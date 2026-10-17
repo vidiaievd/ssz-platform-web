@@ -65,6 +65,7 @@ import { createModuleAction, renameContainerAction } from '../actions/container'
 import { renameSectionAction, reorderSectionsAction } from '../actions/section';
 import {
   assignItemSectionAction,
+  placeItemAgainAction,
   removeContainerItemAction,
   reorderContainerItemsAction,
 } from '../actions/container-item';
@@ -77,7 +78,7 @@ import { ItemChangeBadge } from './item-change-badge';
 import { MoveSection } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
 import { InlineRename } from './inline-rename';
-import { NodeMenu } from './node-menu';
+import { NodeMenu, type PlaceAgainTarget } from './node-menu';
 import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { useNodeDeletion } from '../hooks/use-node-deletion';
 import { useStructureUndo } from '../hooks/use-structure-undo';
@@ -633,8 +634,14 @@ function ModuleCard({
   expanded,
   onToggleExpanded,
   recipeIssues = [],
+  courseModules,
 }: {
   module: CurriculumTreeModuleNode;
+  /**
+   * Every module of the course, in tree order — where a block of this one can be
+   * placed again. The card marks its own module itself.
+   */
+  courseModules: readonly Omit<PlaceAgainTarget, 'isCurrent'>[];
   /** What this lesson lacks against the course recipe. Empty draws nothing. */
   recipeIssues?: readonly RecipeIssue[];
   code: string;
@@ -699,6 +706,36 @@ function ModuleCard({
     });
   }
 
+  const placeAgainTargets: PlaceAgainTarget[] = courseModules.map((target) => ({
+    ...target,
+    isCurrent: target.containerId === mod.containerId,
+  }));
+
+  /**
+   * «Place again» (plan 76, B1): one more row pointing at the same material, last
+   * in the chosen section. Undo takes that row away again; the material is not
+   * touched either way.
+   */
+  function placeItemAgain(
+    item: CurriculumTreeItemNode,
+    containerId: string,
+    sectionId: string | null,
+  ) {
+    const targetTitle = courseModules.find((m) => m.containerId === containerId)?.title ?? '';
+    placeItemAgainAction(containerId, item.itemType, item.refId, sectionId).then((result) => {
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      const rowId = result.value.id;
+      recordUndo({
+        label: t('undo.placedAgain', { name: item.title ?? '', module: targetTitle }),
+        revert: async () => (await removeContainerItemAction(containerId, rowId)).ok,
+      });
+      onChanged(rowId, 'item');
+    });
+  }
+
   function renderItems(section: CurriculumTreeSectionNode | null) {
     const siblings = section ? section.items : mod.ungroupedItems;
     const items = visible(siblings);
@@ -743,6 +780,10 @@ function ModuleCard({
                     sections={sectionOptions}
                     currentSectionId={section?.id ?? null}
                     onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
+                    placeAgainTargets={placeAgainTargets}
+                    onPlaceAgain={(containerId, sectionId) =>
+                      placeItemAgain(item, containerId, sectionId)
+                    }
                     onDelete={() =>
                       onRequestDelete({
                         kind: 'item',
@@ -981,6 +1022,15 @@ export function CurriculumTree({
   /** Which of the edited module's own sections the picker is filing into. */
   const [addOwnLessonIn, setAddOwnLessonIn] = useState<string | null>(null);
   const editingModule = tree.containerType === 'module';
+  // Built from the whole tree, not the filtered view: a filter narrows what the
+  // author is looking at, not where material may go.
+  const courseModules = tree.levels.flatMap((level) =>
+    level.modules.map((m) => ({
+      containerId: m.containerId,
+      title: m.title ?? '',
+      sections: m.sections.map((section) => ({ id: section.id, title: section.title })),
+    })),
+  );
 
   const materialLabel = useMaterialLabel();
   const filtering = isFiltering(filters);
@@ -1863,6 +1913,7 @@ export function CurriculumTree({
                       expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                       onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                       recipeIssues={recipeIssues?.get(mod.containerId)}
+                      courseModules={courseModules}
                     />
                   ))}
 

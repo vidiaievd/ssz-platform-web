@@ -580,6 +580,9 @@
     "moveDown": "Flytt ned",
     "moveTo": "Flytt til…",
     "moveToAnotherModule": "En annen modul",
+    "placeAgain": "Plasser på nytt i…",
+    "placeAgainHint": "Samme materiell: en endring vises alle steder.",
+    "placeAgainThisModule": "{name} (denne modulen)",
     "unpublish": "Avpubliser",
     "moreActions": "Flere handlinger for {name}",
     "item": "Element",
@@ -1626,6 +1629,7 @@
     "titleCleared": "Tittelen er fjernet.",
     "moved": "Flyttet «{name}».",
     "movedToSection": "Flyttet «{name}» til en annen seksjon.",
+    "placedAgain": "Plasserte «{name}» på nytt i «{module}».",
     "removed": "Fjernet «{name}».",
     "removedBlocks": "{count, plural, one {Fjernet # blokk.} other {Fjernet # blokker.}}"
   },

@@ -41,6 +41,27 @@ export async function assignItemSectionAction(
 }
 
 /**
+ * Places material that is already placed somewhere once more — «Place again»
+ * (plan 76, B1). The new row points at the same lesson or exercise, so an edit to
+ * it shows in every place; a copy the author can change on its own is «Duplicate».
+ *
+ * `containerId` is the module receiving the row, which need not be the one the
+ * original sits in. Returns the new row's id, which is what undo removes.
+ */
+export async function placeItemAgainAction(
+  containerId: string,
+  itemType: ContainerItemType,
+  refId: string,
+  sectionId: string | null,
+) {
+  return tryAction(async () => {
+    const created = await addItemToDraft(containerId, itemType, refId, sectionId);
+    revalidatePath(`/school/content/${containerId}`);
+    return created;
+  });
+}
+
+/**
  * Takes a row out of the draft version without touching what it points at.
  *
  * Deliberately not a delete of the underlying lesson, exercise or module: that

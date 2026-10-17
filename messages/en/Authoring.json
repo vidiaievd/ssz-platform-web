@@ -580,6 +580,9 @@
     "moveDown": "Move down",
     "moveTo": "Move to…",
     "moveToAnotherModule": "Another module",
+    "placeAgain": "Place again in…",
+    "placeAgainHint": "The same material: an edit to it shows in every place.",
+    "placeAgainThisModule": "{name} (this module)",
     "unpublish": "Unpublish",
     "moreActions": "More actions for {name}",
     "item": "Item",
@@ -1626,6 +1629,7 @@
     "titleCleared": "Title cleared.",
     "moved": "Moved “{name}”.",
     "movedToSection": "Moved “{name}” to another section.",
+    "placedAgain": "Placed “{name}” again in “{module}”.",
     "removed": "Removed “{name}”.",
     "removedBlocks": "{count, plural, one {Removed # block.} other {Removed # blocks.}}"
   },

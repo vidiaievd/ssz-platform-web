@@ -580,6 +580,9 @@
     "moveDown": "Вниз",
     "moveTo": "Переместить в…",
     "moveToAnotherModule": "Другой модуль",
+    "placeAgain": "Разместить ещё раз…",
+    "placeAgainHint": "Тот же материал: правка видна во всех местах.",
+    "placeAgainThisModule": "{name} (этот модуль)",
     "unpublish": "Снять с публикации",
     "moreActions": "Другие действия для «{name}»",
     "item": "Элемент",
@@ -1626,6 +1629,7 @@
     "titleCleared": "Название убрано.",
     "moved": "Перемещено «{name}».",
     "movedToSection": "«{name}» перемещено в другую секцию.",
+    "placedAgain": "«{name}» размещено ещё раз в «{module}».",
     "removed": "Удалено «{name}».",
     "removedBlocks": "{count, plural, one {Удалён # блок.} few {Удалено # блока.} many {Удалено # блоков.} other {Удалено # блока.}}"
   },

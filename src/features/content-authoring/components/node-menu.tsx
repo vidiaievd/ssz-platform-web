@@ -18,6 +18,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Link } from '@/lib/i18n/navigation';
 
+/** A module a block can be placed again in, with the sections it offers. */
+export interface PlaceAgainTarget {
+  containerId: string;
+  title: string;
+  /** The module the block already sits in — still a valid target. */
+  isCurrent: boolean;
+  sections: { id: string; title: string }[];
+}
+
 export interface NodeMenuProps {
   /** Names the group header, and decides which items apply. */
   kind: 'level' | 'module' | 'item';
@@ -34,6 +43,9 @@ export interface NodeMenuProps {
   sections?: { id: string; title: string }[];
   currentSectionId?: string | null;
   onMoveToSection?: (sectionId: string | null) => void;
+  /** Blocks only: modules of the course for «Place again in…» (plan 76, B1). */
+  placeAgainTargets?: PlaceAgainTarget[];
+  onPlaceAgain?: (containerId: string, sectionId: string | null) => void;
   onDelete?: () => void;
   className?: string;
 }
@@ -62,6 +74,8 @@ export function NodeMenu({
   sections,
   currentSectionId,
   onMoveToSection,
+  placeAgainTargets,
+  onPlaceAgain,
   onDelete,
   className,
 }: NodeMenuProps) {
@@ -128,6 +142,57 @@ export function NodeMenu({
           {t('structure.duplicate')}
           {notYet}
         </DropdownMenuItem>
+
+        {kind === 'item' && placeAgainTargets && placeAgainTargets.length > 0 && onPlaceAgain && (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>{t('structure.placeAgain')}</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent
+              // A course can hold dozens of modules; the list scrolls rather than
+              // running off the screen.
+              className="max-h-(--radix-dropdown-menu-content-available-height) max-w-72 overflow-y-auto"
+            >
+              {/* The difference from Duplicate is the one thing worth saying here:
+                  both rows are the same material. */}
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                {t('structure.placeAgainHint')}
+              </DropdownMenuLabel>
+              {placeAgainTargets.map((target) => {
+                const label = target.isCurrent
+                  ? t('structure.placeAgainThisModule', { name: target.title })
+                  : target.title;
+                if (target.sections.length === 0) {
+                  return (
+                    <DropdownMenuItem
+                      key={target.containerId}
+                      onSelect={() => onPlaceAgain(target.containerId, null)}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  );
+                }
+                return (
+                  <DropdownMenuSub key={target.containerId}>
+                    <DropdownMenuSubTrigger>{label}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {target.sections.map((section) => (
+                        <DropdownMenuItem
+                          key={section.id}
+                          onSelect={() => onPlaceAgain(target.containerId, section.id)}
+                        >
+                          {section.title}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onSelect={() => onPlaceAgain(target.containerId, null)}>
+                        {t('sections.noSection')}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                );
+              })}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        )}
 
         <DropdownMenuItem disabled={!canMoveUp} onSelect={() => onMoveUp?.()}>
           {t('structure.moveUp')}

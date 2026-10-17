@@ -14,6 +14,7 @@ vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
   removeContainerItemAction: vi.fn(),
+  placeItemAgainAction: vi.fn(),
 }));
 // Stands in for the dialog, reporting where a new item would be filed.
 vi.mock('./add-lesson-picker', () => ({
@@ -66,8 +67,12 @@ const { createModuleAction } = await import('../actions/container');
 const { createSectionAction } = await import('../actions/section');
 const { renameContainerAction } = await import('../actions/container');
 const { renameItemAction } = await import('../actions/rename-item');
-const { assignItemSectionAction, reorderContainerItemsAction, removeContainerItemAction } =
-  await import('../actions/container-item');
+const {
+  assignItemSectionAction,
+  placeItemAgainAction,
+  reorderContainerItemsAction,
+  removeContainerItemAction,
+} = await import('../actions/container-item');
 const { deleteSectionAction } = await import('../actions/section');
 
 const TREE: CurriculumTreeData = {
@@ -190,6 +195,7 @@ beforeEach(() => {
   vi.mocked(reorderContainerItemsAction).mockReset();
   vi.mocked(assignItemSectionAction).mockReset();
   vi.mocked(removeContainerItemAction).mockReset();
+  vi.mocked(placeItemAgainAction).mockReset();
   vi.mocked(deleteSectionAction).mockReset();
   routerPush.mockReset();
 });
@@ -515,6 +521,71 @@ describe('CurriculumTree', () => {
       await waitFor(() =>
         expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'item-1', null),
       );
+    });
+
+    describe('Place again (plan 76, B1)', () => {
+      const [level] = TREE.levels;
+      const twoModules: CurriculumTreeData = {
+        ...TREE,
+        levels: [
+          {
+            ...level!,
+            modules: [
+              level!.modules[0]!,
+              {
+                ...level!.modules[0]!,
+                id: 'item-module-2',
+                containerId: 'module-2',
+                versionId: 'module-version-2',
+                title: 'Arbeidsliv',
+                titleEn: null,
+                position: 1,
+                sections: [{ id: 'section-2', title: 'Practise', position: 0, items: [] }],
+              },
+            ],
+          },
+        ],
+      };
+
+      async function openPlaceAgain() {
+        const menu = await openItemMenu();
+        await userEvent.click(within(menu).getByRole('menuitem', { name: 'Place again in…' }));
+        return screen.findByRole('menu', { name: 'Place again in…' });
+      }
+
+      it('offers every module of the course, naming the one the block is in', async () => {
+        renderTree(vi.fn(), vi.fn(), twoModules);
+        const submenu = await openPlaceAgain();
+
+        expect(
+          within(submenu).getByRole('menuitem', { name: 'Samfunn og kultur (this module)' }),
+        ).toBeInTheDocument();
+        expect(within(submenu).getByRole('menuitem', { name: 'Arbeidsliv' })).toBeInTheDocument();
+      });
+
+      it('places the same material in the chosen section of another module', async () => {
+        vi.mocked(placeItemAgainAction).mockResolvedValue({
+          ok: true,
+          value: { id: 'row-new' },
+        } as never);
+        const { onChanged } = renderTree(vi.fn(), vi.fn(), twoModules);
+        const submenu = await openPlaceAgain();
+
+        await userEvent.click(within(submenu).getByRole('menuitem', { name: 'Arbeidsliv' }));
+        const sections = await screen.findByRole('menu', { name: 'Arbeidsliv' });
+        await userEvent.click(within(sections).getByRole('menuitem', { name: 'Practise' }));
+
+        await waitFor(() =>
+          expect(placeItemAgainAction).toHaveBeenCalledWith(
+            'module-2',
+            'lesson',
+            'lesson-1',
+            'section-2',
+          ),
+        );
+        // The new row is selected, so the author sees where it went.
+        await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-new', 'item'));
+      });
     });
   });
 

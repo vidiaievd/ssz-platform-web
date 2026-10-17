@@ -50,13 +50,15 @@ export async function addItemToDraft(
   containerId: string,
   itemType: ContainerItemType,
   itemId: string,
+  sectionId?: string | null,
 ): Promise<{ id: string }> {
   const versionId = await requireDraftVersionId(containerId);
   const created = await serverFetch<{ itemId: string }>({
     service: 'content',
     path: `/containers/${containerId}/versions/${versionId}/items`,
     method: 'POST',
-    body: { itemType, itemId },
+    // The row lands last in its section: positions run across the whole version.
+    body: sectionId ? { itemType, itemId, sectionId } : { itemType, itemId },
   });
   return { id: created.itemId };
 }
