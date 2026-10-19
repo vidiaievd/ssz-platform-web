@@ -507,14 +507,12 @@ describe('CurriculumTree', () => {
 
     // Per-block publishing has no backend (plan 38 §3), so the menu lists it but
     // cannot run it; Duplicate does (plan 76, B1).
-    it('duplicates from the menu and marks the actions with no backend', async () => {
+    it('duplicates from the menu, which offers no per-row Unpublish', async () => {
       renderTree();
       const menu = await openItemMenu();
 
-      expect(within(menu).getByRole('menuitem', { name: /Unpublish/ })).toHaveAttribute(
-        'aria-disabled',
-        'true',
-      );
+      // Plan 39, B2: a row has no publish state of its own; Remove covers it.
+      expect(within(menu).queryByRole('menuitem', { name: /Unpublish/ })).toBeNull();
       await userEvent.click(within(menu).getByRole('menuitem', { name: /Duplicate/ }));
       expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
     });
@@ -891,17 +889,13 @@ describe('CurriculumTree', () => {
       expect(screen.queryByText('1 selected')).not.toBeInTheDocument();
     });
 
-    it('offers the actions with no backend as unavailable', async () => {
+    it('offers no Publish or Unpublish for a selection', async () => {
       renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
       await tick('Hos legen');
 
-      // Scoped to the bar: rows carry a Duplicate of their own.
+      // Plan 39, B2: publishing is per module version, in "Review & publish".
       const bar = screen.getByRole('toolbar', { name: /Bulk actions/ });
-      for (const label of ['Publish', 'Unpublish']) {
-        expect(
-          within(bar).getByRole('button', { name: `${label} — not available yet` }),
-        ).toHaveAttribute('aria-disabled', 'true');
-      }
+      expect(within(bar).queryByRole('button', { name: /Publish/ })).toBeNull();
     });
 
     it('duplicates every ticked block in the container that holds it, one at a time', async () => {

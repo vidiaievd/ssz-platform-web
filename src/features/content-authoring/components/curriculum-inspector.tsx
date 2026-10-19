@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/lib/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   ContainerPublishState,
@@ -55,13 +56,7 @@ import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
 import { SectionAssignSelect } from './section-assign-select';
 import type { DeleteNodeTarget } from './delete-node-dialog';
-import {
-  STUB_PLACEHOLDERS,
-  StubField,
-  StubSegmentedField,
-  StubSelectField,
-  StubSwitchRow,
-} from './stub-controls';
+import { STUB_PLACEHOLDERS, StubField } from './stub-controls';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -79,6 +74,53 @@ function InspectorField({ label, value }: { label: string; value: React.ReactNod
     <div className="flex flex-col gap-1.5">
       <span className="text-xs font-bold tracking-wide text-muted-foreground">{label}</span>
       <div className="text-sm text-foreground">{value}</div>
+    </div>
+  );
+}
+
+/**
+ * The design's three-way publish segment, drawn as a reading (plan 39, B2).
+ *
+ * Nothing is switched from here: publishing is a property of a container
+ * version and happens in one place, "Review & publish". So the segment has no
+ * buttons and no focus stop — it is a label with a highlighted value, and says
+ * so to a screen reader in one sentence.
+ */
+function PublishStateSegment({
+  label,
+  options,
+  activeValue,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  activeValue: string | null;
+}) {
+  const active = options.find((option) => option.value === activeValue);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-bold tracking-wide text-muted-foreground">{label}</span>
+      <div
+        role="img"
+        aria-label={active ? `${label}: ${active.label}` : label}
+        data-testid="publish-state-segment"
+        className="flex gap-0.5 rounded-md bg-muted/40 p-0.5"
+      >
+        {options.map((option) => (
+          <span
+            key={option.value}
+            aria-hidden="true"
+            className={cn(
+              'flex-1 rounded-sm px-2 py-1 text-center text-xs',
+              option.value === activeValue
+                ? 'bg-background text-foreground shadow-[var(--ssz-shadow-xs)]'
+                : 'text-muted-foreground',
+            )}
+          >
+            {option.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -380,8 +422,8 @@ function InspectorFields({
         <StubField label={t('structure.subtitle')} value={STUB_PLACEHOLDERS.none} />
 
         {/* Read from the modules underneath: a level is a grouping and has no
-            state of its own, which is also why the segment cannot be used. */}
-        <StubSegmentedField
+            state of its own. */}
+        <PublishStateSegment
           label={t('structure.publishStateLabel')}
           options={publishOptions}
           activeValue={levelPublishSegment(level)}
@@ -392,11 +434,8 @@ function InspectorFields({
           <CountRow label={t('structure.blocks')} value={blockCount} />
         </div>
 
-        <StubSwitchRow
-          label={t('structure.sequentialUnlock')}
-          hint={t('structure.sequentialUnlockHint')}
-          on
-        />
+        {/* No sequential-unlock switch here (B6): gating is one setting of the
+            course, in its settings drawer, not a third level of the same knob. */}
 
         <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.levelHelp')}</p>
 
@@ -518,16 +557,6 @@ function InspectorFields({
               onChanged();
             }}
           />
-          <StubSwitchRow
-            label={t('structure.homeworkByDefault')}
-            hint={t('structure.homeworkByDefaultHint')}
-          />
-          <StubSwitchRow
-            label={t('structure.includeInSrs')}
-            hint={t('structure.includeInSrsHint')}
-            on
-          />
-
           <p className="text-xs leading-relaxed text-muted-foreground">
             {t('structure.moduleHelp')}
           </p>
@@ -558,7 +587,6 @@ function InspectorFields({
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
   const materialLabel = tContent(`materialType.${def.kind}` as 'materialType.text');
-  const isExercise = item.itemType === 'exercise';
 
   return (
     <div key={item.id} className="flex flex-col gap-4">
@@ -609,13 +637,13 @@ function InspectorFields({
           }}
         />
       ) : (
-        <StubField label={t('structure.titleField')} value={item.title ?? ''} />
+        <InspectorField label={t('structure.titleField')} value={item.title ?? '—'} />
       )}
 
       <div className="grid grid-cols-2 gap-3">
         {/* A row's type is fixed by the material it points at: changing it would
             mean replacing the material, not editing the row. */}
-        <StubSelectField label={t('structure.blockType')} value={materialLabel} />
+        <InspectorField label={t('structure.blockType')} value={materialLabel} />
         <InspectorField
           label={t('structure.duration')}
           value={
@@ -649,7 +677,7 @@ function InspectorFields({
       </div>
 
       <div className="flex flex-col gap-2">
-        <StubSegmentedField
+        <PublishStateSegment
           label={t('structure.publishStateLabel')}
           options={publishOptions}
           activeValue={itemPublishSegment(item)}
@@ -671,25 +699,9 @@ function InspectorFields({
         </div>
       </div>
 
-      {isExercise ? (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            <StubField label={t('structure.points')} value={STUB_PLACEHOLDERS.points} />
-            <StubSelectField
-              label={t('structure.attempts')}
-              value={t('structure.attemptsUnlimited')}
-            />
-          </div>
-          <StubSwitchRow label={t('structure.autoGrade')} hint={t('structure.autoGradeHint')} on />
-          <StubSwitchRow label={t('structure.showHints')} hint={t('structure.showHintsHint')} />
-        </>
-      ) : (
-        <StubSwitchRow
-          label={t('structure.visibleToStudents')}
-          hint={t('structure.visibleToStudentsHint')}
-          on
-        />
-      )}
+      {/* No attempts, auto-grade or hints here (B4): they live in the exercise
+          document and are set in its builder; a row-level copy would be a second
+          truth. No points either — `xpReward` above is the only scale. */}
 
       <div className="flex items-center justify-between gap-3 py-0.5 text-xs text-muted-foreground">
         <span>{t('structure.blockId')}</span>

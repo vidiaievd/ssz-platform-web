@@ -199,10 +199,13 @@ describe('CurriculumInspector', () => {
   it('offers the fields the backend cannot store yet without letting them be edited', () => {
     renderInspector({ kind: 'module', module: moduleNode() });
 
-    expect(screen.getByLabelText('Homework by default — not available yet')).toHaveAttribute(
+    expect(screen.getByLabelText('Code — not available yet')).toHaveAttribute(
       'aria-disabled',
       'true',
     );
+    // Decided against rather than still to come (plan 76, B5): no switch for them.
+    expect(screen.queryByText('Homework by default')).toBeNull();
+    expect(screen.queryByText('Include in SRS')).toBeNull();
   });
 
   it('counts what the whole course trains, whatever is selected', () => {
@@ -333,7 +336,9 @@ describe('CurriculumInspector', () => {
     vi.useRealTimers();
   });
 
-  it('offers exercise-only settings on an exercise, and visibility on everything else', () => {
+  it('shows no row-level check settings, points or visibility switch on any block', () => {
+    // They live in the exercise document (plan 76, Q4) or are what publishing
+    // decides (B2); the inspector used to draw them as unmovable stubs.
     const { unmount } = render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
         <CurriculumInspector
@@ -345,13 +350,22 @@ describe('CurriculumInspector', () => {
         />
       </NextIntlClientProvider>,
     );
-    expect(screen.getByLabelText('Auto-grade — not available yet')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Visible to students — not available yet')).toBeNull();
+    expect(screen.queryByText('Auto-grade')).toBeNull();
+    expect(screen.queryByText('Points')).toBeNull();
+    expect(screen.queryByText(/not available yet/)).toBeNull();
     unmount();
 
     renderInspector(itemSelection(itemNode()));
-    expect(screen.getByLabelText('Visible to students — not available yet')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Auto-grade — not available yet')).toBeNull();
+    expect(screen.queryByText('Visible to students')).toBeNull();
+    expect(screen.queryByLabelText(/not available yet/)).toBeNull();
+  });
+
+  it('reads the publish state of a block without offering to switch it', () => {
+    renderInspector(itemSelection(itemNode({ isLive: true, pendingChange: null })));
+
+    const segment = screen.getByTestId('publish-state-segment');
+    expect(segment).toHaveAccessibleName('Publish state: Published');
+    expect(segment.querySelector('button, [role="button"], [tabindex]')).toBeNull();
   });
 
   it('points the section select and the editor link at the container that places the row', () => {

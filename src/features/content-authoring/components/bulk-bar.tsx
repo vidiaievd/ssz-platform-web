@@ -3,8 +3,6 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { StubButton } from './stub-controls';
-
 interface BulkBarProps {
   /** How many blocks are ticked. The bar is not rendered below one. */
   count: number;
@@ -24,9 +22,9 @@ interface BulkBarProps {
 /**
  * The bar that appears once blocks are ticked, floating over the tree.
  *
- * Publish / Unpublish are listed because the design lists them, but neither
- * exists in content-service yet (plan 38 §3 B2), so they are stubs. Duplicating
- * (plan 76, B1), removing blocks and clearing the selection genuinely work.
+ * No Publish / Unpublish here, although the design lists them (plan 39, B2):
+ * publishing is a property of a module's version, not of a row, and happens in
+ * "Review & publish". Taking a block out of the next release is Remove.
  */
 export function BulkBar({
   count,
@@ -64,8 +62,6 @@ export function BulkBar({
       <button type="button" disabled={pending} onClick={onDuplicate} className={action}>
         {t('duplicate')}
       </button>
-      <StubButton label={t('publish')} className="bg-white/10" />
-      <StubButton label={t('unpublish')} className="bg-white/10" />
       <button type="button" disabled={pending} onClick={onDelete} className={action}>
         {t('delete')}
       </button>

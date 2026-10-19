@@ -291,12 +291,9 @@ export function NodeMenu({
           </DropdownMenuSub>
         )}
 
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem disabled>
-          {t('structure.unpublish')}
-          {notYet}
-        </DropdownMenuItem>
+        {/* No Unpublish (plan 39, B2): a row has no publish state of its own,
+            and keeping it out of the next release is what Remove does. */}
+        {onDelete && <DropdownMenuSeparator />}
 
         {onDelete && (
           <DropdownMenuItem variant="destructive" onSelect={() => onDelete()}>
