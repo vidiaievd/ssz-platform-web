@@ -196,13 +196,22 @@ describe('CurriculumInspector', () => {
     expect(screen.getByText('Blocks').parentElement).toHaveTextContent('2');
   });
 
-  it('offers the fields the backend cannot store yet without letting them be edited', () => {
-    renderInspector({ kind: 'module', module: moduleNode() });
-
-    expect(screen.getByLabelText('Code — not available yet')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+  it('reads the module code the panel derives from its place, and offers no stub fields', () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CurriculumInspector
+          selection={{ kind: 'module', module: moduleNode() }}
+          courseContainerId="course-1"
+          workspaceId="my-school"
+          onChanged={vi.fn()}
+          onDelete={vi.fn()}
+          moduleCode="2C"
+        />
+      </NextIntlClientProvider>,
     );
+
+    expect(screen.getByText('Code').parentElement).toHaveTextContent('2C');
+    expect(screen.queryByLabelText(/not available yet/)).toBeNull();
     // Decided against rather than still to come (plan 76, B5): no switch for them.
     expect(screen.queryByText('Homework by default')).toBeNull();
     expect(screen.queryByText('Include in SRS')).toBeNull();

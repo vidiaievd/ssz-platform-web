@@ -595,7 +595,6 @@
     "dragLevel": "Drag to move level {name}",
     "openEditor": "Open editor",
     "deleteAction": "Delete",
-    "subtitle": "Subtitle",
     "publishStateLabel": "Publish state",
     "publishEdited": "Edited",
     "blocks": "Blocks",
@@ -1558,8 +1557,7 @@
     "hasUnpublished": "Has unpublished changes"
   },
   "stub": {
-    "notAvailable": "not available yet",
-    "short": "not yet"
+    "notAvailable": "not available yet"
   },
   "toolbar": {
     "searchPlaceholder": "Search lessons, blocks, exercises…",

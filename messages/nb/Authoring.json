@@ -595,7 +595,6 @@
     "dragLevel": "Dra for å flytte nivået {name}",
     "openEditor": "Åpne redigering",
     "deleteAction": "Slett",
-    "subtitle": "Undertittel",
     "publishStateLabel": "Publiseringsstatus",
     "publishEdited": "Endret",
     "blocks": "Blokker",
@@ -1558,8 +1557,7 @@
     "hasUnpublished": "Har upubliserte endringer"
   },
   "stub": {
-    "notAvailable": "ikke tilgjengelig ennå",
-    "short": "ikke ennå"
+    "notAvailable": "ikke tilgjengelig ennå"
   },
   "toolbar": {
     "searchPlaceholder": "Søk i leksjoner, blokker, øvelser…",

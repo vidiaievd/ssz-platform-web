@@ -595,7 +595,6 @@
     "dragLevel": "Перетащите, чтобы переместить уровень «{name}»",
     "openEditor": "Открыть редактор",
     "deleteAction": "Удалить",
-    "subtitle": "Подзаголовок",
     "publishStateLabel": "Состояние публикации",
     "publishEdited": "Изменено",
     "blocks": "Блоки",
@@ -1558,8 +1557,7 @@
     "hasUnpublished": "Есть неопубликованные изменения"
   },
   "stub": {
-    "notAvailable": "пока недоступно",
-    "short": "пока нет"
+    "notAvailable": "пока недоступно"
   },
   "toolbar": {
     "searchPlaceholder": "Поиск уроков, блоков, упражнений…",

@@ -90,7 +90,6 @@ export function NodeMenu({
   className,
 }: NodeMenuProps) {
   const t = useTranslations('Authoring');
-  const tStub = useTranslations('Authoring.stub');
 
   /**
    * Closing a Radix menu returns focus to its trigger. Rename has to outlive
@@ -102,7 +101,6 @@ export function NodeMenu({
   const pendingRename = useRef(false);
 
   const groupLabel = t(`structure.${kind}` as 'structure.level');
-  const notYet = <DropdownMenuShortcut>{tStub('short')}</DropdownMenuShortcut>;
   const kbd = (keys: string) => <DropdownMenuShortcut>{keys}</DropdownMenuShortcut>;
 
   return (
@@ -136,7 +134,9 @@ export function NodeMenu({
           }}
         >
           {t('structure.rename')}
-          {onRename ? kbd('F2') : notYet}
+          {/* Only a level the course never named as a section has no rename:
+              there is no section row to hold the title. */}
+          {onRename && kbd('F2')}
         </DropdownMenuItem>
 
         {kind === 'item' && editorHref && (
@@ -148,22 +148,22 @@ export function NodeMenu({
           </DropdownMenuItem>
         )}
 
+        {/* A level is not duplicated (plan 76, Q4); a row whose material is not
+            copied says what to do instead. */}
         {onDuplicate ? (
           <DropdownMenuItem onSelect={() => onDuplicate()}>
             {t('structure.duplicate')}
             {kbd('⌘D')}
           </DropdownMenuItem>
         ) : (
-          <DropdownMenuItem disabled>
-            {t('structure.duplicate')}
-            {kind === 'item' ? (
+          kind === 'item' && (
+            <DropdownMenuItem disabled>
+              {t('structure.duplicate')}
               <DropdownMenuShortcut>
                 {t('structure.duplicateUsePlaceAgainShort')}
               </DropdownMenuShortcut>
-            ) : (
-              notYet
-            )}
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+          )
         )}
 
         {kind === 'item' && placeAgainTargets && placeAgainTargets.length > 0 && onPlaceAgain && (

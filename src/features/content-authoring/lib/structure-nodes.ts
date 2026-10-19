@@ -63,6 +63,19 @@ export function moduleCode(levelIndex: number, moduleIndex: number): string {
 }
 
 /**
+ * The positional code of a module, found by id — what the inspector shows in
+ * its Code field, so the field and the badge on the row always agree. Null
+ * when the module is not in the tree (a stale selection mid-refetch).
+ */
+export function moduleCodeIn(tree: CurriculumTree, moduleId: string): string | null {
+  for (const [levelIndex, level] of tree.levels.entries()) {
+    const moduleIndex = level.modules.findIndex((mod) => mod.id === moduleId);
+    if (moduleIndex !== -1) return moduleCode(levelIndex, moduleIndex);
+  }
+  return null;
+}
+
+/**
  * The publish state to badge a level with. Levels are sections, not containers,
  * so they have no state of their own — what an author means by "this Leksjon is
  * not published" is that something inside it is not.

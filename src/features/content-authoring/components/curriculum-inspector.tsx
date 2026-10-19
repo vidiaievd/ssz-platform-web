@@ -56,7 +56,6 @@ import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
 import { SectionAssignSelect } from './section-assign-select';
 import type { DeleteNodeTarget } from './delete-node-dialog';
-import { STUB_PLACEHOLDERS, StubField } from './stub-controls';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -67,6 +66,12 @@ interface CurriculumInspectorProps {
   onChanged: () => void;
   /** Opens the delete confirmation, which the panel owns (`useNodeDeletion`). */
   onDelete: (target: DeleteNodeTarget) => void;
+  /**
+   * The selected module's positional code ("1A"), as its row's badge shows it.
+   * Read from the tree by the panel: the selection alone does not know where
+   * the module sits.
+   */
+  moduleCode?: string | null;
 }
 
 function InspectorField({ label, value }: { label: string; value: React.ReactNode }) {
@@ -363,6 +368,7 @@ function InspectorFields({
   workspaceId,
   onChanged,
   onDelete,
+  moduleCode,
 }: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
@@ -418,8 +424,6 @@ function InspectorFields({
             <div className="truncate text-[15px] font-bold text-foreground">{level.title}</div>
           )}
         </InspectorHead>
-
-        <StubField label={t('structure.subtitle')} value={STUB_PLACEHOLDERS.none} />
 
         {/* Read from the modules underneath: a level is a grouping and has no
             state of its own. */}
@@ -489,7 +493,9 @@ function InspectorFields({
 
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3">
-            <StubField label={t('structure.code')} value={STUB_PLACEHOLDERS.code} />
+            {/* Derived from the module's place, not stored (plan 39, B10): it
+                changes when the module is moved, exactly as the row's badge does. */}
+            <InspectorField label={t('structure.code')} value={moduleCode ?? '—'} />
             <InspectorField
               label={t('structure.estMinutes')}
               value={t('structure.minutes', { count: estimatedMinutes })}

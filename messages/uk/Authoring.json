@@ -595,7 +595,6 @@
     "dragLevel": "Перетягніть, щоб перемістити рівень «{name}»",
     "openEditor": "Відкрити редактор",
     "deleteAction": "Видалити",
-    "subtitle": "Підзаголовок",
     "publishStateLabel": "Стан публікації",
     "publishEdited": "Змінено",
     "blocks": "Блоки",
@@ -1558,8 +1557,7 @@
     "hasUnpublished": "Є неопубліковані зміни"
   },
   "stub": {
-    "notAvailable": "ще недоступно",
-    "short": "ще ні"
+    "notAvailable": "ще недоступно"
   },
   "toolbar": {
     "searchPlaceholder": "Пошук уроків, блоків, вправ…",
