@@ -9,5 +9,12 @@
   "upstream_unavailable": "Tjenesten er midlertidig utilgjengelig. Prøv igjen.",
   "timeout": "Forespørselen tok for lang tid. Prøv igjen.",
   "unknown": "Noe gikk galt. Prøv igjen.",
-  "gone": "Denne invitasjonsnlenken er ikke lenger gyldig."
+  "gone": "Denne invitasjonsnlenken er ikke lenger gyldig.",
+  "boundary_title": "Noe gikk galt",
+  "boundary_body": "Denne siden kunne ikke vises. Prøv igjen — skjer det igjen, send oss referansen nedenfor.",
+  "boundary_reference": "Referanse: {digest}",
+  "retry": "Prøv igjen",
+  "go_home": "Gå til forsiden",
+  "not_found_title": "Fant ikke siden",
+  "not_found_body": "Adressen kan være feilskrevet, eller siden er flyttet eller fjernet."
 }
