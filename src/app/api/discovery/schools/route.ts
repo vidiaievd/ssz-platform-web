@@ -2,11 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import {
   backendSchoolToFrontend,
+  listPublicSchools,
   type BackendPublicSchool,
 } from '@/features/discovery/api/get-schools.server';
 import { filterSchools } from '@/features/discovery/api/filter-schools';
 import { discoveryQuerySchema } from '@/features/discovery/schemas';
-import { serverFetch } from '@/lib/api/server-fetcher';
 
 export async function GET(request: NextRequest) {
   const parsed = discoveryQuerySchema.safeParse(
@@ -18,11 +18,7 @@ export async function GET(request: NextRequest) {
 
   let raw: BackendPublicSchool[];
   try {
-    raw = await serverFetch<BackendPublicSchool[]>({
-      service: 'organization',
-      path: '/schools/public',
-      anonymous: true,
-    });
+    raw = await listPublicSchools();
   } catch {
     return NextResponse.json({ error: 'Failed to fetch schools' }, { status: 502 });
   }
