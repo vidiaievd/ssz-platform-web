@@ -19,6 +19,7 @@ function level(modules: ContainerPublishState[]): CurriculumTreeLevelNode {
       versionId: `version-${i}`,
       title: `Module ${i}`,
       titleEn: null,
+      learningGoals: [],
       position: i,
       isRequired: true,
       publishState,

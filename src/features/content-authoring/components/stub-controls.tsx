@@ -157,18 +157,6 @@ export function StubSelectField({ label, value }: { label: string; value: string
   );
 }
 
-/** A multi-line field (learning goals), shown empty with its prompt. */
-export function StubTextareaField({ label, placeholder }: { label: string; placeholder: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <StubLabel>{label}</StubLabel>
-      <StubBox label={label} className="min-h-16 items-start py-2">
-        <span className="text-muted-foreground/60">{placeholder}</span>
-      </StubBox>
-    </div>
-  );
-}
-
 /**
  * The three-way publish segment of the design, which no node can be switched
  * through from here (B2): publishing is a property of a container version and

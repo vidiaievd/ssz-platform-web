@@ -41,6 +41,7 @@ function moduleNode(
     versionId: 'v1',
     title,
     titleEn: null,
+    learningGoals: [],
     position: 0,
     isRequired: true,
     sections: [{ id: `s-${containerId}`, title: 'Innhold', position: 0, items }],

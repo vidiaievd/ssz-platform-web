@@ -123,6 +123,7 @@ function renderShell(draftVersionId: string | null, pendingModules = 0, view?: s
             versionId: `mod-${i}-draft`,
             title: `Leksjon ${i}`,
             titleEn: null,
+            learningGoals: [],
             position: i,
             isRequired: true,
             publishState: 'pending_changes',

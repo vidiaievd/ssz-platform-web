@@ -40,6 +40,7 @@ function module_(
     versionId: `version-${id}`,
     title: id,
     titleEn: null,
+    learningGoals: [],
     position: 0,
     isRequired: true,
     publishState: 'published',

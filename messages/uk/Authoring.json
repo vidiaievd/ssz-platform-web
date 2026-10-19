@@ -607,6 +607,11 @@
     "estMinutes": "Прибл. хвилин",
     "learningGoals": "Навчальні цілі",
     "learningGoalsPlaceholder": "Одна ціль на рядок…",
+    "learningGoalsHint": "Одна ціль на рядок — що учень уміє після модуля. Бачать лише автори.",
+    "learningGoalsTooMany": "Не більше {max} цілей.",
+    "learningGoalsTooLong": "Кожна ціль — не довша за {max} символів.",
+    "saveLearningGoals": "Зберегти цілі",
+    "learningGoalsSaved": "Навчальні цілі збережено.",
     "homeworkByDefault": "Типово як домашнє завдання",
     "homeworkByDefaultHint": "Автоматично призначати групам",
     "includeInSrs": "Додавати до SRS",
@@ -1638,7 +1643,8 @@
     "duplicatedBlocks": "{count, plural, one {Скопійовано # блок.} few {Скопійовано # блоки.} many {Скопійовано # блоків.} other {Скопійовано # блока.}}",
     "placedAgain": "«{name}» розміщено ще раз у «{module}».",
     "removed": "Вилучено «{name}».",
-    "removedBlocks": "{count, plural, one {Вилучено # блок.} few {Вилучено # блоки.} many {Вилучено # блоків.} other {Вилучено # блока.}}"
+    "removedBlocks": "{count, plural, one {Вилучено # блок.} few {Вилучено # блоки.} many {Вилучено # блоків.} other {Вилучено # блока.}}",
+    "learningGoalsChanged": "Змінено навчальні цілі «{name}»."
   },
   "translate": {
     "shell": {

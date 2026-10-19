@@ -607,6 +607,11 @@
     "estMinutes": "Est. minutes",
     "learningGoals": "Learning goals",
     "learningGoalsPlaceholder": "One goal per line…",
+    "learningGoalsHint": "One goal per line — what a student can do after this module. Only authors see them.",
+    "learningGoalsTooMany": "At most {max} goals.",
+    "learningGoalsTooLong": "Each goal fits in {max} characters.",
+    "saveLearningGoals": "Save goals",
+    "learningGoalsSaved": "Learning goals saved.",
     "homeworkByDefault": "Homework by default",
     "homeworkByDefaultHint": "Assign to groups automatically",
     "includeInSrs": "Include in SRS",
@@ -1638,7 +1643,8 @@
     "duplicatedBlocks": "{count, plural, one {Duplicated # block.} other {Duplicated # blocks.}}",
     "placedAgain": "Placed “{name}” again in “{module}”.",
     "removed": "Removed “{name}”.",
-    "removedBlocks": "{count, plural, one {Removed # block.} other {Removed # blocks.}}"
+    "removedBlocks": "{count, plural, one {Removed # block.} other {Removed # blocks.}}",
+    "learningGoalsChanged": "Changed the learning goals of “{name}”."
   },
   "translate": {
     "shell": {

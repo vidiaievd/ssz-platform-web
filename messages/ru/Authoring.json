@@ -607,6 +607,11 @@
     "estMinutes": "Прибл. минут",
     "learningGoals": "Учебные цели",
     "learningGoalsPlaceholder": "По одной цели в строке…",
+    "learningGoalsHint": "По одной цели в строке — что ученик умеет после модуля. Видят только авторы.",
+    "learningGoalsTooMany": "Не больше {max} целей.",
+    "learningGoalsTooLong": "Каждая цель — не длиннее {max} символов.",
+    "saveLearningGoals": "Сохранить цели",
+    "learningGoalsSaved": "Учебные цели сохранены.",
     "homeworkByDefault": "По умолчанию домашнее задание",
     "homeworkByDefaultHint": "Автоматически назначать группам",
     "includeInSrs": "Включать в SRS",
@@ -1638,7 +1643,8 @@
     "duplicatedBlocks": "{count, plural, one {Скопирован # блок.} few {Скопировано # блока.} many {Скопировано # блоков.} other {Скопировано # блока.}}",
     "placedAgain": "«{name}» размещено ещё раз в «{module}».",
     "removed": "Удалено «{name}».",
-    "removedBlocks": "{count, plural, one {Удалён # блок.} few {Удалено # блока.} many {Удалено # блоков.} other {Удалено # блока.}}"
+    "removedBlocks": "{count, plural, one {Удалён # блок.} few {Удалено # блока.} many {Удалено # блоков.} other {Удалено # блока.}}",
+    "learningGoalsChanged": "Изменены учебные цели «{name}»."
   },
   "translate": {
     "shell": {

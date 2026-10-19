@@ -10,6 +10,7 @@ import type { CurriculumTreeSelection } from '../types';
 
 vi.mock('../actions/container', () => ({
   renameContainerAction: vi.fn(),
+  setContainerLearningGoalsAction: vi.fn(),
   setContainerTitleEnAction: vi.fn(),
 }));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
@@ -60,7 +61,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { CurriculumInspector } = await import('./curriculum-inspector');
-const { renameContainerAction, setContainerTitleEnAction } = await import('../actions/container');
+const { renameContainerAction, setContainerLearningGoalsAction, setContainerTitleEnAction } =
+  await import('../actions/container');
 const { renameSectionAction } = await import('../actions/section');
 const { renameItemAction } = await import('../actions/rename-item');
 
@@ -90,6 +92,7 @@ function moduleNode(overrides: Partial<CurriculumTreeModuleNode> = {}): Curricul
     versionId: 'module-version-1',
     title: 'Samfunn og kultur',
     titleEn: null,
+    learningGoals: [],
     position: 0,
     isRequired: true,
     sections: [],
@@ -196,9 +199,6 @@ describe('CurriculumInspector', () => {
   it('offers the fields the backend cannot store yet without letting them be edited', () => {
     renderInspector({ kind: 'module', module: moduleNode() });
 
-    const goals = screen.getByLabelText('Learning goals — not available yet');
-    expect(goals).toHaveAttribute('aria-disabled', 'true');
-    expect(goals.tagName).not.toBe('INPUT');
     expect(screen.getByLabelText('Homework by default — not available yet')).toHaveAttribute(
       'aria-disabled',
       'true',
@@ -220,11 +220,11 @@ describe('CurriculumInspector', () => {
   it('keeps the form on screen while the numbers are a tab away', () => {
     renderInspector({ kind: 'module', module: moduleNode() });
 
-    expect(screen.getByLabelText('Learning goals — not available yet')).toBeInTheDocument();
+    expect(screen.getByLabelText('Learning goals')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Coverage' }));
-    expect(screen.queryByLabelText('Learning goals — not available yet')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Learning goals')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Fields' }));
-    expect(screen.getByLabelText('Learning goals — not available yet')).toBeInTheDocument();
+    expect(screen.getByLabelText('Learning goals')).toBeInTheDocument();
   });
 
   it("deletes the selected module through the panel's confirmation", () => {
@@ -454,6 +454,52 @@ describe('CurriculumInspector', () => {
         'Society and culture',
         false,
       );
+    });
+
+    it("shows the module's learning goals one per line", () => {
+      renderInspector({
+        kind: 'module',
+        module: moduleNode({ learningGoals: ['Bestille mat', 'Spørre om prisen'] }),
+      });
+
+      expect(screen.getByLabelText('Learning goals')).toHaveValue('Bestille mat\nSpørre om prisen');
+    });
+
+    it('saves the goals as a list, trimmed and without blank lines', async () => {
+      vi.mocked(setContainerLearningGoalsAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+      const onChanged = renderInspector({ kind: 'module', module: moduleNode() });
+
+      fireEvent.change(screen.getByLabelText('Learning goals'), {
+        target: { value: '  Bestille mat \n\n Spørre om prisen\n' },
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Save goals' }));
+      });
+
+      expect(setContainerLearningGoalsAction).toHaveBeenCalledWith('module-1', [
+        'Bestille mat',
+        'Spørre om prisen',
+      ]);
+      expect(screen.getByLabelText('Learning goals')).toHaveValue('Bestille mat\nSpørre om prisen');
+      expect(onChanged).toHaveBeenCalled();
+    });
+
+    it('does not send a goal longer than the server keeps', async () => {
+      vi.mocked(setContainerLearningGoalsAction).mockClear();
+      renderInspector({ kind: 'module', module: moduleNode() });
+
+      fireEvent.change(screen.getByLabelText('Learning goals'), {
+        target: { value: 'x'.repeat(301) },
+      });
+      expect(screen.getByText('Each goal fits in 300 characters.')).toBeInTheDocument();
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Save goals' }));
+      });
+
+      expect(setContainerLearningGoalsAction).not.toHaveBeenCalled();
     });
   });
 });

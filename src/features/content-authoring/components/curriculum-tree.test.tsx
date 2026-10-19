@@ -100,6 +100,7 @@ const TREE: CurriculumTreeData = {
           versionId: 'module-version-1',
           title: 'Samfunn og kultur',
           titleEn: 'Society and culture',
+          learningGoals: [],
           position: 0,
           isRequired: true,
           sections: [
@@ -600,6 +601,7 @@ describe('CurriculumTree', () => {
                 versionId: 'module-version-2',
                 title: 'Arbeidsliv',
                 titleEn: null,
+                learningGoals: [],
                 position: 1,
                 sections: [{ id: 'section-2', title: 'Practise', position: 0, items: [] }],
               },

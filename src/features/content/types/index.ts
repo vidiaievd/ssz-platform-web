@@ -145,6 +145,8 @@ export interface CurriculumTreeModuleNode {
   versionId: string | null;
   title: string | null;
   titleEn: string | null;
+  /** What a student should be able to do after the module, in order. Empty when unset. */
+  learningGoals: string[];
   position: number;
   isRequired: boolean;
   publishState: ContainerPublishState;

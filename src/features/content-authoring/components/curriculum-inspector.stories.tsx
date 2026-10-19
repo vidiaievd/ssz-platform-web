@@ -42,6 +42,7 @@ export const ModuleSelected: Story = {
         versionId: 'module-version-1',
         title: 'Samfunn og kultur',
         titleEn: 'Society and culture',
+        learningGoals: [],
         position: 0,
         isRequired: true,
         sections: [],

@@ -113,6 +113,23 @@ export async function renameContainerAction(id: string, title: string) {
 }
 
 /**
+ * Replaces a module's learning goals with `goals`, in that order. The list is
+ * sent whole — content-service has no per-goal rows — and an empty one clears it.
+ */
+export async function setContainerLearningGoalsAction(id: string, goals: string[]) {
+  return tryAction(async () => {
+    await serverFetch({
+      service: 'content',
+      path: `/containers/${id}`,
+      method: 'PATCH',
+      body: { learningGoals: goals },
+    });
+
+    revalidatePath(`/school/content/${id}`);
+  });
+}
+
+/**
  * Sets the English subtitle the curriculum tree reports as `titleEn` — a
  * container *localization* row (`languageCode: 'en'`,
  * `get-curriculum-tree.handler.ts`), not a field on the container itself.
