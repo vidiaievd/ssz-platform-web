@@ -582,6 +582,8 @@
     "moveToAnotherModule": "En annen modul",
     "placeAgain": "Plasser på nytt i…",
     "placeAgainHint": "Samme materiell: en endring vises alle steder.",
+    "duplicateUsePlaceAgain": "Ordlister og grammatikkregler kopieres ikke — bruk Plasser på nytt",
+    "duplicateUsePlaceAgainShort": "bruk Plasser på nytt",
     "placeAgainThisModule": "{name} (denne modulen)",
     "unpublish": "Avpubliser",
     "moreActions": "Flere handlinger for {name}",
@@ -1595,7 +1597,9 @@
     "unpublish": "Avpubliser",
     "delete": "Fjern",
     "clear": "Nullstill",
-    "deleteFailed": "{count, plural, one {# blokk kunne ikke fjernes} other {# blokker kunne ikke fjernes}}. De er fortsatt valgt."
+    "deleteFailed": "{count, plural, one {# blokk kunne ikke fjernes} other {# blokker kunne ikke fjernes}}. De er fortsatt valgt.",
+    "duplicateSkipped": "{count, plural, one {# ordliste eller grammatikkregel ble hoppet over — bruk Plasser på nytt} other {# ordlister eller grammatikkregler ble hoppet over — bruk Plasser på nytt}}.",
+    "duplicateFailed": "{count, plural, one {# blokk kunne ikke dupliseres} other {# blokker kunne ikke dupliseres}}."
   },
   "deleteNode": {
     "cancel": "Avbryt",
@@ -1629,6 +1633,8 @@
     "titleCleared": "Tittelen er fjernet.",
     "moved": "Flyttet «{name}».",
     "movedToSection": "Flyttet «{name}» til en annen seksjon.",
+    "duplicated": "Dupliserte «{name}».",
+    "duplicatedBlocks": "{count, plural, one {Dupliserte # blokk.} other {Dupliserte # blokker.}}",
     "placedAgain": "Plasserte «{name}» på nytt i «{module}».",
     "removed": "Fjernet «{name}».",
     "removedBlocks": "{count, plural, one {Fjernet # blokk.} other {Fjernet # blokker.}}"

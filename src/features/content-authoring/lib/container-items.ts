@@ -63,6 +63,32 @@ export async function addItemToDraft(
   return { id: created.itemId };
 }
 
+/** What «Duplicate» leaves behind: the new row and the copy it places. */
+export interface DuplicatedRow {
+  /** The new container item, right after the original in the same section. */
+  id: string;
+  /** The copied lesson, exercise or module. */
+  materialId: string;
+}
+
+/**
+ * Deep-copies the material a draft row places and places the copy right after it
+ * (plan 76, B1). Lessons, exercises and — on a course — modules; content-service
+ * answers 422 for vocabulary lists and grammar rules.
+ */
+export async function duplicateDraftItem(
+  containerId: string,
+  containerItemId: string,
+): Promise<DuplicatedRow> {
+  const versionId = await requireDraftVersionId(containerId);
+  const created = await serverFetch<{ itemId: string; position: number; materialId: string }>({
+    service: 'content',
+    path: `/containers/${containerId}/versions/${versionId}/items/${containerItemId}/duplicate`,
+    method: 'POST',
+  });
+  return { id: created.itemId, materialId: created.materialId };
+}
+
 /** Removes an item (by its container-item id, not the referenced content id) from the draft version. */
 export async function removeItemFromDraft(containerId: string, containerItemId: string): Promise<void> {
   const versionId = await requireDraftVersionId(containerId);

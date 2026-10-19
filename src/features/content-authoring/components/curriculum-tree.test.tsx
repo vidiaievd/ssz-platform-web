@@ -15,6 +15,8 @@ vi.mock('../actions/container-item', () => ({
   assignItemSectionAction: vi.fn(),
   removeContainerItemAction: vi.fn(),
   placeItemAgainAction: vi.fn(),
+  duplicateContainerItemAction: vi.fn(),
+  discardDuplicateAction: vi.fn(),
 }));
 // Stands in for the dialog, reporting where a new item would be filed.
 vi.mock('./add-lesson-picker', () => ({
@@ -69,6 +71,7 @@ const { renameContainerAction } = await import('../actions/container');
 const { renameItemAction } = await import('../actions/rename-item');
 const {
   assignItemSectionAction,
+  duplicateContainerItemAction,
   placeItemAgainAction,
   reorderContainerItemsAction,
   removeContainerItemAction,
@@ -196,6 +199,11 @@ beforeEach(() => {
   vi.mocked(assignItemSectionAction).mockReset();
   vi.mocked(removeContainerItemAction).mockReset();
   vi.mocked(placeItemAgainAction).mockReset();
+  vi.mocked(duplicateContainerItemAction).mockReset();
+  vi.mocked(duplicateContainerItemAction).mockResolvedValue({
+    ok: true,
+    value: { id: 'row-copy', materialId: 'material-copy' },
+  } as never);
   vi.mocked(deleteSectionAction).mockReset();
   routerPush.mockReset();
 });
@@ -403,14 +411,66 @@ describe('CurriculumTree', () => {
     );
   });
 
-  // Duplicate has no backend (plan 38 §3 B1). It is rendered where the design
-  // puts it, but announced as unavailable rather than silently doing nothing.
-  it('offers duplicate as a control that says it is not connected yet', () => {
-    renderTree();
+  // «Duplicate» (plan 76, B1): a copy right after the row, selected once it exists.
+  it('duplicates a block in the module that holds it and selects the copy', async () => {
+    const { onChanged } = renderTree();
     const row = screen.getByRole('group', { name: 'En vanlig arbeidsdag' });
-    const duplicate = within(row).getByRole('button', { name: /Duplicate/ });
+
+    await userEvent.click(within(row).getByRole('button', { name: 'Duplicate' }));
+
+    expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
+    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-copy', 'item'));
+  });
+
+  it('duplicates a module from the course row that places it', async () => {
+    const { onChanged } = renderTree();
+    const header = screen.getByRole('group', { name: 'Samfunn og kultur' });
+
+    await userEvent.click(within(header).getAllByRole('button', { name: 'Duplicate' })[0]!);
+
+    expect(duplicateContainerItemAction).toHaveBeenCalledWith('course-1', 'item-module-1');
+    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-copy', 'module'));
+  });
+
+  it('duplicates the selected row on ⌘D', async () => {
+    renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-1');
+
+    await userEvent.keyboard('{Meta>}d{/Meta}');
+
+    expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
+  });
+
+  // Q4: a list or rule is not copied, and its ⧉ says what to do instead.
+  it('points a vocabulary list to Place again instead of copying it', () => {
+    const [level] = TREE.levels;
+    const [mod] = level!.modules;
+    const [section] = mod!.sections;
+    const words: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...level!,
+          modules: [
+            {
+              ...mod!,
+              sections: [
+                {
+                  ...section!,
+                  items: [{ ...section!.items[0]!, itemType: 'vocabulary_list', title: 'Nye ord' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    renderTree(vi.fn(), vi.fn(), words);
+
+    const row = screen.getByRole('group', { name: 'Nye ord' });
+    const duplicate = within(row).getByRole('button', { name: /Place again/ });
     expect(duplicate).toHaveAttribute('aria-disabled', 'true');
-    expect(duplicate).toHaveAccessibleName('Duplicate — not available yet');
+    // Not a feature still to come: lists are placed again, by decision.
+    expect(duplicate).not.toHaveAccessibleName(/not available yet/);
   });
 
   describe('the row menu', () => {
@@ -441,20 +501,18 @@ describe('CurriculumTree', () => {
       ).toHaveAttribute('href', '/w/my-school/content/module-1/lessons/item-1');
     });
 
-    // Duplicate and per-block publishing have no backend (plan 38 §3), so the
-    // menu lists them but cannot run them.
-    it('marks the actions that have no backend as unavailable', async () => {
+    // Per-block publishing has no backend (plan 38 §3), so the menu lists it but
+    // cannot run it; Duplicate does (plan 76, B1).
+    it('duplicates from the menu and marks the actions with no backend', async () => {
       renderTree();
       const menu = await openItemMenu();
 
-      expect(within(menu).getByRole('menuitem', { name: /Duplicate/ })).toHaveAttribute(
-        'aria-disabled',
-        'true',
-      );
       expect(within(menu).getByRole('menuitem', { name: /Unpublish/ })).toHaveAttribute(
         'aria-disabled',
         'true',
       );
+      await userEvent.click(within(menu).getByRole('menuitem', { name: /Duplicate/ }));
+      expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
     });
 
     it('disables moving a block that is alone in its section', async () => {
@@ -789,13 +847,28 @@ describe('CurriculumTree', () => {
       renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
       await tick('Hos legen');
 
-      // Scoped to the bar: rows carry a stub Duplicate of their own.
+      // Scoped to the bar: rows carry a Duplicate of their own.
       const bar = screen.getByRole('toolbar', { name: /Bulk actions/ });
-      for (const label of ['Duplicate', 'Publish', 'Unpublish']) {
+      for (const label of ['Publish', 'Unpublish']) {
         expect(
           within(bar).getByRole('button', { name: `${label} — not available yet` }),
         ).toHaveAttribute('aria-disabled', 'true');
       }
+    });
+
+    it('duplicates every ticked block in the container that holds it, one at a time', async () => {
+      const { onChanged } = renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+      await tick('En vanlig arbeidsdag');
+      await tick('Hos legen');
+
+      const bar = screen.getByRole('toolbar', { name: /Bulk actions/ });
+      await userEvent.click(within(bar).getByRole('button', { name: 'Duplicate' }));
+
+      await waitFor(() => expect(onChanged).toHaveBeenCalled());
+      expect(vi.mocked(duplicateContainerItemAction).mock.calls).toEqual([
+        ['module-1', 'item-1'],
+        ['module-2', 'item-2'],
+      ]);
     });
 
     it('removes every ticked block from the container that holds it', async () => {

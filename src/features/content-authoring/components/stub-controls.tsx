@@ -268,13 +268,21 @@ export function StubSwitchRow({ label, hint, on }: { label: string; hint: string
 export function StubIconButton({
   icon,
   label,
+  reason,
   className,
 }: {
   icon: React.ReactNode;
   label: string;
+  /**
+   * Why the control does nothing here, when it is not a backend still to come —
+   * Duplicate on a vocabulary list, which is placed again instead. Said as is,
+   * in place of the «not available yet» note.
+   */
+  reason?: string;
   className?: string;
 }) {
-  const title = useStubLabel(label);
+  const stubTitle = useStubLabel(label);
+  const title = reason ?? stubTitle;
 
   return (
     <TooltipProvider>

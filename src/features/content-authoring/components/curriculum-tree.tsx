@@ -65,9 +65,12 @@ import { createModuleAction, renameContainerAction } from '../actions/container'
 import { renameSectionAction, reorderSectionsAction } from '../actions/section';
 import {
   assignItemSectionAction,
+  discardDuplicateAction,
+  duplicateContainerItemAction,
   placeItemAgainAction,
   removeContainerItemAction,
   reorderContainerItemsAction,
+  type DuplicateToDiscard,
 } from '../actions/container-item';
 import { renameItemAction } from '../actions/rename-item';
 import { isRenamableItem, ownTitleOf, type RenamableItemType } from '../lib/renamable-item';
@@ -87,6 +90,7 @@ import { describeRemoval, rowRemovalUndo } from '../lib/structure-restore';
 import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
+import { canDuplicate, duplicateTargetFor, type DuplicateTarget } from '../lib/duplicate-target';
 import {
   applyBlockPreview,
   applyCourseEntryPreview,
@@ -266,6 +270,38 @@ function AddIconButton({ label, onClick }: { label: string; onClick: () => void 
 
 const TOOL_BUTTON =
   'flex size-6 shrink-0 items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
+/**
+ * ⧉ on a row. Without `onDuplicate` the row places material that is not copied
+ * (a vocabulary list or grammar rule), and the button says what to do instead
+ * rather than promising a feature that is coming.
+ */
+function DuplicateButton({ onDuplicate }: { onDuplicate?: () => void }) {
+  const t = useTranslations('Authoring');
+  if (!onDuplicate) {
+    return (
+      <StubIconButton
+        icon={<Copy size={13} />}
+        label={t('structure.duplicate')}
+        reason={t('structure.duplicateUsePlaceAgain')}
+      />
+    );
+  }
+  return (
+    <button
+      type="button"
+      aria-label={t('structure.duplicate')}
+      title={t('structure.duplicate')}
+      onClick={(e) => {
+        e.stopPropagation();
+        onDuplicate();
+      }}
+      className={TOOL_BUTTON}
+    >
+      <Copy size={13} />
+    </button>
+  );
+}
 
 /** Dashed "＋ …" affordance used everywhere something can be added inline. */
 function AddButton({
@@ -466,6 +502,7 @@ function BlockRow({
   check,
   drag,
   menu,
+  onDuplicate,
 }: {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
@@ -483,6 +520,8 @@ function BlockRow({
    */
   drag: BlockDragData | CourseEntryDragData | null;
   menu?: React.ReactNode;
+  /** Absent on rows whose material is not copied — see `DuplicateButton`. */
+  onDuplicate?: () => void;
 }) {
   const t = useTranslations('Authoring');
   const materialLabel = useMaterialLabel();
@@ -603,7 +642,7 @@ function BlockRow({
         >
           <Pencil size={13} />
         </Link>
-        <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+        <DuplicateButton onDuplicate={onDuplicate} />
         {menu}
       </RowTools>
     </div>
@@ -635,8 +674,11 @@ function ModuleCard({
   onToggleExpanded,
   recipeIssues = [],
   courseModules,
+  onDuplicate,
 }: {
   module: CurriculumTreeModuleNode;
+  /** Duplicates the module or one of its rows, by tree id. Owned by the tree, which keeps the undo. */
+  onDuplicate: (id: string) => void;
   /**
    * Every module of the course, in tree order — where a block of this one can be
    * placed again. The card marks its own module itself.
@@ -767,6 +809,7 @@ function ModuleCard({
                 rename={rename}
                 check={check}
                 drag={{ type: 'block', itemId: item.id, moduleContainerId: mod.containerId }}
+                onDuplicate={canDuplicate(item.itemType) ? () => onDuplicate(item.id) : undefined}
                 menu={
                   <NodeMenu
                     kind="item"
@@ -780,6 +823,9 @@ function ModuleCard({
                     sections={sectionOptions}
                     currentSectionId={section?.id ?? null}
                     onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
+                    onDuplicate={
+                      canDuplicate(item.itemType) ? () => onDuplicate(item.id) : undefined
+                    }
                     placeAgainTargets={placeAgainTargets}
                     onPlaceAgain={(containerId, sectionId) =>
                       placeItemAgain(item, containerId, sectionId)
@@ -895,11 +941,12 @@ function ModuleCard({
           >
             <Plus size={13} />
           </button>
-          <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+          <DuplicateButton onDuplicate={() => onDuplicate(mod.id)} />
           <NodeMenu
             kind="module"
             nodeTitle={mod.title ?? ''}
             onRename={() => rename.begin(mod.id)}
+            onDuplicate={() => onDuplicate(mod.id)}
             canMoveUp={moduleIndex > 0}
             canMoveDown={moduleIndex < level.modules.length - 1}
             onMoveUp={() => onNudge(mod.id, -1)}
@@ -1014,7 +1061,6 @@ export function CurriculumTree({
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
-  const tStub = useTranslations('Authoring.stub');
   const { record: recordUndo } = useStructureUndo();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -1120,6 +1166,89 @@ export function CurriculumTree({
     if (removed.length > 0) {
       recordUndo(rowRemovalUndo(t('undo.removedBlocks', { count: removed.length }), removed));
     }
+  }
+
+  /**
+   * «Duplicate» (plan 76, B1): a copy of the material, placed right after its row,
+   * that the author can change on its own. Undo takes the row away and deletes the
+   * copy — it was never anywhere else.
+   */
+  function duplicateNode(id: string) {
+    const target = duplicateTargetFor(tree, courseContainerId, id);
+    if (!target) {
+      // A level, or a list or rule: the row's own ⧉ says the same thing.
+      toast(t('structure.duplicateUsePlaceAgain'));
+      return;
+    }
+    void duplicateOne(target).then((discard) => {
+      if (!discard) return;
+      recordUndo({
+        label: t('undo.duplicated', { name: target.title }),
+        revert: async () => (await discardDuplicateAction(discard)).ok,
+      });
+      onChanged(discard.rowId, target.kind);
+    });
+  }
+
+  /** One copy, or null after saying why there is none. */
+  async function duplicateOne(target: DuplicateTarget): Promise<DuplicateToDiscard | null> {
+    const result = await duplicateContainerItemAction(target.containerId, target.rowId);
+    if (!result.ok) {
+      toast.error(tErrors(result.error.code));
+      return null;
+    }
+    return {
+      containerId: target.containerId,
+      rowId: result.value.id,
+      itemType: target.itemType,
+      materialId: result.value.materialId,
+    };
+  }
+
+  const [duplicating, setDuplicating] = useState(false);
+
+  /**
+   * Bulk Duplicate. One request at a time, like bulk removal: each copy shifts the
+   * rows after it, and two at once in one module would race for the positions.
+   * Lists and rules among the ticked rows are skipped and counted, not refused.
+   * One undo entry for the lot.
+   */
+  async function duplicateCheckedBlocks() {
+    if (duplicating) return;
+    setDuplicating(true);
+    const copyable = selectedBlocks.filter((block) => canDuplicate(block.itemType));
+    const skipped = selectedBlocks.length - copyable.length;
+    const done: DuplicateToDiscard[] = [];
+    let failed = 0;
+    for (const block of copyable) {
+      const result = await duplicateContainerItemAction(block.containerId, block.id);
+      if (!result.ok) {
+        failed += 1;
+        continue;
+      }
+      done.push({
+        containerId: block.containerId,
+        rowId: result.value.id,
+        itemType: block.itemType,
+        materialId: result.value.materialId,
+      });
+    }
+    setDuplicating(false);
+
+    if (skipped > 0) toast(t('bulk.duplicateSkipped', { count: skipped }));
+    if (failed > 0) toast.error(t('bulk.duplicateFailed', { count: failed }));
+    if (done.length === 0) return;
+    recordUndo({
+      label: t('undo.duplicatedBlocks', { count: done.length }),
+      revert: async () => {
+        let ok = true;
+        for (const discard of [...done].reverse()) {
+          ok = (await discardDuplicateAction(discard)).ok && ok;
+        }
+        return ok;
+      },
+    });
+    onChanged();
   }
 
   /** The single-node cases, shared with the inspector's footer. */
@@ -1545,8 +1674,7 @@ export function CurriculumTree({
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
       event.preventDefault();
-      // Duplicating needs an endpoint content-service does not have (§3 B1).
-      toast(`${t('structure.duplicate')} — ${tStub('notAvailable')}`);
+      if (selectedId) duplicateNode(selectedId);
       return;
     }
 
@@ -1914,6 +2042,7 @@ export function CurriculumTree({
                       onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                       recipeIssues={recipeIssues?.get(mod.containerId)}
                       courseModules={courseModules}
+                      onDuplicate={duplicateNode}
                     />
                   ))}
 
@@ -1935,6 +2064,9 @@ export function CurriculumTree({
                           rename={rename}
                           check={check}
                           drag={{ type: 'courseEntry', itemId: item.id }}
+                          onDuplicate={
+                            canDuplicate(item.itemType) ? () => duplicateNode(item.id) : undefined
+                          }
                         />
                       ))}
                     </div>
@@ -1991,6 +2123,9 @@ export function CurriculumTree({
                 rename={rename}
                 check={check}
                 drag={{ type: 'courseEntry', itemId: item.id }}
+                onDuplicate={
+                  canDuplicate(item.itemType) ? () => duplicateNode(item.id) : undefined
+                }
               />
             ))}
           </LevelDropZone>
@@ -2008,7 +2143,8 @@ export function CurriculumTree({
 
         <BulkBar
           count={selectedBlocks.length}
-          pending={deletion.pending}
+          pending={deletion.pending || duplicating}
+          onDuplicate={duplicateCheckedBlocks}
           escapeClears={deletion.target === null}
           onClear={clearChecked}
           onDelete={() =>

@@ -43,6 +43,11 @@ export interface NodeMenuProps {
   sections?: { id: string; title: string }[];
   currentSectionId?: string | null;
   onMoveToSection?: (sectionId: string | null) => void;
+  /**
+   * Modules and blocks whose material is copied (plan 76, B1). Absent on a block
+   * of a list or rule, where the item says to place it again instead, and on a level.
+   */
+  onDuplicate?: () => void;
   /** Blocks only: modules of the course for «Place again in…» (plan 76, B1). */
   placeAgainTargets?: PlaceAgainTarget[];
   onPlaceAgain?: (containerId: string, sectionId: string | null) => void;
@@ -53,7 +58,7 @@ export interface NodeMenuProps {
 /**
  * The ⋯ menu on every row.
  *
- * Items with no backend (duplicate, publishing a single block, moving a block
+ * Items with no backend (publishing a single block, moving a block
  * to another module) are listed where the design puts them but disabled and
  * marked, so the menu stays a truthful map of what this row can do — see
  * plan 38 §3.
@@ -74,6 +79,7 @@ export function NodeMenu({
   sections,
   currentSectionId,
   onMoveToSection,
+  onDuplicate,
   placeAgainTargets,
   onPlaceAgain,
   onDelete,
@@ -138,10 +144,23 @@ export function NodeMenu({
           </DropdownMenuItem>
         )}
 
-        <DropdownMenuItem disabled>
-          {t('structure.duplicate')}
-          {notYet}
-        </DropdownMenuItem>
+        {onDuplicate ? (
+          <DropdownMenuItem onSelect={() => onDuplicate()}>
+            {t('structure.duplicate')}
+            {kbd('⌘D')}
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem disabled>
+            {t('structure.duplicate')}
+            {kind === 'item' ? (
+              <DropdownMenuShortcut>
+                {t('structure.duplicateUsePlaceAgainShort')}
+              </DropdownMenuShortcut>
+            ) : (
+              notYet
+            )}
+          </DropdownMenuItem>
+        )}
 
         {kind === 'item' && placeAgainTargets && placeAgainTargets.length > 0 && onPlaceAgain && (
           <DropdownMenuSub>

@@ -2,11 +2,14 @@
 
 import { revalidatePath } from 'next/cache';
 
+import { serverFetch } from '@/lib/api/server-fetcher';
 import { tryAction } from '@/lib/result';
 
 import {
   addItemToDraft,
   assignItemSection,
+  duplicateDraftItem,
+  listDraftItems,
   removeItemFromDraft,
   reorderDraftItems,
   type ContainerItemType,
@@ -59,6 +62,68 @@ export async function placeItemAgainAction(
     revalidatePath(`/school/content/${containerId}`);
     return created;
   });
+}
+
+/**
+ * «Duplicate» (plan 76, B1): a copy of the material the row places that the author
+ * can change on its own, placed right after the row. Returns the new row and the
+ * copy — both are what undo takes away.
+ */
+export async function duplicateContainerItemAction(containerId: string, containerItemId: string) {
+  return tryAction(async () => {
+    const duplicated = await duplicateDraftItem(containerId, containerItemId);
+    revalidatePath(`/school/content/${containerId}`);
+    return duplicated;
+  });
+}
+
+/** One duplicate as undo needs it. */
+export interface DuplicateToDiscard {
+  /** The container whose draft holds the new row. */
+  containerId: string;
+  rowId: string;
+  itemType: ContainerItemType;
+  materialId: string;
+}
+
+/**
+ * The undo of «Duplicate»: the new row goes, and so does the copy — unlike a removal,
+ * which never deletes material. Nothing but this row ever placed the copy, so
+ * nothing else loses it, and leaving it would strand it in the library.
+ *
+ * A module copy holds copies of its own: every exercise and lesson inside it was
+ * made for it and goes with it. Its vocabulary lists and grammar rules are the
+ * original's, placed again, and are left alone. The copies of a lesson's stage
+ * exercises are not reached from here and stay behind.
+ */
+export async function discardDuplicateAction(duplicate: DuplicateToDiscard) {
+  return tryAction(async () => {
+    const { containerId, rowId, itemType, materialId } = duplicate;
+    await removeItemFromDraft(containerId, rowId);
+
+    if (itemType === 'container') {
+      for (const row of await listDraftItems(materialId)) {
+        if (row.itemType === 'exercise' || row.itemType === 'lesson') {
+          await deleteMaterial(row.itemType, row.itemId);
+        }
+      }
+    }
+    await deleteMaterial(itemType, materialId);
+
+    revalidatePath(`/school/content/${containerId}`);
+  });
+}
+
+const DELETE_PATH: Partial<Record<ContainerItemType, string>> = {
+  exercise: '/exercises',
+  lesson: '/lessons',
+  container: '/containers',
+};
+
+async function deleteMaterial(itemType: ContainerItemType, id: string): Promise<void> {
+  const base = DELETE_PATH[itemType];
+  if (!base) return;
+  await serverFetch({ service: 'content', path: `${base}/${id}`, method: 'DELETE' });
 }
 
 /**

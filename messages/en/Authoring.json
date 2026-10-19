@@ -582,6 +582,8 @@
     "moveToAnotherModule": "Another module",
     "placeAgain": "Place again in…",
     "placeAgainHint": "The same material: an edit to it shows in every place.",
+    "duplicateUsePlaceAgain": "Vocabulary lists and grammar rules are not copied — use Place again",
+    "duplicateUsePlaceAgainShort": "use Place again",
     "placeAgainThisModule": "{name} (this module)",
     "unpublish": "Unpublish",
     "moreActions": "More actions for {name}",
@@ -1595,7 +1597,9 @@
     "unpublish": "Unpublish",
     "delete": "Remove",
     "clear": "Clear",
-    "deleteFailed": "{count, plural, one {# block could not be removed} other {# blocks could not be removed}}. They are still selected."
+    "deleteFailed": "{count, plural, one {# block could not be removed} other {# blocks could not be removed}}. They are still selected.",
+    "duplicateSkipped": "{count, plural, one {# vocabulary list or grammar rule was skipped — use Place again} other {# vocabulary lists or grammar rules were skipped — use Place again}}.",
+    "duplicateFailed": "{count, plural, one {# block could not be duplicated} other {# blocks could not be duplicated}}."
   },
   "deleteNode": {
     "cancel": "Cancel",
@@ -1629,6 +1633,8 @@
     "titleCleared": "Title cleared.",
     "moved": "Moved “{name}”.",
     "movedToSection": "Moved “{name}” to another section.",
+    "duplicated": "Duplicated “{name}”.",
+    "duplicatedBlocks": "{count, plural, one {Duplicated # block.} other {Duplicated # blocks.}}",
     "placedAgain": "Placed “{name}” again in “{module}”.",
     "removed": "Removed “{name}”.",
     "removedBlocks": "{count, plural, one {Removed # block.} other {Removed # blocks.}}"
