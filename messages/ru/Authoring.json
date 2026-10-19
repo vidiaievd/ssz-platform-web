@@ -1633,6 +1633,7 @@
     "titleCleared": "Название убрано.",
     "moved": "Перемещено «{name}».",
     "movedToSection": "«{name}» перемещено в другую секцию.",
+    "movedToModule": "«{name}» перенесено в «{module}». Ученики увидят перенос, когда оба модуля будут опубликованы.",
     "duplicated": "Создана копия «{name}».",
     "duplicatedBlocks": "{count, plural, one {Скопирован # блок.} few {Скопировано # блока.} many {Скопировано # блоков.} other {Скопировано # блока.}}",
     "placedAgain": "«{name}» размещено ещё раз в «{module}».",

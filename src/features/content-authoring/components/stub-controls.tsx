@@ -8,8 +8,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 
 /**
  * Controls the design calls for that content-service cannot back yet
- * (plan 38 §3 — duplicate, per-block publish, cross-module move, and the
- * lesson/block fields the inspector shows).
+ * (plan 38 §3 — per-block publish and the lesson/block fields the inspector
+ * shows; duplicate and the cross-module move have since got their backend).
  *
  * The rule these enforce: the control appears where the design puts it, but it
  * never accepts input and never reports success. An author who flips a switch

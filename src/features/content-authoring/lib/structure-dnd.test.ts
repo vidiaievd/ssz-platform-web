@@ -13,6 +13,7 @@ import {
   applyLevelPreview,
   planBlockDrop,
   planCourseEntryDrop,
+  planCrossModuleDrop,
   planLevelDrop,
   type BlockDragData,
 } from './structure-dnd';
@@ -121,6 +122,38 @@ describe('planBlockDrop', () => {
       kind: 'none',
     });
     expect(planBlockDrop(MODULE, drag('a'), null)).toEqual({ kind: 'none' });
+  });
+});
+
+describe('planCrossModuleDrop', () => {
+  // `x` arrives from another module; MODULE is where it is dropped.
+  it('takes the place of the row it is dropped on, in that row\'s section', () => {
+    expect(planCrossModuleDrop(MODULE, 'x', overBlock('b'))).toEqual({
+      orderedItemIds: ['a', 'x', 'b', 'c', 'd', 'e'],
+      sectionId: 'sec-1',
+    });
+  });
+
+  it('goes last in a section dropped on as a whole, including an empty one', () => {
+    expect(
+      planCrossModuleDrop(MODULE, 'x', {
+        type: 'section',
+        moduleContainerId: 'module-1',
+        sectionId: 'sec-2',
+      }),
+    ).toEqual({ orderedItemIds: ['a', 'b', 'c', 'd', 'x', 'e'], sectionId: 'sec-2' });
+  });
+
+  it('can land outside every section', () => {
+    expect(planCrossModuleDrop(MODULE, 'x', overBlock('e'))).toEqual({
+      orderedItemIds: ['a', 'b', 'c', 'd', 'x', 'e'],
+      sectionId: null,
+    });
+  });
+
+  it('has no answer for a pointer over another module or over nothing', () => {
+    expect(planCrossModuleDrop(MODULE, 'x', overBlock('b', 'module-9'))).toBeNull();
+    expect(planCrossModuleDrop(MODULE, 'x', null)).toBeNull();
   });
 });
 

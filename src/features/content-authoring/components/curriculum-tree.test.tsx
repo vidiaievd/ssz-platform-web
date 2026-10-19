@@ -17,6 +17,7 @@ vi.mock('../actions/container-item', () => ({
   placeItemAgainAction: vi.fn(),
   duplicateContainerItemAction: vi.fn(),
   discardDuplicateAction: vi.fn(),
+  moveItemToContainerAction: vi.fn(),
 }));
 // Stands in for the dialog, reporting where a new item would be filed.
 vi.mock('./add-lesson-picker', () => ({
@@ -72,6 +73,7 @@ const { renameItemAction } = await import('../actions/rename-item');
 const {
   assignItemSectionAction,
   duplicateContainerItemAction,
+  moveItemToContainerAction,
   placeItemAgainAction,
   reorderContainerItemsAction,
   removeContainerItemAction,
@@ -199,6 +201,7 @@ beforeEach(() => {
   vi.mocked(assignItemSectionAction).mockReset();
   vi.mocked(removeContainerItemAction).mockReset();
   vi.mocked(placeItemAgainAction).mockReset();
+  vi.mocked(moveItemToContainerAction).mockReset();
   vi.mocked(duplicateContainerItemAction).mockReset();
   vi.mocked(duplicateContainerItemAction).mockResolvedValue({
     ok: true,
@@ -643,6 +646,49 @@ describe('CurriculumTree', () => {
         );
         // The new row is selected, so the author sees where it went.
         await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-new', 'item'));
+      });
+
+      // Plan 39, B3: the block leaves this module for another one.
+      async function openMoveToModule() {
+        const menu = await openItemMenu();
+        await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move to…' }));
+        const moveTo = await screen.findByRole('menu', { name: 'Move to…' });
+        await userEvent.click(within(moveTo).getByRole('menuitem', { name: /Another module/ }));
+        return screen.findByRole('menu', { name: /Another module/ });
+      }
+
+      it('offers the other modules of the course to move a block to, not its own', async () => {
+        renderTree(vi.fn(), vi.fn(), twoModules);
+        const modules = await openMoveToModule();
+
+        expect(within(modules).getByRole('menuitem', { name: 'Arbeidsliv' })).toBeInTheDocument();
+        expect(
+          within(modules).queryByRole('menuitem', { name: /Samfunn og kultur/ }),
+        ).not.toBeInTheDocument();
+      });
+
+      it('moves the block into the chosen section and selects it there', async () => {
+        vi.mocked(moveItemToContainerAction).mockResolvedValue({
+          ok: true,
+          value: { id: 'row-moved' },
+        } as never);
+        const { onChanged } = renderTree(vi.fn(), vi.fn(), twoModules);
+        const modules = await openMoveToModule();
+
+        await userEvent.click(within(modules).getByRole('menuitem', { name: 'Arbeidsliv' }));
+        const sections = await screen.findByRole('menu', { name: 'Arbeidsliv' });
+        await userEvent.click(within(sections).getByRole('menuitem', { name: 'Practise' }));
+
+        await waitFor(() =>
+          expect(moveItemToContainerAction).toHaveBeenCalledWith({
+            containerId: 'module-1',
+            itemId: 'item-1',
+            targetContainerId: 'module-2',
+            targetSectionId: 'section-2',
+            targetOrder: undefined,
+          }),
+        );
+        await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-moved', 'item'));
       });
     });
   });
@@ -1312,6 +1358,19 @@ describe('CurriculumTree', () => {
       fireEvent.keyDown(document, { key: 'Enter' });
 
       expect(routerPush).toHaveBeenCalledWith('/w/my-school/content/module-1/lessons/item-1');
+    });
+
+    // Enter on a menu item chooses the item; it must not also open the editor.
+    it('leaves Enter pressed in an open menu to the menu', async () => {
+      renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-1');
+      await userEvent.click(
+        screen.getByRole('button', { name: 'More actions for En vanlig arbeidsdag' }),
+      );
+      const menu = await screen.findByRole('menu');
+
+      fireEvent.keyDown(within(menu).getByRole('menuitem', { name: /Move to/ }), { key: 'Enter' });
+
+      expect(routerPush).not.toHaveBeenCalled();
     });
   });
 });

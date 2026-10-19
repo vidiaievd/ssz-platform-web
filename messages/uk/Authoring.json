@@ -1633,6 +1633,7 @@
     "titleCleared": "Назву прибрано.",
     "moved": "Переміщено «{name}».",
     "movedToSection": "«{name}» переміщено в іншу секцію.",
+    "movedToModule": "«{name}» перенесено до «{module}». Учні побачать перенесення, коли обидва модулі буде опубліковано.",
     "duplicated": "Створено копію «{name}».",
     "duplicatedBlocks": "{count, plural, one {Скопійовано # блок.} few {Скопійовано # блоки.} many {Скопійовано # блоків.} other {Скопійовано # блока.}}",
     "placedAgain": "«{name}» розміщено ще раз у «{module}».",

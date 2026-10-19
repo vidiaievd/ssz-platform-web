@@ -18,7 +18,8 @@ vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
 }));
 
-const { duplicateContainerItemAction, discardDuplicateAction } = await import('./container-item');
+const { duplicateContainerItemAction, discardDuplicateAction, moveItemToContainerAction } =
+  await import('./container-item');
 
 const BASE = 'http://content.test/api/v1';
 const draft = (id: string) => ({
@@ -98,5 +99,42 @@ describe('discardDuplicateAction', () => {
       '/exercises/exercise-copy',
       '/containers/module-copy',
     ]);
+  });
+});
+
+describe('moveItemToContainerAction', () => {
+  it("moves the row and orders the target with the row's new id in its place", async () => {
+    let moveBody: unknown;
+    let order: unknown;
+    server.use(
+      http.get(`${BASE}/containers/module-17b/versions`, () => HttpResponse.json(draft('v-17b'))),
+      http.get(`${BASE}/containers/module-17c/versions`, () => HttpResponse.json(draft('v-17c'))),
+      http.post(
+        `${BASE}/containers/module-17b/versions/v-17b/items/row-1/move`,
+        async ({ request }) => {
+          moveBody = await request.json();
+          return HttpResponse.json({ itemId: 'row-new', position: 7 }, { status: 201 });
+        },
+      ),
+      http.put(
+        `${BASE}/containers/module-17c/versions/v-17c/items/reorder`,
+        async ({ request }) => {
+          order = await request.json();
+          return new HttpResponse(null, { status: 204 });
+        },
+      ),
+    );
+
+    const result = await moveItemToContainerAction({
+      containerId: 'module-17b',
+      itemId: 'row-1',
+      targetContainerId: 'module-17c',
+      targetSectionId: 'section-ord',
+      targetOrder: ['a', 'row-1', 'b'],
+    });
+
+    expect(result).toEqual({ ok: true, value: { id: 'row-new' } });
+    expect(moveBody).toEqual({ targetContainerId: 'module-17c', targetSectionId: 'section-ord' });
+    expect(order).toEqual({ orderedItemIds: ['a', 'row-new', 'b'] });
   });
 });

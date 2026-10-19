@@ -1633,6 +1633,7 @@
     "titleCleared": "Tittelen er fjernet.",
     "moved": "Flyttet «{name}».",
     "movedToSection": "Flyttet «{name}» til en annen seksjon.",
+    "movedToModule": "Flyttet «{name}» til «{module}». Elevene ser det der når begge modulene er publisert.",
     "duplicated": "Dupliserte «{name}».",
     "duplicatedBlocks": "{count, plural, one {Dupliserte # blokk.} other {Dupliserte # blokker.}}",
     "placedAgain": "Plasserte «{name}» på nytt i «{module}».",

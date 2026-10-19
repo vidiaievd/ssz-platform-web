@@ -10,6 +10,7 @@ import {
   assignItemSection,
   duplicateDraftItem,
   listDraftItems,
+  moveDraftItem,
   removeItemFromDraft,
   reorderDraftItems,
   type ContainerItemType,
@@ -124,6 +125,46 @@ async function deleteMaterial(itemType: ContainerItemType, id: string): Promise<
   const base = DELETE_PATH[itemType];
   if (!base) return;
   await serverFetch({ service: 'content', path: `${base}/${id}`, method: 'DELETE' });
+}
+
+/** One move of a block to another container — forward, or back as its undo. */
+export interface MoveToContainer {
+  /** The container whose draft holds the row now. */
+  containerId: string;
+  itemId: string;
+  targetContainerId: string;
+  targetSectionId: string | null;
+  /**
+   * The target's whole order once the row is there, naming the row by `itemId`.
+   * Absent, the row stays last in its section. The moved row gets a new id, which
+   * only this action learns, so the swap happens here.
+   */
+  targetOrder?: string[];
+}
+
+/**
+ * «Move to → Another module» and a drop into another module (plan 39, B3). The
+ * material is not touched: it leaves one draft and joins the other. Learners see
+ * it move once both modules are published. Returns the row's new id.
+ */
+export async function moveItemToContainerAction(move: MoveToContainer) {
+  return tryAction(async () => {
+    const moved = await moveDraftItem(
+      move.containerId,
+      move.itemId,
+      move.targetContainerId,
+      move.targetSectionId,
+    );
+    if (move.targetOrder) {
+      await reorderDraftItems(
+        move.targetContainerId,
+        move.targetOrder.map((id) => (id === move.itemId ? moved.id : id)),
+      );
+    }
+    revalidatePath(`/school/content/${move.containerId}`);
+    revalidatePath(`/school/content/${move.targetContainerId}`);
+    return moved;
+  });
 }
 
 /**

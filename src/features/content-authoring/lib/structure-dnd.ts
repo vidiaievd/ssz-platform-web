@@ -51,10 +51,9 @@ export type StructureDragData =
 /**
  * What a drop should do.
  *
- * `cross-module` is a real outcome rather than a refusal to answer: the drag is
- * allowed to end there so the author gets told why nothing happened. Moving a
- * block between modules needs a cross-container move content-service does not
- * have (plan 38 §3 B3).
+ * `cross-module` says the block left its module: the order inside the module it
+ * came from has nothing to say about that, and `planCrossModuleDrop` answers
+ * where it lands in the other one (plan 39, B3).
  */
 export type BlockDropPlan =
   | { kind: 'none' }
@@ -155,6 +154,41 @@ export function planBlockDrop(
     active.itemId,
     over.type === 'block' ? { onRow: over.itemId } : { onGroup: over.sectionId },
   );
+}
+
+/** Where a block from another module lands in this one, and the order to submit after. */
+export interface CrossModuleDrop {
+  /** The target module's whole order with the arriving block in it, under its current id. */
+  orderedItemIds: string[];
+  sectionId: string | null;
+}
+
+/**
+ * A block dropped into another module (plan 39, B3), by the same rule as a drop
+ * inside one: it takes the place of the row it lands on, or goes last in the
+ * section it is dropped on. Null when the pointer is over nothing of `target`'s.
+ */
+export function planCrossModuleDrop(
+  target: CurriculumTreeModuleNode,
+  activeId: string,
+  over: StructureDragData | null,
+): CrossModuleDrop | null {
+  if (!over || (over.type !== 'block' && over.type !== 'section')) return null;
+  if (over.moduleContainerId !== target.containerId) return null;
+
+  // The arriving block is appended as if it were already a row here, so the one
+  // rule can place it. Coming from outside, it is "below" every row it lands on
+  // and settles in front of it.
+  const ARRIVING = '\u0000arriving';
+  const entries = [...flattenEntries(target), { id: activeId, sectionId: ARRIVING }];
+  const plan = planEntryDrop(
+    entries,
+    activeId,
+    over.type === 'block' ? { onRow: over.itemId } : { onGroup: over.sectionId },
+  );
+  // Always a move: no section here is the sentinel the block came in with.
+  if (plan.kind !== 'move') return null;
+  return { orderedItemIds: plan.orderedItemIds, sectionId: plan.sectionId };
 }
 
 /**

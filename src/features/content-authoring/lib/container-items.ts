@@ -89,6 +89,27 @@ export async function duplicateDraftItem(
   return { id: created.itemId, materialId: created.materialId };
 }
 
+/**
+ * Moves a draft row to another container's draft, last in `targetSectionId`
+ * (plan 39, B3). The material stays the same; the row there is a new one, and its
+ * id is what comes back.
+ */
+export async function moveDraftItem(
+  containerId: string,
+  containerItemId: string,
+  targetContainerId: string,
+  targetSectionId: string | null,
+): Promise<{ id: string }> {
+  const versionId = await requireDraftVersionId(containerId);
+  const moved = await serverFetch<{ itemId: string; position: number }>({
+    service: 'content',
+    path: `/containers/${containerId}/versions/${versionId}/items/${containerItemId}/move`,
+    method: 'POST',
+    body: { targetContainerId, targetSectionId },
+  });
+  return { id: moved.itemId };
+}
+
 /** Removes an item (by its container-item id, not the referenced content id) from the draft version. */
 export async function removeItemFromDraft(containerId: string, containerItemId: string): Promise<void> {
   const versionId = await requireDraftVersionId(containerId);

@@ -11,11 +11,13 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCenter,
+  pointerWithin,
   useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragOverEvent,
+  type CollisionDetection,
   type DragStartEvent,
 } from '@dnd-kit/core';
 import type { DraggableAttributes } from '@dnd-kit/core';
@@ -67,6 +69,7 @@ import {
   assignItemSectionAction,
   discardDuplicateAction,
   duplicateContainerItemAction,
+  moveItemToContainerAction,
   placeItemAgainAction,
   removeContainerItemAction,
   reorderContainerItemsAction,
@@ -96,6 +99,7 @@ import {
   applyCourseEntryPreview,
   applyLevelPreview,
   planBlockDrop,
+  planCrossModuleDrop,
   planCourseEntryDrop,
   planLevelDrop,
   flattenCourseEntries,
@@ -111,6 +115,21 @@ import {
 type ChangeKind = 'level' | 'module' | 'item';
 
 const EMPTY_KEYS: ReadonlySet<string> = new Set();
+
+/**
+ * What the pointer is inside first, the nearest centre only when it is inside
+ * nothing (and for the keyboard, which has no pointer).
+ *
+ * `closestCenter` alone loops: a block that was alone in its section leaves that
+ * section's empty drop zone behind when the preview moves it out, the empty zone
+ * is now the nearest centre, the preview moves the block back, and React gives up
+ * after fifty nested updates. The row under the pointer does not move with the
+ * preview, so asking what the pointer is in settles on it.
+ */
+const collisionDetection: CollisionDetection = (args) => {
+  const inside = pointerWithin(args);
+  return inside.length > 0 ? inside : closestCenter(args);
+};
 
 interface CurriculumTreeProps {
   tree: CurriculumTreeData;
@@ -675,8 +694,16 @@ function ModuleCard({
   recipeIssues = [],
   courseModules,
   onDuplicate,
+  onMoveToModule,
 }: {
   module: CurriculumTreeModuleNode;
+  /** Moves a block of this module into another one (plan 39, B3). Owned by the tree, which keeps the undo. */
+  onMoveToModule: (
+    item: CurriculumTreeItemNode,
+    sourceContainerId: string,
+    targetContainerId: string,
+    sectionId: string | null,
+  ) => void;
   /** Duplicates the module or one of its rows, by tree id. Owned by the tree, which keeps the undo. */
   onDuplicate: (id: string) => void;
   /**
@@ -825,6 +852,10 @@ function ModuleCard({
                     onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
                     onDuplicate={
                       canDuplicate(item.itemType) ? () => onDuplicate(item.id) : undefined
+                    }
+                    moveTargets={placeAgainTargets.filter((target) => !target.isCurrent)}
+                    onMoveToModule={(containerId, sectionId) =>
+                      onMoveToModule(item, mod.containerId, containerId, sectionId)
                     }
                     placeAgainTargets={placeAgainTargets}
                     onPlaceAgain={(containerId, sectionId) =>
@@ -1169,6 +1200,55 @@ export function CurriculumTree({
   }
 
   /**
+   * A block into another module (plan 39, B3), from the menu or by a drop. The row
+   * changes hands, so it changes id; undo moves it back into its old section and
+   * restores the old module's order with the id it has by then.
+   *
+   * `targetOrder` comes with a drop, naming the block by its current id; from the
+   * menu the block goes last in the section it is filed in.
+   */
+  async function moveBlockToModule(
+    item: Pick<CurriculumTreeItemNode, 'id' | 'title'>,
+    sourceContainerId: string,
+    targetContainerId: string,
+    sectionId: string | null,
+    targetOrder?: string[],
+  ) {
+    const source = findModule(sourceContainerId);
+    if (!source) return;
+    const before = flattenEntries(source);
+    const previousSection = before.find((entry) => entry.id === item.id)?.sectionId ?? null;
+    const targetTitle = findModule(targetContainerId)?.title ?? '';
+
+    const result = await moveItemToContainerAction({
+      containerId: sourceContainerId,
+      itemId: item.id,
+      targetContainerId,
+      targetSectionId: sectionId,
+      targetOrder,
+    });
+    if (!result.ok) {
+      toast.error(tErrors(result.error.code));
+      return;
+    }
+    const movedId = result.value.id;
+    recordUndo({
+      label: t('undo.movedToModule', { name: item.title ?? '', module: targetTitle }),
+      revert: async () =>
+        (
+          await moveItemToContainerAction({
+            containerId: targetContainerId,
+            itemId: movedId,
+            targetContainerId: sourceContainerId,
+            targetSectionId: previousSection,
+            targetOrder: before.map((entry) => (entry.id === item.id ? movedId : entry.id)),
+          })
+        ).ok,
+    });
+    await onChanged(movedId, 'item');
+  }
+
+  /**
    * «Duplicate» (plan 76, B1): a copy of the material, placed right after its row,
    * that the author can change on its own. Undo takes the row away and deletes the
    * copy — it was never anywhere else.
@@ -1471,9 +1551,28 @@ export function CurriculumTree({
     }
 
     const resolved = active ? planFor(active, over) : null;
+    if (resolved?.plan.kind === 'cross-module' && active?.type === 'block') {
+      setPreview(null);
+      const target = resolveOver(active, over);
+      const targetModule =
+        target && target.type !== 'courseEntry' && target.type !== 'level'
+          ? findModule(target.moduleContainerId)
+          : undefined;
+      const drop = targetModule ? planCrossModuleDrop(targetModule, active.itemId, target) : null;
+      const moved = findItemWithModule(tree, active.itemId)?.item;
+      if (targetModule && drop && moved) {
+        void moveBlockToModule(
+          moved,
+          active.moduleContainerId,
+          targetModule.containerId,
+          drop.sectionId,
+          drop.orderedItemIds,
+        );
+      }
+      return;
+    }
     if (!resolved || resolved.plan.kind === 'none' || resolved.plan.kind === 'cross-module') {
       setPreview(null);
-      if (resolved?.plan.kind === 'cross-module') toast(t('structure.dragCrossModule'));
       return;
     }
 
@@ -1671,6 +1770,15 @@ export function CurriculumTree({
     ) {
       return;
     }
+    // A key pressed in an open menu or dialog is that menu's: Enter on «Move to → …»
+    // must choose the item, not also open the editor of whatever the tree has selected
+    // by the time the keystroke arrives here.
+    if (
+      target instanceof Element &&
+      target.closest('[role="menu"], [role="dialog"], [role="alertdialog"]')
+    ) {
+      return;
+    }
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
       event.preventDefault();
@@ -1850,7 +1958,7 @@ export function CurriculumTree({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -2043,6 +2151,9 @@ export function CurriculumTree({
                       recipeIssues={recipeIssues?.get(mod.containerId)}
                       courseModules={courseModules}
                       onDuplicate={duplicateNode}
+                      onMoveToModule={(item, source, target, sectionId) =>
+                        void moveBlockToModule(item, source, target, sectionId)
+                      }
                     />
                   ))}
 

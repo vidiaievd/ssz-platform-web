@@ -43,6 +43,9 @@ export interface NodeMenuProps {
   sections?: { id: string; title: string }[];
   currentSectionId?: string | null;
   onMoveToSection?: (sectionId: string | null) => void;
+  /** Blocks only: the course's other modules for «Move to → Another module» (plan 39, B3). */
+  moveTargets?: PlaceAgainTarget[];
+  onMoveToModule?: (containerId: string, sectionId: string | null) => void;
   /**
    * Modules and blocks whose material is copied (plan 76, B1). Absent on a block
    * of a list or rule, where the item says to place it again instead, and on a level.
@@ -58,8 +61,7 @@ export interface NodeMenuProps {
 /**
  * The ⋯ menu on every row.
  *
- * Items with no backend (publishing a single block, moving a block
- * to another module) are listed where the design puts them but disabled and
+ * Items with no backend (publishing a single block) are listed where the design puts them but disabled and
  * marked, so the menu stays a truthful map of what this row can do — see
  * plan 38 §3.
  *
@@ -79,6 +81,8 @@ export function NodeMenu({
   sections,
   currentSectionId,
   onMoveToSection,
+  moveTargets,
+  onMoveToModule,
   onDuplicate,
   placeAgainTargets,
   onPlaceAgain,
@@ -241,13 +245,48 @@ export function NodeMenu({
                   {section.title}
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              {/* Moving a block out of its module needs a cross-container move
-                  the API does not have yet (plan 38 §3 B3). */}
-              <DropdownMenuItem disabled>
-                {t('structure.moveToAnotherModule')}
-                {notYet}
-              </DropdownMenuItem>
+              {moveTargets && moveTargets.length > 0 && onMoveToModule && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      {t('structure.moveToAnotherModule')}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="max-h-(--radix-dropdown-menu-content-available-height) max-w-72 overflow-y-auto">
+                      {moveTargets.map((target) =>
+                        target.sections.length === 0 ? (
+                          <DropdownMenuItem
+                            key={target.containerId}
+                            onSelect={() => onMoveToModule(target.containerId, null)}
+                          >
+                            {target.title}
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuSub key={target.containerId}>
+                            <DropdownMenuSubTrigger>{target.title}</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              {target.sections.map((section) => (
+                                <DropdownMenuItem
+                                  key={section.id}
+                                  onSelect={() => onMoveToModule(target.containerId, section.id)}
+                                >
+                                  {section.title}
+                                </DropdownMenuItem>
+                              ))}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onSelect={() => onMoveToModule(target.containerId, null)}
+                              >
+                                {t('sections.noSection')}
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        ),
+                      )}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </>
+              )}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         )}

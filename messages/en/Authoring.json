@@ -1633,6 +1633,7 @@
     "titleCleared": "Title cleared.",
     "moved": "Moved “{name}”.",
     "movedToSection": "Moved “{name}” to another section.",
+    "movedToModule": "Moved “{name}” to “{module}”. Students see it there once both modules are published.",
     "duplicated": "Duplicated “{name}”.",
     "duplicatedBlocks": "{count, plural, one {Duplicated # block.} other {Duplicated # blocks.}}",
     "placedAgain": "Placed “{name}” again in “{module}”.",
