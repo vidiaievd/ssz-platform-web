@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, ShieldCheck, UserRound } from 'lucide-react';
+import { Bell, ShieldCheck, Timer, UserRound } from 'lucide-react';
 
 import { usePathname, useRouter } from '@/lib/i18n/navigation';
 import { Link } from '@/lib/i18n/navigation';
@@ -11,6 +11,7 @@ const ICON_MAP = {
   UserRound,
   ShieldCheck,
   Bell,
+  Timer,
 } as const;
 
 export type SettingsNavIconName = keyof typeof ICON_MAP;
