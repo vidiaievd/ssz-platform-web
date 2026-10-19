@@ -1,12 +1,24 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { Suspense } from 'react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Locale } from '@/lib/i18n/config';
+import { localeAlternates } from '@/lib/seo';
 import { CatalogueClientView } from './catalogue-client';
 
-export async function generateMetadata() {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('Content');
-  return { title: t('catalogueTitle') };
+  return {
+    title: t('catalogueTitle'),
+    description: t('catalogueSubtitle'),
+    alternates: localeAlternates(locale, '/catalogue'),
+  };
 }
 
 export default async function CataloguePage() {

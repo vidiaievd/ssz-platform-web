@@ -1,9 +1,21 @@
+import type { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { GraduationCap, BookOpen, Layers, TrendingUp, Globe } from 'lucide-react';
 
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { Link } from '@/lib/i18n/navigation';
+import type { Locale } from '@/lib/i18n/config';
+import { localeAlternates } from '@/lib/seo';
 import { Button } from '@/components/ui/button';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: Locale }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return { alternates: localeAlternates(locale, '/') };
+}
 
 export default async function HomePage() {
   const [user, t] = await Promise.all([
