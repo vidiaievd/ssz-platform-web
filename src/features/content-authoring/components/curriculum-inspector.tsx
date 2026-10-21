@@ -6,9 +6,11 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/lib/i18n/navigation';
+import { cn } from '@/lib/utils';
 import { getLessonTypeDefinition } from '@/lib/content/lesson-types';
 import type {
   ContainerPublishState,
@@ -21,11 +23,27 @@ import { wsHref } from '@/features/workspaces/lib/href';
 import type { CurriculumTreeSelection } from '../types';
 import { getMaterialKind } from '../lib/material-kind';
 import { moduleItems } from '../lib/structure-filters';
-import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
+import {
+  isRenamableItem,
+  isTitleOptional,
+  ownTitleOf,
+  type RenamableItemType,
+} from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
+import {
+  MAX_LEARNING_GOALS,
+  MAX_LEARNING_GOAL_LENGTH,
+  formatLearningGoals,
+  learningGoalsProblem,
+  parseLearningGoals,
+} from '../lib/learning-goals';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { useStructureUndo } from '../hooks/use-structure-undo';
-import { renameContainerAction, setContainerTitleEnAction } from '../actions/container';
+import {
+  renameContainerAction,
+  setContainerLearningGoalsAction,
+  setContainerTitleEnAction,
+} from '../actions/container';
 import { renameSectionAction } from '../actions/section';
 import { renameItemAction } from '../actions/rename-item';
 import { assignItemSectionAction } from '../actions/container-item';
@@ -38,14 +56,6 @@ import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
 import { SectionAssignSelect } from './section-assign-select';
 import type { DeleteNodeTarget } from './delete-node-dialog';
-import {
-  STUB_PLACEHOLDERS,
-  StubField,
-  StubSegmentedField,
-  StubSelectField,
-  StubSwitchRow,
-  StubTextareaField,
-} from './stub-controls';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -56,6 +66,12 @@ interface CurriculumInspectorProps {
   onChanged: () => void;
   /** Opens the delete confirmation, which the panel owns (`useNodeDeletion`). */
   onDelete: (target: DeleteNodeTarget) => void;
+  /**
+   * The selected module's positional code ("1A"), as its row's badge shows it.
+   * Read from the tree by the panel: the selection alone does not know where
+   * the module sits.
+   */
+  moduleCode?: string | null;
 }
 
 function InspectorField({ label, value }: { label: string; value: React.ReactNode }) {
@@ -63,6 +79,53 @@ function InspectorField({ label, value }: { label: string; value: React.ReactNod
     <div className="flex flex-col gap-1.5">
       <span className="text-xs font-bold tracking-wide text-muted-foreground">{label}</span>
       <div className="text-sm text-foreground">{value}</div>
+    </div>
+  );
+}
+
+/**
+ * The design's three-way publish segment, drawn as a reading (plan 39, B2).
+ *
+ * Nothing is switched from here: publishing is a property of a container
+ * version and happens in one place, "Review & publish". So the segment has no
+ * buttons and no focus stop — it is a label with a highlighted value, and says
+ * so to a screen reader in one sentence.
+ */
+function PublishStateSegment({
+  label,
+  options,
+  activeValue,
+}: {
+  label: string;
+  options: { value: string; label: string }[];
+  activeValue: string | null;
+}) {
+  const active = options.find((option) => option.value === activeValue);
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-xs font-bold tracking-wide text-muted-foreground">{label}</span>
+      <div
+        role="img"
+        aria-label={active ? `${label}: ${active.label}` : label}
+        data-testid="publish-state-segment"
+        className="flex gap-0.5 rounded-md bg-muted/40 p-0.5"
+      >
+        {options.map((option) => (
+          <span
+            key={option.value}
+            aria-hidden="true"
+            className={cn(
+              'flex-1 rounded-sm px-2 py-1 text-center text-xs',
+              option.value === activeValue
+                ? 'bg-background text-foreground shadow-[var(--ssz-shadow-xs)]'
+                : 'text-muted-foreground',
+            )}
+          >
+            {option.label}
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
@@ -114,6 +177,7 @@ function EditableField({
   saveLabel,
   savedMessage,
   value,
+  placeholder,
   onSave,
 }: {
   label: string;
@@ -121,6 +185,8 @@ function EditableField({
   saveLabel: string;
   savedMessage: string;
   value: string;
+  /** What stands in when the field is left blank, for a field that may be. */
+  placeholder?: string;
   onSave: (next: string) => Promise<void>;
 }) {
   const [draft, setDraft] = useState(value);
@@ -139,11 +205,78 @@ function EditableField({
             unsaved.markDirty();
           }}
           aria-label={label}
+          placeholder={placeholder}
           className="h-8 text-sm"
         />
         <PanelSaveButton unsaved={unsaved} label={saveLabel} successMessage={savedMessage} />
       </div>
       <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
+    </div>
+  );
+}
+
+/**
+ * A module's learning goals, one per line. Saved on demand like the other
+ * fields; after a save the text is rewritten the way the server keeps it —
+ * trimmed, without blank lines — so what the author sees is what was stored.
+ */
+function LearningGoalsField({
+  value,
+  onSave,
+}: {
+  value: string[];
+  onSave: (goals: string[]) => Promise<void>;
+}) {
+  const t = useTranslations('Authoring');
+  const [draft, setDraft] = useState(() => formatLearningGoals(value));
+  const goals = parseLearningGoals(draft);
+  const problem = learningGoalsProblem(goals);
+  const unsaved = useUnsavedChanges({
+    onSave: async () => {
+      // The button's own toast reports the failure; the reason is already on screen.
+      if (learningGoalsProblem(goals)) throw new Error(problem ?? 'invalid');
+      await onSave(goals);
+      setDraft(formatLearningGoals(goals));
+    },
+  });
+  const label = t('structure.learningGoals');
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+        {label}
+      </span>
+      <Textarea
+        value={draft}
+        onChange={(e) => {
+          setDraft(e.target.value);
+          unsaved.markDirty();
+        }}
+        aria-label={label}
+        aria-invalid={problem !== null}
+        aria-describedby="learning-goals-hint"
+        placeholder={t('structure.learningGoalsPlaceholder')}
+        rows={3}
+        className="text-sm"
+      />
+      <p
+        id="learning-goals-hint"
+        className={problem ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}
+      >
+        {problem === 'tooMany'
+          ? t('structure.learningGoalsTooMany', { max: MAX_LEARNING_GOALS })
+          : problem === 'tooLong'
+            ? t('structure.learningGoalsTooLong', { max: MAX_LEARNING_GOAL_LENGTH })
+            : t('structure.learningGoalsHint')}
+      </p>
+      <div className="flex items-center justify-between gap-2">
+        <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
+        <PanelSaveButton
+          unsaved={unsaved}
+          label={t('structure.saveLearningGoals')}
+          successMessage={t('structure.learningGoalsSaved')}
+        />
+      </div>
     </div>
   );
 }
@@ -235,6 +368,7 @@ function InspectorFields({
   workspaceId,
   onChanged,
   onDelete,
+  moduleCode,
 }: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
@@ -291,11 +425,9 @@ function InspectorFields({
           )}
         </InspectorHead>
 
-        <StubField label={t('structure.subtitle')} value={STUB_PLACEHOLDERS.none} />
-
         {/* Read from the modules underneath: a level is a grouping and has no
-            state of its own, which is also why the segment cannot be used. */}
-        <StubSegmentedField
+            state of its own. */}
+        <PublishStateSegment
           label={t('structure.publishStateLabel')}
           options={publishOptions}
           activeValue={levelPublishSegment(level)}
@@ -306,11 +438,8 @@ function InspectorFields({
           <CountRow label={t('structure.blocks')} value={blockCount} />
         </div>
 
-        <StubSwitchRow
-          label={t('structure.sequentialUnlock')}
-          hint={t('structure.sequentialUnlockHint')}
-          on
-        />
+        {/* No sequential-unlock switch here (B6): gating is one setting of the
+            course, in its settings drawer, not a third level of the same knob. */}
 
         <p className="text-xs leading-relaxed text-muted-foreground">{t('structure.levelHelp')}</p>
 
@@ -364,7 +493,9 @@ function InspectorFields({
 
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-2 gap-3">
-            <StubField label={t('structure.code')} value={STUB_PLACEHOLDERS.code} />
+            {/* Derived from the module's place, not stored (plan 39, B10): it
+                changes when the module is moved, exactly as the row's badge does. */}
+            <InspectorField label={t('structure.code')} value={moduleCode ?? '—'} />
             <InspectorField
               label={t('structure.estMinutes')}
               value={t('structure.minutes', { count: estimatedMinutes })}
@@ -412,20 +543,26 @@ function InspectorFields({
             <CountRow label={t('structure.sections')} value={mod.sections.length} />
           </div>
 
-          <StubTextareaField
-            label={t('structure.learningGoals')}
-            placeholder={t('structure.learningGoalsPlaceholder')}
+          {/* Keyed by what the server holds, so an undo — which changes it behind the
+            field's back — shows up in the field instead of the text it replaced. */}
+          <LearningGoalsField
+            key={formatLearningGoals(mod.learningGoals)}
+            value={mod.learningGoals}
+            onSave={async (next) => {
+              const previous = mod.learningGoals;
+              const result = await setContainerLearningGoalsAction(mod.containerId, next);
+              if (!result.ok) {
+                toast.error(tErrors(result.error.code));
+                throw new Error(result.error.code);
+              }
+              undo.record({
+                label: t('undo.learningGoalsChanged', { name: mod.title ?? '' }),
+                revert: async () =>
+                  (await setContainerLearningGoalsAction(mod.containerId, previous)).ok,
+              });
+              onChanged();
+            }}
           />
-          <StubSwitchRow
-            label={t('structure.homeworkByDefault')}
-            hint={t('structure.homeworkByDefaultHint')}
-          />
-          <StubSwitchRow
-            label={t('structure.includeInSrs')}
-            hint={t('structure.includeInSrsHint')}
-            on
-          />
-
           <p className="text-xs leading-relaxed text-muted-foreground">
             {t('structure.moduleHelp')}
           </p>
@@ -456,7 +593,6 @@ function InspectorFields({
   const def = getLessonTypeDefinition(getMaterialKind(item));
   const Icon = def.icon;
   const materialLabel = tContent(`materialType.${def.kind}` as 'materialType.text');
-  const isExercise = item.itemType === 'exercise';
 
   return (
     <div key={item.id} className="flex flex-col gap-4">
@@ -476,17 +612,20 @@ function InspectorFields({
         </div>
       </div>
 
-      {/* An exercise row is labelled by its template's name and has no title of
-          its own to write to (B8) — which is also why two exercises in a row
-          read the same. */}
+      {/* An exercise's title is optional (B8): the field holds only what the author
+          wrote, and the label the row falls back to — the document's title, then
+          the template name — shows as the placeholder. Clearing it brings that back. */}
       {isRenamableItem(item) ? (
         <EditableField
           label={t('structure.titleField')}
           saveLabel={t('form.save')}
           savedMessage={t('structure.titleSaved')}
-          value={item.title ?? ''}
+          value={ownTitleOf(item)}
+          placeholder={
+            isTitleOptional(item.itemType) && !item.ownTitle ? (item.title ?? '') : undefined
+          }
           onSave={async (next) => {
-            const previous = item.title ?? '';
+            const previous = ownTitleOf(item);
             const itemType = item.itemType as RenamableItemType;
             const result = await renameItemAction(itemType, item.refId, containerId, next);
             if (!result.ok) {
@@ -494,7 +633,9 @@ function InspectorFields({
               throw new Error(result.error.code);
             }
             undo.record({
-              label: t('undo.renamed', { name: next }),
+              label: next.trim()
+                ? t('undo.renamed', { name: next.trim() })
+                : t('undo.titleCleared'),
               revert: async () =>
                 (await renameItemAction(itemType, item.refId, containerId, previous)).ok,
             });
@@ -502,13 +643,13 @@ function InspectorFields({
           }}
         />
       ) : (
-        <StubField label={t('structure.titleField')} value={item.title ?? ''} />
+        <InspectorField label={t('structure.titleField')} value={item.title ?? '—'} />
       )}
 
       <div className="grid grid-cols-2 gap-3">
         {/* A row's type is fixed by the material it points at: changing it would
             mean replacing the material, not editing the row. */}
-        <StubSelectField label={t('structure.blockType')} value={materialLabel} />
+        <InspectorField label={t('structure.blockType')} value={materialLabel} />
         <InspectorField
           label={t('structure.duration')}
           value={
@@ -542,7 +683,7 @@ function InspectorFields({
       </div>
 
       <div className="flex flex-col gap-2">
-        <StubSegmentedField
+        <PublishStateSegment
           label={t('structure.publishStateLabel')}
           options={publishOptions}
           activeValue={itemPublishSegment(item)}
@@ -564,25 +705,9 @@ function InspectorFields({
         </div>
       </div>
 
-      {isExercise ? (
-        <>
-          <div className="grid grid-cols-2 gap-3">
-            <StubField label={t('structure.points')} value={STUB_PLACEHOLDERS.points} />
-            <StubSelectField
-              label={t('structure.attempts')}
-              value={t('structure.attemptsUnlimited')}
-            />
-          </div>
-          <StubSwitchRow label={t('structure.autoGrade')} hint={t('structure.autoGradeHint')} on />
-          <StubSwitchRow label={t('structure.showHints')} hint={t('structure.showHintsHint')} />
-        </>
-      ) : (
-        <StubSwitchRow
-          label={t('structure.visibleToStudents')}
-          hint={t('structure.visibleToStudentsHint')}
-          on
-        />
-      )}
+      {/* No attempts, auto-grade or hints here (B4): they live in the exercise
+          document and are set in its builder; a row-level copy would be a second
+          truth. No points either — `xpReward` above is the only scale. */}
 
       <div className="flex items-center justify-between gap-3 py-0.5 text-xs text-muted-foreground">
         <span>{t('structure.blockId')}</span>

@@ -6,11 +6,18 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { tryAction } from '@/lib/result';
 
-import { RENAMABLE_ITEM_PATHS, type RenamableItemType } from '../lib/renamable-item';
+import {
+  isTitleOptional,
+  RENAMABLE_ITEM_PATHS,
+  type RenamableItemType,
+} from '../lib/renamable-item';
 
 /**
  * Renames the entity a curriculum row points at, without touching anything else
- * about it — the inline rename in the structure tree.
+ * about it — the inline rename in the structure tree and the inspector's title.
+ *
+ * A blank title clears an exercise's (its label falls back to the document's
+ * title, then the template name) and is refused for every other type.
  *
  * @param containerId the container being edited, for cache revalidation only.
  */
@@ -22,7 +29,7 @@ export async function renameItemAction(
 ) {
   return tryAction(async () => {
     const trimmed = title.trim();
-    if (!trimmed) {
+    if (!trimmed && !isTitleOptional(itemType)) {
       throw new AppError('validation', 'Invalid input', { title: ['Required'] });
     }
 
@@ -35,7 +42,7 @@ export async function renameItemAction(
       service: 'content',
       path: `/${segment}/${refId}`,
       method: 'PATCH',
-      body: { title: trimmed },
+      body: { title: trimmed || null },
     });
 
     revalidatePath(`/school/content/${containerId}`);

@@ -47,5 +47,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon\\.ico).*)'],
+  // robots.txt and sitemap.xml live at the root — the locale middleware would redirect them to /en/….
+  matcher: ['/((?!api|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml).*)'],
 };

@@ -9,5 +9,12 @@
   "upstream_unavailable": "Service temporarily unavailable. Please try again.",
   "timeout": "The request took too long. Please try again.",
   "unknown": "Something went wrong. Please try again.",
-  "gone": "This invitation link is no longer valid."
+  "gone": "This invitation link is no longer valid.",
+  "boundary_title": "Something went wrong",
+  "boundary_body": "This page could not be shown. Try again — if it keeps happening, send us the reference below.",
+  "boundary_reference": "Reference: {digest}",
+  "retry": "Try again",
+  "go_home": "Go to the home page",
+  "not_found_title": "Page not found",
+  "not_found_body": "The address may be mistyped, or the page has been moved or removed."
 }

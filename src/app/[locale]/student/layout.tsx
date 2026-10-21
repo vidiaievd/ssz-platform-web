@@ -9,6 +9,8 @@ import { getMyProfile } from '@/features/profile/api/get-my-profile';
 import { getStudentProfile } from '@/features/profile/api/get-student-profile';
 import { profileKeys } from '@/features/profile/api/keys';
 import { AppShell } from '@/components/shared/app-shell';
+import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
+import { EntitlementsProvider } from '@/features/entitlements';
 import { GLOBAL_NAMESPACES, STUDENT_NAMESPACES } from '@/lib/i18n/messages';
 import { pickMessages } from '@/lib/i18n/pick-messages';
 
@@ -20,10 +22,14 @@ export default async function StudentLayout({ children }: { children: React.Reac
   if (!studentProfile) redirect(`/${locale}/onboarding`);
 
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({
-    queryKey: profileKeys.me(),
-    queryFn: getMyProfile,
-  });
+  // The learner's own rights — what they get without a school paying (plan 78 §7).
+  const [entitlements] = await Promise.all([
+    getEntitlements(),
+    queryClient.prefetchQuery({
+      queryKey: profileKeys.me(),
+      queryFn: getMyProfile,
+    }),
+  ]);
 
   return (
     <NextIntlClientProvider
@@ -31,9 +37,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
       messages={pickMessages(messages, [...GLOBAL_NAMESPACES, ...STUDENT_NAMESPACES])}
     >
       <HydrationBoundary state={dehydrate(queryClient)}>
-        <AppShell variant="student" user={user}>
-          {children}
-        </AppShell>
+        <EntitlementsProvider entitlements={entitlements}>
+          <AppShell variant="student" user={user}>
+            {children}
+          </AppShell>
+        </EntitlementsProvider>
       </HydrationBoundary>
     </NextIntlClientProvider>
   );

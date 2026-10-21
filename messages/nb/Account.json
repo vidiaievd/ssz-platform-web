@@ -3,7 +3,8 @@
     "profile": "Profil",
     "appearance": "Utseende",
     "notifications": "Varsler",
-    "security": "Sikkerhet"
+    "security": "Sikkerhet",
+    "sessionLifetimes": "Øktvarighet"
   },
   "appearance": {
     "title": "Utseende",
@@ -74,5 +75,39 @@
     "description": "Du har ulagrede endringer. Hvis du forlater siden, mister du endringene.",
     "leave": "Forlat uten å lagre",
     "stay": "Bli på siden"
+  },
+  "sessionLifetimes": {
+    "title": "Øktvarighet",
+    "subtitle": "Hvor lenge en økt kan stå ubrukt før personen må logge inn igjen, etter rolle og app. Hver fornyelse starter klokken på nytt.",
+    "role": "Rolle",
+    "client": {
+      "web": "Nett",
+      "mobile": "Mobilapp"
+    },
+    "unit": "timer",
+    "hours": "{n, plural, one {# time} other {# timer}}",
+    "days": "{n, plural, one {# dag} other {# dager}}",
+    "was": "var {value}",
+    "noPolicy": "Ikke satt — standardverdien gjelder",
+    "bounds": "Mellom {min} og {max} timer.",
+    "shortestWins": "En person med flere roller får den korteste varigheten blant dem.",
+    "fallback": "En person uten noen av rollene i listen får {value}.",
+    "lastChanged": "Sist endret {at}.",
+    "neverChanged": "Ingenting er endret siden standardverdiene ble satt.",
+    "appliesFrom": "En endring gjelder økter som logges inn eller fornyes etter den. En åpen økt beholder utløpet sitt til neste fornyelse; for å avslutte økter nå, tilbakekall dem.",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "saved": "{n, plural, one {Én varighet lagret.} other {# varigheter lagret.}}",
+    "saveFailed": "Endringen ble ikke lagret.",
+    "failed": "Vi kunne ikke laste øktvarighetene.",
+    "roles": {
+      "platform_admin": "Plattformadministrator",
+      "manager_platform": "Plattformleder",
+      "school_admin": "Skoleadministrator",
+      "teacher": "Lærer",
+      "tutor": "Privatlærer",
+      "student": "Elev",
+      "premium": "Premium"
+    }
   }
 }

@@ -11,11 +11,13 @@ import {
   KeyboardSensor,
   PointerSensor,
   closestCenter,
+  pointerWithin,
   useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
   type DragOverEvent,
+  type CollisionDetection,
   type DragStartEvent,
 } from '@dnd-kit/core';
 import type { DraggableAttributes } from '@dnd-kit/core';
@@ -65,11 +67,16 @@ import { createModuleAction, renameContainerAction } from '../actions/container'
 import { renameSectionAction, reorderSectionsAction } from '../actions/section';
 import {
   assignItemSectionAction,
+  discardDuplicateAction,
+  duplicateContainerItemAction,
+  moveItemToContainerAction,
+  placeItemAgainAction,
   removeContainerItemAction,
   reorderContainerItemsAction,
+  type DuplicateToDiscard,
 } from '../actions/container-item';
 import { renameItemAction } from '../actions/rename-item';
-import { isRenamableItem, type RenamableItemType } from '../lib/renamable-item';
+import { isRenamableItem, ownTitleOf, type RenamableItemType } from '../lib/renamable-item';
 import { findItemWithModule } from '../lib/find-tree-item';
 import { PublishStateBadge } from './publish-state-badge';
 import { RecipeDot } from './recipe-dot';
@@ -77,7 +84,7 @@ import { ItemChangeBadge } from './item-change-badge';
 import { MoveSection } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
 import { InlineRename } from './inline-rename';
-import { NodeMenu } from './node-menu';
+import { NodeMenu, type PlaceAgainTarget } from './node-menu';
 import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { useNodeDeletion } from '../hooks/use-node-deletion';
 import { useStructureUndo } from '../hooks/use-structure-undo';
@@ -86,11 +93,13 @@ import { describeRemoval, rowRemovalUndo } from '../lib/structure-restore';
 import { StubIconButton } from './stub-controls';
 import { BulkBar } from './bulk-bar';
 import { checkedBlocks } from '../lib/block-selection';
+import { canDuplicate, duplicateTargetFor, type DuplicateTarget } from '../lib/duplicate-target';
 import {
   applyBlockPreview,
   applyCourseEntryPreview,
   applyLevelPreview,
   planBlockDrop,
+  planCrossModuleDrop,
   planCourseEntryDrop,
   planLevelDrop,
   flattenCourseEntries,
@@ -106,6 +115,21 @@ import {
 type ChangeKind = 'level' | 'module' | 'item';
 
 const EMPTY_KEYS: ReadonlySet<string> = new Set();
+
+/**
+ * What the pointer is inside first, the nearest centre only when it is inside
+ * nothing (and for the keyboard, which has no pointer).
+ *
+ * `closestCenter` alone loops: a block that was alone in its section leaves that
+ * section's empty drop zone behind when the preview moves it out, the empty zone
+ * is now the nearest centre, the preview moves the block back, and React gives up
+ * after fifty nested updates. The row under the pointer does not move with the
+ * preview, so asking what the pointer is in settles on it.
+ */
+const collisionDetection: CollisionDetection = (args) => {
+  const inside = pointerWithin(args);
+  return inside.length > 0 ? inside : closestCenter(args);
+};
 
 interface CurriculumTreeProps {
   tree: CurriculumTreeData;
@@ -265,6 +289,38 @@ function AddIconButton({ label, onClick }: { label: string; onClick: () => void 
 
 const TOOL_BUTTON =
   'flex size-6 shrink-0 items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
+/**
+ * ⧉ on a row. Without `onDuplicate` the row places material that is not copied
+ * (a vocabulary list or grammar rule), and the button says what to do instead
+ * rather than promising a feature that is coming.
+ */
+function DuplicateButton({ onDuplicate }: { onDuplicate?: () => void }) {
+  const t = useTranslations('Authoring');
+  if (!onDuplicate) {
+    return (
+      <StubIconButton
+        icon={<Copy size={13} />}
+        label={t('structure.duplicate')}
+        reason={t('structure.duplicateUsePlaceAgain')}
+      />
+    );
+  }
+  return (
+    <button
+      type="button"
+      aria-label={t('structure.duplicate')}
+      title={t('structure.duplicate')}
+      onClick={(e) => {
+        e.stopPropagation();
+        onDuplicate();
+      }}
+      className={TOOL_BUTTON}
+    >
+      <Copy size={13} />
+    </button>
+  );
+}
 
 /** Dashed "＋ …" affordance used everywhere something can be added inline. */
 function AddButton({
@@ -465,6 +521,7 @@ function BlockRow({
   check,
   drag,
   menu,
+  onDuplicate,
 }: {
   item: CurriculumTreeItemNode;
   sectionTitle: string | null;
@@ -482,6 +539,8 @@ function BlockRow({
    */
   drag: BlockDragData | CourseEntryDragData | null;
   menu?: React.ReactNode;
+  /** Absent on rows whose material is not copied — see `DuplicateButton`. */
+  onDuplicate?: () => void;
 }) {
   const t = useTranslations('Authoring');
   const materialLabel = useMaterialLabel();
@@ -602,7 +661,7 @@ function BlockRow({
         >
           <Pencil size={13} />
         </Link>
-        <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+        <DuplicateButton onDuplicate={onDuplicate} />
         {menu}
       </RowTools>
     </div>
@@ -633,8 +692,25 @@ function ModuleCard({
   expanded,
   onToggleExpanded,
   recipeIssues = [],
+  courseModules,
+  onDuplicate,
+  onMoveToModule,
 }: {
   module: CurriculumTreeModuleNode;
+  /** Moves a block of this module into another one (plan 39, B3). Owned by the tree, which keeps the undo. */
+  onMoveToModule: (
+    item: CurriculumTreeItemNode,
+    sourceContainerId: string,
+    targetContainerId: string,
+    sectionId: string | null,
+  ) => void;
+  /** Duplicates the module or one of its rows, by tree id. Owned by the tree, which keeps the undo. */
+  onDuplicate: (id: string) => void;
+  /**
+   * Every module of the course, in tree order — where a block of this one can be
+   * placed again. The card marks its own module itself.
+   */
+  courseModules: readonly Omit<PlaceAgainTarget, 'isCurrent'>[];
   /** What this lesson lacks against the course recipe. Empty draws nothing. */
   recipeIssues?: readonly RecipeIssue[];
   code: string;
@@ -699,6 +775,36 @@ function ModuleCard({
     });
   }
 
+  const placeAgainTargets: PlaceAgainTarget[] = courseModules.map((target) => ({
+    ...target,
+    isCurrent: target.containerId === mod.containerId,
+  }));
+
+  /**
+   * «Place again» (plan 76, B1): one more row pointing at the same material, last
+   * in the chosen section. Undo takes that row away again; the material is not
+   * touched either way.
+   */
+  function placeItemAgain(
+    item: CurriculumTreeItemNode,
+    containerId: string,
+    sectionId: string | null,
+  ) {
+    const targetTitle = courseModules.find((m) => m.containerId === containerId)?.title ?? '';
+    placeItemAgainAction(containerId, item.itemType, item.refId, sectionId).then((result) => {
+      if (!result.ok) {
+        toast.error(tErrors(result.error.code));
+        return;
+      }
+      const rowId = result.value.id;
+      recordUndo({
+        label: t('undo.placedAgain', { name: item.title ?? '', module: targetTitle }),
+        revert: async () => (await removeContainerItemAction(containerId, rowId)).ok,
+      });
+      onChanged(rowId, 'item');
+    });
+  }
+
   function renderItems(section: CurriculumTreeSectionNode | null) {
     const siblings = section ? section.items : mod.ungroupedItems;
     const items = visible(siblings);
@@ -730,6 +836,7 @@ function ModuleCard({
                 rename={rename}
                 check={check}
                 drag={{ type: 'block', itemId: item.id, moduleContainerId: mod.containerId }}
+                onDuplicate={canDuplicate(item.itemType) ? () => onDuplicate(item.id) : undefined}
                 menu={
                   <NodeMenu
                     kind="item"
@@ -743,6 +850,17 @@ function ModuleCard({
                     sections={sectionOptions}
                     currentSectionId={section?.id ?? null}
                     onMoveToSection={(sectionId) => moveItemToSection(item.id, sectionId)}
+                    onDuplicate={
+                      canDuplicate(item.itemType) ? () => onDuplicate(item.id) : undefined
+                    }
+                    moveTargets={placeAgainTargets.filter((target) => !target.isCurrent)}
+                    onMoveToModule={(containerId, sectionId) =>
+                      onMoveToModule(item, mod.containerId, containerId, sectionId)
+                    }
+                    placeAgainTargets={placeAgainTargets}
+                    onPlaceAgain={(containerId, sectionId) =>
+                      placeItemAgain(item, containerId, sectionId)
+                    }
                     onDelete={() =>
                       onRequestDelete({
                         kind: 'item',
@@ -854,11 +972,12 @@ function ModuleCard({
           >
             <Plus size={13} />
           </button>
-          <StubIconButton icon={<Copy size={13} />} label={t('structure.duplicate')} />
+          <DuplicateButton onDuplicate={() => onDuplicate(mod.id)} />
           <NodeMenu
             kind="module"
             nodeTitle={mod.title ?? ''}
             onRename={() => rename.begin(mod.id)}
+            onDuplicate={() => onDuplicate(mod.id)}
             canMoveUp={moduleIndex > 0}
             canMoveDown={moduleIndex < level.modules.length - 1}
             onMoveUp={() => onNudge(mod.id, -1)}
@@ -973,7 +1092,6 @@ export function CurriculumTree({
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
   const tErrors = useTranslations('Errors');
-  const tStub = useTranslations('Authoring.stub');
   const { record: recordUndo } = useStructureUndo();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -981,6 +1099,15 @@ export function CurriculumTree({
   /** Which of the edited module's own sections the picker is filing into. */
   const [addOwnLessonIn, setAddOwnLessonIn] = useState<string | null>(null);
   const editingModule = tree.containerType === 'module';
+  // Built from the whole tree, not the filtered view: a filter narrows what the
+  // author is looking at, not where material may go.
+  const courseModules = tree.levels.flatMap((level) =>
+    level.modules.map((m) => ({
+      containerId: m.containerId,
+      title: m.title ?? '',
+      sections: m.sections.map((section) => ({ id: section.id, title: section.title })),
+    })),
+  );
 
   const materialLabel = useMaterialLabel();
   const filtering = isFiltering(filters);
@@ -1001,7 +1128,7 @@ export function CurriculumTree({
       setRenamingId(null);
       const save = resolveRename(id, title);
       if (!save) return;
-      const previousTitle = titleOf(id);
+      const previousTitle = savedTitleOf(id);
       save.then((result) => {
         if (!result.ok) {
           toast.error(tErrors(result.error.code));
@@ -1070,6 +1197,138 @@ export function CurriculumTree({
     if (removed.length > 0) {
       recordUndo(rowRemovalUndo(t('undo.removedBlocks', { count: removed.length }), removed));
     }
+  }
+
+  /**
+   * A block into another module (plan 39, B3), from the menu or by a drop. The row
+   * changes hands, so it changes id; undo moves it back into its old section and
+   * restores the old module's order with the id it has by then.
+   *
+   * `targetOrder` comes with a drop, naming the block by its current id; from the
+   * menu the block goes last in the section it is filed in.
+   */
+  async function moveBlockToModule(
+    item: Pick<CurriculumTreeItemNode, 'id' | 'title'>,
+    sourceContainerId: string,
+    targetContainerId: string,
+    sectionId: string | null,
+    targetOrder?: string[],
+  ) {
+    const source = findModule(sourceContainerId);
+    if (!source) return;
+    const before = flattenEntries(source);
+    const previousSection = before.find((entry) => entry.id === item.id)?.sectionId ?? null;
+    const targetTitle = findModule(targetContainerId)?.title ?? '';
+
+    const result = await moveItemToContainerAction({
+      containerId: sourceContainerId,
+      itemId: item.id,
+      targetContainerId,
+      targetSectionId: sectionId,
+      targetOrder,
+    });
+    if (!result.ok) {
+      toast.error(tErrors(result.error.code));
+      return;
+    }
+    const movedId = result.value.id;
+    recordUndo({
+      label: t('undo.movedToModule', { name: item.title ?? '', module: targetTitle }),
+      revert: async () =>
+        (
+          await moveItemToContainerAction({
+            containerId: targetContainerId,
+            itemId: movedId,
+            targetContainerId: sourceContainerId,
+            targetSectionId: previousSection,
+            targetOrder: before.map((entry) => (entry.id === item.id ? movedId : entry.id)),
+          })
+        ).ok,
+    });
+    await onChanged(movedId, 'item');
+  }
+
+  /**
+   * «Duplicate» (plan 76, B1): a copy of the material, placed right after its row,
+   * that the author can change on its own. Undo takes the row away and deletes the
+   * copy — it was never anywhere else.
+   */
+  function duplicateNode(id: string) {
+    const target = duplicateTargetFor(tree, courseContainerId, id);
+    if (!target) {
+      // A level, or a list or rule: the row's own ⧉ says the same thing.
+      toast(t('structure.duplicateUsePlaceAgain'));
+      return;
+    }
+    void duplicateOne(target).then((discard) => {
+      if (!discard) return;
+      recordUndo({
+        label: t('undo.duplicated', { name: target.title }),
+        revert: async () => (await discardDuplicateAction(discard)).ok,
+      });
+      onChanged(discard.rowId, target.kind);
+    });
+  }
+
+  /** One copy, or null after saying why there is none. */
+  async function duplicateOne(target: DuplicateTarget): Promise<DuplicateToDiscard | null> {
+    const result = await duplicateContainerItemAction(target.containerId, target.rowId);
+    if (!result.ok) {
+      toast.error(tErrors(result.error.code));
+      return null;
+    }
+    return {
+      containerId: target.containerId,
+      rowId: result.value.id,
+      itemType: target.itemType,
+      materialId: result.value.materialId,
+    };
+  }
+
+  const [duplicating, setDuplicating] = useState(false);
+
+  /**
+   * Bulk Duplicate. One request at a time, like bulk removal: each copy shifts the
+   * rows after it, and two at once in one module would race for the positions.
+   * Lists and rules among the ticked rows are skipped and counted, not refused.
+   * One undo entry for the lot.
+   */
+  async function duplicateCheckedBlocks() {
+    if (duplicating) return;
+    setDuplicating(true);
+    const copyable = selectedBlocks.filter((block) => canDuplicate(block.itemType));
+    const skipped = selectedBlocks.length - copyable.length;
+    const done: DuplicateToDiscard[] = [];
+    let failed = 0;
+    for (const block of copyable) {
+      const result = await duplicateContainerItemAction(block.containerId, block.id);
+      if (!result.ok) {
+        failed += 1;
+        continue;
+      }
+      done.push({
+        containerId: block.containerId,
+        rowId: result.value.id,
+        itemType: block.itemType,
+        materialId: result.value.materialId,
+      });
+    }
+    setDuplicating(false);
+
+    if (skipped > 0) toast(t('bulk.duplicateSkipped', { count: skipped }));
+    if (failed > 0) toast.error(t('bulk.duplicateFailed', { count: failed }));
+    if (done.length === 0) return;
+    recordUndo({
+      label: t('undo.duplicatedBlocks', { count: done.length }),
+      revert: async () => {
+        let ok = true;
+        for (const discard of [...done].reverse()) {
+          ok = (await discardDuplicateAction(discard)).ok && ok;
+        }
+        return ok;
+      },
+    });
+    onChanged();
   }
 
   /** The single-node cases, shared with the inspector's footer. */
@@ -1292,9 +1551,28 @@ export function CurriculumTree({
     }
 
     const resolved = active ? planFor(active, over) : null;
+    if (resolved?.plan.kind === 'cross-module' && active?.type === 'block') {
+      setPreview(null);
+      const target = resolveOver(active, over);
+      const targetModule =
+        target && target.type !== 'courseEntry' && target.type !== 'level'
+          ? findModule(target.moduleContainerId)
+          : undefined;
+      const drop = targetModule ? planCrossModuleDrop(targetModule, active.itemId, target) : null;
+      const moved = findItemWithModule(tree, active.itemId)?.item;
+      if (targetModule && drop && moved) {
+        void moveBlockToModule(
+          moved,
+          active.moduleContainerId,
+          targetModule.containerId,
+          drop.sectionId,
+          drop.orderedItemIds,
+        );
+      }
+      return;
+    }
     if (!resolved || resolved.plan.kind === 'none' || resolved.plan.kind === 'cross-module') {
       setPreview(null);
-      if (resolved?.plan.kind === 'cross-module') toast(t('structure.dragCrossModule'));
       return;
     }
 
@@ -1466,7 +1744,7 @@ export function CurriculumTree({
       : null;
   }
 
-  /** Whether F2 has anything to open on this node — an exercise has no title of its own (B8). */
+  /** Whether F2 has anything to open on this node: every node with a title of its own. */
   function canRename(id: string): boolean {
     if (tree.levels.some((level) => level.id === id)) return true;
     if (tree.levels.flatMap((l) => l.modules).some((mod) => mod.id === id)) return true;
@@ -1492,11 +1770,19 @@ export function CurriculumTree({
     ) {
       return;
     }
+    // A key pressed in an open menu or dialog is that menu's: Enter on «Move to → …»
+    // must choose the item, not also open the editor of whatever the tree has selected
+    // by the time the keystroke arrives here.
+    if (
+      target instanceof Element &&
+      target.closest('[role="menu"], [role="dialog"], [role="alertdialog"]')
+    ) {
+      return;
+    }
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
       event.preventDefault();
-      // Duplicating needs an endpoint content-service does not have (§3 B1).
-      toast(`${t('structure.duplicate')} — ${tStub('notAvailable')}`);
+      if (selectedId) duplicateNode(selectedId);
       return;
     }
 
@@ -1571,6 +1857,19 @@ export function CurriculumTree({
       ...tree.levels.flatMap((l) => [...l.items, ...l.modules.flatMap((m) => moduleItems(m))]),
     ].find((i) => i.id === id);
     return item?.title ?? null;
+  }
+
+  /**
+   * What reverting a rename writes back: the title as the author saved it. The same
+   * as `titleOf` except for an exercise, whose shown label may be a fallback — a
+   * blank here clears its title again.
+   */
+  function savedTitleOf(id: string): string | null {
+    const item = [
+      ...tree.ungroupedItems,
+      ...tree.levels.flatMap((l) => [...l.items, ...l.modules.flatMap((m) => moduleItems(m))]),
+    ].find((i) => i.id === id);
+    return item ? ownTitleOf(item) : titleOf(id);
   }
 
   function resolveRename(id: string, title: string) {
@@ -1659,7 +1958,7 @@ export function CurriculumTree({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
@@ -1850,6 +2149,11 @@ export function CurriculumTree({
                       expanded={isExpanded(moduleCollapseKey(mod), moduleMatches(mod))}
                       onToggleExpanded={() => toggleExpanded(moduleCollapseKey(mod))}
                       recipeIssues={recipeIssues?.get(mod.containerId)}
+                      courseModules={courseModules}
+                      onDuplicate={duplicateNode}
+                      onMoveToModule={(item, source, target, sectionId) =>
+                        void moveBlockToModule(item, source, target, sectionId)
+                      }
                     />
                   ))}
 
@@ -1871,6 +2175,9 @@ export function CurriculumTree({
                           rename={rename}
                           check={check}
                           drag={{ type: 'courseEntry', itemId: item.id }}
+                          onDuplicate={
+                            canDuplicate(item.itemType) ? () => duplicateNode(item.id) : undefined
+                          }
                         />
                       ))}
                     </div>
@@ -1927,6 +2234,9 @@ export function CurriculumTree({
                 rename={rename}
                 check={check}
                 drag={{ type: 'courseEntry', itemId: item.id }}
+                onDuplicate={
+                  canDuplicate(item.itemType) ? () => duplicateNode(item.id) : undefined
+                }
               />
             ))}
           </LevelDropZone>
@@ -1944,7 +2254,8 @@ export function CurriculumTree({
 
         <BulkBar
           count={selectedBlocks.length}
-          pending={deletion.pending}
+          pending={deletion.pending || duplicating}
+          onDuplicate={duplicateCheckedBlocks}
           escapeClears={deletion.target === null}
           onClear={clearChecked}
           onDelete={() =>

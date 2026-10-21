@@ -3,7 +3,8 @@
     "profile": "Profile",
     "appearance": "Appearance",
     "notifications": "Notifications",
-    "security": "Security"
+    "security": "Security",
+    "sessionLifetimes": "Session lifetimes"
   },
   "appearance": {
     "title": "Appearance",
@@ -74,5 +75,39 @@
     "description": "You have unsaved changes. If you leave, your changes will be lost.",
     "leave": "Leave without saving",
     "stay": "Stay on page"
+  },
+  "sessionLifetimes": {
+    "title": "Session lifetimes",
+    "subtitle": "How long a session may go unused before the person has to sign in again, by role and by app. Every refresh starts the clock again.",
+    "role": "Role",
+    "client": {
+      "web": "Web",
+      "mobile": "Mobile app"
+    },
+    "unit": "hours",
+    "hours": "{n, plural, one {# hour} other {# hours}}",
+    "days": "{n, plural, one {# day} other {# days}}",
+    "was": "was {value}",
+    "noPolicy": "Not set — the fallback applies",
+    "bounds": "Between {min} and {max} hours.",
+    "shortestWins": "A person with several roles gets the shortest lifetime among them.",
+    "fallback": "A person none of whose roles is listed gets {value}.",
+    "lastChanged": "Last changed {at}.",
+    "neverChanged": "Nothing has been changed since the defaults were set.",
+    "appliesFrom": "A change applies to sessions signed in or refreshed after it. An open session keeps its expiry until its next refresh; to end sessions now, revoke them.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "{n, plural, one {One lifetime saved.} other {# lifetimes saved.}}",
+    "saveFailed": "The change was not saved.",
+    "failed": "We could not load session lifetimes.",
+    "roles": {
+      "platform_admin": "Platform administrator",
+      "manager_platform": "Platform manager",
+      "school_admin": "School administrator",
+      "teacher": "Teacher",
+      "tutor": "Tutor",
+      "student": "Student",
+      "premium": "Premium"
+    }
   }
 }

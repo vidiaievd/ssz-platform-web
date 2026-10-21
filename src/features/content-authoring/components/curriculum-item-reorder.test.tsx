@@ -45,6 +45,7 @@ const MODULE: CurriculumTreeModuleNode = {
   versionId: 'module-version-1',
   title: 'Module',
   titleEn: null,
+  learningGoals: [],
   position: 0,
   isRequired: true,
   sections: [

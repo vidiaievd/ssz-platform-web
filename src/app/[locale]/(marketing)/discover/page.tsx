@@ -6,16 +6,22 @@ import { getSchools } from '@/features/discovery/api/get-schools.server';
 import { DiscoverSurface } from '@/features/discovery/components/discover-surface';
 import { discoverFilterSchema } from '@/features/discovery/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Locale } from '@/lib/i18n/config';
+import { localeAlternates } from '@/lib/seo';
 
 interface PageProps {
+  params: Promise<{ locale: Locale }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: Pick<PageProps, 'params'>): Promise<Metadata> {
+  const { locale } = await params;
   const t = await getTranslations('Discovery');
   return {
     title: t('title'),
     description: t('subtitle'),
+    // Filters and the cursor live in the query string; every variant is this one page.
+    alternates: localeAlternates(locale, '/discover'),
     openGraph: {
       title: t('title'),
       description: t('subtitle'),

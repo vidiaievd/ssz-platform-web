@@ -10,6 +10,7 @@ import type { CurriculumTreeSelection } from '../types';
 
 vi.mock('../actions/container', () => ({
   renameContainerAction: vi.fn(),
+  setContainerLearningGoalsAction: vi.fn(),
   setContainerTitleEnAction: vi.fn(),
 }));
 vi.mock('../actions/section', () => ({ renameSectionAction: vi.fn() }));
@@ -60,7 +61,8 @@ vi.mock('@/lib/i18n/navigation', () => ({
 }));
 
 const { CurriculumInspector } = await import('./curriculum-inspector');
-const { renameContainerAction, setContainerTitleEnAction } = await import('../actions/container');
+const { renameContainerAction, setContainerLearningGoalsAction, setContainerTitleEnAction } =
+  await import('../actions/container');
 const { renameSectionAction } = await import('../actions/section');
 const { renameItemAction } = await import('../actions/rename-item');
 
@@ -90,6 +92,7 @@ function moduleNode(overrides: Partial<CurriculumTreeModuleNode> = {}): Curricul
     versionId: 'module-version-1',
     title: 'Samfunn og kultur',
     titleEn: null,
+    learningGoals: [],
     position: 0,
     isRequired: true,
     sections: [],
@@ -193,16 +196,25 @@ describe('CurriculumInspector', () => {
     expect(screen.getByText('Blocks').parentElement).toHaveTextContent('2');
   });
 
-  it('offers the fields the backend cannot store yet without letting them be edited', () => {
-    renderInspector({ kind: 'module', module: moduleNode() });
-
-    const goals = screen.getByLabelText('Learning goals — not available yet');
-    expect(goals).toHaveAttribute('aria-disabled', 'true');
-    expect(goals.tagName).not.toBe('INPUT');
-    expect(screen.getByLabelText('Homework by default — not available yet')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+  it('reads the module code the panel derives from its place, and offers no stub fields', () => {
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CurriculumInspector
+          selection={{ kind: 'module', module: moduleNode() }}
+          courseContainerId="course-1"
+          workspaceId="my-school"
+          onChanged={vi.fn()}
+          onDelete={vi.fn()}
+          moduleCode="2C"
+        />
+      </NextIntlClientProvider>,
     );
+
+    expect(screen.getByText('Code').parentElement).toHaveTextContent('2C');
+    expect(screen.queryByLabelText(/not available yet/)).toBeNull();
+    // Decided against rather than still to come (plan 76, B5): no switch for them.
+    expect(screen.queryByText('Homework by default')).toBeNull();
+    expect(screen.queryByText('Include in SRS')).toBeNull();
   });
 
   it('counts what the whole course trains, whatever is selected', () => {
@@ -220,11 +232,11 @@ describe('CurriculumInspector', () => {
   it('keeps the form on screen while the numbers are a tab away', () => {
     renderInspector({ kind: 'module', module: moduleNode() });
 
-    expect(screen.getByLabelText('Learning goals — not available yet')).toBeInTheDocument();
+    expect(screen.getByLabelText('Learning goals')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Coverage' }));
-    expect(screen.queryByLabelText('Learning goals — not available yet')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Learning goals')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('tab', { name: 'Fields' }));
-    expect(screen.getByLabelText('Learning goals — not available yet')).toBeInTheDocument();
+    expect(screen.getByLabelText('Learning goals')).toBeInTheDocument();
   });
 
   it("deletes the selected module through the panel's confirmation", () => {
@@ -279,19 +291,63 @@ describe('CurriculumInspector', () => {
     vi.useRealTimers();
   });
 
-  it('cannot rename an exercise, which is labelled by its template', () => {
+  // Plan 39, B8: an exercise's title is optional. The field holds only what the
+  // author wrote; the label the row falls back to is the placeholder.
+  it('names an unnamed exercise, its fallback label standing in as the placeholder', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
     renderInspector(
-      itemSelection(itemNode({ itemType: 'exercise', refId: 'exercise-1', title: 'Gap fill' })),
+      itemSelection(
+        itemNode({ itemType: 'exercise', refId: 'exercise-1', title: 'Gap fill', ownTitle: null }),
+      ),
     );
 
-    expect(screen.getByLabelText('Title — not available yet')).toHaveAttribute(
-      'aria-disabled',
-      'true',
+    const field = screen.getByLabelText('Title');
+    expect(field).toHaveValue('');
+    expect(field).toHaveAttribute('placeholder', 'Gap fill');
+
+    fireEvent.change(field, { target: { value: 'Kjønn på substantiv' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    });
+
+    expect(renameItemAction).toHaveBeenCalledWith(
+      'exercise',
+      'exercise-1',
+      'module-1',
+      'Kjønn på substantiv',
     );
-    expect(screen.queryByRole('button', { name: 'Save' })).not.toBeInTheDocument();
+    vi.useRealTimers();
   });
 
-  it('offers exercise-only settings on an exercise, and visibility on everything else', () => {
+  it('clears an exercise title when the field is saved blank', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
+    renderInspector(
+      itemSelection(
+        itemNode({
+          itemType: 'exercise',
+          refId: 'exercise-1',
+          title: 'Kjønn på substantiv',
+          ownTitle: 'Kjønn på substantiv',
+        }),
+      ),
+    );
+
+    const field = screen.getByLabelText('Title');
+    expect(field).toHaveValue('Kjønn på substantiv');
+    fireEvent.change(field, { target: { value: '' } });
+    await act(async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    });
+
+    expect(renameItemAction).toHaveBeenCalledWith('exercise', 'exercise-1', 'module-1', '');
+    vi.useRealTimers();
+  });
+
+  it('shows no row-level check settings, points or visibility switch on any block', () => {
+    // They live in the exercise document (plan 76, Q4) or are what publishing
+    // decides (B2); the inspector used to draw them as unmovable stubs.
     const { unmount } = render(
       <NextIntlClientProvider locale="en" messages={enMessages}>
         <CurriculumInspector
@@ -303,13 +359,22 @@ describe('CurriculumInspector', () => {
         />
       </NextIntlClientProvider>,
     );
-    expect(screen.getByLabelText('Auto-grade — not available yet')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Visible to students — not available yet')).toBeNull();
+    expect(screen.queryByText('Auto-grade')).toBeNull();
+    expect(screen.queryByText('Points')).toBeNull();
+    expect(screen.queryByText(/not available yet/)).toBeNull();
     unmount();
 
     renderInspector(itemSelection(itemNode()));
-    expect(screen.getByLabelText('Visible to students — not available yet')).toBeInTheDocument();
-    expect(screen.queryByLabelText('Auto-grade — not available yet')).toBeNull();
+    expect(screen.queryByText('Visible to students')).toBeNull();
+    expect(screen.queryByLabelText(/not available yet/)).toBeNull();
+  });
+
+  it('reads the publish state of a block without offering to switch it', () => {
+    renderInspector(itemSelection(itemNode({ isLive: true, pendingChange: null })));
+
+    const segment = screen.getByTestId('publish-state-segment');
+    expect(segment).toHaveAccessibleName('Publish state: Published');
+    expect(segment.querySelector('button, [role="button"], [tabindex]')).toBeNull();
   });
 
   it('points the section select and the editor link at the container that places the row', () => {
@@ -412,6 +477,52 @@ describe('CurriculumInspector', () => {
         'Society and culture',
         false,
       );
+    });
+
+    it("shows the module's learning goals one per line", () => {
+      renderInspector({
+        kind: 'module',
+        module: moduleNode({ learningGoals: ['Bestille mat', 'Spørre om prisen'] }),
+      });
+
+      expect(screen.getByLabelText('Learning goals')).toHaveValue('Bestille mat\nSpørre om prisen');
+    });
+
+    it('saves the goals as a list, trimmed and without blank lines', async () => {
+      vi.mocked(setContainerLearningGoalsAction).mockResolvedValue({
+        ok: true,
+        value: undefined,
+      } as never);
+      const onChanged = renderInspector({ kind: 'module', module: moduleNode() });
+
+      fireEvent.change(screen.getByLabelText('Learning goals'), {
+        target: { value: '  Bestille mat \n\n Spørre om prisen\n' },
+      });
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Save goals' }));
+      });
+
+      expect(setContainerLearningGoalsAction).toHaveBeenCalledWith('module-1', [
+        'Bestille mat',
+        'Spørre om prisen',
+      ]);
+      expect(screen.getByLabelText('Learning goals')).toHaveValue('Bestille mat\nSpørre om prisen');
+      expect(onChanged).toHaveBeenCalled();
+    });
+
+    it('does not send a goal longer than the server keeps', async () => {
+      vi.mocked(setContainerLearningGoalsAction).mockClear();
+      renderInspector({ kind: 'module', module: moduleNode() });
+
+      fireEvent.change(screen.getByLabelText('Learning goals'), {
+        target: { value: 'x'.repeat(301) },
+      });
+      expect(screen.getByText('Each goal fits in 300 characters.')).toBeInTheDocument();
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'Save goals' }));
+      });
+
+      expect(setContainerLearningGoalsAction).not.toHaveBeenCalled();
     });
   });
 });

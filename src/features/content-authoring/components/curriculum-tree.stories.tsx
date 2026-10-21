@@ -27,6 +27,7 @@ const TREE: CurriculumTreeData = {
           versionId: 'module-version-1',
           title: 'Samfunn og kultur',
           titleEn: 'Society and culture',
+          learningGoals: [],
           position: 0,
           isRequired: true,
           sections: [
@@ -81,6 +82,7 @@ const TREE: CurriculumTreeData = {
           versionId: 'module-version-2',
           title: 'På kafé',
           titleEn: 'At the café',
+          learningGoals: [],
           position: 1,
           isRequired: true,
           sections: [],

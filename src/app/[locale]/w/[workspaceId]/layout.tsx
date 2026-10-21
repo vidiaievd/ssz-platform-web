@@ -10,6 +10,8 @@ import { schoolKeys } from '@/features/school/api/keys';
 import { deriveSchoolType } from '@/features/dashboard/lib/derive';
 import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { WorkspaceActivator } from '@/features/workspaces/components/workspace-activator';
+import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
+import { EntitlementsProvider } from '@/features/entitlements';
 import { AppShell } from '@/components/shared/app-shell';
 import type { SchoolContext } from '@/components/shared/app-shell';
 import type { DashboardRole } from '@/features/dashboard/types';
@@ -54,7 +56,12 @@ export default async function WorkspaceLayout({ children, params }: Props) {
   // whole URL in hand (phase 4).
 
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery({ queryKey: profileKeys.me(), queryFn: getMyProfile });
+  // What the workspace's plan lets its screens offer. Only which controls are drawn
+  // follows from it — the services behind them check again (plan 78 §7).
+  const [entitlements] = await Promise.all([
+    getEntitlements(workspace.id),
+    queryClient.prefetchQuery({ queryKey: profileKeys.me(), queryFn: getMyProfile }),
+  ]);
 
   const isSolo = workspace.kind === 'SOLO';
   let schoolContext: SchoolContext | undefined;
@@ -79,14 +86,16 @@ export default async function WorkspaceLayout({ children, params }: Props) {
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <WorkspaceActivator contextKey={isSolo ? 'private_tutor' : `school:${workspace.id}`} />
-      <AppShell
-        variant={isSolo ? 'tutor' : 'school'}
-        user={user}
-        schoolContext={schoolContext}
-        tutorWorkspaceId={isSolo ? workspace.id : undefined}
-      >
-        {children}
-      </AppShell>
+      <EntitlementsProvider entitlements={entitlements}>
+        <AppShell
+          variant={isSolo ? 'tutor' : 'school'}
+          user={user}
+          schoolContext={schoolContext}
+          tutorWorkspaceId={isSolo ? workspace.id : undefined}
+        >
+          {children}
+        </AppShell>
+      </EntitlementsProvider>
     </HydrationBoundary>
   );
 }

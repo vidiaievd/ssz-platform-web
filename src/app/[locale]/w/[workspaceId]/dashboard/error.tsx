@@ -7,10 +7,10 @@ import { Button } from '@/components/ui/button';
 
 type ErrorProps = {
   error: Error & { digest?: string };
-  reset: () => void;
+  unstable_retry: () => void;
 };
 
-export default function DashboardError({ error, reset }: ErrorProps) {
+export default function DashboardError({ error, unstable_retry }: ErrorProps) {
   useEffect(() => {
     console.error('[Dashboard] error boundary caught:', error);
   }, [error]);
@@ -30,7 +30,7 @@ export default function DashboardError({ error, reset }: ErrorProps) {
             retry buttons if only a part of the page failed.
           </p>
         </div>
-        <Button onClick={reset} className="gap-2">
+        <Button onClick={() => unstable_retry()} className="gap-2">
           <RefreshCw className="size-4" aria-hidden="true" />
           Try again
         </Button>

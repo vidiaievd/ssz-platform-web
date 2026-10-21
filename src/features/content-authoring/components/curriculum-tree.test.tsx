@@ -14,6 +14,10 @@ vi.mock('../actions/container-item', () => ({
   reorderContainerItemsAction: vi.fn(),
   assignItemSectionAction: vi.fn(),
   removeContainerItemAction: vi.fn(),
+  placeItemAgainAction: vi.fn(),
+  duplicateContainerItemAction: vi.fn(),
+  discardDuplicateAction: vi.fn(),
+  moveItemToContainerAction: vi.fn(),
 }));
 // Stands in for the dialog, reporting where a new item would be filed.
 vi.mock('./add-lesson-picker', () => ({
@@ -66,8 +70,14 @@ const { createModuleAction } = await import('../actions/container');
 const { createSectionAction } = await import('../actions/section');
 const { renameContainerAction } = await import('../actions/container');
 const { renameItemAction } = await import('../actions/rename-item');
-const { assignItemSectionAction, reorderContainerItemsAction, removeContainerItemAction } =
-  await import('../actions/container-item');
+const {
+  assignItemSectionAction,
+  duplicateContainerItemAction,
+  moveItemToContainerAction,
+  placeItemAgainAction,
+  reorderContainerItemsAction,
+  removeContainerItemAction,
+} = await import('../actions/container-item');
 const { deleteSectionAction } = await import('../actions/section');
 
 const TREE: CurriculumTreeData = {
@@ -90,6 +100,7 @@ const TREE: CurriculumTreeData = {
           versionId: 'module-version-1',
           title: 'Samfunn og kultur',
           titleEn: 'Society and culture',
+          learningGoals: [],
           position: 0,
           isRequired: true,
           sections: [
@@ -190,6 +201,13 @@ beforeEach(() => {
   vi.mocked(reorderContainerItemsAction).mockReset();
   vi.mocked(assignItemSectionAction).mockReset();
   vi.mocked(removeContainerItemAction).mockReset();
+  vi.mocked(placeItemAgainAction).mockReset();
+  vi.mocked(moveItemToContainerAction).mockReset();
+  vi.mocked(duplicateContainerItemAction).mockReset();
+  vi.mocked(duplicateContainerItemAction).mockResolvedValue({
+    ok: true,
+    value: { id: 'row-copy', materialId: 'material-copy' },
+  } as never);
   vi.mocked(deleteSectionAction).mockReset();
   routerPush.mockReset();
 });
@@ -397,14 +415,66 @@ describe('CurriculumTree', () => {
     );
   });
 
-  // Duplicate has no backend (plan 38 §3 B1). It is rendered where the design
-  // puts it, but announced as unavailable rather than silently doing nothing.
-  it('offers duplicate as a control that says it is not connected yet', () => {
-    renderTree();
+  // «Duplicate» (plan 76, B1): a copy right after the row, selected once it exists.
+  it('duplicates a block in the module that holds it and selects the copy', async () => {
+    const { onChanged } = renderTree();
     const row = screen.getByRole('group', { name: 'En vanlig arbeidsdag' });
-    const duplicate = within(row).getByRole('button', { name: /Duplicate/ });
+
+    await userEvent.click(within(row).getByRole('button', { name: 'Duplicate' }));
+
+    expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
+    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-copy', 'item'));
+  });
+
+  it('duplicates a module from the course row that places it', async () => {
+    const { onChanged } = renderTree();
+    const header = screen.getByRole('group', { name: 'Samfunn og kultur' });
+
+    await userEvent.click(within(header).getAllByRole('button', { name: 'Duplicate' })[0]!);
+
+    expect(duplicateContainerItemAction).toHaveBeenCalledWith('course-1', 'item-module-1');
+    await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-copy', 'module'));
+  });
+
+  it('duplicates the selected row on ⌘D', async () => {
+    renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-1');
+
+    await userEvent.keyboard('{Meta>}d{/Meta}');
+
+    expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
+  });
+
+  // Q4: a list or rule is not copied, and its ⧉ says what to do instead.
+  it('points a vocabulary list to Place again instead of copying it', () => {
+    const [level] = TREE.levels;
+    const [mod] = level!.modules;
+    const [section] = mod!.sections;
+    const words: CurriculumTreeData = {
+      ...TREE,
+      levels: [
+        {
+          ...level!,
+          modules: [
+            {
+              ...mod!,
+              sections: [
+                {
+                  ...section!,
+                  items: [{ ...section!.items[0]!, itemType: 'vocabulary_list', title: 'Nye ord' }],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    renderTree(vi.fn(), vi.fn(), words);
+
+    const row = screen.getByRole('group', { name: 'Nye ord' });
+    const duplicate = within(row).getByRole('button', { name: /Place again/ });
     expect(duplicate).toHaveAttribute('aria-disabled', 'true');
-    expect(duplicate).toHaveAccessibleName('Duplicate — not available yet');
+    // Not a feature still to come: lists are placed again, by decision.
+    expect(duplicate).not.toHaveAccessibleName(/not available yet/);
   });
 
   describe('the row menu', () => {
@@ -435,20 +505,16 @@ describe('CurriculumTree', () => {
       ).toHaveAttribute('href', '/w/my-school/content/module-1/lessons/item-1');
     });
 
-    // Duplicate and per-block publishing have no backend (plan 38 §3), so the
-    // menu lists them but cannot run them.
-    it('marks the actions that have no backend as unavailable', async () => {
+    // Per-block publishing has no backend (plan 38 §3), so the menu lists it but
+    // cannot run it; Duplicate does (plan 76, B1).
+    it('duplicates from the menu, which offers no per-row Unpublish', async () => {
       renderTree();
       const menu = await openItemMenu();
 
-      expect(within(menu).getByRole('menuitem', { name: /Duplicate/ })).toHaveAttribute(
-        'aria-disabled',
-        'true',
-      );
-      expect(within(menu).getByRole('menuitem', { name: /Unpublish/ })).toHaveAttribute(
-        'aria-disabled',
-        'true',
-      );
+      // Plan 39, B2: a row has no publish state of its own; Remove covers it.
+      expect(within(menu).queryByRole('menuitem', { name: /Unpublish/ })).toBeNull();
+      await userEvent.click(within(menu).getByRole('menuitem', { name: /Duplicate/ }));
+      expect(duplicateContainerItemAction).toHaveBeenCalledWith('module-1', 'item-1');
     });
 
     it('disables moving a block that is alone in its section', async () => {
@@ -515,6 +581,115 @@ describe('CurriculumTree', () => {
       await waitFor(() =>
         expect(assignItemSectionAction).toHaveBeenCalledWith('module-1', 'item-1', null),
       );
+    });
+
+    describe('Place again (plan 76, B1)', () => {
+      const [level] = TREE.levels;
+      const twoModules: CurriculumTreeData = {
+        ...TREE,
+        levels: [
+          {
+            ...level!,
+            modules: [
+              level!.modules[0]!,
+              {
+                ...level!.modules[0]!,
+                id: 'item-module-2',
+                containerId: 'module-2',
+                versionId: 'module-version-2',
+                title: 'Arbeidsliv',
+                titleEn: null,
+                learningGoals: [],
+                position: 1,
+                sections: [{ id: 'section-2', title: 'Practise', position: 0, items: [] }],
+              },
+            ],
+          },
+        ],
+      };
+
+      async function openPlaceAgain() {
+        const menu = await openItemMenu();
+        await userEvent.click(within(menu).getByRole('menuitem', { name: 'Place again in…' }));
+        return screen.findByRole('menu', { name: 'Place again in…' });
+      }
+
+      it('offers every module of the course, naming the one the block is in', async () => {
+        renderTree(vi.fn(), vi.fn(), twoModules);
+        const submenu = await openPlaceAgain();
+
+        expect(
+          within(submenu).getByRole('menuitem', { name: 'Samfunn og kultur (this module)' }),
+        ).toBeInTheDocument();
+        expect(within(submenu).getByRole('menuitem', { name: 'Arbeidsliv' })).toBeInTheDocument();
+      });
+
+      it('places the same material in the chosen section of another module', async () => {
+        vi.mocked(placeItemAgainAction).mockResolvedValue({
+          ok: true,
+          value: { id: 'row-new' },
+        } as never);
+        const { onChanged } = renderTree(vi.fn(), vi.fn(), twoModules);
+        const submenu = await openPlaceAgain();
+
+        await userEvent.click(within(submenu).getByRole('menuitem', { name: 'Arbeidsliv' }));
+        const sections = await screen.findByRole('menu', { name: 'Arbeidsliv' });
+        await userEvent.click(within(sections).getByRole('menuitem', { name: 'Practise' }));
+
+        await waitFor(() =>
+          expect(placeItemAgainAction).toHaveBeenCalledWith(
+            'module-2',
+            'lesson',
+            'lesson-1',
+            'section-2',
+          ),
+        );
+        // The new row is selected, so the author sees where it went.
+        await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-new', 'item'));
+      });
+
+      // Plan 39, B3: the block leaves this module for another one.
+      async function openMoveToModule() {
+        const menu = await openItemMenu();
+        await userEvent.click(within(menu).getByRole('menuitem', { name: 'Move to…' }));
+        const moveTo = await screen.findByRole('menu', { name: 'Move to…' });
+        await userEvent.click(within(moveTo).getByRole('menuitem', { name: /Another module/ }));
+        return screen.findByRole('menu', { name: /Another module/ });
+      }
+
+      it('offers the other modules of the course to move a block to, not its own', async () => {
+        renderTree(vi.fn(), vi.fn(), twoModules);
+        const modules = await openMoveToModule();
+
+        expect(within(modules).getByRole('menuitem', { name: 'Arbeidsliv' })).toBeInTheDocument();
+        expect(
+          within(modules).queryByRole('menuitem', { name: /Samfunn og kultur/ }),
+        ).not.toBeInTheDocument();
+      });
+
+      it('moves the block into the chosen section and selects it there', async () => {
+        vi.mocked(moveItemToContainerAction).mockResolvedValue({
+          ok: true,
+          value: { id: 'row-moved' },
+        } as never);
+        const { onChanged } = renderTree(vi.fn(), vi.fn(), twoModules);
+        const modules = await openMoveToModule();
+
+        await userEvent.click(within(modules).getByRole('menuitem', { name: 'Arbeidsliv' }));
+        const sections = await screen.findByRole('menu', { name: 'Arbeidsliv' });
+        await userEvent.click(within(sections).getByRole('menuitem', { name: 'Practise' }));
+
+        await waitFor(() =>
+          expect(moveItemToContainerAction).toHaveBeenCalledWith({
+            containerId: 'module-1',
+            itemId: 'item-1',
+            targetContainerId: 'module-2',
+            targetSectionId: 'section-2',
+            targetOrder: undefined,
+          }),
+        );
+        await waitFor(() => expect(onChanged).toHaveBeenCalledWith('row-moved', 'item'));
+      });
     });
   });
 
@@ -714,17 +889,28 @@ describe('CurriculumTree', () => {
       expect(screen.queryByText('1 selected')).not.toBeInTheDocument();
     });
 
-    it('offers the actions with no backend as unavailable', async () => {
+    it('offers no Publish or Unpublish for a selection', async () => {
       renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
       await tick('Hos legen');
 
-      // Scoped to the bar: rows carry a stub Duplicate of their own.
+      // Plan 39, B2: publishing is per module version, in "Review & publish".
       const bar = screen.getByRole('toolbar', { name: /Bulk actions/ });
-      for (const label of ['Duplicate', 'Publish', 'Unpublish']) {
-        expect(
-          within(bar).getByRole('button', { name: `${label} — not available yet` }),
-        ).toHaveAttribute('aria-disabled', 'true');
-      }
+      expect(within(bar).queryByRole('button', { name: /Publish/ })).toBeNull();
+    });
+
+    it('duplicates every ticked block in the container that holds it, one at a time', async () => {
+      const { onChanged } = renderTree(vi.fn(), vi.fn(), TREE_TWO_MODULES);
+      await tick('En vanlig arbeidsdag');
+      await tick('Hos legen');
+
+      const bar = screen.getByRole('toolbar', { name: /Bulk actions/ });
+      await userEvent.click(within(bar).getByRole('button', { name: 'Duplicate' }));
+
+      await waitFor(() => expect(onChanged).toHaveBeenCalled());
+      expect(vi.mocked(duplicateContainerItemAction).mock.calls).toEqual([
+        ['module-1', 'item-1'],
+        ['module-2', 'item-2'],
+      ]);
     });
 
     it('removes every ticked block from the container that holds it', async () => {
@@ -822,9 +1008,10 @@ describe('CurriculumTree', () => {
       expect(screen.getByText('Samfunn og kultur')).toBeInTheDocument();
     });
 
-    // An exercise row is labelled by its template's name; there is no
-    // per-exercise title field to write to.
-    it('does not offer rename on an exercise row', () => {
+    // Plan 39, B8: an exercise has a title of its own, so its row renames like any
+    // other block — through the exercise, not the placement.
+    it('renames an exercise row through the exercise', async () => {
+      vi.mocked(renameItemAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const [level] = TREE.levels;
       const [module_] = level!.modules;
       const [section] = module_!.sections;
@@ -844,8 +1031,10 @@ describe('CurriculumTree', () => {
                       {
                         ...item!,
                         itemType: 'exercise',
+                        refId: 'exercise-1',
                         lessonKind: null,
                         title: 'Gap-Fill',
+                        ownTitle: null,
                       },
                     ],
                   },
@@ -858,8 +1047,18 @@ describe('CurriculumTree', () => {
 
       renderTree(vi.fn(), vi.fn(), exerciseTree);
       fireEvent.doubleClick(screen.getByText('Gap-Fill'));
+      const input = screen.getByDisplayValue('Gap-Fill');
+      fireEvent.change(input, { target: { value: 'Kjønn på substantiv' } });
+      fireEvent.keyDown(input, { key: 'Enter' });
 
-      expect(screen.queryByDisplayValue('Gap-Fill')).not.toBeInTheDocument();
+      await waitFor(() =>
+        expect(renameItemAction).toHaveBeenCalledWith(
+          'exercise',
+          'exercise-1',
+          'course-1',
+          'Kjønn på substantiv',
+        ),
+      );
     });
   });
 
@@ -1155,6 +1354,19 @@ describe('CurriculumTree', () => {
       fireEvent.keyDown(document, { key: 'Enter' });
 
       expect(routerPush).toHaveBeenCalledWith('/w/my-school/content/module-1/lessons/item-1');
+    });
+
+    // Enter on a menu item chooses the item; it must not also open the editor.
+    it('leaves Enter pressed in an open menu to the menu', async () => {
+      renderTree(vi.fn(), vi.fn(), TREE, undefined, 'item-1');
+      await userEvent.click(
+        screen.getByRole('button', { name: 'More actions for En vanlig arbeidsdag' }),
+      );
+      const menu = await screen.findByRole('menu');
+
+      fireEvent.keyDown(within(menu).getByRole('menuitem', { name: /Move to/ }), { key: 'Enter' });
+
+      expect(routerPush).not.toHaveBeenCalled();
     });
   });
 });

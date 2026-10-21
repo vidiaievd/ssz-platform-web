@@ -1,4 +1,4 @@
-import type { CurriculumTree } from '@/features/content/types';
+import type { CurriculumTree, CurriculumTreeItemNode } from '@/features/content/types';
 
 import { moduleItems } from './structure-filters';
 
@@ -15,6 +15,12 @@ export interface StructureBlock {
   id: string;
   title: string;
   containerId: string;
+  /** What the row places — bulk Duplicate copies lessons and exercises only. */
+  itemType: CurriculumTreeItemNode['itemType'];
+}
+
+function block(item: CurriculumTreeItemNode, containerId: string): StructureBlock {
+  return { id: item.id, title: item.title ?? '', containerId, itemType: item.itemType };
 }
 
 /**
@@ -30,16 +36,16 @@ export function collectBlocks(tree: CurriculumTree, courseContainerId: string): 
   for (const level of tree.levels) {
     for (const mod of level.modules) {
       for (const item of moduleItems(mod)) {
-        blocks.push({ id: item.id, title: item.title ?? '', containerId: mod.containerId });
+        blocks.push(block(item, mod.containerId));
       }
     }
     for (const item of level.items) {
-      blocks.push({ id: item.id, title: item.title ?? '', containerId: courseContainerId });
+      blocks.push(block(item, courseContainerId));
     }
   }
 
   for (const item of tree.ungroupedItems) {
-    blocks.push({ id: item.id, title: item.title ?? '', containerId: courseContainerId });
+    blocks.push(block(item, courseContainerId));
   }
 
   return blocks;

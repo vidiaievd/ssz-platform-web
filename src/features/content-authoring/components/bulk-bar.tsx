@@ -3,11 +3,11 @@
 import { useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { StubButton } from './stub-controls';
-
 interface BulkBarProps {
   /** How many blocks are ticked. The bar is not rendered below one. */
   count: number;
+  /** Copies the ticked lessons and exercises; lists and rules are skipped. */
+  onDuplicate: () => void;
   onDelete: () => void;
   onClear: () => void;
   pending?: boolean;
@@ -22,11 +22,18 @@ interface BulkBarProps {
 /**
  * The bar that appears once blocks are ticked, floating over the tree.
  *
- * Duplicate / Publish / Unpublish are listed because the design lists them, but
- * none of the three exists in content-service yet (plan 38 §3 B1, B2), so they
- * are stubs. Removing blocks and clearing the selection genuinely work.
+ * No Publish / Unpublish here, although the design lists them (plan 39, B2):
+ * publishing is a property of a module's version, not of a row, and happens in
+ * "Review & publish". Taking a block out of the next release is Remove.
  */
-export function BulkBar({ count, onDelete, onClear, pending, escapeClears = true }: BulkBarProps) {
+export function BulkBar({
+  count,
+  onDuplicate,
+  onDelete,
+  onClear,
+  pending,
+  escapeClears = true,
+}: BulkBarProps) {
   const t = useTranslations('Authoring.bulk');
 
   // Escape is the way out of a selection everywhere else in the app, and an
@@ -52,9 +59,9 @@ export function BulkBar({ count, onDelete, onClear, pending, escapeClears = true
       className="fixed bottom-6 left-1/2 z-70 flex -translate-x-1/2 items-center gap-3 rounded-full bg-neutral-900 px-3 py-2 text-sm text-white shadow-[var(--ssz-shadow-xl)]"
     >
       <b className="px-1 font-semibold">{t('selected', { count })}</b>
-      <StubButton label={t('duplicate')} className="bg-white/10" />
-      <StubButton label={t('publish')} className="bg-white/10" />
-      <StubButton label={t('unpublish')} className="bg-white/10" />
+      <button type="button" disabled={pending} onClick={onDuplicate} className={action}>
+        {t('duplicate')}
+      </button>
       <button type="button" disabled={pending} onClick={onDelete} className={action}>
         {t('delete')}
       </button>

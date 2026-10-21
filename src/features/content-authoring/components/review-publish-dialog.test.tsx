@@ -55,6 +55,7 @@ function makeModule(
     versionId: `${containerId}-draft`,
     title,
     titleEn: null,
+    learningGoals: [],
     position: 0,
     isRequired: true,
     publishState,

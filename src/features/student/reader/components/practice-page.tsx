@@ -1,7 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { Check } from 'lucide-react';
+import { Check, Send } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import type { UnitContentsItem } from '@/features/learning';
@@ -14,8 +13,8 @@ export interface PracticePageProps {
   title: string;
   /** Every exercise of the section, in authoring order. */
   items: UnitContentsItem[];
-  /** Fired the first time a task is checked, so the reader can record progress. */
-  onExerciseChecked?: (item: UnitContentsItem) => void;
+  /** Fired every time a task is checked, so the reader can read progress again. */
+  onExerciseChecked?: () => void;
   /**
    * The lesson these tasks were set on, for the runners that offer a way back to it —
    * today `multiple_choice_group`'s «Til teksten». Absent when the unit holds no text.
@@ -30,30 +29,16 @@ export interface PracticePageProps {
  */
 export function PracticePage({ title, items, onExerciseChecked, sourceHref }: PracticePageProps) {
   const t = useTranslations('Learning.reader.practice');
-  const [checkedIds, setCheckedIds] = useState<string[]>([]);
 
   /**
-   * What counts as done, from both sides: the tasks the server already records as
-   * completed, and the ones checked in this sitting. Local state alone made the set
-   * start at zero on every visit — the work was recorded, only never read back — so a
-   * returning learner saw a finished set as untouched.
+   * What the server records, and nothing checked in this sitting (plan 76, 2.6): a check
+   * is not a pass, and counting it locally showed «Done» on a failed task and on work
+   * still with a teacher. The reader reads progress again after each check, so the badge
+   * follows the verdict within a moment. Work handed in counts towards the set — the
+   * learner has done their part — and keeps a badge of its own.
    */
-  const doneIds = useMemo(() => {
-    const ids = new Set(checkedIds);
-    for (const item of items) if (item.status === 'completed') ids.add(item.id);
-    return ids;
-  }, [items, checkedIds]);
-
-  const done = doneIds.size;
+  const done = items.filter((i) => i.status === 'completed' || i.status === 'submitted').length;
   const total = items.length;
-
-  const handleChecked = useCallback(
-    (item: UnitContentsItem) => {
-      setCheckedIds((ids) => (ids.includes(item.id) ? ids : [...ids, item.id]));
-      onExerciseChecked?.(item);
-    },
-    [onExerciseChecked],
-  );
 
   return (
     <div>
@@ -79,17 +64,23 @@ export function PracticePage({ title, items, onExerciseChecked, sourceHref }: Pr
             key={item.id}
             className="relative list-none rounded-2xl border border-(--ssz-border-default) bg-surface px-5 py-5"
           >
-            {doneIds.has(item.id) && (
+            {item.status === 'completed' && (
               <span className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-(--ssz-feedback-ok-bg) px-2 py-0.5 text-[11.5px] font-semibold text-(--ssz-feedback-ok-fg)">
                 <Check size={12} aria-hidden="true" />
                 {t('taskDone')}
+              </span>
+            )}
+            {item.status === 'submitted' && (
+              <span className="absolute top-4 right-4 inline-flex items-center gap-1 rounded-full bg-(--ssz-bg-subtle) px-2 py-0.5 text-[11.5px] font-semibold text-secondary-foreground">
+                <Send size={12} aria-hidden="true" />
+                {t('taskSubmitted')}
               </span>
             )}
             <ExerciseSolver
               exerciseId={item.contentId}
               index={i + 1}
               stacked
-              onChecked={() => handleChecked(item)}
+              {...(onExerciseChecked === undefined ? {} : { onChecked: () => onExerciseChecked() })}
               {...(sourceHref === undefined ? {} : { sourceHref })}
               {...(item.title === null ? {} : { title: item.title })}
             />

@@ -17,6 +17,7 @@ import {
   resolveSelection,
 } from '../lib/find-tree-item';
 import { EMPTY_FILTERS, type StructureFilters } from '../lib/structure-filters';
+import { moduleCodeIn } from '../lib/structure-nodes';
 import { useNodeDeletion } from '../hooks/use-node-deletion';
 import { StructureUndoProvider } from '../hooks/use-structure-undo';
 import { CurriculumTree } from './curriculum-tree';
@@ -222,6 +223,9 @@ export function CourseStructurePanel({
               workspaceId={workspaceId}
               onChanged={() => handleChanged()}
               onDelete={deletion.request}
+              moduleCode={
+                selection?.kind === 'module' ? moduleCodeIn(tree, selection.module.id) : null
+              }
             />
           </div>
         </div>

@@ -452,6 +452,31 @@ describe('ReaderShell', () => {
     expect(mutate).not.toHaveBeenCalled();
   });
 
+  /**
+   * Moving past an exercise is not finishing it (plan 76, 2.6): whether it passed is the
+   * engine's to record. The reader used to post `completed: true` here, failed or not.
+   */
+  it('does not mark an exercise complete when the footer "Next" link is clicked', () => {
+    const mutate = vi.fn();
+    setup();
+    const [exercise, video] = UNIT_CONTENTS.sections[0]!.items;
+    useUnitContents.mockReturnValue({
+      data: {
+        ...UNIT_CONTENTS,
+        sections: [{ ...UNIT_CONTENTS.sections[0]!, items: [exercise!, { ...video!, status: 'available' }] }],
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    });
+    useUpsertProgress.mockReturnValue({ mutate });
+
+    renderShell();
+    fireEvent.click(screen.getByRole('link', { name: /next/i }));
+
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
   it('shows a loading skeleton while queries are pending', () => {
     useCourseHome.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: vi.fn() });
     useUnitContents.mockReturnValue({ data: undefined, isLoading: true, isError: false, refetch: vi.fn() });

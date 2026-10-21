@@ -5,6 +5,7 @@ import { Sparkles } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { GAPFILL_AI_DRAFTS_ENABLED } from '@/lib/config/feature-flags';
+import { useCan } from '@/features/entitlements';
 
 export interface DraftPanelProps {
   /** The pending draft text, or `null` when there is none. */
@@ -70,11 +71,15 @@ export interface DraftActionProps {
  * handoff names: a gap's default explanation, and the matrix cell editor.
  *
  * Absent, not disabled, while the flag is off: a control that cannot do anything is
- * worse than no control, and this one has nothing behind it yet.
+ * worse than no control, and this one has nothing behind it yet. Absent too when the
+ * workspace's plan has no `ai.authoring` — the author assistant would refuse it (plan 78
+ * §7). A draft already stored is still shown by `DraftPanel`: deciding about it costs
+ * nothing.
  */
 export function DraftAction({ disabled = false, onDraft }: DraftActionProps) {
   const t = useTranslations('Authoring');
-  if (!GAPFILL_AI_DRAFTS_ENABLED) return null;
+  const can = useCan();
+  if (!GAPFILL_AI_DRAFTS_ENABLED || !can('ai.authoring')) return null;
 
   return (
     <Button type="button" size="sm" variant="ghost" disabled={disabled} onClick={onDraft}>

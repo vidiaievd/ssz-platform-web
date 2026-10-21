@@ -18,6 +18,15 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Link } from '@/lib/i18n/navigation';
 
+/** A module a block can be placed again in, with the sections it offers. */
+export interface PlaceAgainTarget {
+  containerId: string;
+  title: string;
+  /** The module the block already sits in — still a valid target. */
+  isCurrent: boolean;
+  sections: { id: string; title: string }[];
+}
+
 export interface NodeMenuProps {
   /** Names the group header, and decides which items apply. */
   kind: 'level' | 'module' | 'item';
@@ -34,6 +43,17 @@ export interface NodeMenuProps {
   sections?: { id: string; title: string }[];
   currentSectionId?: string | null;
   onMoveToSection?: (sectionId: string | null) => void;
+  /** Blocks only: the course's other modules for «Move to → Another module» (plan 39, B3). */
+  moveTargets?: PlaceAgainTarget[];
+  onMoveToModule?: (containerId: string, sectionId: string | null) => void;
+  /**
+   * Modules and blocks whose material is copied (plan 76, B1). Absent on a block
+   * of a list or rule, where the item says to place it again instead, and on a level.
+   */
+  onDuplicate?: () => void;
+  /** Blocks only: modules of the course for «Place again in…» (plan 76, B1). */
+  placeAgainTargets?: PlaceAgainTarget[];
+  onPlaceAgain?: (containerId: string, sectionId: string | null) => void;
   onDelete?: () => void;
   className?: string;
 }
@@ -41,8 +61,7 @@ export interface NodeMenuProps {
 /**
  * The ⋯ menu on every row.
  *
- * Items with no backend (duplicate, publishing a single block, moving a block
- * to another module) are listed where the design puts them but disabled and
+ * Items with no backend (publishing a single block) are listed where the design puts them but disabled and
  * marked, so the menu stays a truthful map of what this row can do — see
  * plan 38 §3.
  *
@@ -62,11 +81,15 @@ export function NodeMenu({
   sections,
   currentSectionId,
   onMoveToSection,
+  moveTargets,
+  onMoveToModule,
+  onDuplicate,
+  placeAgainTargets,
+  onPlaceAgain,
   onDelete,
   className,
 }: NodeMenuProps) {
   const t = useTranslations('Authoring');
-  const tStub = useTranslations('Authoring.stub');
 
   /**
    * Closing a Radix menu returns focus to its trigger. Rename has to outlive
@@ -78,7 +101,6 @@ export function NodeMenu({
   const pendingRename = useRef(false);
 
   const groupLabel = t(`structure.${kind}` as 'structure.level');
-  const notYet = <DropdownMenuShortcut>{tStub('short')}</DropdownMenuShortcut>;
   const kbd = (keys: string) => <DropdownMenuShortcut>{keys}</DropdownMenuShortcut>;
 
   return (
@@ -112,7 +134,9 @@ export function NodeMenu({
           }}
         >
           {t('structure.rename')}
-          {onRename ? kbd('F2') : notYet}
+          {/* Only a level the course never named as a section has no rename:
+              there is no section row to hold the title. */}
+          {onRename && kbd('F2')}
         </DropdownMenuItem>
 
         {kind === 'item' && editorHref && (
@@ -124,10 +148,74 @@ export function NodeMenu({
           </DropdownMenuItem>
         )}
 
-        <DropdownMenuItem disabled>
-          {t('structure.duplicate')}
-          {notYet}
-        </DropdownMenuItem>
+        {/* A level is not duplicated (plan 76, Q4); a row whose material is not
+            copied says what to do instead. */}
+        {onDuplicate ? (
+          <DropdownMenuItem onSelect={() => onDuplicate()}>
+            {t('structure.duplicate')}
+            {kbd('⌘D')}
+          </DropdownMenuItem>
+        ) : (
+          kind === 'item' && (
+            <DropdownMenuItem disabled>
+              {t('structure.duplicate')}
+              <DropdownMenuShortcut>
+                {t('structure.duplicateUsePlaceAgainShort')}
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+          )
+        )}
+
+        {kind === 'item' && placeAgainTargets && placeAgainTargets.length > 0 && onPlaceAgain && (
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>{t('structure.placeAgain')}</DropdownMenuSubTrigger>
+            <DropdownMenuSubContent
+              // A course can hold dozens of modules; the list scrolls rather than
+              // running off the screen.
+              className="max-h-(--radix-dropdown-menu-content-available-height) max-w-72 overflow-y-auto"
+            >
+              {/* The difference from Duplicate is the one thing worth saying here:
+                  both rows are the same material. */}
+              <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                {t('structure.placeAgainHint')}
+              </DropdownMenuLabel>
+              {placeAgainTargets.map((target) => {
+                const label = target.isCurrent
+                  ? t('structure.placeAgainThisModule', { name: target.title })
+                  : target.title;
+                if (target.sections.length === 0) {
+                  return (
+                    <DropdownMenuItem
+                      key={target.containerId}
+                      onSelect={() => onPlaceAgain(target.containerId, null)}
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  );
+                }
+                return (
+                  <DropdownMenuSub key={target.containerId}>
+                    <DropdownMenuSubTrigger>{label}</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {target.sections.map((section) => (
+                        <DropdownMenuItem
+                          key={section.id}
+                          onSelect={() => onPlaceAgain(target.containerId, section.id)}
+                        >
+                          {section.title}
+                        </DropdownMenuItem>
+                      ))}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onSelect={() => onPlaceAgain(target.containerId, null)}>
+                        {t('sections.noSection')}
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                );
+              })}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        )}
 
         <DropdownMenuItem disabled={!canMoveUp} onSelect={() => onMoveUp?.()}>
           {t('structure.moveUp')}
@@ -157,23 +245,55 @@ export function NodeMenu({
                   {section.title}
                 </DropdownMenuItem>
               ))}
-              <DropdownMenuSeparator />
-              {/* Moving a block out of its module needs a cross-container move
-                  the API does not have yet (plan 38 §3 B3). */}
-              <DropdownMenuItem disabled>
-                {t('structure.moveToAnotherModule')}
-                {notYet}
-              </DropdownMenuItem>
+              {moveTargets && moveTargets.length > 0 && onMoveToModule && (
+                <>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      {t('structure.moveToAnotherModule')}
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent className="max-h-(--radix-dropdown-menu-content-available-height) max-w-72 overflow-y-auto">
+                      {moveTargets.map((target) =>
+                        target.sections.length === 0 ? (
+                          <DropdownMenuItem
+                            key={target.containerId}
+                            onSelect={() => onMoveToModule(target.containerId, null)}
+                          >
+                            {target.title}
+                          </DropdownMenuItem>
+                        ) : (
+                          <DropdownMenuSub key={target.containerId}>
+                            <DropdownMenuSubTrigger>{target.title}</DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              {target.sections.map((section) => (
+                                <DropdownMenuItem
+                                  key={section.id}
+                                  onSelect={() => onMoveToModule(target.containerId, section.id)}
+                                >
+                                  {section.title}
+                                </DropdownMenuItem>
+                              ))}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                onSelect={() => onMoveToModule(target.containerId, null)}
+                              >
+                                {t('sections.noSection')}
+                              </DropdownMenuItem>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        ),
+                      )}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                </>
+              )}
             </DropdownMenuSubContent>
           </DropdownMenuSub>
         )}
 
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem disabled>
-          {t('structure.unpublish')}
-          {notYet}
-        </DropdownMenuItem>
+        {/* No Unpublish (plan 39, B2): a row has no publish state of its own,
+            and keeping it out of the next release is what Remove does. */}
+        {onDelete && <DropdownMenuSeparator />}
 
         {onDelete && (
           <DropdownMenuItem variant="destructive" onSelect={() => onDelete()}>

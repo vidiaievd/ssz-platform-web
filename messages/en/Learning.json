@@ -522,7 +522,8 @@
     "practice": {
       "taskCount": "{n} tasks in this set",
       "setProgress": "Checked {done} of {total}",
-      "taskDone": "Done"
+      "taskDone": "Done",
+      "taskSubmitted": "Submitted"
     },
     "unsupportedStages": {
       "title": "{count, plural, one {One question isn't shown here} other {# questions aren't shown here}}",

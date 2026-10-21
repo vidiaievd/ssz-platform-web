@@ -33,6 +33,7 @@ function makeTree(
           versionId: `module-version-${i}`,
           title: `Module ${i}`,
           titleEn: null,
+          learningGoals: [],
           position: i,
           isRequired: true,
           publishState,

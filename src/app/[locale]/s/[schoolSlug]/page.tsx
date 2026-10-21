@@ -8,6 +8,8 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { ApplyCta, type ApplyCtaState } from '@/features/enrollment/components/apply-cta';
 import type { MembershipStatus } from '@/features/enrollment/types';
+import type { Locale } from '@/lib/i18n/config';
+import { localeAlternates } from '@/lib/seo';
 
 type Props = {
   params: Promise<{ locale: string; schoolSlug: string }>;
@@ -19,13 +21,14 @@ type BackendMembership = {
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { schoolSlug } = await params;
+  const { locale, schoolSlug } = await params;
   const school = await getPublicSchool(schoolSlug);
   if (!school) return {};
 
   return {
     title: school.schoolName,
     description: school.description ?? undefined,
+    alternates: localeAlternates(locale as Locale, `/s/${encodeURIComponent(school.schoolSlug)}`),
     openGraph: {
       title: school.schoolName,
       description: school.description ?? undefined,

@@ -105,10 +105,17 @@ export interface CurriculumTreeItemNode {
    * and so on. Null for every other item type, and for a server that predates
    * the field.
    *
-   * The title already carries the template's display name; the code is here
-   * because a picture cannot be keyed off a name that gets translated.
+   * An unnamed exercise's title falls back to the template's display name; the
+   * code is here because a picture cannot be keyed off a name that gets translated.
    */
   templateCode?: string | null;
+  /**
+   * The exercise's own title (plan 39, B8) — without the fallbacks `title`
+   * resolves through (the document's title, then the template name). Null for
+   * every other item type, for an exercise nobody named, and for a server that
+   * predates the field.
+   */
+  ownTitle?: string | null;
   durationMinutes: number | null;
   xpReward: number | null;
 }
@@ -138,6 +145,8 @@ export interface CurriculumTreeModuleNode {
   versionId: string | null;
   title: string | null;
   titleEn: string | null;
+  /** What a student should be able to do after the module, in order. Empty when unset. */
+  learningGoals: string[];
   position: number;
   isRequired: boolean;
   publishState: ContainerPublishState;

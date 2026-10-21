@@ -32,6 +32,7 @@ function makeTree(levels: { id: string; title: string; modules: ContainerPublish
         versionId: `${level.id}-version-${mi}`,
         title: `Module ${mi}`,
         titleEn: null,
+        learningGoals: [],
         position: mi,
         isRequired: true,
         publishState,

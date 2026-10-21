@@ -24,6 +24,7 @@ const TREE: CurriculumTree = {
           versionId: 'module-version-1',
           title: 'Samfunn og kultur',
           titleEn: null,
+          learningGoals: [],
           position: 0,
           isRequired: true,
           sections: [

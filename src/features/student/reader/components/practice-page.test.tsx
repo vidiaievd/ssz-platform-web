@@ -101,7 +101,12 @@ describe('PracticePage', () => {
     expect(screen.getByText('Question c-e2')).toBeInTheDocument();
   });
 
-  it('reports each task once as it is checked and counts progress', () => {
+  /**
+   * A check is not a pass (plan 76, 2.6): the page tells the reader to read progress
+   * again and counts only what the server records — a «Done» on a failed task, or on
+   * work still with a teacher, was the bug.
+   */
+  it('reports every check, and counts nothing the server has not recorded', () => {
     mockMcq();
     const onExerciseChecked = vi.fn();
     renderWithProviders(
@@ -114,10 +119,24 @@ describe('PracticePage', () => {
     fireEvent.click(screen.getAllByRole('button', { name: 'Check' })[0]!);
 
     expect(onExerciseChecked).toHaveBeenCalledTimes(1);
-    expect(onExerciseChecked).toHaveBeenCalledWith(items[0]);
-    expect(screen.getByText('1/3')).toBeInTheDocument();
+    expect(screen.getByText('0/3')).toBeInTheDocument();
+    expect(screen.queryByText('Done')).not.toBeInTheDocument();
     // The other tasks stay answerable — grading is per exercise.
     expect(screen.getAllByRole('button', { name: 'Check' })).toHaveLength(2);
+  });
+
+  it('marks work with a teacher as submitted, and counts it towards the set', () => {
+    mockMcq();
+    const seen = [
+      { ...items[0]!, status: 'completed' as const },
+      { ...items[1]!, status: 'submitted' as const },
+      items[2]!,
+    ];
+    renderWithProviders(<PracticePage title="Øvelser" items={seen} />);
+
+    expect(screen.getByText('2/3')).toBeInTheDocument();
+    expect(screen.getAllByText('Done')).toHaveLength(1);
+    expect(screen.getAllByText('Submitted')).toHaveLength(1);
   });
 
   it('counts the tasks the server already records as done', () => {

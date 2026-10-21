@@ -280,6 +280,8 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createReadAloudAction).toHaveBeenCalled());
     expect(vi.mocked(createReadAloudAction).mock.calls[0]![1]).toBe('no');
+    // The picker's generic placeholder would hide the type's own line and the reader card's.
+    expect(vi.mocked(createReadAloudAction).mock.calls[0]![4]).toBe('');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 
@@ -296,6 +298,8 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createMinimalPairsAction).toHaveBeenCalled());
     expect(vi.mocked(createMinimalPairsAction).mock.calls[0]![1]).toBe('no');
+    // The picker's generic placeholder would hide the type's own line and the reader card's.
+    expect(vi.mocked(createMinimalPairsAction).mock.calls[0]![4]).toBe('');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 
@@ -312,6 +316,8 @@ describe('AddLessonPicker', () => {
 
     await waitFor(() => expect(createInformationTransferAction).toHaveBeenCalled());
     expect(vi.mocked(createInformationTransferAction).mock.calls[0]![1]).toBe('no');
+    // The picker's generic placeholder would hide the type's own line and the reader card's.
+    expect(vi.mocked(createInformationTransferAction).mock.calls[0]![4]).toBe('');
     expect(createExerciseAction).not.toHaveBeenCalled();
   });
 

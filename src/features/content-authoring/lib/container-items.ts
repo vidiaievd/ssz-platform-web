@@ -50,15 +50,64 @@ export async function addItemToDraft(
   containerId: string,
   itemType: ContainerItemType,
   itemId: string,
+  sectionId?: string | null,
 ): Promise<{ id: string }> {
   const versionId = await requireDraftVersionId(containerId);
   const created = await serverFetch<{ itemId: string }>({
     service: 'content',
     path: `/containers/${containerId}/versions/${versionId}/items`,
     method: 'POST',
-    body: { itemType, itemId },
+    // The row lands last in its section: positions run across the whole version.
+    body: sectionId ? { itemType, itemId, sectionId } : { itemType, itemId },
   });
   return { id: created.itemId };
+}
+
+/** What «Duplicate» leaves behind: the new row and the copy it places. */
+export interface DuplicatedRow {
+  /** The new container item, right after the original in the same section. */
+  id: string;
+  /** The copied lesson, exercise or module. */
+  materialId: string;
+}
+
+/**
+ * Deep-copies the material a draft row places and places the copy right after it
+ * (plan 76, B1). Lessons, exercises and — on a course — modules; content-service
+ * answers 422 for vocabulary lists and grammar rules.
+ */
+export async function duplicateDraftItem(
+  containerId: string,
+  containerItemId: string,
+): Promise<DuplicatedRow> {
+  const versionId = await requireDraftVersionId(containerId);
+  const created = await serverFetch<{ itemId: string; position: number; materialId: string }>({
+    service: 'content',
+    path: `/containers/${containerId}/versions/${versionId}/items/${containerItemId}/duplicate`,
+    method: 'POST',
+  });
+  return { id: created.itemId, materialId: created.materialId };
+}
+
+/**
+ * Moves a draft row to another container's draft, last in `targetSectionId`
+ * (plan 39, B3). The material stays the same; the row there is a new one, and its
+ * id is what comes back.
+ */
+export async function moveDraftItem(
+  containerId: string,
+  containerItemId: string,
+  targetContainerId: string,
+  targetSectionId: string | null,
+): Promise<{ id: string }> {
+  const versionId = await requireDraftVersionId(containerId);
+  const moved = await serverFetch<{ itemId: string; position: number }>({
+    service: 'content',
+    path: `/containers/${containerId}/versions/${versionId}/items/${containerItemId}/move`,
+    method: 'POST',
+    body: { targetContainerId, targetSectionId },
+  });
+  return { id: moved.itemId };
 }
 
 /** Removes an item (by its container-item id, not the referenced content id) from the draft version. */
