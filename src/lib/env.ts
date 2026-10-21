@@ -20,6 +20,7 @@ export const env = createEnv({
     ANALYTICS_SERVICE_URL: z.string().url().optional(),
     NOTIFICATION_SERVICE_URL: z.string().url().optional(),
     SCHEDULING_SERVICE_URL: z.string().url().optional(),
+    SUBSCRIPTION_SERVICE_URL: z.string().url().optional(),
 
     AUTH_COOKIE_SECRET: z.string().min(32),
 
@@ -75,6 +76,7 @@ export const env = createEnv({
     ANALYTICS_SERVICE_URL: process.env.ANALYTICS_SERVICE_URL,
     NOTIFICATION_SERVICE_URL: process.env.NOTIFICATION_SERVICE_URL,
     SCHEDULING_SERVICE_URL: process.env.SCHEDULING_SERVICE_URL,
+    SUBSCRIPTION_SERVICE_URL: process.env.SUBSCRIPTION_SERVICE_URL,
     AUTH_COOKIE_SECRET: process.env.AUTH_COOKIE_SECRET,
     CONTENT_SERVICE_INTERNAL_URL: process.env.CONTENT_SERVICE_INTERNAL_URL,
     EXERCISE_SERVICE_INTERNAL_URL: process.env.EXERCISE_SERVICE_INTERNAL_URL,
