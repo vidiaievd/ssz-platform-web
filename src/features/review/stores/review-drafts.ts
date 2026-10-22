@@ -21,7 +21,7 @@ export interface ReviewDraft {
   /**
    * What the reviewer did with a model's draft (plan 79, 1.4), by remark index as a string,
    * `summary` for the draft's overall note, and `draft` for dropping the whole of it. An
-   * absent key is a remark nobody has acted on. Sent with the verdict once 1.5 asks for it:
+   * absent key is a remark nobody has acted on. Sent with the verdict (`aiOutcomes`, 1.5):
    * which remarks were taken as they were, which were reworded and which were thrown out is
    * what tells a good model from a bad one.
    */

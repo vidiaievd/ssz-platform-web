@@ -36,6 +36,11 @@ interface DecisionRequest {
    */
   rubricMarks?: Record<string, number>;
   /**
+   * What the reviewer did with the model's draft (plan 79, 1.5). Forwarded unread like the
+   * marks: the engine knows the draft and drops any key or value it could not have drawn.
+   */
+  aiOutcomes?: Record<string, string>;
+  /**
    * The queue as the reviewer currently has it arranged. Sent rather than assumed,
    * because what "the next one" means is exactly the list on their screen.
    */
@@ -121,6 +126,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         comment: body.comment ?? null,
         sentenceComments: body.sentenceComments ?? {},
         ...(body.rubricMarks === undefined ? {} : { rubricMarks: body.rubricMarks }),
+        ...(body.aiOutcomes === undefined ? {} : { aiOutcomes: body.aiOutcomes }),
       },
       // Both are outcomes the screen has a shape for, not faults worth logging as such.
       expectedErrorStatuses: [409, 422],

@@ -132,6 +132,22 @@ describe('POST /api/review/submissions/[id]/decision', () => {
     expect(JSON.stringify(sent?.body)).not.toContain('score');
   });
 
+  it("forwards what was done with the model's draft, and nothing when none was shown", async () => {
+    upstream();
+    await POST(
+      request({ verdict: 'approved', aiOutcomes: { '0': 'accepted', draft: 'discarded' } }),
+      context,
+    );
+    await POST(approve(), context);
+
+    const sent = vi
+      .mocked(serverFetch)
+      .mock.calls.filter(([opts]) => opts.method === 'POST' && opts.path.endsWith(`/review`))
+      .map(([opts]) => opts.body);
+    expect(sent[0]).toMatchObject({ aiOutcomes: { '0': 'accepted', draft: 'discarded' } });
+    expect(sent[1]).not.toHaveProperty('aiOutcomes');
+  });
+
   it('sends no rubric field at all when the screen had no rubric', async () => {
     upstream();
     await POST(approve(), context);

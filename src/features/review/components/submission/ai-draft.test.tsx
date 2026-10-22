@@ -108,6 +108,10 @@ function renderPanel(entitlements: Entitlements | null = WITH_KEY) {
   );
 }
 
+const decisionBody = () => {
+  const call = vi.mocked(fetch).mock.calls.find(([input]) => String(input).includes('/decision'));
+  return call === undefined ? {} : (JSON.parse(String(call[1]?.body)) as Record<string, unknown>);
+};
 const outcomes = () => useReviewDraftsStore.getState().drafts['att-1']?.ai ?? {};
 const sentenceComment = () => useReviewDraftsStore.getState().drafts['att-1']?.sentences.i1;
 
@@ -196,6 +200,32 @@ describe('AI draft on the review card', () => {
     expect(useReviewDraftsStore.getState().drafts['att-1']?.comment).toBe(
       'Ordstilling etter adverbial.',
     );
+  });
+
+  it('sends what was done with the draft along with the verdict', async () => {
+    upstream({});
+    renderPanel();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Discard' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Pass$/ }));
+
+    await vi.waitFor(() =>
+      expect(decisionBody()).toMatchObject({ aiOutcomes: { '0': 'discarded' } }),
+    );
+  });
+
+  it('sends an empty record for a draft left alone, and none without the key', async () => {
+    upstream({});
+    const { unmount } = renderPanel();
+    fireEvent.click(await screen.findByRole('button', { name: /^Pass$/ }));
+    await vi.waitFor(() => expect(decisionBody()).toMatchObject({ aiOutcomes: {} }));
+    unmount();
+
+    upstream({});
+    renderPanel(null);
+    fireEvent.click(await screen.findByRole('button', { name: /^Pass$/ }));
+    await vi.waitFor(() => expect(decisionBody()).toHaveProperty('verdict', 'approved'));
+    expect(decisionBody()).not.toHaveProperty('aiOutcomes');
   });
 
   it('is the card as it was without the school’s key', async () => {
