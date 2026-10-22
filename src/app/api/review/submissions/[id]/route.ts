@@ -11,6 +11,7 @@ import { fetchRecordingPlayback, recordingIdsOf } from '@/features/review/lib/re
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 import type {
+  ReviewAiDraft,
   ReviewItemDecision,
   ReviewSubmission,
   ReviewVerdictRecord,
@@ -49,6 +50,8 @@ interface EngineSubmission {
   rubricSnapshot: RubricSnapshot | null;
   rubricMarks: Record<string, number> | null;
   reviewDecisions?: ReviewItemDecision[] | null;
+  /** Plan 79, 1.4 — absent from an engine older than the draft. */
+  aiDraft?: ReviewAiDraft | null;
   submittedAnswer: unknown;
 }
 
@@ -170,6 +173,7 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     rubricMarks: submission.rubricMarks ?? null,
     reviewDecisions: submission.reviewDecisions ?? null,
     playback,
+    aiDraft: submission.aiDraft ?? null,
     submittedAnswer: submission.submittedAnswer,
     canDecide: access.write,
   };

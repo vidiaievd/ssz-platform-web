@@ -93,7 +93,24 @@ describe('rubric marks', () => {
       comment: 'Bra.',
       sentences: {},
       marks: {},
+      ai: {},
       touchedAt: 5,
     });
+  });
+});
+
+describe('AI draft outcomes', () => {
+  it('records what was done with each remark, and takes a decision back', () => {
+    store().setAiOutcome('att-1', '0', 'accepted');
+    store().setAiOutcome('att-1', '1', 'discarded');
+    store().setAiOutcome('att-1', '1', undefined);
+
+    expect(store().drafts['att-1']?.ai).toEqual({ '0': 'accepted' });
+  });
+
+  it('keeps a draft that holds only a dropped remark — that is a decision too', () => {
+    store().setAiOutcome('att-1', 'draft', 'discarded');
+
+    expect(store().drafts['att-1']?.ai).toEqual({ draft: 'discarded' });
   });
 });

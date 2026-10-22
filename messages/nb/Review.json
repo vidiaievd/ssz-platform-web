@@ -130,6 +130,30 @@
       "addToSentence": "Kommenter denne setningen",
       "sentenceLabel": "Kommentar til denne setningen",
       "sentencePlaceholder": "Hva bør eleven se på her?"
+    },
+    "ai": {
+      "title": "KI-utkast",
+      "label": "KI-utkast",
+      "count": "{count, plural, one {# merknad} other {# merknader}}",
+      "none": "ingen merknader",
+      "hint": "Eleven ser bare det du tar inn i en kommentar.",
+      "discardDraft": "Forkast utkastet",
+      "draftDiscarded": "KI-utkastet er forkastet.",
+      "restore": "Angre",
+      "takeSummary": "Legg til i hovedkommentaren",
+      "summaryTaken": "i hovedkommentaren",
+      "accept": "Legg til i kommentar",
+      "edit": "Rediger",
+      "discard": "Forkast",
+      "accepted": "lagt til i kommentar",
+      "edited": "redigert og lagt til",
+      "remarkDiscarded": "forkastet",
+      "aspect": {
+        "grammar": "grammatikk",
+        "order": "ordstilling",
+        "lexis": "ordvalg",
+        "register": "register"
+      }
     }
   },
   "rubric": {

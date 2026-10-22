@@ -130,6 +130,30 @@
       "addToSentence": "Comment on this sentence",
       "sentenceLabel": "Comment on this sentence",
       "sentencePlaceholder": "What should the learner look at here?"
+    },
+    "ai": {
+      "title": "AI draft",
+      "label": "AI draft",
+      "count": "{count, plural, one {# remark} other {# remarks}}",
+      "none": "no remarks",
+      "hint": "The student sees only what you take into a comment.",
+      "discardDraft": "Discard draft",
+      "draftDiscarded": "AI draft discarded.",
+      "restore": "Restore",
+      "takeSummary": "Add to overall comment",
+      "summaryTaken": "in the overall comment",
+      "accept": "Add to comment",
+      "edit": "Edit",
+      "discard": "Discard",
+      "accepted": "added to comment",
+      "edited": "edited and added",
+      "remarkDiscarded": "discarded",
+      "aspect": {
+        "grammar": "grammar",
+        "order": "word order",
+        "lexis": "word choice",
+        "register": "register"
+      }
     }
   },
   "rubric": {

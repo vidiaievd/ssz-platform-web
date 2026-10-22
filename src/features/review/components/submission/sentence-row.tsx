@@ -20,7 +20,9 @@ import type {
   TranslateItemDetail,
 } from '@/features/content-authoring/types/review';
 
-import { SentenceComment } from './comment-box';
+import { AiRemarkCard, appendParagraph, remarkText, type AiRemarkEntry } from './ai-draft';
+import { SentenceComment, type SentenceCommentSeed } from './comment-box';
+import type { AiRemarkOutcome } from '../../stores/review-drafts';
 
 const READING = 'var(--ssz-font-reading)';
 
@@ -63,6 +65,9 @@ export interface SentenceRowProps {
   teacherNote?: string;
   comment: string | undefined;
   onComment: (value: string | undefined) => void;
+  /** A model's remarks about this sentence (plan 79, 1.4); empty without a draft. */
+  aiRemarks?: AiRemarkEntry[];
+  onAiOutcome?: (key: string, outcome: AiRemarkOutcome | undefined) => void;
 }
 
 /**
@@ -85,10 +90,20 @@ export function SentenceRow({
   teacherNote,
   comment,
   onComment,
+  aiRemarks = [],
+  onAiOutcome,
 }: SentenceRowProps) {
   const t = useTranslations('Review.submission.sentence');
   const autoPassed = detail.routing === 'pass';
-  const [open, setOpen] = useState(!autoPassed);
+  // A sentence the machine closed still opens when the model has something to say about
+  // it: the key accepting a translation is not the same as nothing in it worth a word.
+  const [open, setOpen] = useState(
+    !autoPassed || aiRemarks.some((entry) => entry.outcome === undefined),
+  );
+  // The remark being reworded in the comment form, and the text the form opened with.
+  const [rewording, setRewording] = useState<{ key: string; seed: SentenceCommentSeed } | null>(
+    null,
+  );
 
   if (autoPassed && !open) {
     return (
@@ -162,7 +177,43 @@ export function SentenceRow({
           </p>
         )}
 
-        <SentenceComment value={comment} onChange={onComment} />
+        {aiRemarks.length === 0 ? null : (
+          <div className="flex flex-col gap-1.5">
+            {aiRemarks.map((entry) => (
+              <AiRemarkCard
+                key={entry.key}
+                entry={entry}
+                onAccept={() => {
+                  onComment(appendParagraph(comment, remarkText(entry.remark)));
+                  onAiOutcome?.(entry.key, 'accepted');
+                }}
+                onEdit={() =>
+                  setRewording({
+                    key: entry.key,
+                    seed: {
+                      text: appendParagraph(comment, remarkText(entry.remark)),
+                      nonce: Date.now(),
+                    },
+                  })
+                }
+                onDiscard={() => onAiOutcome?.(entry.key, 'discarded')}
+                onRestore={() => onAiOutcome?.(entry.key, undefined)}
+              />
+            ))}
+          </div>
+        )}
+
+        <SentenceComment
+          value={comment}
+          onChange={onComment}
+          seed={rewording?.seed ?? null}
+          onClose={(saved) => {
+            // Reworded only once the reworded text is saved; a cancel leaves the remark
+            // waiting, as if the button had never been pressed.
+            if (saved && rewording !== null) onAiOutcome?.(rewording.key, 'edited');
+            setRewording(null);
+          }}
+        />
       </div>
     </li>
   );

@@ -44,6 +44,7 @@ const BASE: ReviewSubmission = {
   rubricMarks: null,
   reviewDecisions: null,
   playback: null,
+  aiDraft: null,
   submittedAnswer: {},
   canDecide: true,
 };

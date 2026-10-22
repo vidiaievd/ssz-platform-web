@@ -12,6 +12,7 @@ import { readShortAnswerDetails } from '../../lib/short-answer-details';
 import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
+import { AiDraftBanner, remarksFor, type AiDraftBinding } from './ai-draft';
 import { ReadAloudReview } from './read-aloud-review';
 import { RubricMarks } from './rubric-marks';
 import { isTranslateDetail, SentenceRow } from './sentence-row';
@@ -31,6 +32,11 @@ export interface SentenceListProps {
   onMark: (criterionId: string, mark: number) => void;
   /** False once a verdict stands: the rubric becomes a record of what was decided. */
   editable: boolean;
+  /**
+   * A model's draft to take from (plan 79, 1.4), or null for the card as it was. Drawn only
+   * over a per-sentence breakdown — the one shape its remarks are written against.
+   */
+  ai?: AiDraftBinding | null;
 }
 
 /**
@@ -53,6 +59,7 @@ export function SentenceList({
   marks,
   onMark,
   editable,
+  ai = null,
 }: SentenceListProps) {
   const t = useTranslations('Review.submission');
 
@@ -156,6 +163,8 @@ export function SentenceList({
         {items.some(isTranslateDetail) ? <DiffLegend /> : null}
       </div>
 
+      {ai === null ? null : <AiDraftBanner binding={ai} />}
+
       <ul className="flex flex-col gap-2">
         {items.map((item, position) => (
           <SentenceRow
@@ -166,6 +175,8 @@ export function SentenceList({
             teacherNote={item.note ?? undefined}
             comment={comments[item.itemId]}
             onComment={(value) => onComment(item.itemId, value)}
+            aiRemarks={remarksFor(ai, item.itemId)}
+            onAiOutcome={ai?.setOutcome}
           />
         ))}
       </ul>

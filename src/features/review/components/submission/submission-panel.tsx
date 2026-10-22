@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCan } from '@/features/entitlements';
 import {
   readSpeakingSnapshot,
   readSubmission,
@@ -31,6 +32,7 @@ import { useReviewViewStore } from '../../stores/review-view-store';
 import type { ReviewQueueFilters, ReviewSubmission } from '../../types';
 import { Note } from '../primitives';
 
+import { appendParagraph, type AiDraftBinding } from './ai-draft';
 import { DecisionPanel, type RubricDecision } from './decision-panel';
 import { PreviousAttempt } from './previous-attempt';
 import { SentenceList } from './sentence-list';
@@ -109,6 +111,8 @@ export function SubmissionPanel({
   const setComment = useReviewDraftsStore((state) => state.setComment);
   const setSentenceComment = useReviewDraftsStore((state) => state.setSentenceComment);
   const setMark = useReviewDraftsStore((state) => state.setMark);
+  const setAiOutcome = useReviewDraftsStore((state) => state.setAiOutcome);
+  const can = useCan();
   const clearDraft = useReviewDraftsStore((state) => state.clear);
 
   // What this reviewer's own verdict was, until the screen moves on. Held rather than
@@ -207,6 +211,20 @@ export function SubmissionPanel({
   const written = draft.comment.trim() !== '';
   const withComment = written || Object.keys(draft.sentences).length > 0;
 
+  // The model's draft, while there is still a verdict for it to help with. Without the
+  // school's key the card is the one it was: the draft may well exist — it was paid for
+  // under an earlier plan — but the screen does not offer what the plan no longer does.
+  const aiDraft = data?.aiDraft ?? null;
+  const ai: AiDraftBinding | null =
+    stillOpen && aiDraft !== null && aiDraft.status === 'ready' && can('ai.review_draft')
+      ? {
+          draft: aiDraft,
+          outcomes: draft.ai,
+          setOutcome: (key, outcome) => setAiOutcome(id, key, outcome),
+          takeSummary: (text) => setComment(id, appendParagraph(draft.comment, text)),
+        }
+      : null;
+
   // What the marks come to — see `rubricDecisionOf`.
   const rubric: RubricDecision | null = data ? rubricDecisionOf(data, draft) : null;
 
@@ -296,6 +314,7 @@ export function SubmissionPanel({
           marks={draft.marks}
           onMark={onMark}
           editable={stillOpen}
+          ai={ai}
         />
       </div>
 

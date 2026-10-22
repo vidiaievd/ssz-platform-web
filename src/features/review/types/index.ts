@@ -250,9 +250,41 @@ export interface ReviewSubmission {
    * media-service no longer holds.
    */
   playback: Record<string, ReviewPlayback> | null;
+  /**
+   * A model's draft review of the work, for the teacher to take from or drop (plan 79, 1.4).
+   * Null when no model drafted it or its attempt failed — the card is then the card it was.
+   * Present whatever the school's plan says: whether to draw it is `useCan`'s call.
+   */
+  aiDraft: ReviewAiDraft | null;
   submittedAnswer: unknown;
   /** Whether this caller may still decide it — an expired substitution may only read. */
   canDecide: boolean;
+}
+
+/** The aspects a translation draft comments on — exactly the exercise's `ai.checks`. */
+export type ReviewAiAspect = 'grammar' | 'order' | 'lexis' | 'register';
+
+/**
+ * One remark of a model's draft, about one sentence. ai-service has checked that
+ * `fragment` occurs word for word in what the student wrote for `itemId`.
+ */
+export interface ReviewAiRemark {
+  itemId: string;
+  sentenceIndex: number;
+  aspect: ReviewAiAspect | string;
+  fragment: string;
+  comment: string;
+  suggestion: string | null;
+}
+
+export interface ReviewAiDraft {
+  /** `ready` until a verdict settles it (plan 79, 1.5). */
+  status: 'ready' | 'sent' | 'edited' | 'discarded';
+  items: ReviewAiRemark[];
+  summary: string | null;
+  modelId: string | null;
+  promptVersion: string | null;
+  createdAt: string;
 }
 
 /** One item's ruling, as the engine stored it with the verdict. */
