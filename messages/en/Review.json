@@ -172,6 +172,8 @@
     "unmarked": "Not marked yet.",
     "weight": "×2",
     "markOf": "Mark for {name}",
+    "aiMark": "AI: {mark}",
+    "aiMarkTitle": "The AI draft suggests {mark}: {reason}",
     "score": "{points} of {max} points",
     "threshold": "a pass is {passScore}",
     "remaining": "{count, plural, one {# criterion left} other {# criteria left}}",

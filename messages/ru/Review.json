@@ -172,6 +172,8 @@
     "unmarked": "Ещё не оценён.",
     "weight": "×2",
     "markOf": "Оценка по критерию «{name}»",
+    "aiMark": "ИИ: {mark}",
+    "aiMarkTitle": "Черновик ИИ предлагает {mark}: {reason}",
     "score": "{points} из {max} баллов",
     "threshold": "зачёт от {passScore}",
     "remaining": "{count, plural, one {остался # критерий} few {осталось # критерия} other {осталось # критериев}}",

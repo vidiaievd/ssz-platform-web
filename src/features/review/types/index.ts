@@ -290,11 +290,24 @@ export interface ReviewAiRemark {
   suggestion: string | null;
 }
 
+/**
+ * A suggested mark on one rubric criterion (`writing_task`, plan 79 step 1.7c), keyed by
+ * the id in the submission's rubric snapshot.
+ */
+export interface ReviewAiMark {
+  criterionId: string;
+  mark: 0 | 1 | 2 | 3;
+  /** One sentence for the teacher on why this level. */
+  reason: string;
+}
+
 export interface ReviewAiDraft {
   /** `ready` until a verdict settles it (plan 79, 1.5). */
   status: 'ready' | 'sent' | 'edited' | 'discarded';
   items: ReviewAiRemark[];
   summary: string | null;
+  /** Null (or absent, from an engine before 1.7c) when the model was not asked for marks. */
+  marks?: ReviewAiMark[] | null;
   modelId: string | null;
   promptVersion: string | null;
   createdAt: string;

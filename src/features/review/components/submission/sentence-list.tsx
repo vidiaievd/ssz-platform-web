@@ -12,7 +12,13 @@ import { readShortAnswerDetails } from '../../lib/short-answer-details';
 import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
-import { AiDraftBanner, EssayAiRemarks, remarksFor, type AiDraftBinding } from './ai-draft';
+import {
+  AI_DRAFT_KEY,
+  AiDraftBanner,
+  EssayAiRemarks,
+  remarksFor,
+  type AiDraftBinding,
+} from './ai-draft';
 import { ReadAloudReview } from './read-aloud-review';
 import { RubricMarks } from './rubric-marks';
 import { isTranslateDetail, SentenceRow } from './sentence-row';
@@ -110,6 +116,7 @@ export function SentenceList({
             details={readWritingTaskDetails(submission.details)}
             editable={editable}
             onMark={onMark}
+            hints={essayHints(ai)}
           />
         )}
       </div>
@@ -248,4 +255,10 @@ function plainStrings(value: unknown, depth = 0): string[] {
     return Object.values(value).flatMap((entry) => plainStrings(entry, depth + 1));
   }
   return [];
+}
+
+/** The draft's suggested marks, unless there is no draft or the reviewer dropped it whole. */
+function essayHints(ai: AiDraftBinding | null) {
+  if (ai === null || ai.outcomes[AI_DRAFT_KEY] === 'discarded') return null;
+  return ai.draft.marks ?? null;
 }

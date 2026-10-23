@@ -172,6 +172,8 @@
     "unmarked": "Ikke vurdert ennå.",
     "weight": "×2",
     "markOf": "Nivå for {name}",
+    "aiMark": "KI: {mark}",
+    "aiMarkTitle": "KI-utkastet foreslår {mark}: {reason}",
     "score": "{points} av {max} poeng",
     "threshold": "bestått fra {passScore}",
     "remaining": "{count, plural, one {# kriterium igjen} other {# kriterier igjen}}",

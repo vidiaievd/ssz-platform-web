@@ -172,6 +172,8 @@
     "unmarked": "Ще не оцінено.",
     "weight": "×2",
     "markOf": "Оцінка за критерієм «{name}»",
+    "aiMark": "ШІ: {mark}",
+    "aiMarkTitle": "Чернетка ШІ пропонує {mark}: {reason}",
     "score": "{points} із {max} балів",
     "threshold": "залік від {passScore}",
     "remaining": "{count, plural, one {лишився # критерій} few {лишилося # критерії} other {лишилося # критеріїв}}",
