@@ -131,6 +131,29 @@ describe('AI draft on the review card', () => {
     expect(screen.getByText('Ordstilling etter adverbial.')).toBeInTheDocument();
   });
 
+  // Plan 79, step 1.7: error_correction's "differs from the key, and right".
+  it('names an alternative repair as such rather than as an error', async () => {
+    upstream({
+      aiDraft: {
+        ...BASE.aiDraft!,
+        items: [
+          {
+            itemId: 'i1',
+            sentenceIndex: 1,
+            aspect: 'alternative',
+            fragment: 'jeg var',
+            comment: 'Også riktig her.',
+            suggestion: null,
+          },
+        ],
+      },
+    });
+    renderPanel();
+
+    expect(await screen.findByText('Også riktig her.')).toBeInTheDocument();
+    expect(screen.getByText('also correct')).toBeInTheDocument();
+  });
+
   it('takes a remark into the sentence comment as written', async () => {
     upstream({});
     renderPanel();

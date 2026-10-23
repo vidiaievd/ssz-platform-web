@@ -261,8 +261,11 @@ export interface ReviewSubmission {
   canDecide: boolean;
 }
 
-/** The aspects a translation draft comments on — exactly the exercise's `ai.checks`. */
-export type ReviewAiAspect = 'grammar' | 'order' | 'lexis' | 'register';
+/**
+ * What a draft remark is about. The first four are errors; `alternative` (error_correction,
+ * plan 79 step 1.7) says a repair differs from the key and is also right.
+ */
+export type ReviewAiAspect = 'grammar' | 'order' | 'lexis' | 'register' | 'alternative';
 
 /**
  * One remark of a model's draft, about one sentence. ai-service has checked that

@@ -11,7 +11,7 @@ import type { ReviewAiDraft, ReviewAiRemark } from '../../types';
 const READING = 'var(--ssz-font-reading)';
 
 /** The aspects the messages name; anything newer reads under its own code. */
-const KNOWN_ASPECTS = ['grammar', 'order', 'lexis', 'register'] as const;
+const KNOWN_ASPECTS = ['grammar', 'order', 'lexis', 'register', 'alternative'] as const;
 
 /** Where the whole draft's outcome is kept, beside the per-remark ones. */
 export const AI_DRAFT_KEY = 'draft';
@@ -262,6 +262,8 @@ function aspectLabel(
       return t('aspect.order');
     case 'lexis':
       return t('aspect.lexis');
+    case 'alternative':
+      return t('aspect.alternative');
     default:
       return t('aspect.register');
   }

@@ -152,7 +152,8 @@
         "grammar": "grammar",
         "order": "word order",
         "lexis": "word choice",
-        "register": "register"
+        "register": "register",
+        "alternative": "also correct"
       }
     }
   },

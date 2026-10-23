@@ -152,7 +152,8 @@
         "grammar": "grammatikk",
         "order": "ordstilling",
         "lexis": "ordvalg",
-        "register": "register"
+        "register": "register",
+        "alternative": "annen riktig retting"
       }
     }
   },
