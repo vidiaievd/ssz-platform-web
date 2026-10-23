@@ -12,7 +12,7 @@ import { readShortAnswerDetails } from '../../lib/short-answer-details';
 import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
-import { AiDraftBanner, remarksFor, type AiDraftBinding } from './ai-draft';
+import { AiDraftBanner, EssayAiRemarks, remarksFor, type AiDraftBinding } from './ai-draft';
 import { ReadAloudReview } from './read-aloud-review';
 import { RubricMarks } from './rubric-marks';
 import { isTranslateDetail, SentenceRow } from './sentence-row';
@@ -90,6 +90,14 @@ export function SentenceList({
     return (
       <div className="flex flex-col gap-4">
         <EssayBody text={submission.text} />
+        {/* The model's remarks come before the marks: they are what a teacher reads the
+            text with, and what they take from them goes into the overall comment. */}
+        {ai === null ? null : (
+          <div className="flex flex-col gap-2">
+            <AiDraftBanner binding={ai} />
+            <EssayAiRemarks binding={ai} />
+          </div>
+        )}
         {/* No rubric is not a broken screen. A submission queued before the rubric
             existed, or one whose author left it empty, is marked the old way with the
             verdict buttons — and the panel below is already that screen. Tested for

@@ -276,3 +276,89 @@ describe('AI draft on the review card', () => {
     expect(screen.queryByText('V2: verbet står på andre plass.')).not.toBeInTheDocument();
   });
 });
+
+// Plan 79, step 1.7b: an essay is one text, marked as a whole.
+describe('AI draft on an essay', () => {
+  const ESSAY: Partial<ReviewSubmission> = {
+    exercise: { ...BASE.exercise, type: 'writing_task', title: 'Skriv et brev' },
+    details: null,
+    text: 'Hei Kari!\n\nJeg flytte til Bergen i mai.',
+    aiDraft: {
+      ...BASE.aiDraft!,
+      items: [
+        {
+          itemId: 'text',
+          sentenceIndex: 1,
+          aspect: 'grammar',
+          fragment: 'Jeg flytte',
+          comment: 'Presens: flytter.',
+          suggestion: 'Jeg flytter',
+        },
+        {
+          itemId: 'text',
+          sentenceIndex: 1,
+          aspect: 'task',
+          fragment: null,
+          comment: 'Du skriver ikke hvorfor du flytter.',
+          suggestion: null,
+        },
+      ],
+      summary: null,
+    },
+  };
+  const overall = () => useReviewDraftsStore.getState().drafts['att-1']?.comment;
+
+  it('shows every remark under the text, a whole-text one without a quotation', async () => {
+    upstream(ESSAY);
+    renderPanel();
+
+    expect(await screen.findByText('Presens: flytter.')).toBeInTheDocument();
+    expect(screen.getByText('Du skriver ikke hvorfor du flytter.')).toBeInTheDocument();
+    expect(screen.getByText('about the whole text')).toBeInTheDocument();
+    expect(screen.getByText('task')).toBeInTheDocument();
+    expect(screen.getByText('Jeg flytte')).toBeInTheDocument();
+  });
+
+  it('takes remarks into the comment on the whole work, a whole-text one as its comment alone', async () => {
+    upstream(ESSAY);
+    renderPanel();
+
+    const [quoted, whole] = await screen.findAllByRole('button', { name: 'Add to comment' });
+    fireEvent.click(quoted!);
+    fireEvent.click(whole!);
+
+    expect(overall()).toBe(
+      '«Jeg flytte» → «Jeg flytter» — Presens: flytter.\nDu skriver ikke hvorfor du flytter.',
+    );
+    expect(outcomes()).toEqual({ '0': 'accepted', '1': 'accepted' });
+  });
+
+  it('rewords a remark in a form of its own and adds it only when saved', async () => {
+    upstream(ESSAY);
+    renderPanel();
+
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Add to comment' }))[0]!);
+    fireEvent.click(screen.getByRole('button', { name: 'Edit' }));
+    const box = screen.getByRole('textbox', { name: 'Goes into the overall comment' });
+    // The remark alone: the comment already written is not the form's to edit.
+    expect(box).toHaveValue('Du skriver ikke hvorfor du flytter.');
+
+    fireEvent.change(box, { target: { value: 'Skriv også hvorfor.' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+
+    expect(overall()).toBe('«Jeg flytte» → «Jeg flytter» — Presens: flytter.\nSkriv også hvorfor.');
+    expect(outcomes()).toEqual({ '0': 'accepted', '1': 'edited' });
+  });
+
+  it('leaves the remark waiting when the rewording is cancelled', async () => {
+    upstream(ESSAY);
+    renderPanel();
+
+    fireEvent.click((await screen.findAllByRole('button', { name: 'Edit' }))[1]!);
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(outcomes()).toEqual({});
+    expect(overall() ?? '').toBe('');
+    expect(screen.getAllByRole('button', { name: 'Add to comment' })).toHaveLength(2);
+  });
+});

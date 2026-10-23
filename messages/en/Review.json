@@ -153,8 +153,12 @@
         "order": "word order",
         "lexis": "word choice",
         "register": "register",
-        "alternative": "also correct"
-      }
+        "alternative": "also correct",
+        "task": "task",
+        "structure": "structure"
+      },
+      "wholeText": "about the whole text",
+      "editLabel": "Goes into the overall comment"
     }
   },
   "rubric": {

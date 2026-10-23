@@ -153,8 +153,12 @@
         "order": "ordstilling",
         "lexis": "ordvalg",
         "register": "register",
-        "alternative": "annen riktig retting"
-      }
+        "alternative": "annen riktig retting",
+        "task": "oppgaven",
+        "structure": "struktur"
+      },
+      "wholeText": "om hele teksten",
+      "editLabel": "Legges til i den samlede kommentaren"
     }
   },
   "rubric": {

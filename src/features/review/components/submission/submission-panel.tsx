@@ -239,7 +239,7 @@ export function SubmissionPanel({
           draft: aiDraft,
           outcomes: draft.ai,
           setOutcome: (key, outcome) => setAiOutcome(id, key, outcome),
-          takeSummary: (text) => setComment(id, appendParagraph(draft.comment, text)),
+          addToComment: (text) => setComment(id, appendParagraph(draft.comment, text)),
         }
       : null;
 
