@@ -272,6 +272,25 @@ describe('ErrorCorrectionSolver', () => {
     }
   });
 
+  // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
+  it('says nobody will check it when the engine has no reviewer for the work', async () => {
+    renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'none' } }));
+
+    await correctIt();
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+
+    expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
+    expect(screen.queryByText(/Your teacher/)).not.toBeInTheDocument();
+  });
+
+  it('puts back work nobody could check, and says so', async () => {
+    renderSolver(
+      mockApi({ last: { attempt: { ...LAST_ATTEMPT.attempt, status: 'NO_REVIEWER' } } }),
+    );
+
+    expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
+  });
+
   it('puts a previous submission back, and says it was handed in', async () => {
     renderSolver(mockApi({ last: LAST_ATTEMPT }));
 

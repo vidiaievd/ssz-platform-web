@@ -228,6 +228,22 @@ describe('ShortAnswerSolver', () => {
     expect(screen.getByRole('status')).toHaveTextContent('1 passed · 1 partly · 0 not passed');
   });
 
+  // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
+  it('says nobody will check the set further when the engine has no reviewer for it', async () => {
+    renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'none' } }));
+    await screen.findByRole('textbox');
+
+    await handIn('Han har jobbet der i tre år.');
+    await userEvent.click(await screen.findByRole('button', { name: /next question/i }));
+    await handIn('Mer ansvar.');
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
+
+    await waitFor(() =>
+      expect(screen.getByRole('status')).toHaveTextContent('Nobody will check them further'),
+    );
+    expect(screen.getByRole('status')).not.toHaveTextContent('Your teacher');
+  });
+
   it('skips a question, comes back to it, and answers it', async () => {
     const fetchMock = mockApi();
     renderSolver(fetchMock);

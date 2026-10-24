@@ -366,7 +366,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     const found =
       page.items.find(
-        (a) => a.status === 'SCORED' || a.status === 'ROUTED_FOR_REVIEW' || a.status === 'RETURNED',
+        (a) =>
+          a.status === 'SCORED' ||
+          a.status === 'ROUTED_FOR_REVIEW' ||
+          a.status === 'RETURNED' ||
+          // Handed in with nobody to read it (plan 79, step 2.1c) — finished all the same,
+          // and the solver must show the work and say so, not offer a blank exercise.
+          a.status === 'NO_REVIEWER',
       ) ?? null;
     const last =
       found === null

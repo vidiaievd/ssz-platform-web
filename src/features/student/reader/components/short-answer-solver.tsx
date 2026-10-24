@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  handedInFromSubmit,
   resolveSubmitFailure,
   useAnswerQuestion,
   useStartAttempt,
@@ -120,6 +121,8 @@ export function ShortAnswerSolver({
    * so this is read separately and shown in its place until the learner asks to redo it.
    */
   const [review, setReview] = useState<AttemptReview | null>(null);
+  /** The set went in with nobody to read it (plan 79, step 2.1d). */
+  const [unread, setUnread] = useState(false);
 
   /** Every answer handed in, in order — the aggregate `submit` closes the attempt with. */
   const answers = useRef<Array<{ questionId: string; text: string }>>([]);
@@ -252,7 +255,10 @@ export function ShortAnswerSolver({
         timeSpentSeconds: Math.max(0, Math.round((Date.now() - openedAt.current) / 1000)),
       },
       {
-        onSuccess: (data) => onChecked?.(data.requiresReview ? null : data.correct),
+        onSuccess: (data) => {
+          setUnread(handedInFromSubmit(data) === 'unread');
+          onChecked?.(data.requiresReview ? null : data.correct);
+        },
         onError: async () => {
           // The work may well have landed: the engine accepts a submission before it
           // scores or routes it, so a lost response is not a lost set. Asking is the only
@@ -386,6 +392,7 @@ export function ShortAnswerSolver({
     setError(null);
     setPhase('writing');
     setReview(null);
+    setUnread(false);
     answers.current = [];
     begin();
   }
@@ -405,6 +412,7 @@ export function ShortAnswerSolver({
           tally={tally}
           sending={answer.isPending}
           error={error}
+          unread={unread}
           audio={audio}
           audioTranscript={transcript}
           walk={walk}

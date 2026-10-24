@@ -317,6 +317,27 @@ describe('WritingTaskSolver', () => {
     expect(screen.queryByText('eldre utkast')).not.toBeInTheDocument();
   });
 
+  // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
+  it('says nobody will read the text when the engine has no reviewer for it', async () => {
+    const { fetchMock } = mockApi({ submit: { ...ROUTED, reviewer: 'none' } });
+    renderSolver(fetchMock);
+    await screen.findByRole('textbox', { name: 'Your text' });
+
+    write('ett to tre fire fem');
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+    expect(await screen.findByText('Handed in. Nobody will read it.')).toBeInTheDocument();
+    expect(screen.queryByText(/Your teacher responds/)).not.toBeInTheDocument();
+  });
+
+  it('shows text nobody could read as handed in, not as graded', async () => {
+    const { fetchMock } = mockApi({ last: attemptRecord({ status: 'NO_REVIEWER' }) });
+    renderSolver(fetchMock);
+
+    expect(await screen.findByText('Handed in. Nobody will read it.')).toBeInTheDocument();
+    expect(screen.getByText('Levert tekst fra i går')).toBeInTheDocument();
+  });
+
   it("shows the teacher's verdict when the learner comes back to a graded attempt", async () => {
     const { fetchMock } = mockApi({
       last: attemptRecord({

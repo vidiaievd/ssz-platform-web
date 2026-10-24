@@ -70,6 +70,11 @@ export interface ShortAnswerBodyProps {
   sending?: boolean;
   /** What went wrong handing the answer in, in the learner's language. */
   error?: string | null;
+  /**
+   * The set went in with nobody to read it (plan 79, step 2.1d): the closing screen says so
+   * instead of «your teacher is looking through your answers».
+   */
+  unread?: boolean;
   /** False in a preview: everything renders, nothing accepts input. */
   interactive?: boolean;
   /**
@@ -213,6 +218,7 @@ export function ShortAnswerBody({
   tally,
   sending = false,
   error = null,
+  unread = false,
   interactive = true,
   audio,
   audioTranscript = null,
@@ -382,7 +388,9 @@ export function ShortAnswerBody({
         </h4>
         <p className="m-0 text-[13.5px] text-(--ssz-text-secondary)">
           {t('shortAnswer.done.tally', { ...tally })}
-          {withTeacher ? ` ${t('shortAnswer.done.teacher')}` : ''}
+          {withTeacher
+            ? ` ${unread ? t('shortAnswer.done.unread') : t('shortAnswer.done.teacher')}`
+            : ''}
         </p>
         {unanswered > 0 && (
           <p className="m-0 text-[13px] text-(--ssz-text-muted)">

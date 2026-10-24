@@ -6,10 +6,13 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  handedInFromStatus,
+  handedInFromSubmit,
   resolveSubmitFailure,
   useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
+  type HandedIn,
   type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import {
@@ -114,7 +117,7 @@ export function ErrorCorrectionSolver({
   const [checksLeft, setChecksLeft] = useState<number | null>(null);
   const [allTouched, setAllTouched] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
-  const [sent, setSent] = useState<'passed' | 'review' | null>(null);
+  const [sent, setSent] = useState<HandedIn | null>(null);
   /**
    * The teacher's verdict, once one has read the submission. It is the only feedback this
    * template can give beyond "it matched the key", and it arrives with the attempt rather
@@ -175,7 +178,7 @@ export function ErrorCorrectionSolver({
           // What the teacher decided is not this screen's to say, but that the work was
           // handed over is — otherwise a learner who comes back sees their own edits and
           // no sign they ever sent them.
-          setSent(saved.status === 'ROUTED_FOR_REVIEW' ? 'review' : 'passed');
+          setSent(handedInFromStatus(saved.status));
           // A string, not merely "not null": an attempt read back from an engine that
           // predates review carries no such field at all.
           if (typeof saved.reviewedAt === 'string') setReview(readReview(saved));
@@ -250,7 +253,7 @@ export function ErrorCorrectionSolver({
           clearAnswerDraft(exerciseId);
           // The work is in, so the clip has nothing left to give away.
           if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
-          setSent(data.requiresReview ? 'review' : 'passed');
+          setSent(handedInFromSubmit(data));
           // `null` on a routed answer: it has been done, and whether it was right is
           // the teacher's to say. The reader counts it as attempted either way.
           if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
@@ -461,11 +464,18 @@ export function ErrorCorrectionSolver({
               >
                 {sent === 'passed'
                   ? t('errorCorrection.approved')
-                  : t('errorCorrection.withTeacher')}
+                  : sent === 'unread'
+                    ? t('errorCorrection.unread')
+                    : t('errorCorrection.withTeacher')}
               </p>
               {sent === 'review' && (
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
                   {t('errorCorrection.withTeacherWhen')}
+                </p>
+              )}
+              {sent === 'unread' && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {t('errorCorrection.unreadWhy')}
                 </p>
               )}
             </>

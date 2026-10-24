@@ -297,6 +297,27 @@ describe('TranslateSolver', () => {
     expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
   });
 
+  // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
+  it('says nobody will check it when the engine has no reviewer for the work', async () => {
+    renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'none' } }));
+
+    await answer('Jeg bor i Tromsø i tre år.');
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+    expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
+    expect(screen.queryByText(/Your teacher/)).not.toBeInTheDocument();
+    expect(screen.queryByText('Waiting for a teacher')).not.toBeInTheDocument();
+  });
+
+  it('puts back work nobody could check, and says so rather than «handed in to the teacher»', async () => {
+    renderSolver(
+      mockApi({ last: { attempt: { ...LAST_ATTEMPT.attempt, status: 'NO_REVIEWER' } } }),
+    );
+
+    expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
+    expect(await screen.findByRole('textbox')).toHaveValue('Jeg bor i Tromsø i tre år.');
+  });
+
   it('asks the server how the translation is going, and sends the draft to ask', async () => {
     const fetchMock = mockApi();
     renderSolver(fetchMock);

@@ -163,6 +163,13 @@ export interface SubmitAnswerResponse {
   correct: boolean;
   score: number | null;
   requiresReview: boolean;
+  /**
+   * Who will read an answer that `requiresReview` (plan 79, step 2.1c): the school's
+   * teacher, a model, or nobody. `none` means the attempt is already closed as
+   * `NO_REVIEWER` — no verdict is coming, and «sent for review» would be a promise
+   * nobody keeps. Absent when nothing went to review, and from engines before the step.
+   */
+  reviewer?: 'teacher' | 'ai' | 'none';
   feedback: { summary: string; hints?: string[]; correctAnswer?: unknown };
   /** Validator output. For gap-fill, a verdict and an explanation per gap. */
   details?: unknown;
@@ -727,7 +734,12 @@ export type AttemptStatus =
   | 'ROUTED_FOR_REVIEW'
   /** A teacher read the submission and sent it back rather than scoring it. */
   | 'RETURNED'
-  | 'ABANDONED';
+  | 'ABANDONED'
+  /**
+   * Free-form work with nobody to read it — no school, no AI review on the learner's
+   * plan (plan 79, step 2.1c). Final: handed in, never scored.
+   */
+  | 'NO_REVIEWER';
 
 /** What a teacher decided about one sentence, in the learner's copy of the verdict. */
 export interface ReviewDecisionRecord {

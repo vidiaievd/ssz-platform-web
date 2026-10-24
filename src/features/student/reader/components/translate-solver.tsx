@@ -6,10 +6,13 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  handedInFromStatus,
+  handedInFromSubmit,
   resolveSubmitFailure,
   useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
+  type HandedIn,
   type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import type {
@@ -78,7 +81,7 @@ export function TranslateSolver({
   const [checksLeft, setChecksLeft] = useState<number | null>(null);
   const [allWritten, setAllWritten] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
-  const [sent, setSent] = useState<'passed' | 'review' | null>(null);
+  const [sent, setSent] = useState<HandedIn | null>(null);
   /** Per sentence, as the server decided it. Absent when a restored attempt kept none. */
   const [routing, setRouting] = useState<TranslateRouting | null>(null);
   /**
@@ -141,7 +144,7 @@ export function TranslateSolver({
           // What the teacher decided is not this screen's to say, but that the work was
           // handed over is — otherwise a learner who comes back sees their own sentences
           // and no sign they ever sent them.
-          setSent(saved.status === 'ROUTED_FOR_REVIEW' ? 'review' : 'passed');
+          setSent(handedInFromStatus(saved.status));
           setRouting(readRouting(saved.validationDetails));
           // A string, not merely "not null": an attempt read back from an engine that
           // predates review carries no such field at all.
@@ -204,7 +207,7 @@ export function TranslateSolver({
       {
         onSuccess: (data) => {
           clearAnswerDraft(exerciseId);
-          setSent(data.requiresReview ? 'review' : 'passed');
+          setSent(handedInFromSubmit(data));
           setRouting(readRouting(data.details));
           // `null` on a routed answer: it has been done, and whether it was right is the
           // teacher's to say. The reader counts it as attempted either way.
@@ -293,7 +296,9 @@ export function TranslateSolver({
         mode="practice"
         accent={PRACTICE_ACCENT}
         pointOut={pointOut}
-        routing={routing}
+        // With nobody to read the work, «waiting for a teacher» under a sentence would be
+        // the promise the summary below takes back — only what the auto-check closed shows.
+        routing={sent === 'unread' && routing !== null ? passedOnly(routing) : routing}
         verdicts={review?.verdicts ?? null}
       />
 
@@ -422,13 +427,22 @@ export function TranslateSolver({
                     sent === 'passed' ? 'var(--ssz-feedback-ok-fg)' : 'var(--ssz-text-primary)',
                 }}
               >
-                {sent === 'passed' ? t('translate.approved') : t('translate.withTeacher')}
+                {sent === 'passed'
+                  ? t('translate.approved')
+                  : sent === 'unread'
+                    ? t('translate.unread')
+                    : t('translate.withTeacher')}
               </p>
               {sent === 'review' && (
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
                   {approved !== null && approved > 0
                     ? t('translate.withTeacherSplit', { approved, total: items.length })
                     : t('translate.withTeacherWhen')}
+                </p>
+              )}
+              {sent === 'unread' && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {t('translate.unreadWhy')}
                 </p>
               )}
             </>
@@ -447,6 +461,11 @@ export function TranslateSolver({
       )}
     </div>
   );
+}
+
+/** The sentences the auto-check approved, without the ones it left for a reader. */
+function passedOnly(routing: TranslateRouting): TranslateRouting {
+  return Object.fromEntries(Object.entries(routing).filter(([, outcome]) => outcome === 'pass'));
 }
 
 /**

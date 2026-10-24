@@ -195,6 +195,8 @@
     "approved": "Alle setningene traff fasiten — godkjent automatisk",
     "withTeacher": "Levert. Læreren ser på svaret ditt.",
     "withTeacherWhen": "Vanligvis innen 48 timer.",
+    "unread": "Levert, men ingen kan rette det.",
+    "unreadWhy": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen retter dette svaret.",
     "withTeacherSplit": "{approved} av {total} setninger ble godkjent automatisk. Læreren gir tilbakemelding på resten, vanligvis innen 48 timer.",
     "again": "Rett opp og lever på nytt",
     "selfCheck": {
@@ -281,6 +283,7 @@
       "title": "Levert",
       "tally": "{pass} godkjent · {partial} delvis · {fail} ikke godkjent",
       "teacher": "Læreren ser over svarene dine.",
+      "unread": "Ingen retter svarene videre: du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt.",
       "again": "Gjør på nytt",
       "skipped": "Ikke besvart: {count}"
     },
@@ -342,6 +345,8 @@
     "sendUnconfirmed": "Vi fikk ikke bekreftet leveringen. Sjekk «Mine innleveringer» før du leverer på nytt.",
     "delivered": "Levert.",
     "deliveredWhen": "Læreren gir tilbakemelding innen 48 timer.",
+    "unread": "Levert, men ingen kan lese den.",
+    "unreadWhy": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen leser denne teksten.",
     "rewrite": "Skriv om og lever på nytt (innlevering {n})",
     "points": "{score} / {max} poeng",
     "percent": "{score} %",
@@ -438,6 +443,8 @@
     "approved": "Alt riktig — godkjent automatisk",
     "withTeacher": "Levert. Læreren ser på det.",
     "withTeacherWhen": "Vanligvis innen 48 timer.",
+    "unread": "Levert, men ingen kan rette det.",
+    "unreadWhy": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen retter dette svaret.",
     "itemCounted": "teller",
     "itemNotCounted": "teller ikke",
     "itemNotCountedPlain": "Læreren din godtok ikke denne.",
@@ -757,7 +764,9 @@
     },
     "sent": {
       "title": "Levert.",
-      "body": "Læreren hører gjennom opptaket og svarer innen 48 timer. Du får varsel."
+      "body": "Læreren hører gjennom opptaket og svarer innen 48 timer. Du får varsel.",
+      "unreadTitle": "Lagret.",
+      "unreadBody": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen hører på opptaket."
     },
     "refused": {
       "retake": "Opptaket for {labels} ble ikke godtatt — ta det opp på nytt.",

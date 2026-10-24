@@ -6,6 +6,8 @@ import { useTranslations } from 'next-intl';
 import {
   fetchDraft,
   fetchLastAttempt,
+  handedInFromStatus,
+  handedInFromSubmit,
   resolveSubmitFailure,
   useSaveDraft,
   useStartAttempt,
@@ -84,6 +86,11 @@ export function WritingTaskSolver({
 
   const [value, setValue] = useState<WritingTaskValue>({ text: '', ticked: [] });
   const [phase, setPhase] = useState<WritingTaskPhase>('draft');
+  /**
+   * Handed in with nobody to read it (plan 79, step 2.1d): the text stays read-only as in
+   * `sent`, and the card under it says no reader is coming instead of «delivered».
+   */
+  const [unread, setUnread] = useState(false);
   const [attemptNo, setAttemptNo] = useState(1);
   const [saveState, setSaveState] = useState<DraftSaveState>('idle');
   /** The verdict the learner came back to, when there is one. */
@@ -132,7 +139,9 @@ export function WritingTaskSolver({
             if (submitted !== null) {
               setValue(submitted);
               setVerdict(last);
-              setPhase(last.status === 'ROUTED_FOR_REVIEW' ? 'sent' : 'graded');
+              const handedIn = handedInFromStatus(last.status);
+              setPhase(handedIn === 'passed' ? 'graded' : 'sent');
+              setUnread(handedIn === 'unread');
               return;
             }
           }
@@ -214,8 +223,9 @@ export function WritingTaskSolver({
         timeSpentSeconds: Math.max(0, Math.round((Date.now() - openedAt.current) / 1000)),
       },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setPhase('sent');
+          setUnread(handedInFromSubmit(data) === 'unread');
           setSaveState('idle');
           // Always `null`: a written text is never judged by the machine, and reporting
           // anything else would put a verdict on the reader's card that no one gave.
@@ -270,6 +280,7 @@ export function WritingTaskSolver({
   function rewrite() {
     setValue({ text: '', ticked: [] });
     setPhase('draft');
+    setUnread(false);
     setAttemptNo((n) => n + 1);
     setVerdict(null);
     setSaveState('idle');
@@ -326,10 +337,10 @@ export function WritingTaskSolver({
           }}
         >
           <p className="text-[14px] font-semibold text-(--ssz-text-primary)">
-            {t('writingTask.delivered')}
+            {unread ? t('writingTask.unread') : t('writingTask.delivered')}
           </p>
           <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
-            {t('writingTask.deliveredWhen')}
+            {unread ? t('writingTask.unreadWhy') : t('writingTask.deliveredWhen')}
           </p>
         </div>
       ) : (

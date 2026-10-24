@@ -130,6 +130,27 @@ export async function fetchResumable(exerciseId: string): Promise<boolean> {
 }
 
 /**
+ * Handed-in free-form work as the learner should read it (plan 79, step 2.1d): closed by
+ * the auto-check (`passed`), waiting for a reader (`review`), or with nobody to read it
+ * (`unread` — no school, no AI review on the learner's plan). The last is final and must
+ * not be told as «your teacher will look at it».
+ */
+export type HandedIn = 'passed' | 'review' | 'unread';
+
+/** What the submit response says, the moment the work is in. */
+export function handedInFromSubmit(data: SubmitAnswerResponse): HandedIn {
+  if (!data.requiresReview) return 'passed';
+  return data.reviewer === 'none' ? 'unread' : 'review';
+}
+
+/** What a finished attempt read back later says. */
+export function handedInFromStatus(status: AttemptStatus): HandedIn {
+  if (status === 'ROUTED_FOR_REVIEW') return 'review';
+  if (status === 'NO_REVIEWER') return 'unread';
+  return 'passed';
+}
+
+/**
  * How a failed `submit` actually left things (47.0.B).
  *
  * A failed check does not mean a failed submission: the engine has already accepted the
@@ -151,6 +172,7 @@ function resolveByStatus(status: AttemptStatus): SubmitFailureResolution {
       return 'not-delivered';
     case 'SUBMITTED':
     case 'ROUTED_FOR_REVIEW':
+    case 'NO_REVIEWER':
     case 'SCORED':
     case 'RETURNED':
       // RETURNED is reachable only through ROUTED_FOR_REVIEW: a teacher who has already

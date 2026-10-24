@@ -195,6 +195,8 @@
     "approved": "Every sentence matched — approved automatically",
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
+    "unread": "Handed in. Nobody will check it.",
+    "unreadWhy": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will check this answer.",
     "withTeacherSplit": "{approved} of {total} sentences were approved automatically. Your teacher reads the rest, usually within 48 hours.",
     "again": "Correct it and hand in again",
     "selfCheck": {
@@ -281,6 +283,7 @@
       "title": "Handed in",
       "tally": "{pass} passed · {partial} partly · {fail} not passed",
       "teacher": "Your teacher is looking through your answers.",
+      "unread": "Nobody will check them further: you're studying without a teacher, and AI review isn't part of your plan.",
       "again": "Do it again",
       "skipped": "No answer: {count}"
     },
@@ -342,6 +345,8 @@
     "sendUnconfirmed": "We could not confirm the delivery. Check “My submissions” before handing in again.",
     "delivered": "Handed in.",
     "deliveredWhen": "Your teacher responds within 48 hours.",
+    "unread": "Handed in. Nobody will read it.",
+    "unreadWhy": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will read this text.",
     "rewrite": "Rewrite and hand in again (submission {n})",
     "points": "{score} / {max} points",
     "percent": "{score}%",
@@ -438,6 +443,8 @@
     "approved": "Everything correct — approved automatically",
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
+    "unread": "Handed in. Nobody will check it.",
+    "unreadWhy": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will check this answer.",
     "itemCounted": "counted",
     "itemNotCounted": "not counted",
     "itemNotCountedPlain": "Your teacher did not count this one.",
@@ -757,7 +764,9 @@
     },
     "sent": {
       "title": "Handed in.",
-      "body": "The teacher listens to the recording and answers within 48 hours. You'll be notified."
+      "body": "The teacher listens to the recording and answers within 48 hours. You'll be notified.",
+      "unreadTitle": "Saved.",
+      "unreadBody": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will listen to this recording."
     },
     "refused": {
       "retake": "The recording for {labels} was not accepted — record it again.",
