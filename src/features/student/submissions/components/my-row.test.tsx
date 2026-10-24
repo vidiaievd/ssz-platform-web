@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { NextIntlClientProvider } from 'next-intl';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
 
@@ -41,11 +41,13 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
     expectedResponseBy: null,
     decision: {
       verdict: 'returned',
+      by: 'teacher',
       teacherId: 'teacher-1',
       teacherName: 'Kari Nordmann',
       at: new Date().toISOString(),
       comment: 'Se på perfektum.',
     },
+    reader: 'teacher',
     canResubmit: true,
     ...overrides,
   };
@@ -99,6 +101,7 @@ describe('MyRow — the way back into returned work (47.3)', () => {
         canResubmit: false,
         decision: {
           verdict: 'approved',
+          by: 'teacher',
           teacherId: 'teacher-1',
           teacherName: 'Kari Nordmann',
           at: new Date().toISOString(),
@@ -109,5 +112,67 @@ describe('MyRow — the way back into returned work (47.3)', () => {
 
     expect(screen.queryByRole('link', { name: 'Do it again' })).not.toBeInTheDocument();
     expect(screen.getByText('Marked as correct, with nothing to add.')).toBeInTheDocument();
+  });
+});
+
+describe('MyRow — a model’s verdict (plan 79, 2.3c)', () => {
+  const aiReturned = () =>
+    submission({
+      reader: 'ai',
+      decision: {
+        verdict: 'returned',
+        by: 'ai',
+        teacherId: null,
+        teacherName: null,
+        at: new Date().toISOString(),
+        comment: 'Se på verbet.',
+      },
+    });
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() =>
+        Promise.resolve(
+          new Response(
+            JSON.stringify({
+              outcome: 'returned',
+              items: [],
+              summary: 'Se på verbet.',
+              marks: null,
+              reviewedAt: new Date().toISOString(),
+              disputedAt: null,
+            }),
+            { status: 200 },
+          ),
+        ),
+      ),
+    );
+  });
+
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('signs the row as AI and shows the review under its label, the summary once', async () => {
+    renderRow(aiReturned());
+
+    expect(screen.getByText(/^Checked by AI ·/)).toBeInTheDocument();
+    expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+    expect(await screen.findByText('Se på verbet.')).toBeInTheDocument();
+    expect(screen.getAllByText('Se på verbet.')).toHaveLength(1);
+    expect(screen.getByRole('button', { name: 'This review is wrong' })).toBeInTheDocument();
+  });
+
+  it('still offers the way back into work a model sent back', () => {
+    renderRow(aiReturned());
+
+    expect(screen.getByRole('link', { name: 'Do it again' })).toBeInTheDocument();
+  });
+
+  it('does not promise a teacher’s queue for work the model is still reading', () => {
+    renderRow(submission({ status: 'pending', reader: 'ai', decision: null, canResubmit: false }));
+
+    expect(screen.getByText('AI is reviewing — usually under a minute')).toBeInTheDocument();
+    expect(screen.queryByText(/teacher.s queue/i)).not.toBeInTheDocument();
+    expect(screen.queryByText('Checked by AI, not a teacher')).not.toBeInTheDocument();
   });
 });

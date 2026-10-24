@@ -423,15 +423,18 @@
       "signed": "{teacher} · {when}",
       "unsigned": "Marked {when}",
       "open": "Open this submission",
-      "close": "Close this submission"
+      "close": "Close this submission",
+      "ai": "Checked by AI · {when}"
     },
     "due": {
       "expected": "Answer expected {when}",
       "unknown": "No response time set for this course",
-      "note": "That is the usual time this school takes, not a promise for the minute."
+      "note": "That is the usual time this school takes, not a promise for the minute.",
+      "ai": "AI is reviewing — usually under a minute"
     },
     "pending": {
-      "body": "Handed in {age} ago, waiting in your teacher's queue."
+      "body": "Handed in {age} ago, waiting in your teacher's queue.",
+      "ai": "Handed in {age} ago. AI is reviewing your work — the review will appear here, usually in under a minute."
     },
     "comment": {
       "label": "Comment · {teacher}",
@@ -518,5 +521,39 @@
     "commentsMissing": "{count, plural, one {# recording has no comment} other {# recordings have no comment}} — the verdict does not go out without one.",
     "commentsRequired": "Every recording needs a comment before the verdict can be sent.",
     "scoreIsPerPrompt": "Each recording is marked on its own: it passes when its points reach the threshold for one recording, and the submission is approved when every one passes. The total is computed from the levels."
+  },
+  "aiReview": {
+    "label": "Checked by AI, not a teacher",
+    "caveat": "This review was written by a language model. It can be wrong — if something here is off, tell us.",
+    "failed": "Couldn’t load the review.",
+    "retry": "Try again",
+    "noRemarks": "No remarks.",
+    "sentence": "Sentence {n}",
+    "question": "Question {n}",
+    "wholeText": "about the whole text",
+    "wholeAnswer": "about the whole answer",
+    "marksTitle": "Marks by criterion",
+    "mark": "{mark} of 3",
+    "unnamed": "Unnamed criterion",
+    "dispute": "This review is wrong",
+    "reasonLabel": "What’s wrong with the review? (optional)",
+    "reasonPlaceholder": "For example: the second sentence has no mistake.",
+    "disputeNote": "Your mark won’t change — this tells us where the model gets it wrong.",
+    "send": "Send",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "sendFailed": "Couldn’t send. Please try again.",
+    "disputed": "You marked this review as wrong {when}. Thank you — we’ll take it into account.",
+    "aspect": {
+      "grammar": "grammar",
+      "order": "word order",
+      "lexis": "word choice",
+      "register": "register",
+      "meaning": "meaning",
+      "alternative": "this is right too",
+      "task": "task",
+      "structure": "structure",
+      "content": "content"
+    }
   }
 }

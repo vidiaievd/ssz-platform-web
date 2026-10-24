@@ -26,7 +26,10 @@ interface EngineSubmission {
   attemptNo: number;
   decision: {
     verdict: 'approved' | 'returned';
-    byUserId: string;
+    /** Absent from an engine before plan 79, 2.3a — every verdict there was a teacher's. */
+    by?: 'teacher' | 'ai';
+    /** `null` for a model's verdict. */
+    byUserId: string | null;
     at: string;
     comment: string | null;
   } | null;
@@ -120,12 +123,20 @@ export async function GET(request: NextRequest) {
     decision: item.decision
       ? {
           verdict: item.decision.verdict,
+          by: item.decision.by ?? 'teacher',
           teacherId: item.decision.byUserId,
-          teacherName: people[item.decision.byUserId]?.displayName ?? null,
+          // A model's verdict has nobody to name; the row labels it as AI instead.
+          teacherName:
+            item.decision.byUserId === null
+              ? null
+              : (people[item.decision.byUserId]?.displayName ?? null),
           at: item.decision.at,
           comment: item.decision.comment,
         }
       : null,
+    // Only a learner with no school is read by a model, and only one with a verdict on
+    // record can say who read it; a waiting row without a school is waiting for the model.
+    reader: item.decision?.by ?? (item.schoolId === null ? 'ai' : 'teacher'),
     canResubmit: item.canResubmit,
   }));
 

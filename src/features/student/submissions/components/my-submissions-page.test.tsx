@@ -53,6 +53,7 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
     attemptNo: 1,
     expectedResponseBy: inHours(40),
     decision: null,
+    reader: 'teacher',
     canResubmit: false,
     ...overrides,
   };
@@ -66,6 +67,7 @@ const RETURNED = submission({
   canResubmit: true,
   decision: {
     verdict: 'returned',
+    by: 'teacher',
     teacherId: 'teacher-1',
     teacherName: 'Kari Nordmann',
     at: hoursAgo(2),
@@ -79,6 +81,7 @@ const APPROVED_SILENTLY = submission({
   expectedResponseBy: null,
   decision: {
     verdict: 'approved',
+    by: 'teacher',
     teacherId: 'teacher-1',
     teacherName: 'Kari Nordmann',
     at: hoursAgo(1),
