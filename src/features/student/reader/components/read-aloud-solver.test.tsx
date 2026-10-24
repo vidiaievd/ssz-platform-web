@@ -333,4 +333,25 @@ describe('ReadAloudSolver', () => {
     expect(screen.queryByRole('button', { name: 'Start recording' })).toBeNull();
     await act(async () => undefined);
   });
+
+  // Plan 79, step 2.1c: read_aloud has no AI review, so self-study recordings close as NO_REVIEWER.
+  it('says nobody will listen, with no «with the teacher» step, for work nobody can review', async () => {
+    const api = mockApi({
+      last: {
+        id: 'att-0',
+        exerciseId: 'ex-1',
+        templateCode: 'read_aloud',
+        status: 'NO_REVIEWER',
+        submittedAnswer: {
+          recordings: [{ itemId: 'p1aaaa', assetId: 'a1', seconds: 20, takes: 1 }],
+        },
+      },
+      assets: { a1: { id: 'a1', url: 'https://m/a1', entityId: 'att-0', status: 'READY' } },
+    });
+    renderSolver(api);
+    await screen.findByText('Saved.');
+    expect(screen.queryByText('with the teacher')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Start recording' })).toBeNull();
+    await act(async () => undefined);
+  });
 });

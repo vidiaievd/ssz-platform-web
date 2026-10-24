@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCan } from '@/features/entitlements';
 import {
   readSpeakingSnapshot,
   readSubmission,
@@ -31,6 +32,7 @@ import { useReviewViewStore } from '../../stores/review-view-store';
 import type { ReviewQueueFilters, ReviewSubmission } from '../../types';
 import { Note } from '../primitives';
 
+import { appendParagraph, type AiDraftBinding } from './ai-draft';
 import { DecisionPanel, type RubricDecision } from './decision-panel';
 import { PreviousAttempt } from './previous-attempt';
 import { SentenceList } from './sentence-list';
@@ -109,6 +111,8 @@ export function SubmissionPanel({
   const setComment = useReviewDraftsStore((state) => state.setComment);
   const setSentenceComment = useReviewDraftsStore((state) => state.setSentenceComment);
   const setMark = useReviewDraftsStore((state) => state.setMark);
+  const setAiOutcome = useReviewDraftsStore((state) => state.setAiOutcome);
+  const can = useCan();
   const clearDraft = useReviewDraftsStore((state) => state.clear);
 
   // What this reviewer's own verdict was, until the screen moves on. Held rather than
@@ -174,6 +178,12 @@ export function SubmissionPanel({
           // Sent only where there is a rubric to grade against: on every other template
           // an empty object would be marks the engine has no snapshot to score.
           ...(data?.rubric ? { rubricMarks: draft.marks } : {}),
+          // What was done with the model's draft, only when the card drew one (the same
+          // test as the binding below): absent tells the engine the reviewer saw no draft,
+          // which is not the same label as seeing one and leaving it alone (plan 79, 1.5).
+          ...(data?.aiDraft?.status === 'ready' && can('ai.review_draft')
+            ? { aiOutcomes: draft.ai }
+            : {}),
         },
         {
           onSuccess: (result) => {
@@ -191,7 +201,19 @@ export function SubmissionPanel({
         },
       );
     },
-    [advance, clearDraft, data?.rubric, decision, draft.comment, draft.marks, draft.sentences, id],
+    [
+      advance,
+      can,
+      clearDraft,
+      data?.aiDraft?.status,
+      data?.rubric,
+      decision,
+      draft.ai,
+      draft.comment,
+      draft.marks,
+      draft.sentences,
+      id,
+    ],
   );
 
   // A refusal about the comment belongs in the comment field, cursor included.
@@ -206,6 +228,20 @@ export function SubmissionPanel({
   const decidable = stillOpen && !decision.isPending;
   const written = draft.comment.trim() !== '';
   const withComment = written || Object.keys(draft.sentences).length > 0;
+
+  // The model's draft, while there is still a verdict for it to help with. Without the
+  // school's key the card is the one it was: the draft may well exist — it was paid for
+  // under an earlier plan — but the screen does not offer what the plan no longer does.
+  const aiDraft = data?.aiDraft ?? null;
+  const ai: AiDraftBinding | null =
+    stillOpen && aiDraft !== null && aiDraft.status === 'ready' && can('ai.review_draft')
+      ? {
+          draft: aiDraft,
+          outcomes: draft.ai,
+          setOutcome: (key, outcome) => setAiOutcome(id, key, outcome),
+          addToComment: (text) => setComment(id, appendParagraph(draft.comment, text)),
+        }
+      : null;
 
   // What the marks come to — see `rubricDecisionOf`.
   const rubric: RubricDecision | null = data ? rubricDecisionOf(data, draft) : null;
@@ -296,6 +332,7 @@ export function SubmissionPanel({
           marks={draft.marks}
           onMark={onMark}
           editable={stillOpen}
+          ai={ai}
         />
       </div>
 

@@ -7,6 +7,8 @@ import { Segmented } from '@/components/ui/segmented';
 import type { WritingTaskDetails } from '@/features/content-authoring/types/review';
 import { scoreRubric, type RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
+import type { ReviewAiMark } from '../../types';
+
 const MARKS = ['0', '1', '2', '3'] as const;
 
 export interface RubricMarksProps {
@@ -19,6 +21,11 @@ export interface RubricMarksProps {
   /** False once a verdict stands — the marks become a record of what was decided. */
   editable: boolean;
   onMark: (criterionId: string, mark: number) => void;
+  /**
+   * The model's suggested marks (plan 79, 1.7c), drawn beside the teacher's control and
+   * never set on it. Null when there is no draft, it has none, or it was discarded.
+   */
+  hints?: ReviewAiMark[] | null;
 }
 
 /**
@@ -28,8 +35,12 @@ export interface RubricMarksProps {
  * suggestions and the queue deliberately does not carry them (plan 50 §4): a rubric that
  * arrives pre-filled is a rubric a tired teacher confirms, and the four judgements it
  * holds are the only thing standing between two teachers marking the same text four
- * points apart. When the AI stage is built, what it fills in will be labelled as its
- * suggestion — which is a different screen from this one, not a default on it.
+ * points apart.
+ *
+ * The AI stage keeps to that (plan 79, 1.7c): a suggested mark is a labelled chip beside
+ * the control, with its reason on hover, and the control stays unset until the teacher
+ * sets it. Nothing is accepted from the chip — the verdict compares the teacher's own mark
+ * with it afterwards, which is the only thing a suggestion can honestly be measured by.
  *
  * The facts above the rows are measurements and nothing else. Words, paragraphs, and
  * which must-cover points were phrased — none of them is a mark and none of them moves
@@ -40,9 +51,17 @@ export interface RubricMarksProps {
  * threshold is what turns marks into a verdict: a teacher who sets three marks and sees
  * the total sitting one point under the pass line knows exactly what the fourth decides.
  */
-export function RubricMarks({ snapshot, marks, details, editable, onMark }: RubricMarksProps) {
+export function RubricMarks({
+  snapshot,
+  marks,
+  details,
+  editable,
+  onMark,
+  hints = null,
+}: RubricMarksProps) {
   const t = useTranslations('Review.rubric');
   const outcome = scoreRubric(snapshot, marks);
+  const hintOf = new Map((hints ?? []).map((hint) => [hint.criterionId, hint]));
 
   return (
     <section className="flex flex-col gap-3">
@@ -55,6 +74,7 @@ export function RubricMarks({ snapshot, marks, details, editable, onMark }: Rubr
         {snapshot.criteria.map((criterion) => {
           const mark = marks[criterion.id];
           const set = mark !== undefined;
+          const hint = hintOf.get(criterion.id);
 
           return (
             <div
@@ -78,6 +98,20 @@ export function RubricMarks({ snapshot, marks, details, editable, onMark }: Rubr
                   {set ? criterion.levels[mark]?.trim() || '—' : criterion.desc || t('unmarked')}
                 </p>
               </div>
+
+              {/* Not a button: taking the model's mark with one click is exactly the
+                  confirm-the-default habit the unset control exists to prevent. */}
+              {hint !== undefined && (
+                <span
+                  title={t('aiMarkTitle', { mark: hint.mark, reason: hint.reason })}
+                  className="ml-auto inline-flex items-center rounded-[9px] border-[1.5px] border-dashed border-border px-2 py-0.5 text-[11.5px] font-semibold tabular-nums text-muted-foreground"
+                >
+                  <span aria-hidden>{t('aiMark', { mark: hint.mark })}</span>
+                  <span className="sr-only">
+                    {t('aiMarkTitle', { mark: hint.mark, reason: hint.reason })}
+                  </span>
+                </span>
+              )}
 
               {/* No value at all until a mark is set — an unmarked criterion must not
                   look like a zero, which is a judgement nobody made. */}

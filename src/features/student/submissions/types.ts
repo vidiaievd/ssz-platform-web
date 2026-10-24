@@ -14,10 +14,16 @@ export type MySubmissionStatus = 'pending' | 'returned' | 'approved';
 /** Which slice of the list the screen is asking for. */
 export type MySubmissionsFilter = 'all' | MySubmissionStatus;
 
-/** The teacher's word on one submission, as the learner may read it. */
+/** The reviewer's word on one submission, as the learner may read it. */
 export interface MySubmissionDecision {
   verdict: 'approved' | 'returned';
-  teacherId: string;
+  /**
+   * A teacher, or a model that read the work of a learner nobody reviews (plan 79, 2.3) —
+   * which the row must say, and which has nobody to name.
+   */
+  by: 'teacher' | 'ai';
+  /** `null` for a model's verdict. */
+  teacherId: string | null;
   /** `null` when the directory could not name them — a verdict still stands unsigned. */
   teacherName: string | null;
   at: string;
@@ -55,6 +61,11 @@ export interface MySubmission {
    */
   expectedResponseBy: string | null;
   decision: MySubmissionDecision | null;
+  /**
+   * Who reads this work (plan 79, 2.3c): a teacher, or — for a learner with no school — a
+   * model. Known before the verdict, so a waiting row does not promise a teacher's queue.
+   */
+  reader: 'teacher' | 'ai';
   /** Whether "hand in again" would resume *this* row rather than a later one (47.1). */
   canResubmit: boolean;
 }

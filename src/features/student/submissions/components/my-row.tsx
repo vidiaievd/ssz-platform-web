@@ -8,6 +8,7 @@ import { Link } from '@/lib/i18n/navigation';
 
 import { useAgeWords } from '@/features/review/components/age-mark';
 import { hoursSince } from '@/features/review/lib/age-scale';
+import { AiReviewPanel } from '@/features/student/ai-review';
 import { cn } from '@/lib/utils';
 
 import { resubmitModeFor, runnerHref } from '../lib/resubmit-route';
@@ -65,6 +66,8 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
   const bodyId = useId();
 
   const teacher = submission.decision?.teacherName ?? null;
+  /** A model's verdict (plan 79, 2.3c): labelled as such on the row and in full when open. */
+  const byAi = submission.reader === 'ai';
   const decidedAt = submission.decision
     ? format.relativeTime(new Date(submission.decision.at))
     : null;
@@ -118,14 +121,18 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
           </span>
           <span className="mt-px block text-[11.5px] text-(--ssz-text-muted)">
             {submission.status === 'pending'
-              ? submission.expectedResponseBy === null
-                ? t('due.unknown')
-                : t('due.expected', {
-                    when: format.relativeTime(new Date(submission.expectedResponseBy)),
-                  })
-              : teacher === null
-                ? t('row.unsigned', { when: decidedAt ?? '' })
-                : t('row.signed', { teacher, when: decidedAt ?? '' })}
+              ? byAi
+                ? t('due.ai')
+                : submission.expectedResponseBy === null
+                  ? t('due.unknown')
+                  : t('due.expected', {
+                      when: format.relativeTime(new Date(submission.expectedResponseBy)),
+                    })
+              : byAi
+                ? t('row.ai', { when: decidedAt ?? '' })
+                : teacher === null
+                  ? t('row.unsigned', { when: decidedAt ?? '' })
+                  : t('row.signed', { teacher, when: decidedAt ?? '' })}
           </span>
         </span>
 
@@ -141,7 +148,12 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
 
       {open && (
         <div id={bodyId} className="flex flex-col gap-3 pb-4 pl-[63px] pr-4">
-          {submission.status === 'pending' && (
+          {submission.status === 'pending' && byAi && (
+            <p className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">
+              {t('pending.ai', { age: words(hoursSince(submission.submittedAt)) })}
+            </p>
+          )}
+          {submission.status === 'pending' && !byAi && (
             <div className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">
               <p>{t('pending.body', { age: words(hoursSince(submission.submittedAt)) })}</p>
               {/*
@@ -153,7 +165,20 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
             </div>
           )}
 
-          {submission.decision?.comment != null && submission.decision.comment !== '' && (
+          {/*
+            A model's verdict is shown whole, under its label, with the learner's way to say
+            it is wrong — its summary is the comment, so the teacher's comment card below
+            would only repeat it under the wrong heading.
+          */}
+          {byAi && submission.decision !== null && (
+            <AiReviewPanel
+              exerciseId={submission.exerciseId}
+              attemptId={submission.id}
+              templateCode={submission.exerciseType}
+            />
+          )}
+
+          {!byAi && submission.decision?.comment != null && submission.decision.comment !== '' && (
             <div className="rounded-[11px] border-[1.5px] border-(--ssz-border-default) bg-(--ssz-bg-surface) px-3.5 py-3">
               <div className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.07em] text-(--ssz-text-muted)">
                 {teacher === null ? t('comment.unsigned') : t('comment.label', { teacher })}
@@ -172,7 +197,7 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
             decided, and an empty card would read as "nobody got to it yet" — which is the
             exact confusion this whole screen exists to end.
           */}
-          {submission.status === 'approved' && !submission.decision?.comment && (
+          {!byAi && submission.status === 'approved' && !submission.decision?.comment && (
             <p className="text-[13px] text-(--ssz-text-secondary)">{t('approved.noComment')}</p>
           )}
 

@@ -26,6 +26,8 @@ import {
   type ExerciseAudioEngine,
 } from '@/features/student/exercises/audio';
 
+import type { HandedIn } from '../api/use-attempt';
+
 import { Instr } from './instr';
 import { nextUnreached, unansweredCount, type ShortAnswerWalk } from './short-answer-walk';
 
@@ -70,6 +72,14 @@ export interface ShortAnswerBodyProps {
   sending?: boolean;
   /** What went wrong handing the answer in, in the learner's language. */
   error?: string | null;
+  /**
+   * Who reads the set once it is in (plan 79, steps 2.1d and 2.3c2): the closing screen
+   * says a teacher, a model reading it now, or nobody — instead of always «your teacher is
+   * looking through your answers».
+   */
+  handedIn?: HandedIn;
+  /** The model is taking longer than the screen waits for; its verdict goes to «My work». */
+  aiSlow?: boolean;
   /** False in a preview: everything renders, nothing accepts input. */
   interactive?: boolean;
   /**
@@ -137,6 +147,20 @@ const VERDICT_TONE: Record<Verdict | 'wait', { fg: string; bg: string; line: str
     line: 'var(--ssz-border-default)',
   },
 };
+
+/** The closing screen's word on who reads the set now that it is in. */
+function doneReader(t: ReturnType<typeof useTranslations<'ExerciseRunner'>>, handedIn: HandedIn) {
+  switch (handedIn) {
+    case 'unread':
+      return t('shortAnswer.done.unread');
+    case 'ai':
+      return t('shortAnswer.done.ai');
+    case 'dropped':
+      return t('aiReview.gaveUp');
+    default:
+      return t('shortAnswer.done.teacher');
+  }
+}
 
 /** ✓ Godkjent / ⓘ Delvis / × Ikke godkjent / ⏱ Til vurdering — icon and word, never colour alone. */
 function VerdictChip({ verdict }: { verdict: Verdict | 'wait' }) {
@@ -213,6 +237,8 @@ export function ShortAnswerBody({
   tally,
   sending = false,
   error = null,
+  handedIn = 'review',
+  aiSlow = false,
   interactive = true,
   audio,
   audioTranscript = null,
@@ -382,8 +408,13 @@ export function ShortAnswerBody({
         </h4>
         <p className="m-0 text-[13.5px] text-(--ssz-text-secondary)">
           {t('shortAnswer.done.tally', { ...tally })}
-          {withTeacher ? ` ${t('shortAnswer.done.teacher')}` : ''}
+          {withTeacher ? ` ${doneReader(t, handedIn)}` : ''}
         </p>
+        {withTeacher && handedIn === 'ai' && aiSlow && (
+          <p className="m-0 text-[13px] text-(--ssz-text-muted)" role="status">
+            {t('aiReview.slow')}
+          </p>
+        )}
         {unanswered > 0 && (
           <p className="m-0 text-[13px] text-(--ssz-text-muted)">
             {t('shortAnswer.done.skipped', { count: unanswered })}

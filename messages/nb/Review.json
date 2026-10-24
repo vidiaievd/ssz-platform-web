@@ -130,6 +130,37 @@
       "addToSentence": "Kommenter denne setningen",
       "sentenceLabel": "Kommentar til denne setningen",
       "sentencePlaceholder": "Hva bør eleven se på her?"
+    },
+    "ai": {
+      "title": "KI-utkast",
+      "label": "KI-utkast",
+      "count": "{count, plural, one {# merknad} other {# merknader}}",
+      "none": "ingen merknader",
+      "hint": "Eleven ser bare det du tar inn i en kommentar.",
+      "discardDraft": "Forkast utkastet",
+      "draftDiscarded": "KI-utkastet er forkastet.",
+      "restore": "Angre",
+      "takeSummary": "Legg til i hovedkommentaren",
+      "summaryTaken": "i hovedkommentaren",
+      "accept": "Legg til i kommentar",
+      "edit": "Rediger",
+      "discard": "Forkast",
+      "accepted": "lagt til i kommentar",
+      "edited": "redigert og lagt til",
+      "remarkDiscarded": "forkastet",
+      "aspect": {
+        "grammar": "grammatikk",
+        "order": "ordstilling",
+        "lexis": "ordvalg",
+        "register": "register",
+        "alternative": "annen riktig retting",
+        "task": "oppgaven",
+        "structure": "struktur",
+        "content": "innhold"
+      },
+      "wholeText": "om hele teksten",
+      "wholeAnswer": "om hele svaret",
+      "editLabel": "Legges til i den samlede kommentaren"
     }
   },
   "rubric": {
@@ -143,6 +174,8 @@
     "unmarked": "Ikke vurdert ennå.",
     "weight": "×2",
     "markOf": "Nivå for {name}",
+    "aiMark": "KI: {mark}",
+    "aiMarkTitle": "KI-utkastet foreslår {mark}: {reason}",
     "score": "{points} av {max} poeng",
     "threshold": "bestått fra {passScore}",
     "remaining": "{count, plural, one {# kriterium igjen} other {# kriterier igjen}}",
@@ -390,15 +423,18 @@
       "signed": "{teacher} · {when}",
       "unsigned": "Rettet {when}",
       "open": "Åpne innleveringen",
-      "close": "Lukk innleveringen"
+      "close": "Lukk innleveringen",
+      "ai": "Sjekket av KI · {when}"
     },
     "due": {
       "expected": "Svar ventes {when}",
       "unknown": "Ingen svarfrist er satt for dette kurset",
-      "note": "Det er tiden skolen vanligvis bruker, ikke et løfte om svar i minuttet."
+      "note": "Det er tiden skolen vanligvis bruker, ikke et løfte om svar i minuttet.",
+      "ai": "KI går gjennom — vanligvis under ett minutt"
     },
     "pending": {
-      "body": "Levert for {age} siden, ligger i køen til læreren."
+      "body": "Levert for {age} siden, ligger i køen til læreren.",
+      "ai": "Levert for {age} siden. KI går gjennom arbeidet ditt — tilbakemeldingen kommer her, vanligvis på under ett minutt."
     },
     "comment": {
       "label": "Kommentar · {teacher}",
@@ -485,5 +521,39 @@
     "commentsMissing": "{count, plural, one {# opptak mangler kommentar} other {# opptak mangler kommentar}} — uten kommentar går vurderingen ikke ut.",
     "commentsRequired": "Hvert opptak trenger en kommentar før vurderingen kan sendes.",
     "scoreIsPerPrompt": "Hvert opptak vurderes for seg: det er bestått når poengene når grensen for ett opptak, og innleveringen godkjennes når alle er bestått. Summen regnes ut av systemet fra nivåene."
+  },
+  "aiReview": {
+    "label": "Sjekket av KI, ikke av lærer",
+    "caveat": "Denne tilbakemeldingen er skrevet av en språkmodell. Den kan ta feil — si fra hvis noe her ikke stemmer.",
+    "failed": "Kunne ikke laste tilbakemeldingen.",
+    "retry": "Prøv igjen",
+    "noRemarks": "Ingen merknader.",
+    "sentence": "Setning {n}",
+    "question": "Spørsmål {n}",
+    "wholeText": "om hele teksten",
+    "wholeAnswer": "om hele svaret",
+    "marksTitle": "Karakter per kriterium",
+    "mark": "{mark} av 3",
+    "unnamed": "Kriterium uten navn",
+    "dispute": "Tilbakemeldingen er feil",
+    "reasonLabel": "Hva er galt med tilbakemeldingen? (valgfritt)",
+    "reasonPlaceholder": "For eksempel: Det er ingen feil i setning 2.",
+    "disputeNote": "Resultatet endres ikke — slik får vi vite hvor modellen tar feil.",
+    "send": "Send",
+    "sending": "Sender …",
+    "cancel": "Avbryt",
+    "sendFailed": "Kunne ikke sende. Prøv igjen.",
+    "disputed": "Du markerte denne tilbakemeldingen som feil {when}. Takk — vi tar det med oss.",
+    "aspect": {
+      "grammar": "grammatikk",
+      "order": "ordstilling",
+      "lexis": "ordvalg",
+      "register": "register",
+      "meaning": "mening",
+      "alternative": "dette er også riktig",
+      "task": "oppgaven",
+      "structure": "struktur",
+      "content": "innhold"
+    }
   }
 }

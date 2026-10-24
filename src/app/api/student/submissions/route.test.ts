@@ -80,8 +80,7 @@ function keysOf(value: unknown, found: string[] = []): string[] {
   return found;
 }
 
-const request = (query = '') =>
-  new NextRequest(`http://localhost/api/student/submissions${query}`);
+const request = (query = '') => new NextRequest(`http://localhost/api/student/submissions${query}`);
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -165,6 +164,7 @@ describe('GET /api/student/submissions', () => {
 
     expect(body.items[0].decision).toEqual({
       verdict: 'returned',
+      by: 'teacher',
       teacherId: 'teacher-1',
       teacherName: 'Kari Nordmann',
       at: '2026-08-19T11:00:00.000Z',
@@ -179,6 +179,50 @@ describe('GET /api/student/submissions', () => {
     const body = await (await GET(request())).json();
 
     expect(body.items[0].decision).toMatchObject({ teacherName: null, verdict: 'returned' });
+  });
+
+  it('labels a model’s verdict as AI and asks the directory for nobody (plan 79, 2.3c)', async () => {
+    upstream({
+      items: [
+        {
+          ...RETURNED,
+          schoolId: null,
+          decision: { ...RETURNED.decision, by: 'ai', byUserId: null, comment: 'Se på verbet.' },
+        },
+      ],
+    });
+
+    const body = await (await GET(request())).json();
+
+    expect(body.items[0].reader).toBe('ai');
+    expect(body.items[0].decision).toEqual({
+      verdict: 'returned',
+      by: 'ai',
+      teacherId: null,
+      teacherName: null,
+      at: '2026-08-19T11:00:00.000Z',
+      comment: 'Se på verbet.',
+    });
+    expect(fetchProfileSummaries).toHaveBeenCalledWith(['']);
+  });
+
+  it('says who reads waiting work: the model without a school, the teacher with one', async () => {
+    upstream({ items: [PENDING, { ...PENDING, attemptId: 'att-9', schoolId: null }] });
+
+    const body = await (await GET(request())).json();
+
+    expect(body.items.map((item: { reader: string }) => item.reader)).toEqual(['teacher', 'ai']);
+    // No school, no promise to date the model's answer by.
+    expect(body.items[1].expectedResponseBy).toBeNull();
+  });
+
+  it('reads a verdict from an engine before plan 79 as a teacher’s', async () => {
+    upstream({ items: [RETURNED] });
+
+    const body = await (await GET(request())).json();
+
+    expect(body.items[0].reader).toBe('teacher');
+    expect(body.items[0].decision.by).toBe('teacher');
   });
 
   it('counts what is waiting and what came back, and says when that is only this page', async () => {

@@ -24,11 +24,13 @@ const SUBMISSION: MySubmission = {
   expectedResponseBy: null,
   decision: {
     verdict: 'returned',
+    by: 'teacher',
     teacherId: 'teacher-1',
     teacherName: 'Kari Nordmann',
     at: new Date().toISOString(),
     comment: 'Se på perfektum.',
   },
+  reader: 'teacher',
   canResubmit: true,
 };
 

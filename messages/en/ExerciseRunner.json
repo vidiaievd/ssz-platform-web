@@ -195,6 +195,8 @@
     "approved": "Every sentence matched — approved automatically",
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
+    "unread": "Handed in. Nobody will check it.",
+    "unreadWhy": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will check this answer.",
     "withTeacherSplit": "{approved} of {total} sentences were approved automatically. Your teacher reads the rest, usually within 48 hours.",
     "again": "Correct it and hand in again",
     "selfCheck": {
@@ -219,7 +221,7 @@
     "audioLabel": "The sentence, spoken",
     "itemCounted": "counted",
     "itemNotCounted": "not counted",
-    "itemNotCountedPlain": "Your teacher did not count this one.",
+    "itemNotCountedPlain": "This one was not counted.",
     "review": {
       "marked": "Your teacher has marked this",
       "sentBack": "Your teacher sent this back",
@@ -281,8 +283,10 @@
       "title": "Handed in",
       "tally": "{pass} passed · {partial} partly · {fail} not passed",
       "teacher": "Your teacher is looking through your answers.",
+      "unread": "Nobody will check them further: you're studying without a teacher, and AI review isn't part of your plan.",
       "again": "Do it again",
-      "skipped": "No answer: {count}"
+      "skipped": "No answer: {count}",
+      "ai": "The AI is reading your answers."
     },
     "empty": {
       "title": "Nothing to answer yet",
@@ -294,7 +298,7 @@
       "score": "{score} out of 100 for this attempt.",
       "itemCounted": "counted",
       "itemNotCounted": "not counted",
-      "itemNotCountedPlain": "Your teacher did not count this one."
+      "itemNotCountedPlain": "This one was not counted."
     },
     "gaps": {
       "title": "Some questions have no answer",
@@ -342,6 +346,8 @@
     "sendUnconfirmed": "We could not confirm the delivery. Check “My submissions” before handing in again.",
     "delivered": "Handed in.",
     "deliveredWhen": "Your teacher responds within 48 hours.",
+    "unread": "Handed in. Nobody will read it.",
+    "unreadWhy": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will read this text.",
     "rewrite": "Rewrite and hand in again (submission {n})",
     "points": "{score} / {max} points",
     "percent": "{score}%",
@@ -438,9 +444,11 @@
     "approved": "Everything correct — approved automatically",
     "withTeacher": "Handed in. Your teacher will look at it.",
     "withTeacherWhen": "Usually within 48 hours.",
+    "unread": "Handed in. Nobody will check it.",
+    "unreadWhy": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will check this answer.",
     "itemCounted": "counted",
     "itemNotCounted": "not counted",
-    "itemNotCountedPlain": "Your teacher did not count this one.",
+    "itemNotCountedPlain": "This one was not counted.",
     "again": "Try again",
     "charPad": "Norwegian letters",
     "selfCheck": {
@@ -757,7 +765,9 @@
     },
     "sent": {
       "title": "Handed in.",
-      "body": "The teacher listens to the recording and answers within 48 hours. You'll be notified."
+      "body": "The teacher listens to the recording and answers within 48 hours. You'll be notified.",
+      "unreadTitle": "Saved.",
+      "unreadBody": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will listen to this recording."
     },
     "refused": {
       "retake": "The recording for {labels} was not accepted — record it again.",
@@ -905,5 +915,13 @@
       "unlimitedAttempts": "unlimited attempts",
       "start": "Start"
     }
+  },
+  "aiReview": {
+    "reading": "Handed in. The AI is reading it.",
+    "readingWhen": "Its review will appear here in a moment.",
+    "slow": "The AI is taking longer than usual. Its review will appear in “My work” once it is ready.",
+    "marked": "Checked by AI",
+    "sentBack": "Sent back by the AI",
+    "gaveUp": "The AI could not review this work, and nobody else will check it."
   }
 }

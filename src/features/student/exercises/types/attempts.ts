@@ -163,6 +163,13 @@ export interface SubmitAnswerResponse {
   correct: boolean;
   score: number | null;
   requiresReview: boolean;
+  /**
+   * Who will read an answer that `requiresReview` (plan 79, step 2.1c): the school's
+   * teacher, a model, or nobody. `none` means the attempt is already closed as
+   * `NO_REVIEWER` — no verdict is coming, and «sent for review» would be a promise
+   * nobody keeps. Absent when nothing went to review, and from engines before the step.
+   */
+  reviewer?: 'teacher' | 'ai' | 'none';
   feedback: { summary: string; hints?: string[]; correctAnswer?: unknown };
   /** Validator output. For gap-fill, a verdict and an explanation per gap. */
   details?: unknown;
@@ -727,7 +734,12 @@ export type AttemptStatus =
   | 'ROUTED_FOR_REVIEW'
   /** A teacher read the submission and sent it back rather than scoring it. */
   | 'RETURNED'
-  | 'ABANDONED';
+  | 'ABANDONED'
+  /**
+   * Free-form work with nobody to read it — no school, no AI review on the learner's
+   * plan (plan 79, step 2.1c). Final: handed in, never scored.
+   */
+  | 'NO_REVIEWER';
 
 /** What a teacher decided about one sentence, in the learner's copy of the verdict. */
 export interface ReviewDecisionRecord {
@@ -762,6 +774,18 @@ export interface AttemptRecord {
   /** Their verdict per sentence. Carries no answer key, only decisions and words. */
   reviewDecisions: ReviewDecisionRecord[] | null;
   reviewedAt: string | null;
+  /**
+   * Who delivered the verdict (plan 79, 2.3): `ai` — a model reviewed the work of a learner
+   * with no school, and the screen must say so. Null while nothing was delivered; absent
+   * from engines before the step.
+   */
+  reviewedBy?: 'teacher' | 'ai' | null;
+  /**
+   * The school whose queue reads the work. Null for a learner with no school: routed work
+   * of theirs waits for a model, never for a teacher (plan 79, 2.3c2). Absent from engines
+   * before the step.
+   */
+  schoolId?: string | null;
   /**
    * The rubric behind the mark, for the templates a person grades out of criteria.
    *

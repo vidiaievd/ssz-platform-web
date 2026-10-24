@@ -250,9 +250,71 @@ export interface ReviewSubmission {
    * media-service no longer holds.
    */
   playback: Record<string, ReviewPlayback> | null;
+  /**
+   * A model's draft review of the work, for the teacher to take from or drop (plan 79, 1.4).
+   * Null when no model drafted it or its attempt failed — the card is then the card it was.
+   * Present whatever the school's plan says: whether to draw it is `useCan`'s call.
+   */
+  aiDraft: ReviewAiDraft | null;
   submittedAnswer: unknown;
   /** Whether this caller may still decide it — an expired substitution may only read. */
   canDecide: boolean;
+}
+
+/**
+ * What a draft remark is about. `alternative` (error_correction, plan 79 step 1.7a) says a
+ * repair differs from the key and is also right — in short_answer (1.7e), that a key point is
+ * made in words the phrase match missed; every other aspect names an error. `task` and
+ * `structure` (writing_task, 1.7b) are about an essay as a whole; `content` (short_answer) is
+ * a key point an answer leaves out or gets wrong.
+ */
+export type ReviewAiAspect =
+  | 'grammar'
+  | 'order'
+  | 'lexis'
+  | 'register'
+  | 'alternative'
+  | 'task'
+  | 'structure'
+  | 'content';
+
+/**
+ * One remark of a model's draft, about one sentence. ai-service has checked that
+ * `fragment` occurs word for word in what the student wrote for `itemId`. An essay is one
+ * item, the whole text; a remark about it as a whole (`task`, `structure`) may quote
+ * nothing, and then `fragment` is null — as may a short_answer `content` remark about a key
+ * point the answer never makes.
+ */
+export interface ReviewAiRemark {
+  itemId: string;
+  sentenceIndex: number;
+  aspect: ReviewAiAspect | string;
+  fragment: string | null;
+  comment: string;
+  suggestion: string | null;
+}
+
+/**
+ * A suggested mark on one rubric criterion (`writing_task`, plan 79 step 1.7c), keyed by
+ * the id in the submission's rubric snapshot.
+ */
+export interface ReviewAiMark {
+  criterionId: string;
+  mark: 0 | 1 | 2 | 3;
+  /** One sentence for the teacher on why this level. */
+  reason: string;
+}
+
+export interface ReviewAiDraft {
+  /** `ready` until a verdict settles it (plan 79, 1.5). */
+  status: 'ready' | 'sent' | 'edited' | 'discarded';
+  items: ReviewAiRemark[];
+  summary: string | null;
+  /** Null (or absent, from an engine before 1.7c) when the model was not asked for marks. */
+  marks?: ReviewAiMark[] | null;
+  modelId: string | null;
+  promptVersion: string | null;
+  createdAt: string;
 }
 
 /** One item's ruling, as the engine stored it with the verdict. */

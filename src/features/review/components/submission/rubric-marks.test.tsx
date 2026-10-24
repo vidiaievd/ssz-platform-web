@@ -8,6 +8,8 @@ import { enMessages } from '@/lib/i18n/messages';
 import type { WritingTaskDetails } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 
+import type { ReviewAiMark } from '../../types';
+
 import { RubricMarks } from './rubric-marks';
 
 const snapshot: RubricSnapshot = {
@@ -49,10 +51,12 @@ function Harness({
   editable = true,
   initial = {},
   facts = details,
+  hints = null,
 }: {
   editable?: boolean;
   initial?: Record<string, number>;
   facts?: WritingTaskDetails | null;
+  hints?: ReviewAiMark[] | null;
 }) {
   const [marks, setMarks] = useState(initial);
   return (
@@ -63,6 +67,7 @@ function Harness({
         details={facts}
         editable={editable}
         onMark={(id, mark) => setMarks((current) => ({ ...current, [id]: mark }))}
+        hints={hints}
       />
     </NextIntlClientProvider>
   );
@@ -172,5 +177,37 @@ describe('the facts', () => {
     expect(screen.queryByText(/points phrased/)).not.toBeInTheDocument();
     // The marking itself is unaffected: a rubric does not need a word count.
     expect(screen.getByRole('radiogroup', { name: 'Mark for Språk' })).toBeInTheDocument();
+  });
+});
+
+// Plan 79, step 1.7c.
+describe('suggested marks', () => {
+  const hints: ReviewAiMark[] = [
+    { criterionId: 'c-task', mark: 2, reason: 'Two of three points are covered.' },
+  ];
+
+  it('shows the suggestion beside the control, with its reason, and leaves the control unset', () => {
+    renderRubric({ hints });
+
+    expect(screen.getByText('AI: 2')).toBeInTheDocument();
+    expect(
+      screen.getByText('The AI draft suggests 2: Two of three points are covered.'),
+    ).toBeInTheDocument();
+    const task = screen.getByRole('radiogroup', { name: 'Mark for Oppgaveløsning' });
+    expect(within(task).getByRole('radio', { name: '2' })).not.toBeChecked();
+    expect(screen.getByText('2 criteria left')).toBeInTheDocument();
+  });
+
+  it('is not a control: clicking it sets nothing', async () => {
+    const { user } = renderRubric({ hints });
+
+    await user.click(screen.getByText('AI: 2'));
+
+    expect(screen.getByText('2 criteria left')).toBeInTheDocument();
+  });
+
+  it('draws nothing for a criterion without a suggestion, or without a draft', () => {
+    renderRubric({ hints });
+    expect(screen.getAllByText(/^AI: /)).toHaveLength(1);
   });
 });

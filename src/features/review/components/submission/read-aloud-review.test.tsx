@@ -109,6 +109,7 @@ const SUBMISSION: ReviewSubmission = {
       peaks: null,
     },
   },
+  aiDraft: null,
   submittedAnswer: {
     recordings: [
       { itemId: 'p1', assetId: 'asset-1', seconds: 21, takes: 2 },

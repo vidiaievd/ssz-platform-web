@@ -18,9 +18,20 @@ export interface ReviewDraft {
    * criterion nobody has marked, which is what keeps the action disabled.
    */
   marks: Record<string, number>;
+  /**
+   * What the reviewer did with a model's draft (plan 79, 1.4), by remark index as a string,
+   * `summary` for the draft's overall note, and `draft` for dropping the whole of it. An
+   * absent key is a remark nobody has acted on. Sent with the verdict (`aiOutcomes`, 1.5):
+   * which remarks were taken as they were, which were reworded and which were thrown out is
+   * what tells a good model from a bad one.
+   */
+  ai: Record<string, AiRemarkOutcome>;
   /** When it was last written to. Only used to decide what to forget first. */
   touchedAt: number;
 }
+
+/** Taken into a comment as written, taken and reworded, or thrown out. */
+export type AiRemarkOutcome = 'accepted' | 'edited' | 'discarded';
 
 interface ReviewDraftsState {
   drafts: Record<string, ReviewDraft>;
@@ -29,11 +40,19 @@ interface ReviewDraftsState {
   setSentenceComment: (attemptId: string, itemId: string, comment: string | undefined) => void;
   /** One rubric mark. There is no way to unset one: a teacher changes a mark, never blanks it. */
   setMark: (attemptId: string, criterionId: string, mark: number) => void;
+  /** `undefined` takes a decision back — a dropped remark the reviewer wants again. */
+  setAiOutcome: (attemptId: string, key: string, outcome: AiRemarkOutcome | undefined) => void;
   /** The reviewer's own verdict landed. The only thing that empties a draft. */
   clear: (attemptId: string) => void;
 }
 
-export const EMPTY_DRAFT: ReviewDraft = { comment: '', sentences: {}, marks: {}, touchedAt: 0 };
+export const EMPTY_DRAFT: ReviewDraft = {
+  comment: '',
+  sentences: {},
+  marks: {},
+  ai: {},
+  touchedAt: 0,
+};
 
 /**
  * How many submissions' drafts are kept before the oldest are forgotten.
@@ -46,7 +65,7 @@ export const EMPTY_DRAFT: ReviewDraft = { comment: '', sentences: {}, marks: {},
 const MAX_DRAFTS = 40;
 
 /** Bumped when the draft shape gains a field an existing entry would come back without. */
-const DRAFTS_VERSION = 2;
+const DRAFTS_VERSION = 3;
 
 /**
  * What the teacher has written and not yet sent, kept where it survives everything.
@@ -89,6 +108,17 @@ export const useReviewDraftsStore = create<ReviewDraftsState>()(
           })),
         ),
 
+      setAiOutcome: (attemptId, key, outcome) =>
+        set((state) =>
+          write(state, attemptId, (draft) => {
+            if (outcome === undefined) {
+              const { [key]: _undone, ...rest } = draft.ai;
+              return { ...draft, ai: rest };
+            }
+            return { ...draft, ai: { ...draft.ai, [key]: outcome } };
+          }),
+        ),
+
       clear: (attemptId) =>
         set((state) => {
           const { [attemptId]: _sent, ...rest } = state.drafts;
@@ -104,7 +134,7 @@ export const useReviewDraftsStore = create<ReviewDraftsState>()(
 );
 
 /**
- * Give every stored draft the `marks` key it was written before.
+ * Give every stored draft the keys added after it was written — `marks`, then `ai`.
  *
  * Done once on rehydrate rather than in `selectDraft`, which is a Zustand selector: one
  * that patched the object would return a new reference on every render and put the panel
@@ -121,6 +151,7 @@ function fillMarks(persisted: unknown): { drafts: Record<string, ReviewDraft> } 
       comment: draft.comment ?? '',
       sentences: draft.sentences ?? {},
       marks: draft.marks ?? {},
+      ai: draft.ai ?? {},
       touchedAt: draft.touchedAt ?? 0,
     };
   }
@@ -143,7 +174,8 @@ function write(
   if (
     next.comment === '' &&
     Object.keys(next.sentences).length === 0 &&
-    Object.keys(next.marks).length === 0
+    Object.keys(next.marks).length === 0 &&
+    Object.keys(next.ai).length === 0
   ) {
     delete drafts[attemptId];
     return { drafts };

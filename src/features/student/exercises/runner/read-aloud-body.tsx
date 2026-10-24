@@ -67,6 +67,16 @@ export interface ReadAloudBodyProps {
   /** Replaces the author's instruction line, which the reader translates per learner. */
   instruction?: string;
   stage: ReadAloudStage;
+  /**
+   * `sent` with nobody to listen (plan 79, step 2.1d): no «with the teacher» step, and the
+   * card says the recordings are kept but no one will hear them.
+   */
+  unread?: boolean;
+  /**
+   * A fresh try from the `unread` card: no verdict is coming to end this one, and without it
+   * a self-study learner could never record the exercise again.
+   */
+  onRedo?: () => void;
   /** Where a take can be heard from — by its `blob:` URL before the upload, its asset after. */
   sourceOf: (ref: string | null, assetId: string | null) => TakeSource;
   /**
@@ -109,6 +119,8 @@ export function ReadAloudBody({
   title,
   instruction,
   stage,
+  unread = false,
+  onRedo,
   sourceOf,
   carried = [],
   submitted = [],
@@ -233,7 +245,7 @@ export function ReadAloudBody({
         </>
       ) : (
         <>
-          <ReviewSteps graded={stage === 'graded'} />
+          {!unread && <ReviewSteps graded={stage === 'graded'} />}
           {submitted.map((r, i) => (
             <div key={r.itemId} className="flex items-center gap-2.5" style={takeRowStyle(false)}>
               <TakeNumber n={i + 1} />
@@ -256,8 +268,26 @@ export function ReadAloudBody({
               }}
             >
               <p className="m-0">
-                <b>{t('sent.title')}</b> {t('sent.body')}
+                {unread ? (
+                  <>
+                    <b>{t('sent.unreadTitle')}</b> {t('sent.unreadBody')}
+                  </>
+                ) : (
+                  <>
+                    <b>{t('sent.title')}</b> {t('sent.body')}
+                  </>
+                )}
               </p>
+              {unread && onRedo !== undefined && (
+                <button
+                  type="button"
+                  onClick={onRedo}
+                  disabled={!interactive}
+                  className={`self-start text-[12.5px] font-semibold underline underline-offset-2 ${RA_FOCUS}`}
+                >
+                  {t('graded.redo')}
+                </button>
+              )}
             </div>
           )}
           {stage === 'graded' && graded}

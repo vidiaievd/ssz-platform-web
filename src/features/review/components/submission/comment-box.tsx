@@ -148,17 +148,38 @@ export function SavedComment({
   );
 }
 
+/**
+ * Text to open the form with, from outside it — a model's remark the reviewer chose to
+ * reword (plan 79, 1.4). A new `nonce` opens the form again with the new text.
+ */
+export interface SentenceCommentSeed {
+  text: string;
+  nonce: number;
+}
+
 /** The per-sentence form: a link until it is wanted, then a box, then what was saved. */
 export function SentenceComment({
   value,
   onChange,
+  seed = null,
+  onClose,
 }: {
   value: string | undefined;
   onChange: (value: string | undefined) => void;
+  seed?: SentenceCommentSeed | null;
+  /** The form closed — `true` when by saving. Lets a seed's owner learn how it ended. */
+  onClose?: (saved: boolean) => void;
 }) {
   const t = useTranslations('Review.submission.comment');
   // `null` is "the form is not open"; an empty string is an open, empty form.
   const [draft, setDraft] = useState<string | null>(null);
+  // Adjusted during render rather than in an effect, so the form opens on the same paint
+  // as the click that asked for it.
+  const [seededWith, setSeededWith] = useState<number | null>(null);
+  if (seed !== null && seed.nonce !== seededWith) {
+    setSeededWith(seed.nonce);
+    setDraft(seed.text);
+  }
 
   if (draft !== null) {
     return (
@@ -169,10 +190,14 @@ export function SentenceComment({
         rows={2}
         maxLength={SENTENCE_COMMENT_MAX}
         onChange={setDraft}
-        onCancel={() => setDraft(null)}
+        onCancel={() => {
+          setDraft(null);
+          onClose?.(false);
+        }}
         onSave={() => {
           onChange(draft.trim() === '' ? undefined : draft.trim());
           setDraft(null);
+          onClose?.(true);
         }}
       />
     );

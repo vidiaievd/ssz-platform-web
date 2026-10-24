@@ -12,6 +12,13 @@ import { readShortAnswerDetails } from '../../lib/short-answer-details';
 import { readWritingTaskDetails } from '../../lib/writing-task-details';
 import type { ReviewSubmission } from '../../types';
 
+import {
+  AI_DRAFT_KEY,
+  AiDraftBanner,
+  EssayAiRemarks,
+  remarksFor,
+  type AiDraftBinding,
+} from './ai-draft';
 import { ReadAloudReview } from './read-aloud-review';
 import { RubricMarks } from './rubric-marks';
 import { isTranslateDetail, SentenceRow } from './sentence-row';
@@ -31,6 +38,11 @@ export interface SentenceListProps {
   onMark: (criterionId: string, mark: number) => void;
   /** False once a verdict stands: the rubric becomes a record of what was decided. */
   editable: boolean;
+  /**
+   * A model's draft to take from (plan 79, 1.4), or null for the card as it was. Drawn only
+   * over a per-sentence breakdown — the one shape its remarks are written against.
+   */
+  ai?: AiDraftBinding | null;
 }
 
 /**
@@ -53,6 +65,7 @@ export function SentenceList({
   marks,
   onMark,
   editable,
+  ai = null,
 }: SentenceListProps) {
   const t = useTranslations('Review.submission');
 
@@ -83,6 +96,14 @@ export function SentenceList({
     return (
       <div className="flex flex-col gap-4">
         <EssayBody text={submission.text} />
+        {/* The model's remarks come before the marks: they are what a teacher reads the
+            text with, and what they take from them goes into the overall comment. */}
+        {ai === null ? null : (
+          <div className="flex flex-col gap-2">
+            <AiDraftBanner binding={ai} />
+            <EssayAiRemarks binding={ai} />
+          </div>
+        )}
         {/* No rubric is not a broken screen. A submission queued before the rubric
             existed, or one whose author left it empty, is marked the old way with the
             verdict buttons — and the panel below is already that screen. Tested for
@@ -95,6 +116,7 @@ export function SentenceList({
             details={readWritingTaskDetails(submission.details)}
             editable={editable}
             onMark={onMark}
+            hints={essayHints(ai)}
           />
         )}
       </div>
@@ -156,6 +178,8 @@ export function SentenceList({
         {items.some(isTranslateDetail) ? <DiffLegend /> : null}
       </div>
 
+      {ai === null ? null : <AiDraftBanner binding={ai} />}
+
       <ul className="flex flex-col gap-2">
         {items.map((item, position) => (
           <SentenceRow
@@ -166,6 +190,8 @@ export function SentenceList({
             teacherNote={item.note ?? undefined}
             comment={comments[item.itemId]}
             onComment={(value) => onComment(item.itemId, value)}
+            aiRemarks={remarksFor(ai, item.itemId)}
+            onAiOutcome={ai?.setOutcome}
           />
         ))}
       </ul>
@@ -229,4 +255,10 @@ function plainStrings(value: unknown, depth = 0): string[] {
     return Object.values(value).flatMap((entry) => plainStrings(entry, depth + 1));
   }
   return [];
+}
+
+/** The draft's suggested marks, unless there is no draft or the reviewer dropped it whole. */
+function essayHints(ai: AiDraftBinding | null) {
+  if (ai === null || ai.outcomes[AI_DRAFT_KEY] === 'discarded') return null;
+  return ai.draft.marks ?? null;
 }

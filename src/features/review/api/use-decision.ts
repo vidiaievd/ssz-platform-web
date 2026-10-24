@@ -2,6 +2,7 @@
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import type { AiRemarkOutcome } from '../stores/review-drafts';
 import type { ReviewQueueCount, ReviewQueueFilters } from '../types';
 
 import { reviewKeys } from './keys';
@@ -22,6 +23,11 @@ export interface ReviewDecisionInput {
    * support. The invariant "no score is entered by hand" holds exactly as before.
    */
   rubricMarks?: Record<string, number>;
+  /**
+   * What the reviewer did with the model's draft, as `review-drafts` keeps it (plan 79,
+   * 1.5): a remark's index, `summary`, `draft`. Sent only when the card drew a draft.
+   */
+  aiOutcomes?: Record<string, AiRemarkOutcome>;
 }
 
 /** A colleague answered first — everything the banner has to name (criterion 24). */

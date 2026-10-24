@@ -96,8 +96,13 @@ function mockApi(
     draft?: unknown;
     draftPutFails?: boolean;
     attemptStatus?: unknown;
+    /** What `GET .../ai-review` answers; 404 without one. */
+    aiReview?: unknown;
+    /** The last attempt once something was handed in, when it differs from `last`. */
+    lastAfterSubmit?: unknown;
   } = {},
 ) {
+  let handedIn = false;
   const calls: Array<{ path: string; method: string; body: unknown }> = [];
 
   const fetchMock = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
@@ -123,7 +128,13 @@ function mockApi(
       }
       return json(responses.draft ?? { draftAnswer: null, draftSavedAt: null });
     }
+    if (path.endsWith('/ai-review')) {
+      return responses.aiReview === undefined
+        ? json({ code: 'NO_AI_REVIEW' }, 404)
+        : json(responses.aiReview);
+    }
     if (path.endsWith('/submit')) {
+      handedIn = !responses.submitFails;
       return responses.submitFails
         ? json({ error: 'nope' }, 502)
         : json(responses.submit ?? ROUTED);
@@ -133,6 +144,9 @@ function mockApi(
       // last-finished-attempt lookup.
       if (/\/attempts\/[^/]+$/.test(path)) {
         return json(responses.attemptStatus ?? { status: 'IN_PROGRESS' });
+      }
+      if (handedIn && responses.lastAfterSubmit !== undefined) {
+        return json(responses.lastAfterSubmit);
       }
       return json(responses.last ?? { attempt: null });
     }
@@ -315,6 +329,87 @@ describe('WritingTaskSolver', () => {
     // Handed-in work outranks the draft that produced it.
     expect(screen.getByText('Levert tekst fra i går')).toBeInTheDocument();
     expect(screen.queryByText('eldre utkast')).not.toBeInTheDocument();
+  });
+
+  // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
+  it('says nobody will read the text when the engine has no reviewer for it', async () => {
+    const { fetchMock } = mockApi({ submit: { ...ROUTED, reviewer: 'none' } });
+    renderSolver(fetchMock);
+    await screen.findByRole('textbox', { name: 'Your text' });
+
+    write('ett to tre fire fem');
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+    expect(await screen.findByText('Handed in. Nobody will read it.')).toBeInTheDocument();
+    expect(screen.queryByText(/Your teacher responds/)).not.toBeInTheDocument();
+  });
+
+  it('shows text nobody could read as handed in, not as graded', async () => {
+    const { fetchMock } = mockApi({ last: attemptRecord({ status: 'NO_REVIEWER' }) });
+    renderSolver(fetchMock);
+
+    expect(await screen.findByText('Handed in. Nobody will read it.')).toBeInTheDocument();
+    expect(screen.getByText('Levert tekst fra i går')).toBeInTheDocument();
+  });
+
+  describe('a model reads the text (plan 79, 2.3c2)', () => {
+    const AI_SCORED = attemptRecord({
+      id: 'att-1',
+      status: 'SCORED',
+      score: 80,
+      passed: true,
+      reviewComment: 'Teksten svarer på oppgaven.',
+      scoredAt: '2026-10-24T10:00:05.000Z',
+      reviewedAt: '2026-10-24T10:00:05.000Z',
+      reviewedBy: 'ai',
+      schoolId: null,
+    });
+    const AI_REVIEW = {
+      outcome: 'approved',
+      items: [],
+      summary: 'Teksten svarer på oppgaven.',
+      marks: [
+        {
+          criterionId: 'c1',
+          criterionName: 'Oppgaveløsning',
+          mark: 3,
+          reason: 'Alle punkter er med.',
+        },
+      ],
+      reviewedAt: '2026-10-24T10:00:05.000Z',
+      disputedAt: null,
+    };
+
+    it('says the AI is reading it, waits, and shows the grade with its label', async () => {
+      const { fetchMock } = mockApi({
+        submit: { ...ROUTED, reviewer: 'ai' },
+        attemptStatus: { status: 'SCORED' },
+        lastAfterSubmit: AI_SCORED,
+        aiReview: AI_REVIEW,
+      });
+      renderSolver(fetchMock);
+      await screen.findByRole('textbox', { name: 'Your text' });
+
+      write('ett to tre fire fem');
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+
+      expect(await screen.findByText('Handed in. The AI is reading it.')).toBeInTheDocument();
+      expect(await screen.findByText('Passed', {}, { timeout: 4000 })).toBeInTheDocument();
+      expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+      expect(await screen.findByText('Alle punkter er med.')).toBeInTheDocument();
+      expect(screen.getAllByText('Teksten svarer på oppgaven.')).toHaveLength(1);
+    });
+
+    it('waits again for a text still routed with no school', async () => {
+      const { fetchMock } = mockApi({
+        last: attemptRecord({ schoolId: null }),
+        attemptStatus: { status: 'ROUTED_FOR_REVIEW' },
+      });
+      renderSolver(fetchMock);
+
+      expect(await screen.findByText('Handed in. The AI is reading it.')).toBeInTheDocument();
+      expect(screen.queryByText(/Your teacher responds/)).not.toBeInTheDocument();
+    });
   });
 
   it("shows the teacher's verdict when the learner comes back to a graded attempt", async () => {

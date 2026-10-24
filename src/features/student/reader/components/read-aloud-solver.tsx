@@ -10,6 +10,7 @@ import {
   AttemptRequestError,
   fetchDraft,
   fetchLastAttempt,
+  handedInFromSubmit,
   resolveSubmitFailure,
   useSaveDraft,
   useStartAttempt,
@@ -32,7 +33,10 @@ import {
   type ReadAloudStage,
   type TakeSource,
 } from '@/features/student/exercises/runner';
-import type { AttemptRecord } from '@/features/student/exercises/types/attempts';
+import type {
+  AttemptRecord,
+  SubmitAnswerResponse,
+} from '@/features/student/exercises/types/attempts';
 import {
   readDraft,
   readSubmission,
@@ -63,7 +67,7 @@ export interface ReadAloudSolverProps {
   createPort?: () => RecorderPort;
 }
 
-const FINISHED = new Set(['ROUTED_FOR_REVIEW', 'SCORED', 'RETURNED']);
+const FINISHED = new Set(['ROUTED_FOR_REVIEW', 'SCORED', 'RETURNED', 'NO_REVIEWER']);
 
 /** Refusals that mean the take itself is unusable — it goes back to the budget. */
 const RETAKE_CODES = new Set([
@@ -152,7 +156,8 @@ export function ReadAloudSolver({
 /** Where a session opens: recording, waiting for the teacher, or reading the verdict. */
 type Opening =
   | { stage: 'draft'; draft: Draft | null }
-  | { stage: 'sent'; recordings: SubmittedRecording[] }
+  /** `unread` — handed in with nobody to listen (`NO_REVIEWER`, plan 79, step 2.1c). */
+  | { stage: 'sent'; recordings: SubmittedRecording[]; unread: boolean }
   | { stage: 'graded'; recordings: SubmittedRecording[]; verdict: AttemptRecord };
 
 interface RunProps {
@@ -169,8 +174,9 @@ interface RunProps {
  *
  * Three pasts, in this order: work handed in and waiting (`ROUTED_FOR_REVIEW`) — nothing to
  * record until the teacher answers; takes uploaded onto the open attempt's draft — the
- * learner was mid-way (RA-R10); a verdict — the last thing that happened. Takes on the draft
- * outrank a verdict: after «Ta opp på nytt og lever» the new attempt's takes are the work.
+ * learner was mid-way (RA-R10); a verdict — the last thing that happened — or work nobody will
+ * listen to (`NO_REVIEWER`). Takes on the draft outrank both: after «Ta opp på nytt og lever»
+ * the new attempt's takes are the work.
  *
  * Each draft take is asked about before it is offered: a recording belongs to the attempt it
  * was made for (Q2-A), and an attempt restarted under the learner (the start route abandons a
@@ -230,9 +236,14 @@ function ReadAloudRun({
           );
 
           if (mine !== null && mine.status === 'ROUTED_FOR_REVIEW') {
-            opening = { stage: 'sent', recordings: handedIn };
+            opening = { stage: 'sent', recordings: handedIn, unread: false };
           } else if (Object.keys(draft.takes).length > 0) {
             opening = { stage: 'draft', draft };
+          } else if (mine !== null && mine.status === 'NO_REVIEWER') {
+            // Final, so nothing to wait for — but the takes are the learner's work all the
+            // same, and a blank recorder would say they were never sent. Below a draft, like
+            // a verdict: takes recorded after «record again» are the work now.
+            opening = { stage: 'sent', recordings: handedIn, unread: true };
           } else if (mine !== null && FINISHED.has(mine.status)) {
             opening = { stage: 'graded', recordings: handedIn, verdict: mine };
           }
@@ -385,6 +396,7 @@ function ReadAloudSession({
     opening.stage === 'draft' ? [] : opening.recordings,
   );
   const verdict = opening.stage === 'graded' ? opening.verdict : null;
+  const [unread, setUnread] = useState(opening.stage === 'sent' && opening.unread);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   /** The envelope of each take recorded here, by its `blob:` URL — its waveform until upload. */
@@ -517,9 +529,11 @@ function ReadAloudSession({
     if (submission === null) return;
     setError(null);
 
-    const delivered = () => {
+    /** `data` is missing when only the check after a lost response knows it arrived. */
+    const delivered = (data?: SubmitAnswerResponse) => {
       setSubmitted(submission.recordings);
       setStage('sent');
+      setUnread(data !== undefined && handedInFromSubmit(data) === 'unread');
       // The takes the teacher will not hear go (DECISIONS §1); a failed delete costs nothing
       // but storage (§8 item 5).
       for (const id of unsentAssets(recorder.state, submission)) {
@@ -587,6 +601,8 @@ function ReadAloudSession({
       {...(title === undefined ? {} : { title })}
       {...(instruction === undefined ? {} : { instruction })}
       stage={stage}
+      unread={unread}
+      {...(unread ? { onRedo } : {})}
       sourceOf={sourceOf}
       submitted={submitted}
       graded={graded}

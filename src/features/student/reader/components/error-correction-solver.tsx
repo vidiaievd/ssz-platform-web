@@ -6,10 +6,14 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  handedInFromStatus,
+  handedInFromSubmit,
   resolveSubmitFailure,
+  useAiVerdictWait,
   useSelfCheck,
   useStartAttempt,
   useSubmitAnswer,
+  type HandedIn,
   type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import {
@@ -28,6 +32,7 @@ import {
 import type { AttemptRecord } from '@/features/student/exercises/types/attempts';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { AiReviewPanel } from '@/features/student/ai-review';
 
 export interface ErrorCorrectionSolverProps {
   exerciseId: string;
@@ -114,13 +119,15 @@ export function ErrorCorrectionSolver({
   const [checksLeft, setChecksLeft] = useState<number | null>(null);
   const [allTouched, setAllTouched] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
-  const [sent, setSent] = useState<'passed' | 'review' | null>(null);
+  const [sent, setSent] = useState<HandedIn | null>(null);
   /**
    * The teacher's verdict, once one has read the submission. It is the only feedback this
    * template can give beyond "it matched the key", and it arrives with the attempt rather
    * than through this screen — nothing here asks for it.
    */
   const [review, setReview] = useState<AttemptReview | null>(null);
+  /** The handed-in attempt a model is reading, while this screen waits for its verdict. */
+  const [awaited, setAwaited] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState(0);
   /**
    * How a failed `submit` actually left things (47.0.B) — `null` while nothing has
@@ -175,7 +182,10 @@ export function ErrorCorrectionSolver({
           // What the teacher decided is not this screen's to say, but that the work was
           // handed over is — otherwise a learner who comes back sees their own edits and
           // no sign they ever sent them.
-          setSent(saved.status === 'ROUTED_FOR_REVIEW' ? 'review' : 'passed');
+          const handedIn = handedInFromStatus(saved.status, saved.schoolId);
+          setSent(handedIn);
+          // Back within the seconds a model takes: wait for it here, as after a hand-in.
+          if (handedIn === 'ai') setAwaited(saved.id);
           // A string, not merely "not null": an attempt read back from an engine that
           // predates review carries no such field at all.
           if (typeof saved.reviewedAt === 'string') setReview(readReview(saved));
@@ -187,6 +197,12 @@ export function ErrorCorrectionSolver({
   useEffect(() => {
     begin();
   }, [begin]);
+
+  const aiWait = useAiVerdictWait(exerciseId, awaited, sent === 'ai', (attempt) => {
+    // No model could read it after all: closed, and nobody else will.
+    setSent(attempt.status === 'NO_REVIEWER' ? 'dropped' : handedInFromStatus(attempt.status));
+    if (typeof attempt.reviewedAt === 'string') setReview(readReview(attempt));
+  });
 
   /**
    * The listening layer, mounted once for the whole exercise: the allowance, the gate and
@@ -250,7 +266,9 @@ export function ErrorCorrectionSolver({
           clearAnswerDraft(exerciseId);
           // The work is in, so the clip has nothing left to give away.
           if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
-          setSent(data.requiresReview ? 'review' : 'passed');
+          const handedIn = handedInFromSubmit(data);
+          setSent(handedIn);
+          if (handedIn === 'ai') setAwaited(data.attemptId);
           // `null` on a routed answer: it has been done, and whether it was right is
           // the teacher's to say. The reader counts it as attempted either way.
           if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
@@ -322,6 +340,7 @@ export function ErrorCorrectionSolver({
     setChecksLeft(null);
     setSent(null);
     setReview(null);
+    setAwaited(null);
     setSubmissions(0);
     setSendFailure(null);
     begin();
@@ -435,9 +454,13 @@ export function ErrorCorrectionSolver({
                       : 'var(--ssz-feedback-ok-fg)',
                 }}
               >
-                {review.status === 'RETURNED'
-                  ? t('errorCorrection.review.sentBack')
-                  : t('errorCorrection.review.marked')}
+                {review.byAi
+                  ? review.status === 'RETURNED'
+                    ? t('aiReview.sentBack')
+                    : t('aiReview.marked')
+                  : review.status === 'RETURNED'
+                    ? t('errorCorrection.review.sentBack')
+                    : t('errorCorrection.review.marked')}
               </p>
               {review.status !== 'RETURNED' && review.score !== null && (
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
@@ -448,6 +471,18 @@ export function ErrorCorrectionSolver({
                   their place: a made-up explanation is worse than none. */}
               {review.comment !== null && (
                 <p className="mt-2 text-[13px] text-(--ssz-text-primary)">{review.comment}</p>
+              )}
+              {/* The model's remarks and the label that says whose they are. Its summary
+                  is the comment above already. */}
+              {review.byAi && (
+                <div className="mt-3">
+                  <AiReviewPanel
+                    exerciseId={exerciseId}
+                    attemptId={review.attemptId}
+                    templateCode="error_correction"
+                    showSummary={false}
+                  />
+                </div>
               )}
             </>
           ) : (
@@ -461,11 +496,31 @@ export function ErrorCorrectionSolver({
               >
                 {sent === 'passed'
                   ? t('errorCorrection.approved')
-                  : t('errorCorrection.withTeacher')}
+                  : sent === 'unread'
+                    ? t('errorCorrection.unread')
+                    : sent === 'ai'
+                      ? t('aiReview.reading')
+                      : sent === 'dropped'
+                        ? t('aiReview.gaveUp')
+                        : t('errorCorrection.withTeacher')}
               </p>
+              {sent === 'ai' && (
+                <p
+                  className="mt-1 text-[12.5px] text-(--ssz-text-secondary)"
+                  role="status"
+                  aria-live="polite"
+                >
+                  {aiWait === 'slow' ? t('aiReview.slow') : t('aiReview.readingWhen')}
+                </p>
+              )}
               {sent === 'review' && (
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
                   {t('errorCorrection.withTeacherWhen')}
+                </p>
+              )}
+              {sent === 'unread' && (
+                <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                  {t('errorCorrection.unreadWhy')}
                 </p>
               )}
             </>
@@ -488,6 +543,10 @@ export function ErrorCorrectionSolver({
 
 /** The teacher's verdict as this screen holds it. */
 interface AttemptReview {
+  /** The attempt the verdict is on — not the one this screen has open now. */
+  attemptId: string;
+  /** A model's verdict, not a teacher's (plan 79, 2.3): the screen must say so. */
+  byAi: boolean;
   status: AttemptRecord['status'];
   score: number | null;
   comment: string | null;
@@ -513,6 +572,8 @@ function readReview(attempt: AttemptRecord): AttemptReview {
   }
 
   return {
+    attemptId: attempt.id,
+    byAi: attempt.reviewedBy === 'ai',
     status: attempt.status,
     score: attempt.score,
     comment:

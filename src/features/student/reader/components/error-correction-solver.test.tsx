@@ -111,10 +111,21 @@ function mockApi(
     /** What `GET .../attempts/:attemptId` answers when a failed `submit` checks in (47.0.B). */
     attemptStatus?: unknown;
     attemptStatusFails?: boolean;
+    /** What `GET .../ai-review` answers; 404 without one. */
+    aiReview?: unknown;
   } = {},
 ) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
+
+    if (path.endsWith('/ai-review')) {
+      return responses.aiReview === undefined
+        ? new Response(JSON.stringify({ code: 'NO_AI_REVIEW' }), { status: 404 })
+        : new Response(JSON.stringify(responses.aiReview), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          });
+    }
 
     if (path.endsWith('/self-check')) {
       const status = responses.selfCheckStatus ?? 200;
@@ -272,6 +283,25 @@ describe('ErrorCorrectionSolver', () => {
     }
   });
 
+  // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
+  it('says nobody will check it when the engine has no reviewer for the work', async () => {
+    renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'none' } }));
+
+    await correctIt();
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+
+    expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
+    expect(screen.queryByText(/Your teacher/)).not.toBeInTheDocument();
+  });
+
+  it('puts back work nobody could check, and says so', async () => {
+    renderSolver(
+      mockApi({ last: { attempt: { ...LAST_ATTEMPT.attempt, status: 'NO_REVIEWER' } } }),
+    );
+
+    expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
+  });
+
   it('puts a previous submission back, and says it was handed in', async () => {
     renderSolver(mockApi({ last: LAST_ATTEMPT }));
 
@@ -326,7 +356,7 @@ describe('ErrorCorrectionSolver', () => {
       }),
     );
 
-    expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+    expect(await screen.findByText('This one was not counted.')).toBeInTheDocument();
   });
 
   it('says when the work was sent back rather than marked', async () => {
@@ -347,6 +377,49 @@ describe('ErrorCorrectionSolver', () => {
     expect(await screen.findByText('Your teacher sent this back')).toBeInTheDocument();
     expect(screen.getByText('Prøv igjen med ordstillingen.')).toBeInTheDocument();
     expect(screen.queryByText(/out of 100/)).not.toBeInTheDocument();
+  });
+
+  it('says the AI is reading it — not a teacher — right after hand-in (plan 79, 2.3c2)', async () => {
+    renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'ai' } }));
+    await correctIt();
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in' }));
+
+    expect(await screen.findByText('Handed in. The AI is reading it.')).toBeInTheDocument();
+    expect(screen.getByText('Its review will appear here in a moment.')).toBeInTheDocument();
+  });
+
+  it("shows a model's verdict under its label, not as a teacher's (plan 79, 2.3c2)", async () => {
+    renderSolver(
+      mockApi({
+        last: {
+          attempt: {
+            ...LAST_ATTEMPT.attempt,
+            status: 'SCORED',
+            score: 100,
+            passed: true,
+            reviewedAt: '2026-10-24T10:00:05.000Z',
+            reviewComment: 'Riktig rettet.',
+            reviewDecisions: [{ itemId: 'i1', approved: true }],
+            reviewedBy: 'ai',
+            schoolId: null,
+          },
+        },
+        aiReview: {
+          outcome: 'approved',
+          items: [],
+          summary: 'Riktig rettet.',
+          marks: null,
+          reviewedAt: '2026-10-24T10:00:05.000Z',
+          disputedAt: null,
+        },
+      }),
+    );
+
+    expect(await screen.findByText('Checked by AI')).toBeInTheDocument();
+    expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+    expect(screen.queryByText('Your teacher has marked this')).not.toBeInTheDocument();
+    expect(await screen.findByRole('button', { name: 'This review is wrong' })).toBeInTheDocument();
+    expect(screen.getAllByText('Riktig rettet.')).toHaveLength(1);
   });
 
   // An exercise-engine older than the masking ships the stored document instead of the
