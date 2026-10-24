@@ -255,14 +255,14 @@ describe('ErrorCorrectionBody', () => {
   it('says a sentence was not counted without inventing a reason when the teacher wrote none', () => {
     renderBody({ verdicts: { i1: { approved: false } } });
 
-    expect(screen.getByText('Your teacher did not count this one.')).toBeInTheDocument();
+    expect(screen.getByText('This one was not counted.')).toBeInTheDocument();
   });
 
   it('says nothing further about a sentence the teacher counted', () => {
     renderBody({ verdicts: { i1: { approved: true } } });
 
     expect(screen.getByText('counted')).toBeInTheDocument();
-    expect(screen.queryByText('Your teacher did not count this one.')).not.toBeInTheDocument();
+    expect(screen.queryByText('This one was not counted.')).not.toBeInTheDocument();
   });
 
   it('reports that the exercise can be handed in only once every sentence is touched', () => {

@@ -94,11 +94,16 @@ interface ApiOptions {
   answeredQuestions?: Array<{ questionId: string; text: string; verdict: string }>;
   /** What `GET .../attempts` (no id) answers for the previous, already-closed attempt. */
   last?: unknown;
+  /** What it answers once this screen has handed the set in, when that differs. */
+  lastAfterSubmit?: unknown;
+  /** What `GET .../ai-review` answers; 404 without one. */
+  aiReview?: unknown;
 }
 
 function mockApi(options: ApiOptions = {}) {
   const answers = options.answers ?? [answered('sa1', 'pass'), answered('sa2', 'partial')];
   let handed = 0;
+  let closed = false;
 
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
@@ -116,15 +121,23 @@ function mockApi(options: ApiOptions = {}) {
       return json(body);
     }
 
+    if (path.endsWith('/ai-review')) {
+      return options.aiReview === undefined
+        ? json({ code: 'NO_AI_REVIEW' }, 404)
+        : json(options.aiReview);
+    }
+
     if (init?.method === undefined) {
       if (/\/attempts\/[^/]+$/.test(path)) {
         return json(options.attemptStatus ?? { status: 'IN_PROGRESS' });
       }
+      if (closed && options.lastAfterSubmit !== undefined) return json(options.lastAfterSubmit);
       return json(options.last ?? { attempt: null });
     }
 
     if (path.endsWith('/submit')) {
       if (options.submitFails) return json({ error: 'nope' }, 502);
+      closed = true;
       return json(options.submit ?? ROUTED);
     }
 
@@ -242,6 +255,68 @@ describe('ShortAnswerSolver', () => {
       expect(screen.getByRole('status')).toHaveTextContent('Nobody will check them further'),
     );
     expect(screen.getByRole('status')).not.toHaveTextContent('Your teacher');
+  });
+
+  it('says the AI is reading the set, then shows its verdict under its label (plan 79, 2.3c2)', async () => {
+    renderSolver(
+      mockApi({
+        submit: { ...ROUTED, reviewer: 'ai' },
+        attemptStatus: { status: 'RETURNED' },
+        lastAfterSubmit: {
+          attempt: {
+            id: 'att-1',
+            exerciseId: 'ex-1',
+            templateCode: 'short_answer',
+            status: 'RETURNED',
+            checkMode: 'PRACTICE',
+            score: 50,
+            passed: false,
+            answersRevealed: false,
+            submittedAnswer: {
+              answers: [
+                { questionId: 'sa1', text: 'Han har jobbet der i tre år.' },
+                { questionId: 'sa2', text: 'Mer ansvar.' },
+              ],
+            },
+            validationDetails: null,
+            submittedAt: '2026-10-24T10:00:00.000Z',
+            scoredAt: null,
+            reviewComment: 'Svar mer utfyllende på spørsmål 2.',
+            reviewDecisions: [
+              { itemId: 'sa1', approved: true },
+              { itemId: 'sa2', approved: false },
+            ],
+            reviewedAt: '2026-10-24T10:00:05.000Z',
+            reviewedBy: 'ai',
+            schoolId: null,
+          },
+        },
+        aiReview: {
+          outcome: 'returned',
+          items: [],
+          summary: 'Svar mer utfyllende på spørsmål 2.',
+          marks: null,
+          reviewedAt: '2026-10-24T10:00:05.000Z',
+          disputedAt: null,
+        },
+      }),
+    );
+    await screen.findByRole('textbox');
+
+    await handIn('Han har jobbet der i tre år.');
+    await userEvent.click(await screen.findByRole('button', { name: /next question/i }));
+    await handIn('Mer ansvar.');
+    await userEvent.click(await screen.findByRole('button', { name: /send for checking/i }));
+
+    await waitFor(() =>
+      expect(screen.getAllByRole('status')[0]).toHaveTextContent('The AI is reading your answers.'),
+    );
+    expect(
+      await screen.findByText('Sent back by the AI', {}, { timeout: 4000 }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+    expect(screen.getAllByText('Svar mer utfyllende på spørsmål 2.')).toHaveLength(1);
+    expect(screen.getByText('This one was not counted.')).toBeInTheDocument();
   });
 
   it('skips a question, comes back to it, and answers it', async () => {
@@ -499,7 +574,7 @@ describe('ShortAnswerSolver', () => {
         }),
       );
 
-      expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+      expect(await screen.findByText('This one was not counted.')).toBeInTheDocument();
     });
 
     it('says when the work was sent back rather than marked', async () => {

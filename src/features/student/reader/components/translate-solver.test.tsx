@@ -127,10 +127,21 @@ function mockApi(
     /** What `GET .../attempts/:attemptId` answers when a failed `submit` checks in (47.0.B). */
     attemptStatus?: unknown;
     attemptStatusFails?: boolean;
+    /** What `GET .../ai-review` answers; 404 without one. */
+    aiReview?: unknown;
   } = {},
 ) {
   return vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
     const path = String(url);
+
+    if (path.endsWith('/ai-review')) {
+      return responses.aiReview === undefined
+        ? new Response(JSON.stringify({ code: 'NO_AI_REVIEW' }), { status: 404 })
+        : new Response(JSON.stringify(responses.aiReview), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          });
+    }
 
     if (path.endsWith('/self-check')) {
       const status = responses.selfCheckStatus ?? 200;
@@ -438,7 +449,7 @@ describe('TranslateSolver', () => {
       }),
     );
 
-    expect(await screen.findByText('Your teacher did not count this one.')).toBeInTheDocument();
+    expect(await screen.findByText('This one was not counted.')).toBeInTheDocument();
   });
 
   it('says when the work was sent back rather than marked', async () => {
@@ -465,6 +476,129 @@ describe('TranslateSolver', () => {
    * 47.0.B: a failed `submit` is not a verdict on its own — the work may already have
    * reached the teacher, only the response got lost on the way back.
    */
+  describe('a model reads the work (plan 79, 2.3c2)', () => {
+    const AI_REVIEW = {
+      outcome: 'returned',
+      items: [
+        {
+          itemId: 'i1',
+          sentenceIndex: 0,
+          aspect: 'grammar',
+          fragment: 'bor',
+          comment: 'Bruk perfektum: «har bodd».',
+          suggestion: 'har bodd',
+        },
+      ],
+      summary: 'Se på tiden.',
+      marks: null,
+      reviewedAt: '2026-10-24T10:00:05.000Z',
+      disputedAt: null,
+    };
+    const AI_RETURNED = {
+      attempt: {
+        ...LAST_ATTEMPT.attempt,
+        id: 'att-1',
+        status: 'RETURNED',
+        score: 0,
+        passed: false,
+        reviewComment: 'Se på tiden.',
+        reviewDecisions: [{ itemId: 'i1', approved: false }],
+        reviewedAt: '2026-10-24T10:00:05.000Z',
+        reviewedBy: 'ai',
+        schoolId: null,
+      },
+    };
+
+    it('says the AI is reading it — not a teacher — right after hand-in', async () => {
+      renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'ai' } }));
+      await answer('Jeg bor i Tromsø.');
+      await userEvent.click(screen.getByRole('button', { name: /hand in/i }));
+
+      expect(await screen.findByText('Handed in. The AI is reading it.')).toBeInTheDocument();
+      expect(screen.queryByText(/teacher/i)).not.toBeInTheDocument();
+    });
+
+    it('waits for the verdict and shows it with the label, the summary only once', async () => {
+      let handedIn = false;
+      const api = mockApi({
+        submit: { ...ROUTED, reviewer: 'ai' },
+        attemptStatus: { status: 'RETURNED' },
+        aiReview: AI_REVIEW,
+      });
+      const fetchMock = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+        // The past attempt appears only once this screen has handed it in.
+        if (String(url).endsWith('/submit')) handedIn = true;
+        if (init?.method === undefined && String(url).endsWith('/attempts')) {
+          return new Response(JSON.stringify(handedIn ? AI_RETURNED : { attempt: null }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          });
+        }
+        return api(url, init);
+      });
+      renderSolver(fetchMock as unknown as ReturnType<typeof mockApi>);
+      await answer('Jeg bor i Tromsø.');
+      await userEvent.click(screen.getByRole('button', { name: /hand in/i }));
+
+      expect(
+        await screen.findByText('Sent back by the AI', {}, { timeout: 4000 }),
+      ).toBeInTheDocument();
+      expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+      expect(await screen.findByText('Bruk perfektum: «har bodd».')).toBeInTheDocument();
+      expect(screen.getAllByText('Se på tiden.')).toHaveLength(1);
+    });
+
+    it('says the AI could not read it when the attempt closes with nobody to read it', async () => {
+      let handedIn = false;
+      const api = mockApi({
+        submit: { ...ROUTED, reviewer: 'ai' },
+        attemptStatus: { status: 'NO_REVIEWER' },
+      });
+      const fetchMock = vi.fn(async (url: RequestInfo | URL, init?: RequestInit) => {
+        if (String(url).endsWith('/submit')) handedIn = true;
+        if (init?.method === undefined && String(url).endsWith('/attempts')) {
+          const closed = { ...LAST_ATTEMPT.attempt, id: 'att-1', status: 'NO_REVIEWER' };
+          return new Response(JSON.stringify({ attempt: handedIn ? closed : null }), {
+            status: 200,
+            headers: { 'content-type': 'application/json' },
+          });
+        }
+        return api(url, init);
+      });
+      renderSolver(fetchMock as unknown as ReturnType<typeof mockApi>);
+      await answer('Jeg bor i Tromsø.');
+      await userEvent.click(screen.getByRole('button', { name: /hand in/i }));
+
+      expect(
+        await screen.findByText(
+          'The AI could not review this work, and nobody else will check it.',
+          {},
+          { timeout: 4000 },
+        ),
+      ).toBeInTheDocument();
+    });
+
+    it("puts a model's verdict back under its label when the learner returns", async () => {
+      renderSolver(mockApi({ last: AI_RETURNED, aiReview: AI_REVIEW }));
+
+      expect(await screen.findByText('Sent back by the AI')).toBeInTheDocument();
+      expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+      expect(screen.queryByText('Your teacher sent this back')).not.toBeInTheDocument();
+    });
+
+    it('waits again for work still routed with no school', async () => {
+      renderSolver(
+        mockApi({
+          last: { attempt: { ...LAST_ATTEMPT.attempt, schoolId: null } },
+          attemptStatus: { status: 'ROUTED_FOR_REVIEW' },
+        }),
+      );
+
+      expect(await screen.findByText('Handed in. The AI is reading it.')).toBeInTheDocument();
+      expect(screen.queryByText('Waiting for a teacher')).not.toBeInTheDocument();
+    });
+  });
+
   describe('when submit fails', () => {
     it('shows "handed in" — not an error — when the attempt already reached the teacher', async () => {
       renderSolver(

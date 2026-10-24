@@ -775,6 +775,18 @@ export interface AttemptRecord {
   reviewDecisions: ReviewDecisionRecord[] | null;
   reviewedAt: string | null;
   /**
+   * Who delivered the verdict (plan 79, 2.3): `ai` — a model reviewed the work of a learner
+   * with no school, and the screen must say so. Null while nothing was delivered; absent
+   * from engines before the step.
+   */
+  reviewedBy?: 'teacher' | 'ai' | null;
+  /**
+   * The school whose queue reads the work. Null for a learner with no school: routed work
+   * of theirs waits for a model, never for a teacher (plan 79, 2.3c2). Absent from engines
+   * before the step.
+   */
+  schoolId?: string | null;
+  /**
    * The rubric behind the mark, for the templates a person grades out of criteria.
    *
    * Both arrive together and only once a verdict has been delivered: the criteria are

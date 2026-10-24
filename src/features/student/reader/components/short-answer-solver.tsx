@@ -6,11 +6,14 @@ import { useTranslations } from 'next-intl';
 import {
   AttemptRequestError,
   fetchLastAttempt,
+  handedInFromStatus,
   handedInFromSubmit,
   resolveSubmitFailure,
+  useAiVerdictWait,
   useAnswerQuestion,
   useStartAttempt,
   useSubmitAnswer,
+  type HandedIn,
 } from '@/features/student/exercises/api/use-attempt';
 import {
   PRACTICE_ACCENT,
@@ -33,6 +36,7 @@ import type {
 } from '@/lib/shared-kernel/short-answer';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { AiReviewPanel } from '@/features/student/ai-review';
 
 export interface ShortAnswerSolverProps {
   exerciseId: string;
@@ -121,8 +125,10 @@ export function ShortAnswerSolver({
    * so this is read separately and shown in its place until the learner asks to redo it.
    */
   const [review, setReview] = useState<AttemptReview | null>(null);
-  /** The set went in with nobody to read it (plan 79, step 2.1d). */
-  const [unread, setUnread] = useState(false);
+  /** Who reads the set once it is in — a teacher, a model, nobody (plan 79, 2.1d and 2.3c2). */
+  const [handedIn, setHandedIn] = useState<HandedIn>('review');
+  /** The handed-in attempt a model is reading, while this screen waits for its verdict. */
+  const [awaited, setAwaited] = useState<string | null>(null);
 
   /** Every answer handed in, in order — the aggregate `submit` closes the attempt with. */
   const answers = useRef<Array<{ questionId: string; text: string }>>([]);
@@ -221,6 +227,18 @@ export function ShortAnswerSolver({
     begin();
   }, [begin]);
 
+  // The model's verdict replaces the closing screen with the recap, as a teacher's does
+  // when the learner comes back.
+  const aiWait = useAiVerdictWait(exerciseId, awaited, handedIn === 'ai', (attempt) => {
+    if (typeof attempt.reviewedAt === 'string') {
+      setReview(readReview(attempt));
+      setHandedIn(handedInFromStatus(attempt.status));
+    } else {
+      // No model could read it after all: closed, and nobody else will.
+      setHandedIn('dropped');
+    }
+  });
+
   /**
    * The listening layer, mounted once for the whole set rather than per question: the
    * allowance, the gate and the playthrough belong to the exercise, and walking to the
@@ -256,7 +274,9 @@ export function ShortAnswerSolver({
       },
       {
         onSuccess: (data) => {
-          setUnread(handedInFromSubmit(data) === 'unread');
+          const reader = handedInFromSubmit(data);
+          setHandedIn(reader);
+          if (reader === 'ai') setAwaited(openAttemptId);
           onChecked?.(data.requiresReview ? null : data.correct);
         },
         onError: async () => {
@@ -392,7 +412,8 @@ export function ShortAnswerSolver({
     setError(null);
     setPhase('writing');
     setReview(null);
-    setUnread(false);
+    setHandedIn('review');
+    setAwaited(null);
     answers.current = [];
     begin();
   }
@@ -400,7 +421,12 @@ export function ShortAnswerSolver({
   return (
     <div>
       {review !== null ? (
-        <ShortAnswerReviewRecap review={review} projection={projection} onAgain={restart} />
+        <ShortAnswerReviewRecap
+          exerciseId={exerciseId}
+          review={review}
+          projection={projection}
+          onAgain={restart}
+        />
       ) : (
         <ShortAnswerBody
           set={set}
@@ -412,7 +438,8 @@ export function ShortAnswerSolver({
           tally={tally}
           sending={answer.isPending}
           error={error}
-          unread={unread}
+          handedIn={handedIn}
+          aiSlow={aiWait === 'slow'}
           audio={audio}
           audioTranscript={transcript}
           walk={walk}
@@ -440,6 +467,10 @@ type ShortAnswerVerdicts = Record<string, ShortAnswerItemVerdict>;
 
 /** The teacher's verdict on the previous attempt, as this screen holds it. */
 interface AttemptReview {
+  /** The attempt the verdict is on — not the one this screen has open now. */
+  attemptId: string;
+  /** A model's verdict, not a teacher's (plan 79, 2.3): the screen must say so. */
+  byAi: boolean;
   status: AttemptRecord['status'];
   score: number | null;
   comment: string | null;
@@ -478,6 +509,8 @@ function readReview(attempt: AttemptRecord): AttemptReview {
   }
 
   return {
+    attemptId: attempt.id,
+    byAi: attempt.reviewedBy === 'ai',
     status: attempt.status,
     score: attempt.score,
     comment:
@@ -500,10 +533,12 @@ function readReview(attempt: AttemptRecord): AttemptReview {
  * in the set and, where the teacher wrote one, the words they chose to explain it with.
  */
 function ShortAnswerReviewRecap({
+  exerciseId,
   review,
   projection,
   onAgain,
 }: {
+  exerciseId: string;
   review: AttemptReview;
   projection: StudentProjection;
   onAgain: () => void;
@@ -537,9 +572,13 @@ function ShortAnswerReviewRecap({
             review.status === 'RETURNED' ? 'var(--ssz-text-primary)' : 'var(--ssz-feedback-ok-fg)',
         }}
       >
-        {review.status === 'RETURNED'
-          ? t('shortAnswer.review.sentBack')
-          : t('shortAnswer.review.marked')}
+        {review.byAi
+          ? review.status === 'RETURNED'
+            ? t('aiReview.sentBack')
+            : t('aiReview.marked')
+          : review.status === 'RETURNED'
+            ? t('shortAnswer.review.sentBack')
+            : t('shortAnswer.review.marked')}
       </p>
       {review.status !== 'RETURNED' && review.score !== null && (
         <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
@@ -549,6 +588,18 @@ function ShortAnswerReviewRecap({
       {/* The teacher's own words about the submission as a whole, where they wrote any. */}
       {review.comment !== null && (
         <p className="mt-2 text-[13px] text-(--ssz-text-primary)">{review.comment}</p>
+      )}
+      {/* The model's remarks under the label that says whose they are. Its summary is the
+          comment above already. */}
+      {review.byAi && (
+        <div className="mt-3">
+          <AiReviewPanel
+            exerciseId={exerciseId}
+            attemptId={review.attemptId}
+            templateCode="short_answer"
+            showSummary={false}
+          />
+        </div>
       )}
 
       {decided.length > 0 && (

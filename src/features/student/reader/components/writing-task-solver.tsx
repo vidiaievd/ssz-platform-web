@@ -9,9 +9,11 @@ import {
   handedInFromStatus,
   handedInFromSubmit,
   resolveSubmitFailure,
+  useAiVerdictWait,
   useSaveDraft,
   useStartAttempt,
   useSubmitAnswer,
+  type HandedIn,
   type SubmitFailureResolution,
 } from '@/features/student/exercises/api/use-attempt';
 import type { AttemptRecord } from '@/features/student/exercises/types/attempts';
@@ -28,6 +30,7 @@ import {
 import type { StudentProjection } from '@/lib/shared-kernel/writing-task';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { AiReviewPanel } from '@/features/student/ai-review';
 
 export interface WritingTaskSolverProps {
   exerciseId: string;
@@ -87,14 +90,16 @@ export function WritingTaskSolver({
   const [value, setValue] = useState<WritingTaskValue>({ text: '', ticked: [] });
   const [phase, setPhase] = useState<WritingTaskPhase>('draft');
   /**
-   * Handed in with nobody to read it (plan 79, step 2.1d): the text stays read-only as in
-   * `sent`, and the card under it says no reader is coming instead of «delivered».
+   * Who reads the text once it is `sent` (plan 79, steps 2.1d and 2.3c2): a teacher, a model
+   * this screen waits for, or nobody — the card under the read-only text says which.
    */
-  const [unread, setUnread] = useState(false);
+  const [handedIn, setHandedIn] = useState<HandedIn>('review');
   const [attemptNo, setAttemptNo] = useState(1);
   const [saveState, setSaveState] = useState<DraftSaveState>('idle');
-  /** The verdict the learner came back to, when there is one. */
+  /** The verdict the learner came back to, or the model's that this screen waited for. */
   const [verdict, setVerdict] = useState<AttemptRecord | null>(null);
+  /** The handed-in attempt a model is reading, while this screen waits for its verdict. */
+  const [awaited, setAwaited] = useState<string | null>(null);
   const [sendFailure, setSendFailure] = useState<SubmitFailureResolution | null>(null);
   const [confirmingDelivery, setConfirmingDelivery] = useState(false);
 
@@ -139,9 +144,11 @@ export function WritingTaskSolver({
             if (submitted !== null) {
               setValue(submitted);
               setVerdict(last);
-              const handedIn = handedInFromStatus(last.status);
-              setPhase(handedIn === 'passed' ? 'graded' : 'sent');
-              setUnread(handedIn === 'unread');
+              const reader = handedInFromStatus(last.status, last.schoolId);
+              setPhase(reader === 'passed' ? 'graded' : 'sent');
+              setHandedIn(reader);
+              // Back within the seconds a model takes: wait for it here, as after a hand-in.
+              if (reader === 'ai') setAwaited(last.id);
               return;
             }
           }
@@ -159,6 +166,22 @@ export function WritingTaskSolver({
   useEffect(() => {
     begin();
   }, [begin]);
+
+  const aiWait = useAiVerdictWait(
+    exerciseId,
+    awaited,
+    phase === 'sent' && handedIn === 'ai',
+    (attempt) => {
+      setVerdict(attempt);
+      if (attempt.status === 'NO_REVIEWER') {
+        // No model could read it after all: closed, and nobody else will.
+        setHandedIn('dropped');
+      } else {
+        setPhase('graded');
+        setHandedIn('passed');
+      }
+    },
+  );
 
   const retry = useCallback(() => {
     setUnusable(false);
@@ -225,7 +248,9 @@ export function WritingTaskSolver({
       {
         onSuccess: (data) => {
           setPhase('sent');
-          setUnread(handedInFromSubmit(data) === 'unread');
+          const reader = handedInFromSubmit(data);
+          setHandedIn(reader);
+          if (reader === 'ai') setAwaited(data.attemptId);
           setSaveState('idle');
           // Always `null`: a written text is never judged by the machine, and reporting
           // anything else would put a verdict on the reader's card that no one gave.
@@ -280,7 +305,8 @@ export function WritingTaskSolver({
   function rewrite() {
     setValue({ text: '', ticked: [] });
     setPhase('draft');
-    setUnread(false);
+    setHandedIn('review');
+    setAwaited(null);
     setAttemptNo((n) => n + 1);
     setVerdict(null);
     setSaveState('idle');
@@ -337,24 +363,58 @@ export function WritingTaskSolver({
           }}
         >
           <p className="text-[14px] font-semibold text-(--ssz-text-primary)">
-            {unread ? t('writingTask.unread') : t('writingTask.delivered')}
+            {handedIn === 'unread'
+              ? t('writingTask.unread')
+              : handedIn === 'ai'
+                ? t('aiReview.reading')
+                : handedIn === 'dropped'
+                  ? t('aiReview.gaveUp')
+                  : t('writingTask.delivered')}
           </p>
-          <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
-            {unread ? t('writingTask.unreadWhy') : t('writingTask.deliveredWhen')}
-          </p>
+          {handedIn === 'ai' ? (
+            <p
+              className="mt-1 text-[12.5px] text-(--ssz-text-secondary)"
+              role="status"
+              aria-live="polite"
+            >
+              {aiWait === 'slow' ? t('aiReview.slow') : t('aiReview.readingWhen')}
+            </p>
+          ) : (
+            handedIn !== 'dropped' && (
+              <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+                {handedIn === 'unread'
+                  ? t('writingTask.unreadWhy')
+                  : t('writingTask.deliveredWhen')}
+              </p>
+            )
+          )}
         </div>
       ) : (
-        <WritingTaskGraded
-          passed={verdict?.passed ?? null}
-          revision={projection.settings.revision}
-          showRubric={projection.settings.showRubric}
-          snapshot={verdict?.rubricSnapshot ?? null}
-          marks={verdict?.rubricMarks ?? null}
-          score={verdict?.score ?? null}
-          comment={verdict?.reviewComment ?? null}
-          onRewrite={rewrite}
-          nextAttemptNo={attemptNo + 1}
-        />
+        <>
+          <WritingTaskGraded
+            passed={verdict?.passed ?? null}
+            revision={projection.settings.revision}
+            showRubric={projection.settings.showRubric}
+            snapshot={verdict?.rubricSnapshot ?? null}
+            marks={verdict?.rubricMarks ?? null}
+            score={verdict?.score ?? null}
+            comment={verdict?.reviewComment ?? null}
+            onRewrite={rewrite}
+            nextAttemptNo={attemptNo + 1}
+          />
+          {/* A model's marks: its remarks under the label that says whose they are. Its
+            summary is the comment on the card above already. */}
+          {verdict?.reviewedBy === 'ai' && (
+            <div className="mt-3">
+              <AiReviewPanel
+                exerciseId={exerciseId}
+                attemptId={verdict.id}
+                templateCode="writing_task"
+                showSummary={false}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );

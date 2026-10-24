@@ -221,7 +221,7 @@
     "audioLabel": "Setningen, lest inn",
     "itemCounted": "teller",
     "itemNotCounted": "teller ikke",
-    "itemNotCountedPlain": "Læreren din godtok ikke denne.",
+    "itemNotCountedPlain": "Denne ble ikke godtatt.",
     "review": {
       "marked": "Læreren din har vurdert dette",
       "sentBack": "Læreren din sendte dette tilbake",
@@ -285,7 +285,8 @@
       "teacher": "Læreren ser over svarene dine.",
       "unread": "Ingen retter svarene videre: du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt.",
       "again": "Gjør på nytt",
-      "skipped": "Ikke besvart: {count}"
+      "skipped": "Ikke besvart: {count}",
+      "ai": "KI leser svarene dine."
     },
     "empty": {
       "title": "Ingenting å svare på ennå",
@@ -297,7 +298,7 @@
       "score": "{score} av 100 på dette forsøket.",
       "itemCounted": "teller",
       "itemNotCounted": "teller ikke",
-      "itemNotCountedPlain": "Læreren din godtok ikke dette svaret."
+      "itemNotCountedPlain": "Dette svaret ble ikke godtatt."
     },
     "gaps": {
       "title": "Noen spørsmål er ikke besvart",
@@ -447,7 +448,7 @@
     "unreadWhy": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen retter dette svaret.",
     "itemCounted": "teller",
     "itemNotCounted": "teller ikke",
-    "itemNotCountedPlain": "Læreren din godtok ikke denne.",
+    "itemNotCountedPlain": "Denne ble ikke godtatt.",
     "again": "Prøv på nytt",
     "charPad": "Norske bokstaver",
     "selfCheck": {
@@ -914,5 +915,13 @@
       "unlimitedAttempts": "ubegrenset antall forsøk",
       "start": "Start"
     }
+  },
+  "aiReview": {
+    "reading": "Levert. KI leser det nå.",
+    "readingWhen": "Vurderingen kommer her om et øyeblikk.",
+    "slow": "KI bruker lengre tid enn vanlig. Vurderingen kommer i «Arbeidene mine» når den er klar.",
+    "marked": "Rettet av KI",
+    "sentBack": "Sendt tilbake av KI",
+    "gaveUp": "KI klarte ikke å vurdere arbeidet, og ingen andre kommer til å rette det."
   }
 }

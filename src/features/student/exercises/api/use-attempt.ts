@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 
 import type {
@@ -130,24 +131,110 @@ export async function fetchResumable(exerciseId: string): Promise<boolean> {
 }
 
 /**
- * Handed-in free-form work as the learner should read it (plan 79, step 2.1d): closed by
- * the auto-check (`passed`), waiting for a reader (`review`), or with nobody to read it
- * (`unread` — no school, no AI review on the learner's plan). The last is final and must
- * not be told as «your teacher will look at it».
+ * Handed-in free-form work as the learner should read it (plan 79, steps 2.1d and 2.3c2):
+ * closed by the auto-check (`passed`), waiting for a teacher (`review`), being read by a
+ * model (`ai` — seconds, not days), or with nobody to read it (`unread` — no school, no AI
+ * review on the learner's plan). `dropped` is `unread` reached the other way: the model was
+ * to read it, could not, and closed it — seen only by the screen that waited. The last two
+ * are final and must not be told as «your teacher will look at it».
  */
-export type HandedIn = 'passed' | 'review' | 'unread';
+export type HandedIn = 'passed' | 'review' | 'ai' | 'unread' | 'dropped';
 
 /** What the submit response says, the moment the work is in. */
 export function handedInFromSubmit(data: SubmitAnswerResponse): HandedIn {
   if (!data.requiresReview) return 'passed';
-  return data.reviewer === 'none' ? 'unread' : 'review';
+  if (data.reviewer === 'none') return 'unread';
+  return data.reviewer === 'ai' ? 'ai' : 'review';
 }
 
-/** What a finished attempt read back later says. */
-export function handedInFromStatus(status: AttemptStatus): HandedIn {
-  if (status === 'ROUTED_FOR_REVIEW') return 'review';
+/**
+ * What a finished attempt read back later says. Routed work with no school waits for a
+ * model — the engine routes it so only when one may read it (step 2.1c). A record from an
+ * engine that does not send `schoolId` reads as a teacher's, as it did before the step.
+ */
+export function handedInFromStatus(status: AttemptStatus, schoolId?: string | null): HandedIn {
+  if (status === 'ROUTED_FOR_REVIEW') return schoolId === null ? 'ai' : 'review';
   if (status === 'NO_REVIEWER') return 'unread';
   return 'passed';
+}
+
+/** How often a screen waiting on a model asks, and how long before it stops asking. */
+export const AI_VERDICT_POLL_MS = 2_000;
+export const AI_VERDICT_GIVE_UP_MS = 90_000;
+
+/**
+ * The status of one attempt, or `null` when asking failed. A waiting screen reads a failure
+ * as «not yet» and asks again: the work is in either way.
+ */
+async function fetchAttemptStatus(
+  exerciseId: string,
+  attemptId: string,
+): Promise<AttemptStatus | null> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts/${attemptId}`);
+    if (!res.ok) return null;
+    return ((await res.json()) as AttemptStatusResponse).status;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Waits for a model's verdict on work just handed in (plan 79, step 2.3c2).
+ *
+ * The model answers in seconds, so the screen that said «the AI is reading it» stays and
+ * asks — the status only, every couple of seconds — and hands the whole attempt to
+ * `onSettled` once it leaves the queue: scored, returned, or closed as `NO_REVIEWER` when
+ * no model could read it. After `AI_VERDICT_GIVE_UP_MS` it stops and answers `slow`: the
+ * verdict will still come, to «My work», and a loop with no end is not worth the requests.
+ *
+ * Returns `null` while not waiting, `reading` while asking, `slow` once it gave up.
+ */
+export function useAiVerdictWait(
+  exerciseId: string,
+  attemptId: string | null,
+  waiting: boolean,
+  onSettled: (attempt: AttemptRecord) => void,
+): 'reading' | 'slow' | null {
+  /** The attempt the wait gave up on; a new attempt starts reading again. */
+  const [slowFor, setSlowFor] = useState<string | null>(null);
+  const settled = useRef(onSettled);
+  useEffect(() => {
+    settled.current = onSettled;
+  });
+
+  useEffect(() => {
+    if (!waiting || attemptId === null) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const startedAt = Date.now();
+
+    const tick = async () => {
+      const status = await fetchAttemptStatus(exerciseId, attemptId);
+      if (cancelled) return;
+      if (status !== null && status !== 'ROUTED_FOR_REVIEW') {
+        const attempt = await fetchLastAttempt(exerciseId);
+        if (cancelled) return;
+        // Another attempt on top means the learner moved on; there is nothing to show here.
+        if (attempt !== null && attempt.id === attemptId) settled.current(attempt);
+        return;
+      }
+      if (Date.now() - startedAt >= AI_VERDICT_GIVE_UP_MS) {
+        setSlowFor(attemptId);
+        return;
+      }
+      timer = setTimeout(() => void tick(), AI_VERDICT_POLL_MS);
+    };
+    timer = setTimeout(() => void tick(), AI_VERDICT_POLL_MS);
+
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) clearTimeout(timer);
+    };
+  }, [exerciseId, attemptId, waiting]);
+
+  if (!waiting || attemptId === null) return null;
+  return slowFor === attemptId ? 'slow' : 'reading';
 }
 
 /**
