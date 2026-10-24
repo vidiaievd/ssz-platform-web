@@ -183,6 +183,7 @@ export function SentenceRow({
               <AiRemarkCard
                 key={entry.key}
                 entry={entry}
+                scope="answer"
                 onAccept={() => {
                   onComment(appendParagraph(comment, remarkText(entry.remark)));
                   onAiOutcome?.(entry.key, 'accepted');

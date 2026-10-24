@@ -21,6 +21,7 @@ const KNOWN_ASPECTS = [
   'alternative',
   'task',
   'structure',
+  'content',
 ] as const;
 
 /** As long as the overall comment may run, so a reworded remark is never cut by its own form. */
@@ -195,12 +196,15 @@ export function AiDraftBanner({ binding }: { binding: AiDraftBinding }) {
  */
 export function AiRemarkCard({
   entry,
+  scope = 'text',
   onAccept,
   onEdit,
   onDiscard,
   onRestore,
 }: {
   entry: AiRemarkEntry;
+  /** What a remark without a quotation is about: an essay's text, or one answer of a set. */
+  scope?: 'text' | 'answer';
   onAccept: () => void;
   onEdit: () => void;
   onDiscard: () => void;
@@ -253,7 +257,7 @@ export function AiRemarkCard({
         {remark.fragment === null ? (
           <>
             <span aria-hidden>·</span>
-            <span>{t('wholeText')}</span>
+            <span>{scope === 'answer' ? t('wholeAnswer') : t('wholeText')}</span>
           </>
         ) : null}
       </p>
@@ -362,6 +366,8 @@ function aspectLabel(
       return t('aspect.task');
     case 'structure':
       return t('aspect.structure');
+    case 'content':
+      return t('aspect.content');
     default:
       return t('aspect.register');
   }

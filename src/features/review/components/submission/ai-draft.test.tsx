@@ -362,3 +362,68 @@ describe('AI draft on an essay', () => {
     expect(screen.getAllByRole('button', { name: 'Add to comment' })).toHaveLength(2);
   });
 });
+
+// Plan 79, step 1.7e: a set of open questions — remarks hang under the answer they are about.
+describe('AI draft on a short_answer set', () => {
+  const QUESTION = {
+    itemId: 'i1',
+    routing: 'teacher',
+    prompt: 'Hvorfor flyttet Ali til Bergen?',
+    verdict: 'partial',
+    submitted: 'Han flyttet fordi kona fikk jobb.',
+    skipped: false,
+    covered: 1,
+    total: 2,
+    tooShort: false,
+    words: 6,
+    elements: [
+      { id: 'e1', label: 'Kona fikk jobb', required: true, hit: false, anchor: null },
+      { id: 'e2', label: 'I Bergen', required: true, hit: false, anchor: null },
+    ],
+    model: 'Fordi kona hans fikk jobb i Bergen.',
+  };
+  const SET: Partial<ReviewSubmission> = {
+    exercise: { ...BASE.exercise, type: 'short_answer', title: 'Teksten' },
+    details: {
+      totalItems: 1,
+      routedItems: 1,
+      passedItems: 0,
+      coveredElements: 1,
+      totalElements: 2,
+      items: [QUESTION],
+    } as unknown as ReviewSubmission['details'],
+    aiDraft: {
+      ...BASE.aiDraft!,
+      items: [
+        {
+          itemId: 'i1',
+          sentenceIndex: 1,
+          aspect: 'content',
+          fragment: null,
+          comment: 'Du sier ikke at han flyttet til Bergen.',
+          suggestion: null,
+        },
+      ],
+      summary: null,
+    },
+  };
+
+  it('shows a missing key point under its question, about the whole answer', async () => {
+    upstream(SET);
+    renderPanel();
+
+    expect(await screen.findByText('Du sier ikke at han flyttet til Bergen.')).toBeInTheDocument();
+    expect(screen.getByText('content')).toBeInTheDocument();
+    expect(screen.getByText('about the whole answer')).toBeInTheDocument();
+  });
+
+  it('takes it into that question’s comment as its comment alone', async () => {
+    upstream(SET);
+    renderPanel();
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Add to comment' }));
+
+    expect(sentenceComment()).toBe('Du sier ikke at han flyttet til Bergen.');
+    expect(outcomes()).toEqual({ '0': 'accepted' });
+  });
+});

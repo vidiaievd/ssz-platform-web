@@ -155,9 +155,11 @@
         "register": "register",
         "alternative": "also correct",
         "task": "task",
-        "structure": "structure"
+        "structure": "structure",
+        "content": "content"
       },
       "wholeText": "about the whole text",
+      "wholeAnswer": "about the whole answer",
       "editLabel": "Goes into the overall comment"
     }
   },

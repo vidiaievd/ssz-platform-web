@@ -263,8 +263,10 @@ export interface ReviewSubmission {
 
 /**
  * What a draft remark is about. `alternative` (error_correction, plan 79 step 1.7a) says a
- * repair differs from the key and is also right; every other aspect names an error. `task`
- * and `structure` (writing_task, 1.7b) are about an essay as a whole.
+ * repair differs from the key and is also right — in short_answer (1.7e), that a key point is
+ * made in words the phrase match missed; every other aspect names an error. `task` and
+ * `structure` (writing_task, 1.7b) are about an essay as a whole; `content` (short_answer) is
+ * a key point an answer leaves out or gets wrong.
  */
 export type ReviewAiAspect =
   | 'grammar'
@@ -273,13 +275,15 @@ export type ReviewAiAspect =
   | 'register'
   | 'alternative'
   | 'task'
-  | 'structure';
+  | 'structure'
+  | 'content';
 
 /**
  * One remark of a model's draft, about one sentence. ai-service has checked that
  * `fragment` occurs word for word in what the student wrote for `itemId`. An essay is one
  * item, the whole text; a remark about it as a whole (`task`, `structure`) may quote
- * nothing, and then `fragment` is null.
+ * nothing, and then `fragment` is null — as may a short_answer `content` remark about a key
+ * point the answer never makes.
  */
 export interface ReviewAiRemark {
   itemId: string;

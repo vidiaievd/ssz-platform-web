@@ -155,9 +155,11 @@
         "register": "register",
         "alternative": "annen riktig retting",
         "task": "oppgaven",
-        "structure": "struktur"
+        "structure": "struktur",
+        "content": "innhold"
       },
       "wholeText": "om hele teksten",
+      "wholeAnswer": "om hele svaret",
       "editLabel": "Legges til i den samlede kommentaren"
     }
   },
