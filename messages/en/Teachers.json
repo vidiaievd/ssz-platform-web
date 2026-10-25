@@ -122,7 +122,25 @@
     "consecPeakWarning": "{count} consecutive lessons — fatigue risk",
     "preferred": "Preferred",
     "available": "Available",
-    "unavailable": "Unavailable"
+    "unavailable": "Unavailable",
+    "reviewBlocks": {
+      "tab": "Marking time",
+      "title": "Time for marking",
+      "lede": "Blocks in this teacher's week for checking students' work. Students do not see them; the teacher sees them in their own schedule.",
+      "add": "Hold time for marking",
+      "loadFailed": "The marking time could not be read.",
+      "empty": "No time held for marking",
+      "emptyBody": "Hold a weekly block so the school can see when this teacher checks work.",
+      "perWeek": "≈ {hours} h a week over the next {weeks} weeks",
+      "weekly": "Every week",
+      "oneOff": "Once",
+      "everyWeekday": "Every {weekday}, {time}",
+      "onDay": "{day}, {time}",
+      "between": "from {since} to {until}",
+      "since": "from {since}",
+      "sittings": "{count, plural, =0 {no sittings in the next {weeks} weeks} one {# sitting in the next {weeks} weeks} other {# sittings in the next {weeks} weeks}}",
+      "overlaps": "{count, plural, one {Runs into a lesson or another block on # day in the next {weeks} weeks} other {Runs into a lesson or another block on # days in the next {weeks} weeks}}"
+    }
   },
   "availability": {
     "available": "Available",

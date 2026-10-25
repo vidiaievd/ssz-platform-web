@@ -1,14 +1,28 @@
 import { getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
+import { getMySchoolRole } from "@/features/school/api/get-my-school-role";
 import { getSchoolByRef } from "@/features/school/api/get-school-by-ref";
+import { getTeacherReviewBlocks } from "@/features/schedule/api/get-my-schedule";
+import { heldTime } from "@/features/schedule/lib/held-time";
+import { isoDay } from "@/features/schedule/lib/range";
 import { getTeacherAvailability, getAbsences } from "@/features/teachers/api/queries";
 import { getTeacherSchedule } from "@/features/groups/api/queries";
 import { timeToMinutes } from "@/lib/groups/operations";
 import { TeacherScheduleClient } from "@/features/teachers/components/schedule/teacher-schedule-client";
 import type { Lesson } from "@/features/teachers/components/schedule/weekly-grid";
 import { wsHref } from '@/features/workspaces/lib/href';
+
+/** The roster's roles, which are also the ones scheduling lets hold a teacher's marking time. */
+const ALLOWED_ROLES = ['OWNER', 'ADMIN', 'MANAGER', 'SCHEDULER'] as const;
+
+/**
+ * How far ahead the marking time is read: scheduling's widest window, so a series that
+ * starts after the weeks the panel counts is still listed for editing.
+ */
+const REVIEW_BLOCKS_DAYS = 92;
 
 type Props = {
   params: Promise<{ workspaceId: string; locale: string; teacherId: string }>;
@@ -17,6 +31,11 @@ type Props = {
 export default async function TeacherSchedulePage({ params }: Props) {
   const { workspaceId, locale, teacherId } = await params;
   const t = await getTranslations("Teachers.schedule");
+
+  const role = await getMySchoolRole(workspaceId);
+  if (!role || !(ALLOWED_ROLES as readonly string[]).includes(role)) {
+    notFound();
+  }
 
   const school = await getSchoolByRef(workspaceId);
   if (!school) {
@@ -27,10 +46,15 @@ export default async function TeacherSchedulePage({ params }: Props) {
     );
   }
 
-  const [availabilityResult, absencesResult, scheduleResult] = await Promise.all([
+  const today = new Date();
+  const from = isoDay(today);
+  const to = isoDay(new Date(today.getTime() + (REVIEW_BLOCKS_DAYS - 1) * 86_400_000));
+
+  const [availabilityResult, absencesResult, scheduleResult, reviewBlocks] = await Promise.all([
     getTeacherAvailability(teacherId),
     getAbsences(school.id),
     getTeacherSchedule(school.id, teacherId),
+    getTeacherReviewBlocks(school.id, teacherId, { from, to }),
   ]);
 
   const availability =
@@ -89,6 +113,7 @@ export default async function TeacherSchedulePage({ params }: Props) {
         availabilityBlocks={availability}
         absences={absences}
         lessons={lessons}
+        reviewBlocks={{ held: heldTime(reviewBlocks, from), error: reviewBlocks.error, from }}
       />
     </main>
   );

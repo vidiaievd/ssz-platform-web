@@ -299,7 +299,12 @@
       "subTerms": "Hvem som har det travelt, ser du på halen — og på arbeid fristen godkjente før noen leste det.",
       "terms": "godkjent ved fristen",
       "termsRevised": "{revised} vurdert på nytt · {overturned} endret",
-      "addHelper": "Legg til en hjelper"
+      "addHelper": "Legg til en hjelper",
+      "heldHours": "{hours} t",
+      "held": "i uka til retting",
+      "heldNone": "ingen tid satt av til retting",
+      "heldUnread": "rettetiden kunne ikke leses",
+      "heldHint": "Tid satt av til retting, i snitt over de neste {weeks} ukene"
     },
     "groups": {
       "title": "Grupper",
@@ -491,6 +496,37 @@
       "saved": "Kursets retningslinjer for retting er lagret.",
       "saveFailed": "Kursets retningslinjer for retting kunne ikke lagres.",
       "failed": "Kursets retningslinjer for retting kunne ikke leses."
+    },
+    "effort": {
+      "title": "Minutter per innlevering",
+      "sub": "Hvor lenge en lærer bruker på ett arbeid av hver type. Retteprognosen ganger køen med disse; skolens median tar over når {min} vurderinger på {days} dager står bak den.",
+      "type": "Type",
+      "minutes": "Startverdi",
+      "min": "min",
+      "source": {
+        "school": "Satt av skolen",
+        "default": "Standardverdi",
+        "other": "Som andre typer"
+      },
+      "measured": {
+        "title": "Målt på skolen",
+        "unavailable": "Målingene kunne ikke leses",
+        "none": "Ingen tidtatte vurderinger ennå",
+        "tooFew": "{n} av {min} tidtatte vurderinger — verdien brukes",
+        "median": "Median {minutes} min · {n} vurderinger",
+        "inUse": "Prognosen bruker medianen"
+      },
+      "other": "Andre typer",
+      "otherHint": "Alle typer som ikke står her",
+      "informationTransfer": "Informasjonsoverføring",
+      "emptyHint": "Et tomt felt er standardverdien; tøm et felt for å gå tilbake til den.",
+      "bounds": "Hele minutter fra {min} til {max}.",
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "saved": "Minuttene per innlevering er lagret.",
+      "saveFailed": "Minuttene per innlevering kunne ikke lagres.",
+      "failed": "Minuttene per innlevering kunne ikke leses.",
+      "readOnly": "Bare eieren og administratorene kan endre dette."
     }
   },
   "student": {

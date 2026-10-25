@@ -10,6 +10,8 @@ import type { AvailabilityBlock, Absence } from "../../types";
 import { WeeklyGrid, type Lesson } from "./weekly-grid";
 import { AvailabilityEditor } from "./availability-editor";
 import { AbsenceReportForm } from "./absence-report-form";
+import { TeacherReviewBlocks } from "./teacher-review-blocks";
+import type { HeldTime } from "@/features/schedule/lib/held-time";
 
 type TeacherScheduleClientProps = {
   schoolId: string;
@@ -17,9 +19,11 @@ type TeacherScheduleClientProps = {
   availabilityBlocks: AvailabilityBlock[];
   absences: Absence[];
   lessons: Lesson[];
+  /** The teacher's time for marking in this school (plan 81, step 7). */
+  reviewBlocks: { held: HeldTime; error: boolean; from: string };
 };
 
-type PanelId = "grid" | "availability" | "absence";
+type PanelId = "grid" | "review" | "availability" | "absence";
 
 export function TeacherScheduleClient({
   schoolId,
@@ -27,6 +31,7 @@ export function TeacherScheduleClient({
   availabilityBlocks,
   absences,
   lessons,
+  reviewBlocks,
 }: TeacherScheduleClientProps) {
   const t = useTranslations("Teachers.schedule");
   const router = useRouter();
@@ -55,7 +60,7 @@ export function TeacherScheduleClient({
         role="tablist"
         aria-label={t("title")}
       >
-        {(["grid", "availability", "absence"] as PanelId[])
+        {(["grid", "review", "availability", "absence"] as PanelId[])
           .filter((panel) => panel !== "availability" || TEACHER_AVAILABILITY_ENABLED)
           .map((panel) => {
           const isActive = activePanel === panel;
@@ -74,6 +79,7 @@ export function TeacherScheduleClient({
               ].join(" ")}
             >
               {panel === "grid" && t("title")}
+              {panel === "review" && t("reviewBlocks.tab")}
               {panel === "availability" && t("availabilityEditor")}
               {panel === "absence" && t("reportAbsence")}
             </button>
@@ -86,6 +92,16 @@ export function TeacherScheduleClient({
         <WeeklyGrid
           availabilityBlocks={availabilityBlocks}
           lessons={lessons}
+        />
+      )}
+
+      {activePanel === "review" && (
+        <TeacherReviewBlocks
+          schoolId={schoolId}
+          teacherId={teacherId}
+          held={reviewBlocks.held}
+          error={reviewBlocks.error}
+          from={reviewBlocks.from}
         />
       )}
 

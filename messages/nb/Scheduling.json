@@ -79,6 +79,78 @@
       "all": "Hele timeplanen →",
       "none": "Ingenting planlagt de neste {days} dagene.",
       "noTopic": "Uten tema ennå"
+    },
+    "reviewBlocks": {
+      "add": "Sett av tid til retting",
+      "title": "Retting",
+      "weekly": "Hver uke",
+      "overlapsHint": "Kolliderer med en time eller en annen blokk",
+      "count": "{count, plural, one {# rettebolk} other {# rettebolker}}",
+      "loadFailed": "Vi fikk ikke lest rettetiden din. Timene vises; prøv igjen for resten.",
+      "dialog": {
+        "title": "Tid til retting",
+        "editTitle": "Endre rettetiden",
+        "description": "Tid i uken til å rette elevenes arbeid. Elevene ser den ikke.",
+        "editSeriesDescription": "Dette endrer hver uke i serien, også de som har vært. Vil du beholde fortiden som den var, sett en sluttdato her og legg inn en ny blokk.",
+        "repeat": "Hvor ofte",
+        "weekly": "Hver uke",
+        "oneOff": "Én gang",
+        "day": "Dag",
+        "firstDay": "Første dag",
+        "everyWeekday": "Hver {weekday}",
+        "until": "Til og med (valgfritt)",
+        "untilHint": "La stå tomt for en serie uten slutt.",
+        "from": "Fra",
+        "to": "Til",
+        "note": "Notat (valgfritt)",
+        "notePlaceholder": "For eksempel stiler fra B1-gruppene",
+        "cancel": "Avbryt",
+        "submit": "Sett av",
+        "save": "Lagre",
+        "created": "Tiden er lagt inn i uken din.",
+        "saved": "Rettetiden er endret.",
+        "createFailed": "Kunne ikke sette av tiden.",
+        "saveFailed": "Kunne ikke endre tiden.",
+        "descriptionForTeacher": "Tid i lærerens uke til å rette elevenes arbeid. Elevene ser den ikke.",
+        "createdForTeacher": "Tiden ligger i lærerens uke."
+      },
+      "actions": {
+        "label": "Handlinger for {label}",
+        "edit": "Endre",
+        "editSeries": "Endre serien",
+        "skipDay": "Ikke denne gangen",
+        "skipped": "Dagen er tatt ut av serien.",
+        "remove": "Fjern",
+        "removeSeries": "Fjern serien",
+        "removeTitle": "Fjerne denne rettetiden?",
+        "removeSeriesTitle": "Fjerne hele serien?",
+        "removeDescription": "Blokken forsvinner fra uken din.",
+        "removeSeriesDescription": "Alle ukene forsvinner, også de som har vært. Vil du bare ta ut én dag, bruk «Ikke denne gangen».",
+        "removeConfirm": "Fjern",
+        "removed": "Rettetiden er fjernet.",
+        "back": "Tilbake",
+        "failed": "Kunne ikke endre rettetiden.",
+        "removeDescriptionForTeacher": "Blokken forsvinner fra lærerens uke.",
+        "removeSeriesDescriptionForTeacher": "Alle ukene i serien forsvinner fra lærerens timeplan, også de som har vært."
+      },
+      "errors": {
+        "endTimeNotAfterStart": "Blokken må slutte etter at den starter, samme dag.",
+        "endsBeforeStart": "En serie kan ikke slutte før første dag.",
+        "oneOffSpansDays": "En enkeltblokk varer én dag.",
+        "invalidTime": "Klokkeslett går fra 00:00 til 23:59.",
+        "targetNotReviewer": "Du retter ikke arbeid i dette arbeidsområdet, så det er ingenting å sette av tid til.",
+        "oneOffCannotSkip": "En enkeltblokk kan ikke hoppe over sin eneste dag — fjern den i stedet.",
+        "notAnOccurrence": "Serien faller ikke på denne dagen.",
+        "targetNotReviewerForTeacher": "Denne personen retter ikke arbeid på skolen, så det er ingen tid å sette av."
+      }
+    },
+    "forecast": {
+      "queue": "{count, plural, one {# innlevering} other {# innleveringer}} venter ≈ {hours} t",
+      "empty": "Ingenting venter på retting",
+      "held": "{hours} t satt av til retting resten av uka",
+      "overloaded": "Det venter merkbart mer enn tiden som er satt av: sett av mer tid til retting, eller be skolen om hjelp.",
+      "shared": "Arbeid fra grupper du retter sammen med en kollega, telles hos hver av dere.",
+      "failed": "Rettekøen kunne ikke leses, så det vises ingen prognose."
     }
   }
 }

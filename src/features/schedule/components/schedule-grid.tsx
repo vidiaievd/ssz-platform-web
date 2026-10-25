@@ -1,13 +1,18 @@
 import { getTranslations, getFormatter } from 'next-intl/server';
 
 import { SessionCard } from './session-card';
+import { ReviewBlockCard } from './review-block-card';
 import { byDay, type DateRange, type RangeKind } from '../lib/range';
+import { dayItems, overlappingSittings, sittingKey } from '../lib/day-items';
 import type { ScheduleSession } from '../api/get-my-schedule';
+import type { ReviewBlockWindow } from '@/lib/scheduling/provider';
 
 type Props = {
   kind: RangeKind;
   range: DateRange;
   sessions: ScheduleSession[];
+  /** The teacher's time for marking in the same window (plan 81). */
+  reviewBlocks: ReviewBlockWindow;
   workspaceId: string;
   /** Today, so the current day can be marked without the component asking the clock. */
   today: string;
@@ -23,9 +28,19 @@ type Props = {
  * Days with nothing on them stay on the screen. A week drawn only from the days that have
  * lessons reads as a full week to someone scanning it.
  */
-export async function ScheduleGrid({ kind, range, sessions, workspaceId, today }: Props) {
+export async function ScheduleGrid({
+  kind,
+  range,
+  sessions,
+  reviewBlocks,
+  workspaceId,
+  today,
+}: Props) {
   const [t, format] = await Promise.all([getTranslations('Scheduling.my'), getFormatter()]);
-  const days = byDay(range, sessions);
+  const days = byDay(range, dayItems(sessions, reviewBlocks.occurrences));
+
+  const rules = new Map(reviewBlocks.blocks.map((block) => [block.id, block]));
+  const overlapping = overlappingSittings(reviewBlocks.overlaps);
 
   // A month is a calendar, so its first day has to sit under its own weekday; a grid that
   // simply flows would put the 1st under Monday whatever day it fell on. A week needs no
@@ -68,9 +83,23 @@ export async function ScheduleGrid({ kind, range, sessions, workspaceId, today }
             </p>
 
             <div className="space-y-1.5">
-              {items.map((session) => (
-                <SessionCard key={session.id} session={session} workspaceId={workspaceId} />
-              ))}
+              {items.map((item) =>
+                item.kind === 'session' ? (
+                  <SessionCard
+                    key={item.session.id}
+                    session={item.session}
+                    workspaceId={workspaceId}
+                  />
+                ) : (
+                  <ReviewBlockCard
+                    key={sittingKey(item.occurrence.blockId, item.date)}
+                    occurrence={item.occurrence}
+                    block={rules.get(item.occurrence.blockId)}
+                    overlaps={overlapping.has(sittingKey(item.occurrence.blockId, item.date))}
+                    workspaceId={workspaceId}
+                  />
+                ),
+              )}
             </div>
           </section>
         );

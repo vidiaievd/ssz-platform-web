@@ -80,6 +80,12 @@ export interface OversightTeacher {
    * nothing was, or when the school's journal could not be read or attributed.
    */
   terms: OversightTermTally | null;
+  /**
+   * Hours a week this teacher holds for marking in the weeks ahead (plan 81) — 0 when they
+   * hold none. Null when the school's timetable could not be read: a zero here would be the
+   * one wrong answer that looks like an answer.
+   */
+  heldHoursPerWeek: number | null;
 }
 
 export interface OversightGroup {
@@ -142,6 +148,11 @@ export interface ReviewOversightResponse {
   /** Every waiting age in the school, counted once each. */
   ages: number[];
   teachers: OversightTeacher[];
+  /**
+   * How many weeks ahead `heldHoursPerWeek` is averaged over; null when the timetable could
+   * not be read and every row's figure is null with it.
+   */
+  heldWeeks: number | null;
   groups: OversightGroup[];
   courses: OversightCourse[];
   stuck: OversightStuck[];
@@ -244,4 +255,42 @@ export interface CourseReviewSettings {
   respondWithinHours: number | null;
   inheritedHours: number | null;
   overridden: boolean;
+}
+
+/** Whose a starting figure is: the school's own, or the factory value it has not changed. */
+export type ReviewEffortSource = 'school' | 'default';
+
+/**
+ * Minutes per submission a school expects, by template (plan 81, Q5) — the starting figure
+ * a review forecast uses until the school's own measurements take over.
+ */
+export interface SchoolReviewEffortMinutes {
+  templates: { templateCode: string; minutes: number; source: ReviewEffortSource }[];
+  /** For a template on no list. */
+  other: { minutes: number; source: ReviewEffortSource };
+}
+
+/** What the school's own verdicts say about one template (exercise-engine `review/effort`). */
+export interface ReviewEffortMeasurement {
+  templateCode: string;
+  /** Timed verdicts in the window, also when too few to trust. */
+  sampleSize: number;
+  /** The median, once `sampleSize` reaches `minSample`; null until then. */
+  medianMinutes: number | null;
+}
+
+/** The settings screen's read: the school's figures, and beside them what it has measured. */
+export interface SchoolReviewEffort extends SchoolReviewEffortMinutes {
+  /** Null when the measurements could not be read; the figures are still shown. */
+  measured: {
+    historyDays: number;
+    minSample: number;
+    templates: ReviewEffortMeasurement[];
+  } | null;
+}
+
+/** The form's write, whole: a template left out goes back to the factory figure. */
+export interface SchoolReviewEffortInput {
+  templates: Record<string, number>;
+  other: number | null;
 }

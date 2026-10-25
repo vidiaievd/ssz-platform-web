@@ -4,9 +4,14 @@ import { getFormatter, getTranslations } from 'next-intl/server';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
-import { getMySchedule } from '@/features/schedule/api/get-my-schedule';
+import {
+  getMyQueueForecast,
+  getMyReviewBlocks,
+  getMySchedule,
+} from '@/features/schedule/api/get-my-schedule';
 import { ScheduleGrid } from '@/features/schedule/components/schedule-grid';
 import { AddLessonDialog } from '@/features/schedule/components/add-lesson-dialog';
+import { AddReviewBlockButton } from '@/features/schedule/components/add-review-block-button';
 import { getGroupsForSelect } from '@/features/students/api/queries';
 import { isoDay, parseDay, rangeOf, shift, type RangeKind } from '@/features/schedule/lib/range';
 import { Button } from '@/components/ui/button';
@@ -37,10 +42,21 @@ export default async function SchedulePage({ params, searchParams }: Props) {
   const anchor = parseDay(on) ?? today;
   const range = rangeOf(kind, anchor);
 
-  const [{ sessions, error }, groups] = await Promise.all([
+  const [{ sessions, error }, reviewBlocks, groups] = await Promise.all([
     getMySchedule(workspace.id, range),
+    getMyReviewBlocks(workspace.id, range),
     getGroupsForSelect(workspace.id),
   ]);
+
+  // The queue is today's, so it is weighed only against the week it has to be done in:
+  // what is left of this one. Another week, or a month, has no queue to set beside it. A
+  // failed read of the blocks already says so, and zero held hours would be a false alarm.
+  const todayIso = isoDay(today);
+  const forecast =
+    kind === 'week' && range.from <= todayIso && todayIso <= range.to && !reviewBlocks.error
+      ? await getMyQueueForecast(workspace.id, reviewBlocks, { from: todayIso, to: range.to })
+      : null;
+  const hours = (value: number) => format.number(value, { maximumFractionDigits: 1 });
 
   // Whom an extra lesson can be with: everybody the tutor actually teaches. The group the
   // workspace keeps for itself holds all of them and teaches none, so it is not offered.
@@ -74,7 +90,8 @@ export default async function SchedulePage({ params, searchParams }: Props) {
           <p className="mt-1 text-sm text-muted-foreground">{t('subtitle')}</p>
         </div>
 
-        {/* Two scales of one question, the way back to now, and one more lesson. */}
+        {/* Two scales of one question, the way back to now, one more lesson, and time to
+            mark what the lessons produce (plan 81). */}
         <div className="flex flex-wrap items-center gap-2">
           <div className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5">
             <Button
@@ -109,6 +126,7 @@ export default async function SchedulePage({ params, searchParams }: Props) {
             </Link>
           </Button>
 
+          <AddReviewBlockButton workspaceId={workspace.id} defaultDate={isoDay(anchor)} />
           <AddLessonDialog
             workspaceId={workspace.id}
             targets={targets}
@@ -121,16 +139,60 @@ export default async function SchedulePage({ params, searchParams }: Props) {
         {rangeLabel}
         <span className="ml-2 font-normal text-muted-foreground">
           {t('count', { count: sessions.length })}
+          {reviewBlocks.occurrences.length > 0 &&
+            ` · ${t('reviewBlocks.count', { count: reviewBlocks.occurrences.length })}`}
         </span>
       </p>
+
+      {forecast === 'failed' ? (
+        <p className="text-sm text-muted-foreground">{t('forecast.failed')}</p>
+      ) : (
+        forecast && (
+          <div
+            className={
+              forecast.overloaded
+                ? 'rounded-lg border border-warning-300 bg-warning-50 p-3 text-sm text-warning-700 dark:border-warning-800 dark:bg-warning-950/40 dark:text-warning-400'
+                : 'text-sm text-muted-foreground'
+            }
+          >
+            <p>
+              {forecast.pending === 0 ? (
+                t('forecast.empty')
+              ) : (
+                <Link
+                  href={wsHref(workspaceId, 'review')}
+                  className="underline-offset-2 hover:underline"
+                >
+                  {t('forecast.queue', {
+                    count: forecast.pending,
+                    hours: hours(forecast.hoursNeeded),
+                  })}
+                </Link>
+              )}
+              {' · '}
+              {t('forecast.held', { hours: hours(forecast.hoursHeld) })}
+            </p>
+            {forecast.overloaded && <p className="mt-1 font-medium">{t('forecast.overloaded')}</p>}
+            {forecast.shared && <p className="mt-1 text-xs">{t('forecast.shared')}</p>}
+          </div>
+        )
+      )}
+
+      {reviewBlocks.error && (
+        <p className="rounded-lg border border-warning-300 bg-warning-50 p-3 text-sm text-warning-700 dark:border-warning-800 dark:bg-warning-950/40 dark:text-warning-400">
+          {t('reviewBlocks.loadFailed')}
+        </p>
+      )}
 
       {error ? (
         <p className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {t('loadFailed')}
         </p>
-      ) : sessions.length === 0 ? (
+      ) : sessions.length === 0 && reviewBlocks.occurrences.length === 0 ? (
         <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border py-16 text-center">
-          <p className="text-base font-medium">{kind === 'month' ? t('emptyMonth') : t('emptyWeek')}</p>
+          <p className="text-base font-medium">
+            {kind === 'month' ? t('emptyMonth') : t('emptyWeek')}
+          </p>
           <p className="text-sm text-muted-foreground">{t('emptyBody')}</p>
         </div>
       ) : (
@@ -138,8 +200,9 @@ export default async function SchedulePage({ params, searchParams }: Props) {
           kind={kind}
           range={range}
           sessions={sessions}
+          reviewBlocks={reviewBlocks}
           workspaceId={workspaceId}
-          today={isoDay(today)}
+          today={todayIso}
         />
       )}
     </main>
