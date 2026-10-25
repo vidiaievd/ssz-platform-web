@@ -370,7 +370,8 @@
     "escalate": {
       "label": "Eskaler etter",
       "hint": "Når noen andre skal få beskjed om at svaret fortsatt mangler.",
-      "beforeRespond": "Eskaleringen kan ikke komme før selve løftet."
+      "beforeRespond": "Eskaleringen kan ikke komme før selve løftet.",
+      "afterAutoAccept": "I en modus med KI kan eskaleringen ikke komme etter fristen for automatisk godkjenning ({n} t)."
     },
     "escalateTo": {
       "label": "Eskaler til",
@@ -386,6 +387,45 @@
     "saveFailed": "Svartiden kunne ikke lagres.",
     "failed": "Svartiden kunne ikke leses.",
     "readOnly": "Bare eieren og administratorer kan endre dette.",
+    "policy": {
+      "title": "Hvem retter først",
+      "sub": "KI svarer med en gang, læreren bekrefter eller ser på et utvalg",
+      "mode": {
+        "teacher_only": {
+          "label": "Bare læreren",
+          "hint": "Arbeidet venter på en lærer, som før."
+        },
+        "ai_then_teacher": {
+          "label": "KI først, læreren bekrefter",
+          "hint": "Eleven ser KI-ens vurdering med en gang, merket «venter på læreren». Svarer ingen lærer innen fristen, teller KI-ens vurdering."
+        },
+        "ai_with_sampling": {
+          "label": "KI først, læreren ser et utvalg",
+          "hint": "KI-ens vurdering teller med en gang. Ikke godkjent arbeid, uenighet med den automatiske kontrollen, kursets avsluttende arbeid og en tilfeldig andel går til læreren."
+        }
+      },
+      "hours": "timer",
+      "autoAccept": {
+        "label": "Teller av seg selv etter",
+        "hint": "≈ {days} dager. Et kurs kan sette sin egen frist.",
+        "bounds": "Mellom {min} og {max} timer.",
+        "beforeEscalation": "Kan ikke komme før eskaleringen ({n} t)."
+      },
+      "sample": {
+        "label": "Tilfeldig andel til læreren",
+        "hint": "Av arbeidet KI godkjente, går denne andelen likevel til en lærer.",
+        "bounds": "Mellom {min} og {max} %."
+      },
+      "noCredits": "Skolens abonnement har ingen kreditter for KI-vurdering — inntil det har det, går alt arbeid til læreren.",
+      "notEntitled": "En modus med KI er lagret, men skolens abonnement inkluderer den ikke nå — lærerne retter alt.",
+      "save": "Lagre",
+      "cancel": "Avbryt",
+      "saved": "Retningslinjene for retting er lagret.",
+      "saveFailed": "Retningslinjene for retting kunne ikke lagres.",
+      "saveInvalid": "Tjenesten avviste disse tallene — sjekk fristene mot eskaleringen.",
+      "saveNotEntitled": "Skolens abonnement inkluderer ikke retting med KI.",
+      "failed": "Retningslinjene for retting kunne ikke leses."
+    },
     "course": {
       "title": "Svartid",
       "lede": "Hvor lenge dette kurset lover at en elev venter på et svar.",

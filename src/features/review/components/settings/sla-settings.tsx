@@ -7,11 +7,13 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCan } from '@/features/entitlements';
 
 import { AgeSpread } from '../age-spread';
 import { Panel } from '../primitives';
 import { reviewKeys } from '../../api/keys';
 import {
+  useSchoolReviewPolicy,
   useSchoolReviewSettings,
   useSaveSchoolReviewSettings,
 } from '../../api/use-review-settings';
@@ -50,6 +52,10 @@ export function SlaSettings({ school, canEdit }: SlaSettingsProps) {
 
   const { data, isPending, isError } = useSchoolReviewSettings(school);
   const save = useSaveSchoolReviewSettings(school);
+  // Read only to keep the escalation before the auto-accept term (plan 80, Q2-A); a school
+  // without the plan key has no term to stay before.
+  const can = useCan();
+  const policy = useSchoolReviewPolicy(school, can('school.review_ai_policy'));
 
   // The edit, if there is one — not a copy of the server's answer kept in step with it.
   // Nothing is held here until somebody types, so the fields read from the query until
@@ -77,8 +83,16 @@ export function SlaSettings({ school, canEdit }: SlaSettingsProps) {
       : null;
 
   // The escalation is a second warning about the same promise, so it cannot come first.
+  const autoAcceptAfterHours =
+    policy.data !== undefined && policy.data.mode !== 'teacher_only'
+      ? policy.data.autoAcceptAfterHours
+      : null;
   const escalateError =
-    form.escalateAfterHours < form.respondWithinHours ? t('escalate.beforeRespond') : null;
+    form.escalateAfterHours < form.respondWithinHours
+      ? t('escalate.beforeRespond')
+      : autoAcceptAfterHours !== null && form.escalateAfterHours > autoAcceptAfterHours
+        ? t('escalate.afterAutoAccept', { n: autoAcceptAfterHours })
+        : null;
 
   const invalid = respondError !== null || escalateError !== null;
 

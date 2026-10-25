@@ -152,6 +152,25 @@ export interface SchoolReviewSettings {
   escalateTo: 'school_admins' | 'owner' | 'primary_teacher';
 }
 
+/** Who answers a learner's work first (plan 80, R1). */
+export type ReviewAiMode = 'teacher_only' | 'ai_then_teacher' | 'ai_with_sampling';
+
+/**
+ * How a school uses a model to answer work, beside the promise of a person's answer.
+ *
+ * Kept apart from `SchoolReviewSettings` the way organization-service keeps it: the promise
+ * is every school's, the modes with a model come with the plan (`school.review_ai_policy`).
+ * The hours and the share are stored whatever the mode, so turning the model off and on
+ * again finds them where they were left.
+ */
+export interface SchoolReviewAiPolicy {
+  mode: ReviewAiMode;
+  /** After this, a model's provisional verdict counts by itself. Never before the escalation. */
+  autoAcceptAfterHours: number;
+  /** Share of `ai_with_sampling` work sent to the teacher at random, 0–100. */
+  samplePercent: number;
+}
+
 /**
  * A course's promise, always alongside the one it would inherit.
  *

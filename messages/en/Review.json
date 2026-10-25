@@ -370,7 +370,8 @@
     "escalate": {
       "label": "Escalate after",
       "hint": "When to tell someone else that there is still no answer.",
-      "beforeRespond": "Escalation cannot come before the promise itself."
+      "beforeRespond": "Escalation cannot come before the promise itself.",
+      "afterAutoAccept": "In a mode with a model, escalation cannot come after the auto-accept term ({n} h)."
     },
     "escalateTo": {
       "label": "Escalate to",
@@ -386,6 +387,45 @@
     "saveFailed": "The response time could not be saved.",
     "failed": "The response time could not be read.",
     "readOnly": "Only the owner and administrators can change this.",
+    "policy": {
+      "title": "Who checks first",
+      "sub": "A model can answer at once; the teacher confirms or looks at a sample",
+      "mode": {
+        "teacher_only": {
+          "label": "Teacher only",
+          "hint": "Work waits for a teacher, as before."
+        },
+        "ai_then_teacher": {
+          "label": "Model first, teacher confirms",
+          "hint": "The learner sees the model's review at once, marked as waiting for the teacher. If no teacher answers by the term, the model's verdict counts."
+        },
+        "ai_with_sampling": {
+          "label": "Model first, teacher sees a sample",
+          "hint": "The model's verdict counts at once. Failed work, disagreements with the automatic check, the course's final work and a random share go to the teacher."
+        }
+      },
+      "hours": "hours",
+      "autoAccept": {
+        "label": "Counts by itself after",
+        "hint": "≈ {days} days. Courses can set their own term.",
+        "bounds": "Between {min} and {max} hours.",
+        "beforeEscalation": "Cannot come before the escalation ({n} h)."
+      },
+      "sample": {
+        "label": "Random share to the teacher",
+        "hint": "Of the work the model passed, this share still goes to a teacher.",
+        "bounds": "Between {min} and {max} %."
+      },
+      "noCredits": "The school's plan has no AI review credits — until it does, every piece of work goes to the teacher.",
+      "notEntitled": "A mode with a model is saved, but the school's plan does not include it now — teachers check all work.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "The review policy is saved.",
+      "saveFailed": "The review policy could not be saved.",
+      "saveInvalid": "The service refused these numbers — check the terms against the escalation.",
+      "saveNotEntitled": "The school's plan does not include review by a model.",
+      "failed": "The review policy could not be read."
+    },
     "course": {
       "title": "Response time",
       "lede": "How long this course promises a learner will wait for a verdict.",
