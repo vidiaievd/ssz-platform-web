@@ -153,7 +153,11 @@ export function AiDraftBanner({ binding }: { binding: AiDraftBinding }) {
         </Button>
       </div>
 
-      <p className="text-[12px] text-muted-foreground">{t('hint')}</p>
+      <p className="text-[12px] text-muted-foreground">
+        {/* A review the learner has read already (plan 80) is not a private draft: what
+            "only what you accept" promised is no longer true of it. */}
+        {draft.shownToLearner === true ? t('hintShown') : t('hint')}
+      </p>
 
       {summary === '' ? null : (
         <div className="flex flex-wrap items-start gap-2">

@@ -137,6 +137,7 @@
       "count": "{count, plural, one {# remark} other {# remarks}}",
       "none": "no remarks",
       "hint": "The student sees only what you take into a comment.",
+      "hintShown": "The student has already seen this review. Your verdict replaces it; whatever you accept here goes into your comment.",
       "discardDraft": "Discard draft",
       "draftDiscarded": "AI draft discarded.",
       "restore": "Restore",
@@ -161,6 +162,19 @@
       "wholeText": "about the whole text",
       "wholeAnswer": "about the whole answer",
       "editLabel": "Goes into the overall comment"
+    },
+    "aiVerdict": {
+      "approved": "accepted",
+      "returned": "returned for revision",
+      "provisional": {
+        "title": "The student has already seen the AI verdict: {outcome} ({at})",
+        "term": "If nobody answers by {at}, it counts by itself. Your verdict replaces it.",
+        "noTerm": "It waits for your verdict and will not count by itself."
+      },
+      "acceptedAtTerm": {
+        "title": "Counted at the term: {outcome}",
+        "body": "No teacher answered in time, so the AI verdict counted. Your verdict replaces it in the student’s progress and feedback; memory has already taken this answer into account and will not change again."
+      }
     }
   },
   "rubric": {

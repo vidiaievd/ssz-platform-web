@@ -72,6 +72,9 @@ const BASE: ReviewSubmission = {
     createdAt: new Date().toISOString(),
   },
   submittedAnswer: {},
+  aiVerdict: null,
+  autoAcceptAt: null,
+  acceptedAtTerm: false,
   canDecide: true,
 };
 
@@ -257,6 +260,15 @@ describe('AI draft on the review card', () => {
 
     expect(await screen.findByText('I går jeg var på jobb.')).toBeInTheDocument();
     expect(screen.queryByText('V2: verbet står på andre plass.')).not.toBeInTheDocument();
+  });
+
+  it('draws a review the learner has already read without the draft key, and says so', async () => {
+    upstream({ aiDraft: { ...BASE.aiDraft!, shownToLearner: true } });
+    renderPanel(null);
+
+    expect(await screen.findByText('V2: verbet står på andre plass.')).toBeInTheDocument();
+    expect(screen.getByText(/The student has already seen this review/)).toBeInTheDocument();
+    expect(screen.queryByText(/sees only what you take/)).not.toBeInTheDocument();
   });
 
   it('is the card as it was once a verdict stands', async () => {

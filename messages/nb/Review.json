@@ -137,6 +137,7 @@
       "count": "{count, plural, one {# merknad} other {# merknader}}",
       "none": "ingen merknader",
       "hint": "Eleven ser bare det du tar inn i en kommentar.",
+      "hintShown": "Eleven har allerede sett denne vurderingen. Din vurdering erstatter den, og det du godtar her, går inn i kommentaren din.",
       "discardDraft": "Forkast utkastet",
       "draftDiscarded": "KI-utkastet er forkastet.",
       "restore": "Angre",
@@ -161,6 +162,19 @@
       "wholeText": "om hele teksten",
       "wholeAnswer": "om hele svaret",
       "editLabel": "Legges til i den samlede kommentaren"
+    },
+    "aiVerdict": {
+      "approved": "godkjent",
+      "returned": "sendt tilbake",
+      "provisional": {
+        "title": "Eleven har allerede sett KI-vurderingen: {outcome} ({at})",
+        "term": "Svarer ingen innen {at}, teller den av seg selv. Din vurdering erstatter den.",
+        "noTerm": "Den venter på din vurdering og teller ikke av seg selv."
+      },
+      "acceptedAtTerm": {
+        "title": "Godkjent ved fristen: {outcome}",
+        "body": "Ingen lærer svarte innen fristen, så KI-vurderingen talte. Din vurdering erstatter den i elevens fremgang og tilbakemelding; hukommelsen har allerede tatt med dette svaret og endres ikke igjen."
+      }
     }
   },
   "rubric": {

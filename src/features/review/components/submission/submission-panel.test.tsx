@@ -44,6 +44,9 @@ const BASE: ReviewSubmission = {
   playback: null,
   aiDraft: null,
   submittedAnswer: {},
+  aiVerdict: null,
+  autoAcceptAt: null,
+  acceptedAtTerm: false,
   canDecide: true,
 };
 
@@ -179,5 +182,61 @@ describe('SubmissionPanel', () => {
 
     unmount();
     expect(calls().some(([, init]) => init?.method === 'DELETE')).toBe(true);
+  });
+
+  describe('a model answered first (plan 80)', () => {
+    const AI_VERDICT = {
+      outcome: 'approved' as const,
+      comment: 'Godt jobbet.',
+      at: '2026-10-24T09:00:00Z',
+    };
+
+    it('says the learner has seen the model’s verdict, and when it counts by itself', async () => {
+      upstream({ aiVerdict: AI_VERDICT, autoAcceptAt: '2026-10-31T09:00:00Z' });
+      renderPanel();
+
+      expect(
+        await screen.findByText(/The student has already seen the AI verdict: accepted/),
+      ).toBeInTheDocument();
+      expect(screen.getByText(/If nobody answers by .*Oct 31, 2026/)).toBeInTheDocument();
+    });
+
+    it('keeps work counted at the term open, and says the verdict changes progress, not memory', async () => {
+      upstream({
+        status: 'SCORED',
+        aiVerdict: AI_VERDICT,
+        autoAcceptAt: '2026-10-24T09:00:00Z',
+        acceptedAtTerm: true,
+      });
+      renderPanel();
+
+      expect(await screen.findByText('Counted at the term: accepted')).toBeInTheDocument();
+      expect(screen.getByText(/memory has already taken this answer/)).toBeInTheDocument();
+      // Still a card to decide on: the marker is claimed as on any open submission.
+      const claims = vi
+        .mocked(fetch)
+        .mock.calls.filter(
+          ([input, init]) => String(input).includes('/lock') && init?.method === 'POST',
+        );
+      expect(claims.length).toBeGreaterThan(0);
+    });
+
+    it('says nothing about the model once a teacher’s verdict stands', async () => {
+      upstream({
+        aiVerdict: AI_VERDICT,
+        decision: {
+          attemptId: 'att-1',
+          outcome: 'approved',
+          at: new Date().toISOString(),
+          reviewerId: 't9',
+          reviewerName: 'Marius Berg',
+          comment: null,
+        },
+      });
+      renderPanel();
+
+      expect(await screen.findByText('Marius Berg has just reviewed this')).toBeInTheDocument();
+      expect(screen.queryByText(/AI verdict/)).not.toBeInTheDocument();
+    });
   });
 });

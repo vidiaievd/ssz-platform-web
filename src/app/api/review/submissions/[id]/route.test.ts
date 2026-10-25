@@ -69,6 +69,9 @@ function upstream(
           text?: string | null;
           rubricSnapshot?: unknown;
           rubricMarks?: unknown;
+          aiVerdict?: unknown;
+          autoAcceptAt?: string | null;
+          acceptedAtTerm?: boolean;
         })
       | 'missing';
     scopeNow?: string[];
@@ -244,6 +247,42 @@ describe('GET /api/review/submissions/[id]', () => {
 
     expect(body.rubric).toBeNull();
     expect(body.rubricMarks).toBeNull();
+  });
+
+  it('hands the screen the model’s verdict the learner saw, its term, and whether it counted', async () => {
+    upstream({
+      submission: {
+        status: 'SCORED',
+        aiVerdict: {
+          outcome: 'approved',
+          decisions: [{ itemId: 'i1', approved: true }],
+          comment: 'Godt jobbet.',
+          at: '2026-10-24T09:00:00Z',
+          model: { capability: 'review_direct', modelId: 'fake', promptVersion: 'review_direct@2' },
+        },
+        autoAcceptAt: '2026-10-31T09:00:00Z',
+        acceptedAtTerm: true,
+      },
+    });
+    const body = await (await call()).json();
+
+    // Only what the card says: the rulings and the model's axes stay with the verdict.
+    expect(body.aiVerdict).toEqual({
+      outcome: 'approved',
+      comment: 'Godt jobbet.',
+      at: '2026-10-24T09:00:00Z',
+    });
+    expect(body.autoAcceptAt).toBe('2026-10-31T09:00:00Z');
+    expect(body.acceptedAtTerm).toBe(true);
+  });
+
+  it('reads an engine without the review policy as no model verdict', async () => {
+    upstream();
+    const body = await (await call()).json();
+
+    expect(body.aiVerdict).toBeNull();
+    expect(body.autoAcceptAt).toBeNull();
+    expect(body.acceptedAtTerm).toBe(false);
   });
 
   it('does not reveal whether an attempt of another school exists', async () => {
