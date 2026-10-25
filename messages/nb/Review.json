@@ -261,7 +261,10 @@
       "median": "Median svartid",
       "medianSub": "siste {n} dager",
       "medianNone": "ingenting ble besvart i denne perioden",
-      "truncated": "Skolen har mer som venter enn denne skjermen teller. Formen stemmer; totalene stopper ved taket."
+      "truncated": "Skolen har mer som venter enn denne skjermen teller. Formen stemmer; totalene stopper ved taket.",
+      "terms": "Godkjent ved fristen",
+      "termsSub": "KI-vurderingen telte av seg selv · {revised} vurdert på nytt av lærer, {overturned} endret",
+      "termsUnattributed": "{n} i grupper uten lærer den dagen"
     },
     "spread": {
       "title": "Hele køen etter alder"
@@ -280,10 +283,13 @@
       "noMedian": "besvarte ingenting i denne perioden",
       "shared": "deler køen med en kollega",
       "remind": "Minn på",
-      "addReviewer": "Legg til en retter",
       "reminded": "Minnet {name} på — {n, plural, one {# innlevering} other {# innleveringer}} venter",
       "remindedAlready": "Allerede minnet på i dag. Neste kan gå om omtrent {hours, plural, one {# time} other {# timer}}.",
-      "remindFailed": "Påminnelsen kunne ikke sendes."
+      "remindFailed": "Påminnelsen kunne ikke sendes.",
+      "subTerms": "Hvem som har det travelt, ser du på halen — og på arbeid fristen godkjente før noen leste det.",
+      "terms": "godkjent ved fristen",
+      "termsRevised": "{revised} vurdert på nytt · {overturned} endret",
+      "addHelper": "Legg til en hjelper"
     },
     "groups": {
       "title": "Grupper",
@@ -367,7 +373,8 @@
       "submitting": "Legger til…",
       "failed": "Retteren kunne ikke legges til.",
       "assigned": "Lagt til — gruppens kø er nå deres også.",
-      "forTeacher": "Sammen med {name}"
+      "helperTitle": "En hjelper for {name}",
+      "helperFor": "En lærer til i gruppene til {name}: køen deles, og arbeid slutter å nå fristen uten at noen har lest det."
     }
   },
   "settings": {

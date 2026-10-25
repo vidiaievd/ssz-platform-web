@@ -34,7 +34,16 @@ export type AssignTarget =
       /** The learner was in no group: the form cannot help, and the dialog says why. */
       unassigned: boolean;
     }
-  | { kind: 'teacher'; teacherName: string | null };
+  | {
+      kind: 'teacher';
+      teacherId: string;
+      teacherName: string | null;
+      /**
+       * The groups this teacher holds — where a helper for them can go (plan 80, Q3: a
+       * helper is a second teacher of the group). Empty falls back to the screen's groups.
+       */
+      groups: { id: string; name: string }[];
+    };
 
 export interface AssignReviewerDialogProps {
   /** The school's id — the assignment endpoint takes ids, and oversight answers with one. */
@@ -83,16 +92,26 @@ export function AssignReviewerDialog({
   const open = target !== null;
   const unassigned = target?.kind === 'submission' && target.unassigned;
 
+  // A helper for a colleague goes into that colleague's groups, and is someone else.
+  const helping = target?.kind === 'teacher' ? target : null;
+  const choices =
+    helping === null ? teachers : teachers?.filter((t) => t.userId !== helping.teacherId);
+  const groupChoices = helping !== null && helping.groups.length > 0 ? helping.groups : groups;
+
   return (
     <Dialog open={open} onOpenChange={(next) => !next && onClose()}>
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
+          <DialogTitle>
+            {helping === null
+              ? t('title')
+              : t('helperTitle', { name: helping.teacherName ?? t('someone') })}
+          </DialogTitle>
           <DialogDescription>
             {target === null
               ? null
               : target.kind === 'teacher'
-                ? t('forTeacher', { name: target.teacherName ?? t('someone') })
+                ? t('helperFor', { name: target.teacherName ?? t('someone') })
                 : t('for', {
                     student: target.studentName ?? t('someone'),
                     exercise: target.exerciseTitle ?? t('someExercise'),
@@ -110,14 +129,17 @@ export function AssignReviewerDialog({
               {t('banner.body')}
             </Note>
 
-            {isPending || teachers === undefined ? (
+            {isPending || choices === undefined ? (
               <Skeleton className="h-64 w-full rounded-lg" />
             ) : (
               <AssignTeacherForm
                 schoolId={schoolId}
-                groups={groups}
+                // Keyed by target: the form keeps its own choice of group, and a second
+                // opening for another colleague must not inherit the first one's.
+                key={helping?.teacherId ?? 'submission'}
+                groups={groupChoices}
                 initialGroupId={target?.kind === 'submission' ? target.groupId : null}
-                teachers={teachers}
+                teachers={choices}
                 labels={{
                   group: t('group'),
                   teacher: t('teacher'),

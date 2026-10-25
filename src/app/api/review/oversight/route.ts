@@ -22,6 +22,7 @@ import {
   type OversightPeriod,
   type OversightStuck,
   type OversightTeacher,
+  type OversightTermTally,
   type ReviewOversightResponse,
 } from '@/features/review/types/oversight';
 
@@ -42,6 +43,12 @@ interface EngineAggregate {
 /** Who may review each group, as organization-service alone can say. */
 interface EngineReviewers {
   groups: { groupId: string; teachers: { userId: string; name: string; role: string }[] }[];
+}
+
+/** analytics' reading of the auto-acceptance journal (plan 80, step 6b). */
+interface AnalyticsTerms extends OversightTermTally {
+  unattributed: number | null;
+  teachers: (OversightTermTally & { userId: string; name: string })[] | null;
 }
 
 /** One page of the school's queue — where the named rows of "stuck" come from. */
@@ -95,9 +102,10 @@ function remember(key: string, body: ReviewOversightResponse): void {
 /**
  * The shape of a school's review load, in one answer (`API_CONTRACT.md` §6).
  *
- * Five sources, one screen. exercise-engine reports *when* things were handed in and
+ * Six sources, one screen. exercise-engine reports *when* things were handed in and
  * answered; organization-service says who reviews which group and what the school
- * promised; content-service says which courses promised something else; the directory
+ * promised; content-service says which courses promised something else; analytics keeps
+ * the journal of work a model's verdict closed at the term (plan 80); the directory
  * supplies the names. The composition is the whole point — every figure on this screen
  * depends on at least two of them, and a browser asking each in turn would be authorised
  * by none.
@@ -162,12 +170,17 @@ export async function GET(request: NextRequest) {
     ...new Set(pending.map((bucket) => bucket.groupId).filter((id): id is string => id !== null)),
   ];
 
-  const [sla, reviewers, groupNames, courseTitles] = await Promise.all([
+  const [sla, groupNames, courseTitles, journal] = await Promise.all([
     buildSlaMap(access.schoolId, containerIds),
-    fetchReviewers(groupIds),
     fetchGroupNames(access.schoolId),
     fetchCourseTitles(containerIds),
+    fetchTerms(access.schoolId, periodDays, now),
   ]);
+
+  // Every group's staff, not only the groups with work waiting: under a model-first policy
+  // the term empties queues by itself, so the teacher it is happening to may have nothing
+  // left waiting — and a helper for them needs their groups all the same (plan 80, step 7d).
+  const reviewers = await fetchReviewers([...new Set([...groupIds, ...Object.keys(groupNames)])]);
 
   const teachersByGroup = new Map(reviewers.groups.map((group) => [group.groupId, group.teachers]));
   const reviewersOf = (bucket: PendingBucket): string[] =>
@@ -205,24 +218,53 @@ export async function GET(request: NextRequest) {
     teachersByGroup,
   });
 
-  const teachers: OversightTeacher[] = [...byTeacher.entries()]
-    .map(([id, tally]) => ({
-      id,
-      name: teacherNames.get(id) ?? null,
-      groups: [...teachersByGroup.entries()]
+  // Whose work the term closed. A teacher with nothing waiting still gets a row when it did:
+  // an empty queue emptied by the term is the case this column exists to show.
+  const termsByTeacher = new Map(
+    (journal?.teachers ?? [])
+      .filter((teacher) => teacher.accepted > 0)
+      .map((teacher) => [teacher.userId, teacher] as const),
+  );
+  for (const [id, teacher] of termsByTeacher) {
+    if (!teacherNames.has(id) && teacher.name) teacherNames.set(id, teacher.name);
+  }
+
+  const teacherIds = [...new Set([...byTeacher.keys(), ...termsByTeacher.keys()])];
+
+  const teachers: OversightTeacher[] = teacherIds
+    .map((id) => {
+      const tally = byTeacher.get(id) ?? { pending: 0, overdue: 0, ages: [] };
+      const held = [...teachersByGroup.entries()]
         .filter(([, list]) => list.some((teacher) => teacher.userId === id))
-        .map(([groupId]) => groupNames[groupId])
-        .filter((name): name is string => Boolean(name))
-        .sort((a, b) => a.localeCompare(b)),
-      pending: tally.pending,
-      overdue: tally.overdue,
-      ages: tally.ages,
-      medianHours: median(durations.get(id) ?? []),
-      shared: sharesLoad(pending, reviewersOf, id),
-    }))
+        .map(([groupId]) => ({ id: groupId, name: groupNames[groupId] }))
+        .filter((group): group is { id: string; name: string } => Boolean(group.name))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      const term = termsByTeacher.get(id);
+
+      return {
+        id,
+        name: teacherNames.get(id) ?? null,
+        groups: held.map((group) => group.name),
+        groupIds: held.map((group) => group.id),
+        pending: tally.pending,
+        overdue: tally.overdue,
+        ages: tally.ages,
+        medianHours: median(durations.get(id) ?? []),
+        shared: sharesLoad(pending, reviewersOf, id),
+        terms: term
+          ? { accepted: term.accepted, revised: term.revised, overturned: term.overturned }
+          : null,
+      };
+    })
     // Busiest first: the screen exists to find where it has piled up, and a row's place
-    // in the list is the first answer it gives.
-    .sort((a, b) => b.pending - a.pending || (b.medianHours ?? 0) - (a.medianHours ?? 0));
+    // in the list is the first answer it gives. Work the term closed is load that was not
+    // carried, so it ranks next.
+    .sort(
+      (a, b) =>
+        b.pending - a.pending ||
+        (b.terms?.accepted ?? 0) - (a.terms?.accepted ?? 0) ||
+        (b.medianHours ?? 0) - (a.medianHours ?? 0),
+    );
 
   const groups: OversightGroup[] = [...byGroup.entries()]
     .map(([id, tally]) => ({
@@ -266,6 +308,16 @@ export async function GET(request: NextRequest) {
     groups,
     courses,
     stuck,
+    terms:
+      journal === null
+        ? null
+        : {
+            accepted: journal.accepted,
+            revised: journal.revised,
+            overturned: journal.overturned,
+            unattributed: journal.unattributed,
+            attributed: journal.teachers !== null,
+          },
   };
 
   remember(key, body);
@@ -295,6 +347,37 @@ async function fetchReviewers(groupIds: string[]): Promise<EngineReviewers> {
     // The load is still true without it; only the attribution to people is lost, and the
     // screen shows the groups and courses it could attribute.
     return { groups: [] };
+  }
+}
+
+/**
+ * The auto-acceptance journal over the screen's period: the days the terms ran out, UTC,
+ * today included — so seven days is today and the six before it.
+ *
+ * Null when analytics could not be asked. The rest of the screen does not depend on it, and
+ * a zero here would claim that no work was closed by the term.
+ */
+async function fetchTerms(
+  schoolId: string,
+  periodDays: OversightPeriod,
+  now: Date,
+): Promise<AnalyticsTerms | null> {
+  if (!env.ANALYTICS_SERVICE_INTERNAL_URL || !env.INTERNAL_SERVICE_TOKEN) return null;
+
+  const day = (date: Date) => date.toISOString().slice(0, 10);
+  const from = new Date(now.getTime() - (periodDays - 1) * 86_400_000);
+
+  try {
+    return await serverFetch<AnalyticsTerms>({
+      service: 'analytics',
+      path: `/internal/review-terms/schools/${schoolId}`,
+      directBaseUrl: env.ANALYTICS_SERVICE_INTERNAL_URL,
+      query: { from: day(from), to: day(now) },
+      headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN },
+      anonymous: true,
+    });
+  } catch {
+    return null;
   }
 }
 

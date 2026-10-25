@@ -261,7 +261,10 @@
       "median": "Median reply",
       "medianSub": "over the last {n} days",
       "medianNone": "nothing was answered in this period",
-      "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling."
+      "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling.",
+      "terms": "Closed at the term",
+      "termsSub": "a model's verdict counted by itself · {revised} re-checked by a teacher, {overturned} overturned",
+      "termsUnattributed": "{n} in groups with no teacher that day"
     },
     "spread": {
       "title": "The whole queue by age"
@@ -280,10 +283,13 @@
       "noMedian": "nothing answered in this period",
       "shared": "shared with a colleague",
       "remind": "Remind",
-      "addReviewer": "Add a reviewer",
       "reminded": "Reminded {name} — {n, plural, one {# submission} other {# submissions}} waiting",
       "remindedAlready": "Already reminded today. The next one can go in about {hours, plural, one {# hour} other {# hours}}.",
-      "remindFailed": "The reminder could not be sent."
+      "remindFailed": "The reminder could not be sent.",
+      "subTerms": "Who is under pressure shows in the length of the tail — and in the work the term closed before anyone read it.",
+      "terms": "closed at the term",
+      "termsRevised": "{revised} re-checked · {overturned} overturned",
+      "addHelper": "Add a helper"
     },
     "groups": {
       "title": "Groups",
@@ -367,7 +373,8 @@
       "submitting": "Adding…",
       "failed": "The reviewer could not be added.",
       "assigned": "Added — the group's queue is now theirs as well.",
-      "forTeacher": "Alongside {name}"
+      "helperTitle": "A helper for {name}",
+      "helperFor": "A second teacher in {name}'s groups: the queue is shared, and work stops reaching the term with nobody reading it."
     }
   },
   "settings": {
