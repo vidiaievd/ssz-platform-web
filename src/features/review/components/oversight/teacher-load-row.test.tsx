@@ -19,11 +19,13 @@ const teacher = (over: Partial<OversightTeacher> = {}): OversightTeacher => ({
   id: 't1',
   name: 'Per Nygård',
   groups: ['B1 kveld'],
+  groupIds: ['g1'],
   pending: 6,
   overdue: 2,
   ages: [1, 2, 3, 4, 60, 90],
   medianHours: 21,
   shared: false,
+  terms: null,
   ...over,
 });
 
@@ -60,6 +62,29 @@ describe('TeacherLoadRow', () => {
   it('says so plainly when this teacher answered nothing in the period', () => {
     renderWithIntl(<TeacherLoadRow teacher={teacher({ medianHours: null })} slaHours={48} />);
     expect(screen.getByText(/nothing answered in this period/)).toBeInTheDocument();
+  });
+
+  it('counts the work the term closed, and how much of it a teacher looked at again', () => {
+    renderWithIntl(
+      <TeacherLoadRow
+        teacher={teacher({ terms: { accepted: 9, revised: 2, overturned: 1 } })}
+        slaHours={48}
+        showTerms
+      />,
+    );
+    expect(screen.getByText('9')).toBeInTheDocument();
+    expect(screen.getByText('2 re-checked · 1 overturned')).toBeInTheDocument();
+  });
+
+  it('keeps the column for a teacher the term closed nothing for, so the rows line up', () => {
+    renderWithIntl(<TeacherLoadRow teacher={teacher({ overdue: 1 })} slaHours={48} showTerms />);
+    expect(screen.getByText('closed at the term')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+  });
+
+  it('leaves the column off a school whose journal is empty', () => {
+    renderWithIntl(<TeacherLoadRow teacher={teacher()} slaHours={48} />);
+    expect(screen.queryByText('closed at the term')).not.toBeInTheDocument();
   });
 
   it('drops the histogram where no promise exists to colour it against', () => {

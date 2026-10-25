@@ -117,6 +117,33 @@ describe('AssignReviewerDialog', () => {
     });
   });
 
+  it("puts a helper into the colleague's own groups, and never the colleague", async () => {
+    renderDialog({
+      kind: 'teacher',
+      teacherId: 'teacher-2',
+      teacherName: 'Per Nygård',
+      groups: [{ id: 'group-3', name: 'C1 morgen' }],
+    });
+
+    expect(screen.getByText('A helper for Per Nygård')).toBeInTheDocument();
+    const teacher = await screen.findByLabelText('Teacher');
+    expect(screen.getByLabelText('Group')).toHaveValue('group-3');
+    expect(screen.queryByRole('option', { name: 'B1 kveld' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'Per Nygård' })).not.toBeInTheDocument();
+
+    await userEvent.selectOptions(teacher, 'teacher-1');
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    await waitFor(() => {
+      expect(assignTeacher).toHaveBeenCalledWith(
+        SCHOOL_ID,
+        'group-3',
+        expect.objectContaining({ userId: 'teacher-1', role: 'co-primary' }),
+        true,
+      );
+    });
+  });
+
   it('refuses to pretend it can help a learner who is in no group', async () => {
     renderDialog(submission({ unassigned: true, groupId: null }));
 

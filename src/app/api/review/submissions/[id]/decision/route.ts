@@ -12,6 +12,7 @@ import {
   type ReviewScope,
 } from '@/features/review/lib/review-scope';
 import { authorizeSubmission, refuseSubmission } from '@/features/review/lib/submission-access';
+import { engineQueueView } from '@/features/review/lib/term-window';
 import {
   REVIEWABLE_EXERCISE_TYPES,
   type ReviewGroupBy,
@@ -45,6 +46,7 @@ interface DecisionRequest {
    * because what "the next one" means is exactly the list on their screen.
    */
   filters?: {
+    view?: string;
     groupBy?: string;
     group?: string | null;
     course?: string | null;
@@ -234,6 +236,8 @@ async function nextSubmission(
   if (engineScope === null) return null;
 
   const groupBy: ReviewGroupBy = filters.groupBy === 'student' ? 'student' : 'exercise';
+  // The list the reviewer is walking — in the term view, the work closed at the term.
+  const termView = filters.view === 'term';
 
   let candidates: QueueCandidate[];
   try {
@@ -244,7 +248,12 @@ async function nextSubmission(
       directBaseUrl: env.EXERCISE_SERVICE_INTERNAL_URL,
       headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
       anonymous: true,
-      body: { ...engineScope, groupBy, limit: NEXT_LOOKAHEAD },
+      body: {
+        ...engineScope,
+        ...engineQueueView(termView ? 'term' : 'pending', new Date()),
+        groupBy,
+        limit: NEXT_LOOKAHEAD,
+      },
     });
     candidates = queue.groups.flatMap((group) => group.items);
   } catch {
@@ -256,7 +265,7 @@ async function nextSubmission(
   // one answer that is certainly wrong.
   candidates = candidates.filter((item) => item.attemptId !== decided.attemptId);
 
-  if (filters.overdueOnly === true) {
+  if (!termView && filters.overdueOnly === true) {
     const sla = await buildSlaMap(
       scope.schoolId,
       candidates.map((item) => item.containerId).filter((id): id is string => id !== null),

@@ -15,6 +15,7 @@ describe('parseQueueFilters', () => {
     );
 
     expect(filters).toEqual({
+      view: 'pending',
       groupBy: 'student',
       group: 'g1',
       course: 'c1',
@@ -49,6 +50,7 @@ describe('queueFiltersToQuery', () => {
 
   it('round-trips through the address bar', () => {
     const filters = {
+      view: 'term' as const,
       groupBy: 'student' as const,
       group: 'g1',
       course: 'c1',
@@ -56,6 +58,11 @@ describe('queueFiltersToQuery', () => {
       overdueOnly: true,
     };
     expect(parseQueueFilters(new URLSearchParams(queueFiltersToQuery(filters)))).toEqual(filters);
+  });
+
+  it('names the term view and leaves the ordinary queue unnamed', () => {
+    expect(queueFiltersToQuery({ ...DEFAULT_FILTERS, view: 'term' })).toBe('?view=term');
+    expect(parseQueueFilters(new URLSearchParams('view=sideways')).view).toBe('pending');
   });
 
   it('keeps the open submission across a filter change', () => {
@@ -68,6 +75,10 @@ describe('hasActiveFilters', () => {
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, groupBy: 'student' })).toBe(false);
   });
 
+  it('does not count the term view, which is a different list rather than a narrower one', () => {
+    expect(hasActiveFilters({ ...DEFAULT_FILTERS, view: 'term' })).toBe(false);
+  });
+
   it('counts anything that hides work', () => {
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, overdueOnly: true })).toBe(true);
     expect(hasActiveFilters({ ...DEFAULT_FILTERS, course: 'c1' })).toBe(true);
@@ -78,6 +89,12 @@ describe('queueFiltersToApiQuery', () => {
   it('always states the grouping, since the BFF groups the answer', () => {
     expect(queueFiltersToApiQuery('oslo-skole', DEFAULT_FILTERS)).toBe(
       'school=oslo-skole&groupBy=exercise',
+    );
+  });
+
+  it('carries the term view to the BFF', () => {
+    expect(queueFiltersToApiQuery('oslo-skole', { ...DEFAULT_FILTERS, view: 'term' })).toBe(
+      'school=oslo-skole&view=term&groupBy=exercise',
     );
   });
 });

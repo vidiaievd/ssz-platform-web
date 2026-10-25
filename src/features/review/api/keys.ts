@@ -11,6 +11,10 @@ import type { OversightPeriod } from '../types/oversight';
  * The count is keyed by school alone. It is the sidebar's, it ignores every filter on
  * purpose, and every verdict invalidates it.
  *
+ * The term line is keyed by school alone too, and no verdict invalidates it: analytics
+ * folds a verdict into the journal from an event, after the fact, so a refetch right after
+ * the verdict would read the figure from before it.
+ *
  * Oversight is keyed by its period for the same reason as the queue by its filters: seven
  * days and ninety are two different answers to "how fast do we reply", not two versions of
  * one. Its own answer is cached for a minute in the BFF, so switching back and forth costs
@@ -21,6 +25,7 @@ export const reviewKeys = keyFactory('review', {
   queues: () => ['queue'] as const,
   count: (school: string) => ['count', school] as const,
   counts: () => ['count'] as const,
+  terms: (school: string) => ['terms', school] as const,
   submission: (school: string, id: string) => ['submission', school, id] as const,
   submissions: () => ['submission'] as const,
   oversight: (school: string, period: OversightPeriod) => ['oversight', school, period] as const,

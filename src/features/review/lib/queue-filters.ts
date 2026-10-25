@@ -19,6 +19,7 @@ import {
  * useful than answering it with a broken screen.
  */
 export const DEFAULT_FILTERS: ReviewQueueFilters = {
+  view: 'pending',
   groupBy: 'exercise',
   group: null,
   course: null,
@@ -40,6 +41,7 @@ export function parseQueueFilters(source: ParamSource): ReviewQueueFilters {
   const type = read(source, 'type');
 
   return {
+    view: read(source, 'view') === 'term' ? 'term' : 'pending',
     groupBy: read(source, 'groupBy') === 'student' ? 'student' : 'exercise',
     group: read(source, 'group'),
     course: read(source, 'course'),
@@ -50,7 +52,10 @@ export function parseQueueFilters(source: ParamSource): ReviewQueueFilters {
   };
 }
 
-/** True when anything is narrowing the queue — what the "nothing here" state turns on. */
+/**
+ * True when anything is narrowing the queue — what the "nothing here" state turns on. The
+ * view is not a filter: it is a different list, with its own empty state.
+ */
 export function hasActiveFilters(filters: ReviewQueueFilters): boolean {
   return (
     filters.group !== null ||
@@ -76,6 +81,7 @@ export function queueFiltersToQuery(
   submission?: string | null,
 ): string {
   const params = new URLSearchParams();
+  if (filters.view !== DEFAULT_FILTERS.view) params.set('view', filters.view);
   if (filters.groupBy !== DEFAULT_FILTERS.groupBy) params.set('groupBy', filters.groupBy);
   if (filters.group) params.set('group', filters.group);
   if (filters.course) params.set('course', filters.course);
@@ -100,6 +106,7 @@ export function queueFiltersToApiQuery(
   cursor?: string | null,
 ): string {
   const params = new URLSearchParams({ school });
+  if (filters.view !== DEFAULT_FILTERS.view) params.set('view', filters.view);
   params.set('groupBy', filters.groupBy);
   if (filters.group) params.set('group', filters.group);
   if (filters.course) params.set('course', filters.course);

@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { Avatar } from '@/components/ui/avatar';
+import { cn } from '@/lib/utils';
 
 import { AgeSpread } from '../age-spread';
 import { useAgeWords } from '../age-mark';
@@ -16,6 +17,11 @@ export interface TeacherLoadRowProps {
   slaHours: number | null;
   /** What can be done about this row. Revealed on hover; always reachable by keyboard. */
   actions?: ReactNode;
+  /**
+   * Draw the column of work closed at the term (plan 80, R4). Set for every row or none, so
+   * the columns line up; the screen sets it when the school's journal has anything in it.
+   */
+  showTerms?: boolean;
 }
 
 /**
@@ -31,16 +37,32 @@ export interface TeacherLoadRowProps {
  * of them has to read — and the caption says so, because otherwise the rows add up to more
  * than the school's total with no explanation on screen (plan 46 §46.1).
  *
+ * Under a model-first policy a queue can also shrink without anyone reading it: the term
+ * closes work by itself (plan 80). That column is the other half of the load — what was not
+ * carried — and a short queue beside a long count there is the teacher who needs a helper.
+ *
  * The actions fade in on hover at .55 → 1 rather than appearing, so the row does not change
  * height or width under the pointer; at full opacity they are also always in the tab order,
  * because a control that only exists under a mouse does not exist for a keyboard.
  */
-export function TeacherLoadRow({ teacher, slaHours, actions }: TeacherLoadRowProps) {
+export function TeacherLoadRow({
+  teacher,
+  slaHours,
+  actions,
+  showTerms = false,
+}: TeacherLoadRowProps) {
   const t = useTranslations('Review.oversight.teachers');
   const { words } = useAgeWords();
 
   return (
-    <div className="group grid grid-cols-[minmax(180px,1.4fr)_88px_88px_minmax(140px,1fr)_auto] items-center gap-4 rounded-[11px] px-3 py-[13px] transition-colors hover:bg-(--ssz-bg-subtle)">
+    <div
+      className={cn(
+        'group grid items-center gap-4 rounded-[11px] px-3 py-[13px] transition-colors hover:bg-(--ssz-bg-subtle)',
+        showTerms
+          ? 'grid-cols-[minmax(180px,1.4fr)_88px_88px_120px_minmax(140px,1fr)_auto]'
+          : 'grid-cols-[minmax(180px,1.4fr)_88px_88px_minmax(140px,1fr)_auto]',
+      )}
+    >
       <div className="flex min-w-0 items-center gap-2.5">
         <Avatar name={teacher.name ?? '—'} size="sm" />
         <div className="min-w-0">
@@ -70,6 +92,25 @@ export function TeacherLoadRow({ teacher, slaHours, actions }: TeacherLoadRowPro
         <div className="text-[11px] text-muted-foreground">{t('overdue')}</div>
       </div>
 
+      {showTerms ? (
+        <div>
+          <div
+            className="text-lg font-bold tracking-[-0.02em]"
+            style={teacher.terms === null ? { color: 'var(--ssz-text-muted)' } : undefined}
+          >
+            {teacher.terms === null ? '—' : teacher.terms.accepted}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            {teacher.terms === null || teacher.terms.revised === 0
+              ? t('terms')
+              : t('termsRevised', {
+                  revised: teacher.terms.revised,
+                  overturned: teacher.terms.overturned,
+                })}
+          </div>
+        </div>
+      ) : null}
+
       <div className="min-w-0">
         {slaHours === null ? null : (
           <AgeSpread hours={teacher.ages} slaHours={slaHours} height={9} className="w-full" />
@@ -82,7 +123,8 @@ export function TeacherLoadRow({ teacher, slaHours, actions }: TeacherLoadRowPro
         </div>
       </div>
 
-      <div className="flex gap-[7px] opacity-55 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
+      {/* Stacked: two labelled buttons side by side do not fit beside six columns. */}
+      <div className="flex flex-col items-stretch gap-[5px] opacity-55 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100">
         {actions}
       </div>
     </div>

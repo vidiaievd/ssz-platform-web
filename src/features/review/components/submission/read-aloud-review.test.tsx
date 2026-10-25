@@ -116,6 +116,9 @@ const SUBMISSION: ReviewSubmission = {
       { itemId: 'p2', assetId: 'asset-2', seconds: 18, takes: 1 },
     ],
   },
+  aiVerdict: null,
+  autoAcceptAt: null,
+  acceptedAtTerm: false,
   canDecide: true,
 };
 

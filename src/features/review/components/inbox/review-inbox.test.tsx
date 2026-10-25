@@ -64,6 +64,7 @@ const QUEUE: ReviewQueueResponse = {
           overdue: false,
           attemptNo: 1,
           autoClean: false,
+          acceptedAt: null,
           lock: null,
         },
         {
@@ -76,6 +77,7 @@ const QUEUE: ReviewQueueResponse = {
           overdue: true,
           attemptNo: 2,
           autoClean: false,
+          acceptedAt: null,
           lock: null,
         },
       ],
@@ -124,11 +126,16 @@ function answer(
     approved: 0,
     skipped: [],
   },
+  terms: { accepted: number; revised: number; overturned: number } | null = null,
 ) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
+      if (url.includes('/review/terms')) {
+        const body = terms && { ...terms, from: '2026-10-19', to: '2026-10-25' };
+        return new Response(JSON.stringify(body), { status: 200 });
+      }
       if (url.includes('/batch-approve')) {
         return new Response(JSON.stringify(batch), { status: 200 });
       }
@@ -211,6 +218,61 @@ describe('ReviewInbox', () => {
     ).toBeInTheDocument();
   });
 
+  it("says what the term closed this week in the teacher's groups, and how much they re-checked", async () => {
+    answer(QUEUE, undefined, { accepted: 4, revised: 1, overturned: 1 });
+    renderInbox();
+
+    expect(
+      await screen.findByText('Closed at the term this week: 4, of them your verdict: 1'),
+    ).toBeInTheDocument();
+  });
+
+  it('says nothing about the term when it closed nothing, or the journal could not be read', async () => {
+    answer(QUEUE, undefined, { accepted: 0, revised: 0, overturned: 0 });
+    renderInbox();
+
+    await screen.findByText('2 submissions · 1 longer than promised · oldest 1 day');
+    await waitFor(() =>
+      expect(
+        vi.mocked(fetch).mock.calls.some(([input]) => String(input).includes('/review/terms')),
+      ).toBe(true),
+    );
+    expect(screen.queryByText(/Closed at the term/)).not.toBeInTheDocument();
+  });
+
+  it('opens the work the term closed from the line that counts it (plan 80, 7f)', async () => {
+    answer(QUEUE, undefined, { accepted: 4, revised: 1, overturned: 1 });
+    renderInbox();
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /Closed at the term this week: 4/ }),
+    );
+    expect(replace).toHaveBeenCalledWith('?view=term', { scroll: false });
+  });
+
+  it('lists the term view under its own heading, with the way back and no late filter', async () => {
+    search = 'view=term';
+    answer(QUEUE);
+    renderInbox();
+
+    expect(await screen.findByText('Closed at the term')).toBeInTheDocument();
+    expect(
+      await screen.findByText('2 pieces of work await your verdict · this week'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Longer than promised' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Whole queue' }));
+    expect(replace).toHaveBeenCalledWith('', { scroll: false });
+  });
+
+  it('says there is nothing to revise when the term view is empty', async () => {
+    search = 'view=term';
+    answer({ ...QUEUE, groups: [], summary: { ...QUEUE.summary, pending: 0 } });
+    renderInbox();
+
+    expect(await screen.findByText('Nothing to revise')).toBeInTheDocument();
+  });
+
   it('marks the overdue count as partial while a page is still unread', async () => {
     answer({ ...QUEUE, nextCursor: 'more', summary: { ...QUEUE.summary, overduePartial: true } });
     renderInbox();
@@ -257,7 +319,10 @@ describe('ReviewInbox', () => {
   });
 
   it('stops offering more once the last page is in', async () => {
-    answerPages([{ ...QUEUE, nextCursor: 'page-2' }, { ...QUEUE, nextCursor: null }]);
+    answerPages([
+      { ...QUEUE, nextCursor: 'page-2' },
+      { ...QUEUE, nextCursor: null },
+    ]);
     const user = userEvent.setup();
     renderInbox();
 

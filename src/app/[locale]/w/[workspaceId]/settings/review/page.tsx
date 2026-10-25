@@ -1,6 +1,7 @@
 import { getTranslations } from 'next-intl/server';
 
 import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
+import { AiPolicySettings } from '@/features/review/components/settings/ai-policy-settings';
 import { SlaSettings } from '@/features/review/components/settings/sla-settings';
 
 type Props = {
@@ -28,6 +29,7 @@ export default async function SchoolReviewSettingsPage({ params }: Props) {
   const { myRole: role } = await requireSettingsPage(workspaceId, 'review');
 
   const t = await getTranslations('Review.settings');
+  const canEdit = role === 'OWNER' || role === 'ADMIN';
 
   return (
     <div className="mx-auto flex w-full max-w-[780px] flex-col gap-4 p-6 md:p-8">
@@ -39,7 +41,10 @@ export default async function SchoolReviewSettingsPage({ params }: Props) {
         <p className="mt-1 text-[13.5px] text-muted-foreground">{t('lede')}</p>
       </div>
 
-      <SlaSettings school={workspaceId} canEdit={role === 'OWNER' || role === 'ADMIN'} />
+      <SlaSettings school={workspaceId} canEdit={canEdit} />
+
+      {/* Who answers first (plan 80) — drawn only where the plan carries it. */}
+      <AiPolicySettings school={workspaceId} canEdit={canEdit} />
     </div>
   );
 }

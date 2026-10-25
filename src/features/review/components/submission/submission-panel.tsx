@@ -10,6 +10,7 @@ import {
   FileQuestion,
   Lock,
   ShieldAlert,
+  Sparkles,
   UserCheck,
 } from 'lucide-react';
 
@@ -181,9 +182,7 @@ export function SubmissionPanel({
           // What was done with the model's draft, only when the card drew one (the same
           // test as the binding below): absent tells the engine the reviewer saw no draft,
           // which is not the same label as seeing one and leaving it alone (plan 79, 1.5).
-          ...(data?.aiDraft?.status === 'ready' && can('ai.review_draft')
-            ? { aiOutcomes: draft.ai }
-            : {}),
+          ...(drawsAiDraft(data?.aiDraft ?? null, can) ? { aiOutcomes: draft.ai } : {}),
         },
         {
           onSuccess: (result) => {
@@ -205,7 +204,7 @@ export function SubmissionPanel({
       advance,
       can,
       clearDraft,
-      data?.aiDraft?.status,
+      data?.aiDraft,
       data?.rubric,
       decision,
       draft.ai,
@@ -229,12 +228,11 @@ export function SubmissionPanel({
   const written = draft.comment.trim() !== '';
   const withComment = written || Object.keys(draft.sentences).length > 0;
 
-  // The model's draft, while there is still a verdict for it to help with. Without the
-  // school's key the card is the one it was: the draft may well exist — it was paid for
-  // under an earlier plan — but the screen does not offer what the plan no longer does.
+  // The model's draft, while there is still a verdict for it to help with — see
+  // `drawsAiDraft` for when the school's plan keeps it off the card.
   const aiDraft = data?.aiDraft ?? null;
   const ai: AiDraftBinding | null =
-    stillOpen && aiDraft !== null && aiDraft.status === 'ready' && can('ai.review_draft')
+    stillOpen && aiDraft !== null && drawsAiDraft(aiDraft, can)
       ? {
           draft: aiDraft,
           outcomes: draft.ai,
@@ -414,7 +412,23 @@ function rubricDecisionOf(
   };
 }
 
-/** Whose verdict already stands on this submission, if anyone's. */
+/**
+ * Whether the card draws the model's draft, and so reports what was done with it.
+ *
+ * A draft only the teacher sees is an offer of the school's plan: without `ai.review_draft`
+ * the card is the one it was — the draft may well exist, paid for under an earlier plan, but
+ * the screen does not offer what the plan no longer does. A review the learner has already
+ * read is a different thing (plan 80): it is what the teacher's verdict answers, and hiding
+ * it would leave them replying to something they cannot see.
+ */
+function drawsAiDraft(
+  draft: ReviewSubmission['aiDraft'],
+  can: (key: 'ai.review_draft') => boolean,
+): boolean {
+  if (draft === null || draft.status !== 'ready') return false;
+  return draft.shownToLearner === true || can('ai.review_draft');
+}
+
 /**
  * How a prompt of the new try is named, for the rulings made on the one before it. Only a
  * recorded-speech submission has prompts; for any other template there is nothing to name.
@@ -490,6 +504,8 @@ function SubmissionNotes({
         </Note>
       )}
 
+      <AiVerdictNote submission={submission} />
+
       {submission.canDecide ? null : (
         <Note tone="error" icon={ShieldAlert} title={t('windowExpired.title')}>
           {t('windowExpired.body')}
@@ -526,5 +542,47 @@ function SubmissionNotes({
         </Note>
       ) : null}
     </>
+  );
+}
+
+/**
+ * What the learner has already been told by a model, and what the teacher's verdict does to
+ * it (plan 80). Two moments, two notes: while the work waits, the model's verdict is
+ * provisional and the term is the teacher's deadline; once the term has passed it has
+ * counted, and a verdict now changes the learner's progress and feedback but not memory —
+ * the card would otherwise promise an effect the platform deliberately does not have (R5).
+ *
+ * Nothing after a teacher's verdict: then theirs is the one that stands, and the conflict
+ * note above already says whose it is.
+ */
+function AiVerdictNote({ submission }: { submission: ReviewSubmission }) {
+  const t = useTranslations('Review.submission.aiVerdict');
+  const format = useFormatter();
+  // `?? null`: a read cached from before plan 80 has no such field at all.
+  const verdict = submission.aiVerdict ?? null;
+  if (verdict === null || submission.decision !== null) return null;
+
+  const outcome = t(verdict.outcome === 'approved' ? 'approved' : 'returned');
+  const date = (value: string) =>
+    format.dateTime(new Date(value), { dateStyle: 'medium', timeStyle: 'short' });
+
+  if (submission.acceptedAtTerm) {
+    return (
+      <Note tone="warn" icon={Sparkles} title={t('acceptedAtTerm.title', { outcome })}>
+        {t('acceptedAtTerm.body')}
+      </Note>
+    );
+  }
+
+  return (
+    <Note
+      tone="info"
+      icon={Sparkles}
+      title={t('provisional.title', { outcome, at: date(verdict.at) })}
+    >
+      {submission.autoAcceptAt === null
+        ? t('provisional.noTerm')
+        : t('provisional.term', { at: date(submission.autoAcceptAt) })}
+    </Note>
   );
 }

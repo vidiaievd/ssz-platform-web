@@ -46,6 +46,9 @@ const BASE: ReviewSubmission = {
   playback: null,
   aiDraft: null,
   submittedAnswer: {},
+  aiVerdict: null,
+  autoAcceptAt: null,
+  acceptedAtTerm: false,
   canDecide: true,
 };
 

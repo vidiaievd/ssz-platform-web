@@ -12,6 +12,7 @@ import type { ReviewDetails } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 import type {
   ReviewAiDraft,
+  ReviewAiVerdict,
   ReviewItemDecision,
   ReviewSubmission,
   ReviewVerdictRecord,
@@ -52,6 +53,10 @@ interface EngineSubmission {
   reviewDecisions?: ReviewItemDecision[] | null;
   /** Plan 79, 1.4 — absent from an engine older than the draft. */
   aiDraft?: ReviewAiDraft | null;
+  /** Plan 80 — absent from an engine older than the school's review policy. */
+  aiVerdict?: (ReviewAiVerdict & Record<string, unknown>) | null;
+  autoAcceptAt?: string | null;
+  acceptedAtTerm?: boolean;
   submittedAnswer: unknown;
 }
 
@@ -174,6 +179,17 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     reviewDecisions: submission.reviewDecisions ?? null,
     playback,
     aiDraft: submission.aiDraft ?? null,
+    // Only what the card says about it: the engine's copy also carries the per-item rulings
+    // and the model's axes, which are the verdict's business and not the screen's.
+    aiVerdict: submission.aiVerdict
+      ? {
+          outcome: submission.aiVerdict.outcome,
+          comment: submission.aiVerdict.comment ?? null,
+          at: submission.aiVerdict.at,
+        }
+      : null,
+    autoAcceptAt: submission.autoAcceptAt ?? null,
+    acceptedAtTerm: submission.acceptedAtTerm ?? false,
     submittedAnswer: submission.submittedAnswer,
     canDecide: access.write,
   };

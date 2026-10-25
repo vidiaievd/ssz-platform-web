@@ -15,6 +15,7 @@ function item(id: string, overrides: Partial<ReviewQueueItem> = {}): ReviewQueue
     overdue: false,
     attemptNo: 1,
     autoClean: false,
+    acceptedAt: null,
     lock: null,
     ...overrides,
   };

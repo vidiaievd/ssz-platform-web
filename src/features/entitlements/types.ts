@@ -7,7 +7,8 @@ export type FeatureKey =
   | 'ai.review_direct'
   | 'ai.student_assist'
   | 'ai.practice'
-  | 'ai.authoring';
+  | 'ai.authoring'
+  | 'school.review_ai_policy';
 
 export interface FeatureEntitlement {
   enabled: boolean;

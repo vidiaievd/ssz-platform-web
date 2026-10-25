@@ -20,6 +20,9 @@ export interface SchoolSummaryProps {
  * two situations call for entirely different weeks; the histogram under the figures is
  * where that difference is visible (criterion 26, 28).
  *
+ * Beside them, under a model-first policy (plan 80): how much work a model's verdict closed
+ * by itself when the term ran out, and how much of it a teacher still looked at afterwards.
+ *
  * Under the heading, the date the figures begin at. Nothing before the migration carries a
  * school at all, so a median computed over "everything" would be a median over whatever
  * happened to survive — and presenting it as the school's whole history would be a lie the
@@ -33,6 +36,9 @@ export function SchoolSummary({ data }: SchoolSummaryProps) {
 
   const sla = data.schoolSlaHours;
   const { pending, overdue, oldestHours, medianHours } = data.summary;
+  // Only where the term closed anything: a school without a model-first policy has nothing
+  // to report here, and a standing zero would read as a feature it is not using.
+  const terms = data.terms !== null && data.terms.accepted > 0 ? data.terms : null;
 
   return (
     <Panel
@@ -74,6 +80,18 @@ export function SchoolSummary({ data }: SchoolSummaryProps) {
               : t('summary.medianSub', { n: data.periodDays })
           }
         />
+        {terms === null ? null : (
+          <Stat
+            label={t('summary.terms')}
+            value={terms.accepted}
+            sub={
+              t('summary.termsSub', { revised: terms.revised, overturned: terms.overturned }) +
+              (terms.unattributed
+                ? ` · ${t('summary.termsUnattributed', { n: terms.unattributed })}`
+                : '')
+            }
+          />
+        )}
 
         {data.ages.length === 0 || sla === null ? null : (
           <div className="col-span-full">

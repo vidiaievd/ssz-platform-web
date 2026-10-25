@@ -34,7 +34,14 @@ export type ReviewableExerciseType = (typeof REVIEWABLE_EXERCISE_TYPES)[number];
 /** Marking happens in passes: through one exercise, or through one learner's work. */
 export type ReviewGroupBy = 'exercise' | 'student';
 
+/**
+ * What the inbox lists: work waiting on a person, or work a model's verdict closed at the
+ * school's term this week that still has no teacher's verdict (plan 80, step 7f).
+ */
+export type ReviewQueueView = 'pending' | 'term';
+
 export interface ReviewQueueFilters {
+  view: ReviewQueueView;
   groupBy: ReviewGroupBy;
   /** A group of the teacher's own scope; anything else narrows the queue to nothing. */
   group: string | null;
@@ -72,6 +79,8 @@ export interface ReviewQueueItem {
   attemptNo: number;
   /** The machine closed every item. A hint for the batch button; the verdict re-checks. */
   autoClean: boolean;
+  /** When a model's verdict counted at the term — set only in the `term` view. */
+  acceptedAt: string | null;
   lock: ReviewQueueLock | null;
 }
 
@@ -139,6 +148,22 @@ export interface ReviewQueueCount {
    * what makes a queue is being assigned to a group, not holding a job title.
    */
   hasScope: boolean;
+}
+
+/**
+ * The teacher's own line from the auto-acceptance journal over the last week (plan 80,
+ * step 7e): work in their groups a model's verdict closed at the term, and how much of it
+ * they still gave a verdict on — "counted at the term: N, of them your verdict: M".
+ *
+ * Days are the days the terms ran out, today and the six before it. `null` from the route
+ * when the journal could not be read: a zero would claim the term closed nothing.
+ */
+export interface ReviewTermsSummary {
+  accepted: number;
+  revised: number;
+  overturned: number;
+  from: string;
+  to: string;
 }
 
 /**
@@ -256,6 +281,20 @@ export interface ReviewSubmission {
    * Present whatever the school's plan says: whether to draw it is `useCan`'s call.
    */
   aiDraft: ReviewAiDraft | null;
+  /**
+   * The model's verdict the learner has already been given, under a school policy that lets
+   * a model answer first (plan 80). While the work waits it is provisional — it counts by
+   * itself at `autoAcceptAt` unless a teacher answers first. Null where no model answered.
+   */
+  aiVerdict: ReviewAiVerdict | null;
+  /** When the model's verdict counts by itself; null — the work waits for a teacher. */
+  autoAcceptAt: string | null;
+  /**
+   * The model's verdict already counted at the term and no teacher has answered since (plan
+   * 80, R5). The card stays open: a verdict now replaces the model's in the learner's
+   * progress and feedback, while memory keeps the rating it already had.
+   */
+  acceptedAtTerm: boolean;
   submittedAnswer: unknown;
   /** Whether this caller may still decide it — an expired substitution may only read. */
   canDecide: boolean;
@@ -314,7 +353,21 @@ export interface ReviewAiDraft {
   marks?: ReviewAiMark[] | null;
   modelId: string | null;
   promptVersion: string | null;
+  /**
+   * The learner has already read this review — it is the model's verdict under the school's
+   * policy (`review_direct`), not a draft only the teacher sees (plan 80). Absent from an
+   * engine before plan 80.
+   */
+  shownToLearner?: boolean;
   createdAt: string;
+}
+
+/** A model's verdict as the learner was given it (plan 80). */
+export interface ReviewAiVerdict {
+  outcome: 'approved' | 'returned';
+  /** The model's summary, written to the learner. */
+  comment: string | null;
+  at: string;
 }
 
 /** One item's ruling, as the engine stored it with the verdict. */

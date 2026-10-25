@@ -6,6 +6,15 @@
     "subtitleOverdue": "{count, plural, one {# longer than promised} other {# longer than promised}}",
     "subtitleOverduePartial": "{count}+ longer than promised",
     "subtitleOldest": "oldest {age}",
+    "terms": "Closed at the term this week: {accepted}, of them your verdict: {revised}",
+    "termsHint": "A model's verdict counted by itself when the review term ran out. Your verdict on such work still changes the learner's progress and feedback.",
+    "termView": {
+      "back": "Whole queue",
+      "title": "Closed at the term",
+      "subtitle": "{count, plural, one {# piece of work awaits} other {# pieces of work await}} your verdict · this week",
+      "emptyTitle": "Nothing to revise",
+      "emptyBody": "Every piece of work the term closed this week already has your verdict — or the term closed nothing."
+    },
     "groupBy": {
       "label": "Group the queue by",
       "exercise": "By exercise",
@@ -33,7 +42,8 @@
       "attempt": "try {n}",
       "label": "{student} · {exercise} · waiting {age}",
       "exerciseGone": "exercise removed",
-      "lockedByLabel": "being reviewed by {name}"
+      "lockedByLabel": "being reviewed by {name}",
+      "acceptedAtTerm": "closed at the term"
     },
     "empty": {
       "title": "All reviewed",
@@ -137,6 +147,7 @@
       "count": "{count, plural, one {# remark} other {# remarks}}",
       "none": "no remarks",
       "hint": "The student sees only what you take into a comment.",
+      "hintShown": "The student has already seen this review. Your verdict replaces it; whatever you accept here goes into your comment.",
       "discardDraft": "Discard draft",
       "draftDiscarded": "AI draft discarded.",
       "restore": "Restore",
@@ -161,6 +172,19 @@
       "wholeText": "about the whole text",
       "wholeAnswer": "about the whole answer",
       "editLabel": "Goes into the overall comment"
+    },
+    "aiVerdict": {
+      "approved": "accepted",
+      "returned": "returned for revision",
+      "provisional": {
+        "title": "The student has already seen the AI verdict: {outcome} ({at})",
+        "term": "If nobody answers by {at}, it counts by itself. Your verdict replaces it.",
+        "noTerm": "It waits for your verdict and will not count by itself."
+      },
+      "acceptedAtTerm": {
+        "title": "Counted at the term: {outcome}",
+        "body": "No teacher answered in time, so the AI verdict counted. Your verdict replaces it in the student’s progress and feedback; memory has already taken this answer into account and will not change again."
+      }
     }
   },
   "rubric": {
@@ -247,7 +271,10 @@
       "median": "Median reply",
       "medianSub": "over the last {n} days",
       "medianNone": "nothing was answered in this period",
-      "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling."
+      "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling.",
+      "terms": "Closed at the term",
+      "termsSub": "a model's verdict counted by itself · {revised} re-checked by a teacher, {overturned} overturned",
+      "termsUnattributed": "{n} in groups with no teacher that day"
     },
     "spread": {
       "title": "The whole queue by age"
@@ -266,10 +293,13 @@
       "noMedian": "nothing answered in this period",
       "shared": "shared with a colleague",
       "remind": "Remind",
-      "addReviewer": "Add a reviewer",
       "reminded": "Reminded {name} — {n, plural, one {# submission} other {# submissions}} waiting",
       "remindedAlready": "Already reminded today. The next one can go in about {hours, plural, one {# hour} other {# hours}}.",
-      "remindFailed": "The reminder could not be sent."
+      "remindFailed": "The reminder could not be sent.",
+      "subTerms": "Who is under pressure shows in the length of the tail — and in the work the term closed before anyone read it.",
+      "terms": "closed at the term",
+      "termsRevised": "{revised} re-checked · {overturned} overturned",
+      "addHelper": "Add a helper"
     },
     "groups": {
       "title": "Groups",
@@ -353,7 +383,8 @@
       "submitting": "Adding…",
       "failed": "The reviewer could not be added.",
       "assigned": "Added — the group's queue is now theirs as well.",
-      "forTeacher": "Alongside {name}"
+      "helperTitle": "A helper for {name}",
+      "helperFor": "A second teacher in {name}'s groups: the queue is shared, and work stops reaching the term with nobody reading it."
     }
   },
   "settings": {
@@ -370,7 +401,8 @@
     "escalate": {
       "label": "Escalate after",
       "hint": "When to tell someone else that there is still no answer.",
-      "beforeRespond": "Escalation cannot come before the promise itself."
+      "beforeRespond": "Escalation cannot come before the promise itself.",
+      "afterAutoAccept": "In a mode with a model, escalation cannot come after the auto-accept term ({n} h)."
     },
     "escalateTo": {
       "label": "Escalate to",
@@ -386,6 +418,45 @@
     "saveFailed": "The response time could not be saved.",
     "failed": "The response time could not be read.",
     "readOnly": "Only the owner and administrators can change this.",
+    "policy": {
+      "title": "Who checks first",
+      "sub": "A model can answer at once; the teacher confirms or looks at a sample",
+      "mode": {
+        "teacher_only": {
+          "label": "Teacher only",
+          "hint": "Work waits for a teacher, as before."
+        },
+        "ai_then_teacher": {
+          "label": "Model first, teacher confirms",
+          "hint": "The learner sees the model's review at once, marked as waiting for the teacher. If no teacher answers by the term, the model's verdict counts."
+        },
+        "ai_with_sampling": {
+          "label": "Model first, teacher sees a sample",
+          "hint": "The model's verdict counts at once. Failed work, disagreements with the automatic check, the course's final work and a random share go to the teacher."
+        }
+      },
+      "hours": "hours",
+      "autoAccept": {
+        "label": "Counts by itself after",
+        "hint": "≈ {days} days. Courses can set their own term.",
+        "bounds": "Between {min} and {max} hours.",
+        "beforeEscalation": "Cannot come before the escalation ({n} h)."
+      },
+      "sample": {
+        "label": "Random share to the teacher",
+        "hint": "Of the work the model passed, this share still goes to a teacher.",
+        "bounds": "Between {min} and {max} %."
+      },
+      "noCredits": "The school's plan has no AI review credits — until it does, every piece of work goes to the teacher.",
+      "notEntitled": "A mode with a model is saved, but the school's plan does not include it now — teachers check all work.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "The review policy is saved.",
+      "saveFailed": "The review policy could not be saved.",
+      "saveInvalid": "The service refused these numbers — check the terms against the escalation.",
+      "saveNotEntitled": "The school's plan does not include review by a model.",
+      "failed": "The review policy could not be read."
+    },
     "course": {
       "title": "Response time",
       "lede": "How long this course promises a learner will wait for a verdict.",
@@ -400,6 +471,26 @@
       "saveFailed": "The response time could not be saved.",
       "failed": "The response time could not be read.",
       "fieldLabel": "Response time in hours"
+    },
+    "coursePolicy": {
+      "title": "Review by a model",
+      "lede": "How this course follows the school's policy when a model checks first.",
+      "schoolTeacherOnly": "The school has teachers check everything now — this takes effect when the school turns a model on.",
+      "ownTerm": "Its own auto-accept term for this course",
+      "fieldLabel": "Auto-accept term in hours",
+      "hours": "hours",
+      "inheritedFrom": "The school's term: {n} h.",
+      "noSchoolTerm": "There is no school term to inherit.",
+      "bounds": "Between {min} and {max} hours.",
+      "raised": "Earlier than the school's escalation — it will count after {n} h.",
+      "templates": {
+        "label": "Always to the teacher",
+        "hint": "When the school samples, work of these types goes to a teacher, never counted by the model alone."
+      },
+      "save": "Save",
+      "saved": "The course review policy is saved.",
+      "saveFailed": "The course review policy could not be saved.",
+      "failed": "The course review policy could not be read."
     }
   },
   "student": {

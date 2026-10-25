@@ -32,12 +32,38 @@ export interface OversightSummary {
   medianHours: number | null;
 }
 
+/**
+ * Work a model's provisional verdict closed by itself when the term ran out (plan 80, R4).
+ *
+ * Counted on the days the terms ran out, over the screen's period. `revised` is work a
+ * teacher still gave a verdict on afterwards; `overturned` is the part of it where that
+ * verdict differed from the model's.
+ */
+export interface OversightTermTally {
+  accepted: number;
+  revised: number;
+  overturned: number;
+}
+
+/** The school's side of the journal: each work once, whoever answered for it. */
+export interface OversightTerms extends OversightTermTally {
+  /**
+   * Work no teacher answered for on the day its term ran out — a group without staff that
+   * day. Null when organization-service could not say who did.
+   */
+  unattributed: number | null;
+  /** False when the teachers could not be named, so the rows carry no figures of their own. */
+  attributed: boolean;
+}
+
 /** One teacher's load. The shape of the queue is the row's point, not its size. */
 export interface OversightTeacher {
   id: string;
   name: string | null;
   /** The groups they hold right now, by name — what the row is read by. */
   groups: string[];
+  /** The same groups by id, in the same order — where a helper for this teacher can go. */
+  groupIds: string[];
   pending: number;
   overdue: number;
   /** Every waiting age, for the histogram. */
@@ -49,6 +75,11 @@ export interface OversightTeacher {
    * it once; these rows count it for each, and the row says so.
    */
   shared: boolean;
+  /**
+   * What a model's verdict closed by itself in work this teacher answered for. Null when
+   * nothing was, or when the school's journal could not be read or attributed.
+   */
+  terms: OversightTermTally | null;
 }
 
 export interface OversightGroup {
@@ -114,6 +145,11 @@ export interface ReviewOversightResponse {
   groups: OversightGroup[];
   courses: OversightCourse[];
   stuck: OversightStuck[];
+  /**
+   * The auto-acceptance journal over the period. Null when analytics could not be asked —
+   * never a row of zeros standing in for "unknown".
+   */
+  terms: OversightTerms | null;
 }
 
 /** What a reminder did. One message with a number in it, not one per submission. */
@@ -150,6 +186,51 @@ export interface SchoolReviewSettings {
   respondWithinHours: number;
   escalateAfterHours: number;
   escalateTo: 'school_admins' | 'owner' | 'primary_teacher';
+}
+
+/** Who answers a learner's work first (plan 80, R1). */
+export type ReviewAiMode = 'teacher_only' | 'ai_then_teacher' | 'ai_with_sampling';
+
+/**
+ * How a school uses a model to answer work, beside the promise of a person's answer.
+ *
+ * Kept apart from `SchoolReviewSettings` the way organization-service keeps it: the promise
+ * is every school's, the modes with a model come with the plan (`school.review_ai_policy`).
+ * The hours and the share are stored whatever the mode, so turning the model off and on
+ * again finds them where they were left.
+ */
+export interface SchoolReviewAiPolicy {
+  mode: ReviewAiMode;
+  /** After this, a model's provisional verdict counts by itself. Never before the escalation. */
+  autoAcceptAfterHours: number;
+  /** Share of `ai_with_sampling` work sent to the teacher at random, 0–100. */
+  samplePercent: number;
+}
+
+/**
+ * A course's part of the school's policy (plan 80, step 2): its own auto-accept term and the
+ * templates whose work always goes to a teacher when the school samples.
+ *
+ * Read with what it inherits and what it is held to, all resolved by content-service: the
+ * applied term is the course's own raised to the school's escalation (Q2-A), or the school's.
+ */
+export interface CourseReviewAiPolicy {
+  /** What applies now. Null when there is no school behind the course to inherit from. */
+  autoAcceptAfterHours: number | null;
+  inheritedAutoAcceptAfterHours: number | null;
+  overridden: boolean;
+  /** The school's escalation; a course term below it is raised to it on read. */
+  escalationFloorHours: number | null;
+  teacherReviewTemplates: string[];
+  schoolMode: ReviewAiMode | null;
+  samplePercent: number | null;
+  ownerSchoolId: string | null;
+}
+
+/** What a course sends: `null` hands the term back to the school. */
+export interface CourseReviewAiPolicyInput {
+  autoAcceptAfterHours: number | null;
+  teacherReviewTemplates: string[];
 }
 
 /**

@@ -13,7 +13,11 @@ import { wsHref } from '@/features/workspaces/lib/href';
 import { useOversight } from '../../api/use-oversight';
 import { useRemindReviewer } from '../../api/use-remind-reviewer';
 import { Panel, Segment } from '../primitives';
-import { OVERSIGHT_PERIODS, type OversightPeriod } from '../../types/oversight';
+import {
+  OVERSIGHT_PERIODS,
+  type OversightPeriod,
+  type ReviewOversightResponse,
+} from '../../types/oversight';
 
 import { AssignReviewerDialog, type AssignTarget } from './assign-reviewer-dialog';
 import { DecisionLog } from './decision-log';
@@ -31,6 +35,14 @@ export interface OversightScreenProps {
 function parsePeriod(raw: string | null): OversightPeriod {
   const value = Number(raw);
   return OVERSIGHT_PERIODS.includes(value as OversightPeriod) ? (value as OversightPeriod) : 30;
+}
+
+/**
+ * Whether the teacher rows carry the column of work closed at the term: only where the
+ * journal has something in it and could say whose it was.
+ */
+function showTerms(data: ReviewOversightResponse): boolean {
+  return data.terms !== null && data.terms.attributed && data.terms.accepted > 0;
 }
 
 /**
@@ -131,7 +143,11 @@ export function OversightScreen({ school }: OversightScreenProps) {
         <>
           <SchoolSummary data={data} />
 
-          <Panel title={t('teachers.title')} sub={t('teachers.sub')} bodyClassName="px-2 pb-3 pt-2">
+          <Panel
+            title={t('teachers.title')}
+            sub={showTerms(data) ? t('teachers.subTerms') : t('teachers.sub')}
+            bodyClassName="px-2 pb-3 pt-2"
+          >
             {data.teachers.length === 0 ? (
               <p className="px-3 py-2 text-[12.5px] text-muted-foreground">{t('teachers.empty')}</p>
             ) : (
@@ -140,6 +156,7 @@ export function OversightScreen({ school }: OversightScreenProps) {
                   key={teacher.id}
                   teacher={teacher}
                   slaHours={data.schoolSlaHours}
+                  showTerms={showTerms(data)}
                   actions={
                     <>
                       <Button
@@ -154,10 +171,20 @@ export function OversightScreen({ school }: OversightScreenProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setAssigning({ kind: 'teacher', teacherName: teacher.name })}
+                        onClick={() =>
+                          setAssigning({
+                            kind: 'teacher',
+                            teacherId: teacher.id,
+                            teacherName: teacher.name,
+                            groups: teacher.groupIds.map((id, index) => ({
+                              id,
+                              name: teacher.groups[index] ?? id,
+                            })),
+                          })
+                        }
                       >
                         <UserPlus aria-hidden className="size-3.5" />
-                        {t('teachers.addReviewer')}
+                        {t('teachers.addHelper')}
                       </Button>
                     </>
                   }

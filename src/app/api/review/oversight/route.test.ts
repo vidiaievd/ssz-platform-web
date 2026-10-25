@@ -3,6 +3,12 @@
 import { NextRequest } from 'next/server';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+// The journal of work closed at the term is read only where analytics is configured.
+vi.hoisted(() => {
+  process.env.ANALYTICS_SERVICE_INTERNAL_URL = 'http://analytics.test';
+  process.env.INTERNAL_SERVICE_TOKEN = 'internal-test-token';
+});
+
 vi.mock('@/lib/api/server-fetcher', () => ({ serverFetch: vi.fn() }));
 vi.mock('@/lib/api/profile-directory', () => ({ fetchProfileSummaries: vi.fn() }));
 vi.mock('@/features/auth/api/get-current-user', () => ({ getCurrentUser: vi.fn() }));
@@ -51,6 +57,10 @@ const REVIEWERS = {
       groupId: 'group-2',
       teachers: [{ userId: 'teacher-3', name: 'Per Nygård', role: 'primary' }],
     },
+    {
+      groupId: 'group-3',
+      teachers: [{ userId: 'teacher-4', name: 'Kari Lie', role: 'primary' }],
+    },
   ],
 };
 
@@ -80,11 +90,27 @@ const QUEUE = {
   nextCursor: null,
 };
 
+/** teacher-4 answers for work the term closed and has nothing waiting. */
+const TERMS = {
+  from: '2026-09-26',
+  to: '2026-10-25',
+  accepted: 3,
+  revised: 1,
+  overturned: 1,
+  unattributed: 0,
+  teachers: [
+    { userId: 'teacher-1', name: 'Ingrid Sæther', accepted: 1, revised: 1, overturned: 1 },
+    { userId: 'teacher-4', name: 'Kari Lie', accepted: 2, revised: 0, overturned: 0 },
+    { userId: 'teacher-5', name: 'Ola Berg', accepted: 0, revised: 0, overturned: 0 },
+  ],
+};
+
 function upstream(
   overrides: {
     aggregate?: unknown;
     reviewers?: unknown;
     queue?: unknown;
+    terms?: unknown;
     schoolSla?: number | null;
     courseSla?: { respondWithinHours: number | null; overridden: boolean };
   } = {},
@@ -94,6 +120,10 @@ function upstream(
       return overrides.aggregate ?? AGGREGATE;
     if (opts.path === '/internal/review/reviewers') return overrides.reviewers ?? REVIEWERS;
     if (opts.path === '/internal/attempts/review/queue') return overrides.queue ?? QUEUE;
+    if (opts.path.startsWith('/internal/review-terms/schools/')) {
+      if (overrides.terms instanceof Error) throw overrides.terms;
+      return overrides.terms ?? TERMS;
+    }
     if (opts.path.startsWith('/schools') && opts.path.endsWith('/review-settings')) {
       return { respondWithinHours: 'schoolSla' in overrides ? overrides.schoolSla : 48 };
     }
@@ -104,6 +134,7 @@ function upstream(
       return [
         { id: 'group-1', name: 'B1 kveld' },
         { id: 'group-2', name: 'A2 dag' },
+        { id: 'group-3', name: 'C1 morgen' },
       ];
     }
     if (/^\/containers\/[^/]+$/.test(opts.path)) return { title: 'Ny i Norge A2' };
@@ -205,6 +236,7 @@ describe('GET /api/review/oversight', () => {
         ],
       },
       queue: { groups: [], nextCursor: null },
+      terms: { ...TERMS, accepted: 0, revised: 0, overturned: 0, teachers: [] },
     });
 
     const result = await body(await GET(request()));
@@ -242,6 +274,83 @@ describe('GET /api/review/oversight', () => {
     expect(result.schoolSlaHours).toBeNull();
     expect(result.summary.overdue).toBe(0);
     expect(result.stuck).toHaveLength(0);
+  });
+
+  it('folds in the work the term closed, for the school and per teacher', async () => {
+    const result = await body(await GET(request()));
+
+    expect(result.terms).toEqual({
+      accepted: 3,
+      revised: 1,
+      overturned: 1,
+      unattributed: 0,
+      attributed: true,
+    });
+    expect(result.teachers.find((t) => t.id === 'teacher-1')?.terms).toEqual({
+      accepted: 1,
+      revised: 1,
+      overturned: 1,
+    });
+    // Nothing closed in their groups: no figures rather than a row of zeros.
+    expect(result.teachers.find((t) => t.id === 'teacher-3')?.terms).toBeNull();
+  });
+
+  it('asks the journal for the days of the period, today included', async () => {
+    await GET(request(`?school=${SCHOOL_ID}&period=7`));
+
+    const call = vi
+      .mocked(serverFetch)
+      .mock.calls.map(([opts]) => opts as { path: string; query?: Record<string, string> })
+      .find((opts) => opts.path === `/internal/review-terms/schools/${SCHOOL_ID}`);
+    const day = (offset: number) =>
+      new Date(Date.now() - offset * 86_400_000).toISOString().slice(0, 10);
+
+    expect(call?.query).toEqual({ from: day(6), to: day(0) });
+  });
+
+  it('keeps a teacher whose queue the term emptied, with the groups a helper could join', async () => {
+    const result = await body(await GET(request()));
+    const emptied = result.teachers.find((t) => t.id === 'teacher-4');
+
+    expect(emptied).toMatchObject({
+      name: 'Kari Lie',
+      pending: 0,
+      groups: ['C1 morgen'],
+      groupIds: ['group-3'],
+      terms: { accepted: 2, revised: 0, overturned: 0 },
+    });
+    // A zero in the journal is not a reason for a row of its own.
+    expect(result.teachers.find((t) => t.id === 'teacher-5')).toBeUndefined();
+  });
+
+  it('names every group a teacher holds, not only the ones with work waiting', async () => {
+    const result = await body(await GET(request()));
+    expect(result.teachers.find((t) => t.id === 'teacher-1')?.groupIds).toEqual(['group-1']);
+
+    const reviewersCall = vi
+      .mocked(serverFetch)
+      .mock.calls.map(([opts]) => opts as { path: string; body?: { groupIds: string[] } })
+      .find((opts) => opts.path === '/internal/review/reviewers');
+    expect(reviewersCall?.body?.groupIds.sort()).toEqual(['group-1', 'group-2', 'group-3']);
+  });
+
+  it('shows the load without the journal when analytics cannot be asked', async () => {
+    upstream({ terms: new Error('down') });
+
+    const result = await body(await GET(request()));
+
+    expect(result.terms).toBeNull();
+    expect(result.summary.pending).toBe(3);
+    expect(result.teachers.every((teacher) => teacher.terms === null)).toBe(true);
+  });
+
+  it('says the journal could not be attributed rather than crediting nobody', async () => {
+    upstream({ terms: { ...TERMS, teachers: null, unattributed: null } });
+
+    const result = await body(await GET(request()));
+
+    expect(result.terms).toMatchObject({ accepted: 3, attributed: false, unattributed: null });
+    expect(result.teachers.every((teacher) => teacher.terms === null)).toBe(true);
   });
 
   it('answers 502 when the engine cannot report the load', async () => {
