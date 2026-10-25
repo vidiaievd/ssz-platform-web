@@ -143,6 +143,14 @@
         "notAnOccurrence": "The series does not fall on this day.",
         "targetNotReviewerForTeacher": "This person does not check work in the school, so there is nothing to hold time for."
       }
+    },
+    "forecast": {
+      "queue": "{count, plural, one {# submission} other {# submissions}} waiting ≈ {hours} h",
+      "empty": "Nothing is waiting to be marked",
+      "held": "{hours} h held for marking for the rest of the week",
+      "overloaded": "Noticeably more is waiting than the time held for it: hold more marking time, or ask the school for help.",
+      "shared": "Work from groups you mark together with a colleague counts for each of you.",
+      "failed": "The marking queue could not be read, so there is no forecast."
     }
   }
 }

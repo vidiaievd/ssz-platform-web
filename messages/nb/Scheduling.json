@@ -143,6 +143,14 @@
         "notAnOccurrence": "Serien faller ikke på denne dagen.",
         "targetNotReviewerForTeacher": "Denne personen retter ikke arbeid på skolen, så det er ingen tid å sette av."
       }
+    },
+    "forecast": {
+      "queue": "{count, plural, one {# innlevering} other {# innleveringer}} venter ≈ {hours} t",
+      "empty": "Ingenting venter på retting",
+      "held": "{hours} t satt av til retting resten av uka",
+      "overloaded": "Det venter merkbart mer enn tiden som er satt av: sett av mer tid til retting, eller be skolen om hjelp.",
+      "shared": "Arbeid fra grupper du retter sammen med en kollega, telles hos hver av dere.",
+      "failed": "Rettekøen kunne ikke leses, så det vises ingen prognose."
     }
   }
 }

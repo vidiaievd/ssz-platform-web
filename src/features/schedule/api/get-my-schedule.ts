@@ -4,9 +4,13 @@ import { getSchedulingProvider } from '@/lib/scheduling/provider';
 import { getGroupsForSelect } from '@/features/students/api/queries';
 import { getGroupCourseOutline } from '@/features/groups/api/queries';
 import { AppError } from '@/lib/errors';
+import { serverFetch } from '@/lib/api/server-fetcher';
+import { env } from '@/lib/env';
+import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import type { Session } from '@/features/groups/types';
 import type { ReviewBlockWindow } from '@/lib/scheduling/provider';
 import type { DateRange } from '../lib/range';
+import { queueForecast, type QueueForecast, type ReviewEffort } from '../lib/queue-forecast';
 
 /** One session of the week, with the name the screen puts on it. */
 export interface ScheduleSession extends Session {
@@ -133,6 +137,69 @@ export async function getTeacherReviewBlocks(
   } catch (err) {
     console.error('[schedule] getTeacherReviewBlocks failed:', err);
     return { blocks: [], occurrences: [], overlaps: [], error: true };
+  }
+}
+
+/**
+ * The signed-in teacher's queue against the marking time they hold for the rest of the
+ * week (plan 81, step 8). Null when there is nothing to say — no work waiting in their
+ * groups and no time held; `'failed'` when the queue could not be read, so the screen does
+ * not mistake an outage for an empty queue.
+ *
+ * Two services beside the blocks already read: exercise-engine counts the school's queue by
+ * group × template and names a norm for each template; organization-service says who
+ * reviews each group now — the same rule the oversight screen attributes load by.
+ */
+export async function getMyQueueForecast(
+  schoolId: string,
+  blocks: MyReviewBlocks,
+  window: { from: string; to: string },
+): Promise<QueueForecast | 'failed' | null> {
+  try {
+    const user = await getCurrentUser();
+    if (!user?.userId) return null;
+
+    const effort = await serverFetch<ReviewEffort>({
+      service: 'exercises',
+      path: '/internal/attempts/review/effort',
+      directBaseUrl: env.EXERCISE_SERVICE_INTERNAL_URL,
+      headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
+      anonymous: true,
+      query: { schoolId },
+    });
+
+    const groupIds = [
+      ...new Set(effort.pending.map((b) => b.groupId).filter((id): id is string => id !== null)),
+    ];
+    const reviewers =
+      groupIds.length === 0
+        ? { groups: [] }
+        : await serverFetch<{ groups: { groupId: string; teachers: { userId: string }[] }[] }>({
+            service: 'organization',
+            path: '/internal/review/reviewers',
+            method: 'POST',
+            directBaseUrl: env.ORGANIZATION_SERVICE_INTERNAL_URL,
+            headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
+            anonymous: true,
+            body: { groupIds, at: new Date().toISOString() },
+          });
+
+    const reviewersByGroup = new Map(
+      reviewers.groups
+        .filter((group) => group.teachers.some((teacher) => teacher.userId === user.userId))
+        .map((group) => [group.groupId, group.teachers.length]),
+    );
+
+    const forecast = queueForecast({
+      effort,
+      reviewersByGroup,
+      occurrences: blocks.occurrences,
+      ...window,
+    });
+    return forecast.pending === 0 && forecast.hoursHeld === 0 ? null : forecast;
+  } catch (err) {
+    console.error('[schedule] getMyQueueForecast failed:', err);
+    return 'failed';
   }
 }
 
