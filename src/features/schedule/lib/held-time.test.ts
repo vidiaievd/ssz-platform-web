@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { ReviewBlock, ReviewBlockOccurrence } from '@/lib/scheduling/provider';
-import { heldTime } from './held-time';
+import { heldHoursByTeacher, heldTime } from './held-time';
 
 const block = (
   id: string,
@@ -111,5 +111,39 @@ describe("a teacher's marking time read by the school", () => {
       'once-late',
     ]);
     expect(held.hoursPerWeek).toBe(0);
+  });
+});
+
+describe('heldHoursByTeacher', () => {
+  it('averages each teacher over the weeks ahead and counts nothing outside them', () => {
+    const of = (teacherId: string, date: string, start: string, end: string) => ({
+      ...sitting(`${teacherId}-block`, date, start, end),
+      teacherId,
+    });
+
+    const hours = heldHoursByTeacher(
+      {
+        blocks: [],
+        occurrences: [
+          // Two hours in each of the four weeks: two an hour a week.
+          of('kari', '2026-10-28', '09:00', '11:00'),
+          of('kari', '2026-11-04', '09:00', '11:00'),
+          of('kari', '2026-11-11', '09:00', '11:00'),
+          of('kari', '2026-11-18', '09:00', '11:00'),
+          // One sitting of an hour and a half in four weeks.
+          of('per', '2026-11-02', '16:00', '17:30'),
+          // The day before the window and the day after it.
+          of('per', '2026-10-25', '08:00', '12:00'),
+          of('ola', '2026-11-23', '08:00', '12:00'),
+        ],
+        overlaps: [],
+      },
+      FROM,
+    );
+
+    expect([...hours]).toEqual([
+      ['kari', 2],
+      ['per', 0.4],
+    ]);
   });
 });

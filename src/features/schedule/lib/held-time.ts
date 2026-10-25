@@ -31,11 +31,9 @@ export function heldTime(window: ReviewBlockWindow, from: string): HeldTime {
   const inside = (date: string) => date >= from && date <= end;
 
   const sittings = new Map<string, number>();
-  let minutes = 0;
   for (const occurrence of window.occurrences) {
     if (!inside(occurrence.date)) continue;
     sittings.set(occurrence.blockId, (sittings.get(occurrence.blockId) ?? 0) + 1);
-    minutes += toMinutes(occurrence.end) - toMinutes(occurrence.start);
   }
 
   // A day counts once per rule, whatever it ran into: the question is "how often", not
@@ -57,7 +55,44 @@ export function heldTime(window: ReviewBlockWindow, from: string): HeldTime {
     overlapDays: overlapDays.get(block.id)?.size ?? 0,
   }));
 
-  return { blocks, hoursPerWeek: Math.round((minutes / 60 / HELD_TIME_WEEKS) * 10) / 10 };
+  return { blocks, hoursPerWeek: perWeek(sittingMinutes(window, from).get('') ?? 0) };
+}
+
+/**
+ * Hours per week each teacher holds for marking over the weeks ahead (plan 81, step 9) — the
+ * figure {@link heldTime} puts at the top of one teacher's list, for a whole school at once.
+ * A teacher with no sittings in the window is absent, not zero: the caller knows who it asked
+ * about.
+ */
+export function heldHoursByTeacher(window: ReviewBlockWindow, from: string): Map<string, number> {
+  const hours = new Map<string, number>();
+  for (const [teacherId, minutes] of sittingMinutes(window, from, true)) {
+    hours.set(teacherId, perWeek(minutes));
+  }
+  return hours;
+}
+
+/** Minutes of sittings inside the weeks ahead, per teacher or all together under `''`. */
+function sittingMinutes(
+  window: ReviewBlockWindow,
+  from: string,
+  byTeacher = false,
+): Map<string, number> {
+  const end = addDays(from, HELD_TIME_WEEKS * 7 - 1);
+  const minutes = new Map<string, number>();
+  for (const occurrence of window.occurrences) {
+    if (occurrence.date < from || occurrence.date > end) continue;
+    const key = byTeacher ? occurrence.teacherId : '';
+    minutes.set(
+      key,
+      (minutes.get(key) ?? 0) + toMinutes(occurrence.end) - toMinutes(occurrence.start),
+    );
+  }
+  return minutes;
+}
+
+function perWeek(minutes: number): number {
+  return Math.round((minutes / 60 / HELD_TIME_WEEKS) * 10) / 10;
 }
 
 function byRule(a: ReviewBlock, b: ReviewBlock): number {

@@ -80,6 +80,12 @@ export interface OversightTeacher {
    * nothing was, or when the school's journal could not be read or attributed.
    */
   terms: OversightTermTally | null;
+  /**
+   * Hours a week this teacher holds for marking in the weeks ahead (plan 81) — 0 when they
+   * hold none. Null when the school's timetable could not be read: a zero here would be the
+   * one wrong answer that looks like an answer.
+   */
+  heldHoursPerWeek: number | null;
 }
 
 export interface OversightGroup {
@@ -142,6 +148,11 @@ export interface ReviewOversightResponse {
   /** Every waiting age in the school, counted once each. */
   ages: number[];
   teachers: OversightTeacher[];
+  /**
+   * How many weeks ahead `heldHoursPerWeek` is averaged over; null when the timetable could
+   * not be read and every row's figure is null with it.
+   */
+  heldWeeks: number | null;
   groups: OversightGroup[];
   courses: OversightCourse[];
   stuck: OversightStuck[];

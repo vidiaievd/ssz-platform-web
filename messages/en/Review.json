@@ -299,7 +299,12 @@
       "subTerms": "Who is under pressure shows in the length of the tail — and in the work the term closed before anyone read it.",
       "terms": "closed at the term",
       "termsRevised": "{revised} re-checked · {overturned} overturned",
-      "addHelper": "Add a helper"
+      "addHelper": "Add a helper",
+      "heldHours": "{hours} h",
+      "held": "a week for marking",
+      "heldNone": "no marking time held",
+      "heldUnread": "marking time unavailable",
+      "heldHint": "Time held for marking, averaged over the next {weeks} weeks"
     },
     "groups": {
       "title": "Groups",

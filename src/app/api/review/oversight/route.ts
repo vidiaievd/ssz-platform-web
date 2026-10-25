@@ -3,6 +3,9 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { env } from '@/lib/env';
+import { getSchedulingProvider } from '@/lib/scheduling/provider';
+import { HELD_TIME_WEEKS, heldHoursByTeacher } from '@/features/schedule/lib/held-time';
+import { isoDay } from '@/features/schedule/lib/range';
 import { hoursSince, isOverdue } from '@/features/review/lib/age-scale';
 import { buildSlaMap, type SlaMap } from '@/features/review/lib/sla-map';
 import { fetchGroupNames, resolveOversightAccess } from '@/features/review/lib/review-scope';
@@ -102,11 +105,12 @@ function remember(key: string, body: ReviewOversightResponse): void {
 /**
  * The shape of a school's review load, in one answer (`API_CONTRACT.md` §6).
  *
- * Six sources, one screen. exercise-engine reports *when* things were handed in and
+ * Seven sources, one screen. exercise-engine reports *when* things were handed in and
  * answered; organization-service says who reviews which group and what the school
  * promised; content-service says which courses promised something else; analytics keeps
- * the journal of work a model's verdict closed at the term (plan 80); the directory
- * supplies the names. The composition is the whole point — every figure on this screen
+ * the journal of work a model's verdict closed at the term (plan 80); scheduling-service
+ * says how much time each teacher holds for marking (plan 81); the directory supplies the
+ * names. The composition is the whole point — every figure on this screen
  * depends on at least two of them, and a browser asking each in turn would be authorised
  * by none.
  *
@@ -170,11 +174,12 @@ export async function GET(request: NextRequest) {
     ...new Set(pending.map((bucket) => bucket.groupId).filter((id): id is string => id !== null)),
   ];
 
-  const [sla, groupNames, courseTitles, journal] = await Promise.all([
+  const [sla, groupNames, courseTitles, journal, heldHours] = await Promise.all([
     buildSlaMap(access.schoolId, containerIds),
     fetchGroupNames(access.schoolId),
     fetchCourseTitles(containerIds),
     fetchTerms(access.schoolId, periodDays, now),
+    fetchHeldHours(access.schoolId, now),
   ]);
 
   // Every group's staff, not only the groups with work waiting: under a model-first policy
@@ -254,6 +259,7 @@ export async function GET(request: NextRequest) {
         terms: term
           ? { accepted: term.accepted, revised: term.revised, overturned: term.overturned }
           : null,
+        heldHoursPerWeek: heldHours === null ? null : (heldHours.get(id) ?? 0),
       };
     })
     // Busiest first: the screen exists to find where it has piled up, and a row's place
@@ -305,6 +311,7 @@ export async function GET(request: NextRequest) {
     },
     ages: school_.ages,
     teachers,
+    heldWeeks: heldHours === null ? null : HELD_TIME_WEEKS,
     groups,
     courses,
     stuck,
@@ -376,6 +383,27 @@ async function fetchTerms(
       headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN },
       anonymous: true,
     });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Hours a week each teacher of the school holds for marking, averaged over the weeks ahead —
+ * the same figure the teacher's own page leads with (plan 81, step 7). Ahead rather than
+ * over the screen's period: the question beside a long queue is whether time is set aside
+ * to work it down, and a block that has already passed answers nothing.
+ *
+ * Read with the caller's session: scheduling lets the school's timetable roles read it, and
+ * every role this screen admits is one of them. Null when it could not be read.
+ */
+async function fetchHeldHours(schoolId: string, now: Date): Promise<Map<string, number> | null> {
+  const from = isoDay(now);
+  const to = isoDay(new Date(now.getTime() + (HELD_TIME_WEEKS * 7 - 1) * 86_400_000));
+
+  try {
+    const window = await getSchedulingProvider().schoolReviewBlocks(schoolId, from, to);
+    return heldHoursByTeacher(window, from);
   } catch {
     return null;
   }

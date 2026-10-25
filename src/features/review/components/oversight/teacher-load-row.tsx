@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 
 import { Avatar } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,12 @@ export interface TeacherLoadRowProps {
    * the columns line up; the screen sets it when the school's journal has anything in it.
    */
   showTerms?: boolean;
+  /**
+   * Draw the column of time held for marking (plan 81), averaged over this many weeks ahead;
+   * null when the timetable could not be read, so the column says so instead of showing
+   * zeros. Left out, the column is not drawn.
+   */
+  heldWeeks?: number | null;
 }
 
 /**
@@ -40,6 +46,8 @@ export interface TeacherLoadRowProps {
  * Under a model-first policy a queue can also shrink without anyone reading it: the term
  * closes work by itself (plan 80). That column is the other half of the load — what was not
  * carried — and a short queue beside a long count there is the teacher who needs a helper.
+ * Next to it, the time the teacher holds for marking (plan 81): a long queue with no time
+ * set aside is a timetable to fix before it is a person to chase.
  *
  * The actions fade in on hover at .55 → 1 rather than appearing, so the row does not change
  * height or width under the pointer; at full opacity they are also always in the tab order,
@@ -50,17 +58,26 @@ export function TeacherLoadRow({
   slaHours,
   actions,
   showTerms = false,
+  heldWeeks,
 }: TeacherLoadRowProps) {
   const t = useTranslations('Review.oversight.teachers');
+  const format = useFormatter();
   const { words } = useAgeWords();
+
+  const showHeld = heldWeeks !== undefined;
+  const held = heldWeeks === null ? null : teacher.heldHoursPerWeek;
 
   return (
     <div
       className={cn(
         'group grid items-center gap-4 rounded-[11px] px-3 py-[13px] transition-colors hover:bg-(--ssz-bg-subtle)',
-        showTerms
-          ? 'grid-cols-[minmax(180px,1.4fr)_88px_88px_120px_minmax(140px,1fr)_auto]'
-          : 'grid-cols-[minmax(180px,1.4fr)_88px_88px_minmax(140px,1fr)_auto]',
+        showTerms && showHeld
+          ? 'grid-cols-[minmax(180px,1.4fr)_88px_88px_120px_108px_minmax(140px,1fr)_auto]'
+          : showTerms
+            ? 'grid-cols-[minmax(180px,1.4fr)_88px_88px_120px_minmax(140px,1fr)_auto]'
+            : showHeld
+              ? 'grid-cols-[minmax(180px,1.4fr)_88px_88px_108px_minmax(140px,1fr)_auto]'
+              : 'grid-cols-[minmax(180px,1.4fr)_88px_88px_minmax(140px,1fr)_auto]',
       )}
     >
       <div className="flex min-w-0 items-center gap-2.5">
@@ -107,6 +124,22 @@ export function TeacherLoadRow({
                   revised: teacher.terms.revised,
                   overturned: teacher.terms.overturned,
                 })}
+          </div>
+        </div>
+      ) : null}
+
+      {showHeld ? (
+        <div title={heldWeeks === null ? undefined : t('heldHint', { weeks: heldWeeks })}>
+          <div
+            className="text-lg font-bold tracking-[-0.02em]"
+            style={held === null || held === 0 ? { color: 'var(--ssz-text-muted)' } : undefined}
+          >
+            {held === null || held === 0
+              ? '—'
+              : t('heldHours', { hours: format.number(held, { maximumFractionDigits: 1 }) })}
+          </div>
+          <div className="text-[11px] text-muted-foreground">
+            {held === null ? t('heldUnread') : held === 0 ? t('heldNone') : t('held')}
           </div>
         </div>
       ) : null}

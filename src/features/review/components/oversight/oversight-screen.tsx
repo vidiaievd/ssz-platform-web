@@ -157,6 +157,7 @@ export function OversightScreen({ school }: OversightScreenProps) {
                   teacher={teacher}
                   slaHours={data.schoolSlaHours}
                   showTerms={showTerms(data)}
+                  heldWeeks={data.heldWeeks}
                   actions={
                     <>
                       <Button

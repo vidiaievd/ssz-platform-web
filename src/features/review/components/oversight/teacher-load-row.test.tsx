@@ -26,6 +26,7 @@ const teacher = (over: Partial<OversightTeacher> = {}): OversightTeacher => ({
   medianHours: 21,
   shared: false,
   terms: null,
+  heldHoursPerWeek: null,
   ...over,
 });
 
@@ -85,6 +86,25 @@ describe('TeacherLoadRow', () => {
   it('leaves the column off a school whose journal is empty', () => {
     renderWithIntl(<TeacherLoadRow teacher={teacher()} slaHours={48} />);
     expect(screen.queryByText('closed at the term')).not.toBeInTheDocument();
+  });
+
+  it('shows the hours a week held for marking', () => {
+    renderWithIntl(
+      <TeacherLoadRow teacher={teacher({ heldHoursPerWeek: 1.5 })} slaHours={48} heldWeeks={4} />,
+    );
+    expect(screen.getByText('1.5 h')).toBeInTheDocument();
+    expect(screen.getByText('a week for marking')).toBeInTheDocument();
+  });
+
+  it('tells no time held apart from a timetable that could not be read', () => {
+    const { unmount } = renderWithIntl(
+      <TeacherLoadRow teacher={teacher({ heldHoursPerWeek: 0 })} slaHours={48} heldWeeks={4} />,
+    );
+    expect(screen.getByText('no marking time held')).toBeInTheDocument();
+    unmount();
+
+    renderWithIntl(<TeacherLoadRow teacher={teacher()} slaHours={48} heldWeeks={null} />);
+    expect(screen.getByText('marking time unavailable')).toBeInTheDocument();
   });
 
   it('drops the histogram where no promise exists to colour it against', () => {

@@ -299,7 +299,12 @@
       "subTerms": "Hvem som har det travelt, ser du på halen — og på arbeid fristen godkjente før noen leste det.",
       "terms": "godkjent ved fristen",
       "termsRevised": "{revised} vurdert på nytt · {overturned} endret",
-      "addHelper": "Legg til en hjelper"
+      "addHelper": "Legg til en hjelper",
+      "heldHours": "{hours} t",
+      "held": "i uka til retting",
+      "heldNone": "ingen tid satt av til retting",
+      "heldUnread": "rettetiden kunne ikke leses",
+      "heldHint": "Tid satt av til retting, i snitt over de neste {weeks} ukene"
     },
     "groups": {
       "title": "Grupper",

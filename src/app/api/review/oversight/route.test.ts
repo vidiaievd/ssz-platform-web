@@ -13,6 +13,12 @@ vi.mock('@/lib/api/server-fetcher', () => ({ serverFetch: vi.fn() }));
 vi.mock('@/lib/api/profile-directory', () => ({ fetchProfileSummaries: vi.fn() }));
 vi.mock('@/features/auth/api/get-current-user', () => ({ getCurrentUser: vi.fn() }));
 vi.mock('@/features/school/api/get-my-schools', () => ({ getMySchools: vi.fn() }));
+// The provider picks its implementation with `require`, which vitest cannot resolve; the real
+// one is handed over directly, so its calls still land on the mocked `serverFetch`.
+vi.mock('@/lib/scheduling/provider', async () => {
+  const { realProvider } = await import('@/lib/scheduling/real');
+  return { getSchedulingProvider: () => realProvider };
+});
 
 const { GET } = await import('./route');
 import { serverFetch } from '@/lib/api/server-fetcher';
@@ -105,12 +111,31 @@ const TERMS = {
   ],
 };
 
+/** Next Monday 09:00–11:00, a sitting each week for teacher-1; teacher-3 holds nothing. */
+const inDays = (days: number) =>
+  new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+const HELD = {
+  blocks: [],
+  occurrences: [0, 7, 14, 21].map((offset) => ({
+    blockId: 'block-1',
+    schoolId: SCHOOL_ID,
+    teacherId: 'teacher-1',
+    repeat: 'weekly',
+    date: inDays(offset),
+    startTime: '09:00',
+    endTime: '11:00',
+    note: null,
+  })),
+  overlaps: [],
+};
+
 function upstream(
   overrides: {
     aggregate?: unknown;
     reviewers?: unknown;
     queue?: unknown;
     terms?: unknown;
+    held?: unknown;
     schoolSla?: number | null;
     courseSla?: { respondWithinHours: number | null; overridden: boolean };
   } = {},
@@ -123,6 +148,10 @@ function upstream(
     if (opts.path.startsWith('/internal/review-terms/schools/')) {
       if (overrides.terms instanceof Error) throw overrides.terms;
       return overrides.terms ?? TERMS;
+    }
+    if (opts.path === `/scheduling/schools/${SCHOOL_ID}/review-blocks`) {
+      if (overrides.held instanceof Error) throw overrides.held;
+      return overrides.held ?? HELD;
     }
     if (opts.path.startsWith('/schools') && opts.path.endsWith('/review-settings')) {
       return { respondWithinHours: 'schoolSla' in overrides ? overrides.schoolSla : 48 };
@@ -351,6 +380,35 @@ describe('GET /api/review/oversight', () => {
 
     expect(result.terms).toMatchObject({ accepted: 3, attributed: false, unattributed: null });
     expect(result.teachers.every((teacher) => teacher.terms === null)).toBe(true);
+  });
+
+  it('puts the marking time each teacher holds beside their load', async () => {
+    const result = await body(await GET(request()));
+
+    expect(result.heldWeeks).toBe(4);
+    expect(result.teachers.find((t) => t.id === 'teacher-1')?.heldHoursPerWeek).toBe(2);
+    // Nothing held is a zero — the timetable was read and said so.
+    expect(result.teachers.find((t) => t.id === 'teacher-3')?.heldHoursPerWeek).toBe(0);
+
+    // The weeks ahead from today, with the caller's own session rather than the service token.
+    const call = vi
+      .mocked(serverFetch)
+      .mock.calls.map(
+        ([opts]) => opts as { path: string; query?: Record<string, string>; anonymous?: boolean },
+      )
+      .find((opts) => opts.path.endsWith('/review-blocks'));
+    expect(call?.query).toEqual({ from: inDays(0), to: inDays(27) });
+    expect(call?.anonymous).toBeUndefined();
+  });
+
+  it('says the marking time is unknown, not zero, when the timetable cannot be read', async () => {
+    upstream({ held: new Error('down') });
+
+    const result = await body(await GET(request()));
+
+    expect(result.heldWeeks).toBeNull();
+    expect(result.summary.pending).toBe(3);
+    expect(result.teachers.every((teacher) => teacher.heldHoursPerWeek === null)).toBe(true);
   });
 
   it('answers 502 when the engine cannot report the load', async () => {
