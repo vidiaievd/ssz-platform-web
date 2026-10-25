@@ -24,7 +24,12 @@ import type { Absence, SubstituteRequest, SubstituteCandidate, CurriculumPlan } 
 import type {
   MutationResult,
   NewSessionInput,
+  NewReviewBlockInput,
   RegenerateReport,
+  ReviewBlock,
+  ReviewBlockChanges,
+  ReviewBlockOccurrence,
+  ReviewBlockWindow,
   SchedulingProvider,
   SessionChanges,
 } from './provider';
@@ -187,6 +192,79 @@ function toApiSlotInput(s: Slot): { weekday: string; startTime: string; endTime:
     startTime: s.start,
     endTime: s.end,
     room: s.room.trim() ? s.room : null,
+  };
+}
+
+/** One review block as scheduling-service returns it. */
+interface RawReviewBlock {
+  id: string;
+  schoolId: string;
+  teacherId: string;
+  repeat: ReviewBlock['repeat'];
+  startsOn: string;
+  endsOn: string | null;
+  startTime: string;
+  endTime: string;
+  note: string | null;
+  skips: string[];
+}
+
+interface RawReviewBlockOccurrence {
+  blockId: string;
+  schoolId: string;
+  teacherId: string;
+  repeat: ReviewBlock['repeat'];
+  date: string;
+  startTime: string;
+  endTime: string;
+  note: string | null;
+}
+
+function toReviewBlock(r: RawReviewBlock): ReviewBlock {
+  return {
+    id: r.id,
+    schoolId: r.schoolId,
+    teacherId: r.teacherId,
+    repeat: r.repeat,
+    startsOn: r.startsOn,
+    endsOn: r.endsOn,
+    start: r.startTime,
+    end: r.endTime,
+    note: r.note,
+    skips: r.skips ?? [],
+  };
+}
+
+function toReviewBlockOccurrence(r: RawReviewBlockOccurrence): ReviewBlockOccurrence {
+  return {
+    blockId: r.blockId,
+    schoolId: r.schoolId,
+    teacherId: r.teacherId,
+    repeat: r.repeat,
+    date: r.date,
+    start: r.startTime,
+    end: r.endTime,
+    note: r.note,
+  };
+}
+
+/** The service's own words, plus its code: a screen translates `TARGET_NOT_REVIEWER`, not an English sentence. */
+function reviewBlockFailure(e: unknown, fallback: string): Extract<MutationResult, { ok: false }> {
+  const code = e instanceof AppError ? (e.details as { code?: unknown } | null)?.code : undefined;
+  return {
+    ok: false,
+    error: messageOf(e, fallback),
+    details: typeof code === 'string' ? { code } : undefined,
+  };
+}
+
+/** Rename the times to the service's words, leaving absent fields absent. */
+function toApiReviewBlock(input: ReviewBlockChanges): Record<string, unknown> {
+  const { start, end, ...rest } = input;
+  return {
+    ...rest,
+    ...(start !== undefined ? { startTime: start } : {}),
+    ...(end !== undefined ? { endTime: end } : {}),
   };
 }
 
@@ -382,6 +460,78 @@ export const realProvider: SchedulingProvider = {
       path: `/scheduling/schools/${schoolId}/students/${userId}/clashes`,
     });
     return rows.map((r): OpsWarning => ({ type: 'clash', with: r.groupBId, time: r.startTime }));
+  },
+
+  async myReviewBlocks(from: string, to: string) {
+    const raw = await serverFetch<{
+      blocks: RawReviewBlock[];
+      occurrences: RawReviewBlockOccurrence[];
+      overlaps: ReviewBlockWindow['overlaps'];
+    }>({
+      service: 'scheduling',
+      path: '/scheduling/teachers/me/review-blocks',
+      query: { from, to },
+    });
+    return {
+      blocks: raw.blocks.map(toReviewBlock),
+      occurrences: raw.occurrences.map(toReviewBlockOccurrence),
+      overlaps: raw.overlaps ?? [],
+    };
+  },
+
+  async createReviewBlock(schoolId: string, teacherId: string, input: NewReviewBlockInput) {
+    try {
+      const raw = await serverFetch<RawReviewBlock>({
+        service: 'scheduling',
+        path: `/scheduling/schools/${schoolId}/teachers/${teacherId}/review-blocks`,
+        method: 'POST',
+        body: toApiReviewBlock(input),
+      });
+      return { ok: true as const, data: toReviewBlock(raw) };
+    } catch (e) {
+      return reviewBlockFailure(e, 'Failed to hold the time');
+    }
+  },
+
+  async patchReviewBlock(blockId: string, changes: ReviewBlockChanges) {
+    try {
+      const raw = await serverFetch<RawReviewBlock>({
+        service: 'scheduling',
+        path: `/scheduling/review-blocks/${blockId}`,
+        method: 'PATCH',
+        body: toApiReviewBlock(changes),
+      });
+      return { ok: true as const, data: toReviewBlock(raw) };
+    } catch (e) {
+      return reviewBlockFailure(e, 'Failed to change the time');
+    }
+  },
+
+  async deleteReviewBlock(blockId: string): Promise<MutationResult> {
+    try {
+      await serverFetch({
+        service: 'scheduling',
+        path: `/scheduling/review-blocks/${blockId}`,
+        method: 'DELETE',
+      });
+      return { ok: true };
+    } catch (e) {
+      return reviewBlockFailure(e, 'Failed to remove the time');
+    }
+  },
+
+  async skipReviewBlockDay(blockId: string, date: string): Promise<MutationResult> {
+    try {
+      await serverFetch({
+        service: 'scheduling',
+        path: `/scheduling/review-blocks/${blockId}/skips`,
+        method: 'POST',
+        body: { date },
+      });
+      return { ok: true };
+    } catch (e) {
+      return reviewBlockFailure(e, 'Failed to take the day out');
+    }
   },
 
   // plan-28: no GET/PUT per-teacher availability endpoint in scheduling-service yet

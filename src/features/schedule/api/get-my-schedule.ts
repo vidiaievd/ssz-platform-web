@@ -5,6 +5,7 @@ import { getGroupsForSelect } from '@/features/students/api/queries';
 import { getGroupCourseOutline } from '@/features/groups/api/queries';
 import { AppError } from '@/lib/errors';
 import type { Session } from '@/features/groups/types';
+import type { ReviewBlockWindow } from '@/lib/scheduling/provider';
 import type { DateRange } from '../lib/range';
 
 /** One session of the week, with the name the screen puts on it. */
@@ -70,6 +71,44 @@ export async function getMySchedule(
     }
     console.error('[schedule] getMySchedule failed:', err);
     return { sessions: [], error: 'failed' };
+  }
+}
+
+export interface MyReviewBlocks extends ReviewBlockWindow {
+  /**
+   * Set when the blocks could not be read. Read beside the lessons, not instead of them:
+   * the week still shows what is taught, and says that the marking time is missing.
+   */
+  error: boolean;
+}
+
+/**
+ * The signed-in teacher's time for marking held in this workspace (plan 81).
+ *
+ * The read spans every school they mark for; the screen is addressed by workspace, so —
+ * as with lessons — another school's blocks are not this week's business.
+ */
+export async function getMyReviewBlocks(
+  workspaceId: string,
+  range: DateRange,
+): Promise<MyReviewBlocks> {
+  try {
+    const window = await getSchedulingProvider().myReviewBlocks(range.from, range.to);
+    const ids = new Set(
+      window.blocks.filter((block) => block.schoolId === workspaceId).map((block) => block.id),
+    );
+    const mine = (id: string | undefined) => id !== undefined && ids.has(id);
+    return {
+      blocks: window.blocks.filter((block) => ids.has(block.id)),
+      occurrences: window.occurrences.filter((o) => ids.has(o.blockId)),
+      overlaps: window.overlaps.filter(
+        (o) => mine(o.blockId) || mine(o.blockAId) || mine(o.blockBId),
+      ),
+      error: false,
+    };
+  } catch (err) {
+    console.error('[schedule] getMyReviewBlocks failed:', err);
+    return { blocks: [], occurrences: [], overlaps: [], error: true };
   }
 }
 

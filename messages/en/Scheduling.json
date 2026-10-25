@@ -79,6 +79,65 @@
       "all": "Whole schedule →",
       "none": "Nothing scheduled in the next {days} days.",
       "noTopic": "No topic yet"
+    },
+    "reviewBlocks": {
+      "add": "Hold time for marking",
+      "title": "Marking",
+      "weekly": "Every week",
+      "overlapsHint": "Runs into a lesson or another block",
+      "count": "{count, plural, one {# marking block} other {# marking blocks}}",
+      "loadFailed": "We could not read your marking time. Your lessons are shown; try again for the rest.",
+      "dialog": {
+        "title": "Time for marking",
+        "editTitle": "Change the marking time",
+        "description": "Time in your week for checking students' work. Students do not see it.",
+        "editSeriesDescription": "This changes every week of the series, past ones included. To keep the past as it was, set an end date here and hold a new block.",
+        "repeat": "How often",
+        "weekly": "Every week",
+        "oneOff": "Once",
+        "day": "Day",
+        "firstDay": "First day",
+        "everyWeekday": "Every {weekday}",
+        "until": "Until (optional)",
+        "untilHint": "Leave empty for a series with no end.",
+        "from": "From",
+        "to": "To",
+        "note": "Note (optional)",
+        "notePlaceholder": "For example, essays of the B1 groups",
+        "cancel": "Cancel",
+        "submit": "Hold",
+        "save": "Save",
+        "created": "The time is in your week.",
+        "saved": "The marking time is changed.",
+        "createFailed": "Could not hold the time.",
+        "saveFailed": "Could not change the time."
+      },
+      "actions": {
+        "label": "Actions for {label}",
+        "edit": "Change",
+        "editSeries": "Change the series",
+        "skipDay": "Not this time",
+        "skipped": "This day is taken out of the series.",
+        "remove": "Remove",
+        "removeSeries": "Remove the series",
+        "removeTitle": "Remove this marking time?",
+        "removeSeriesTitle": "Remove the whole series?",
+        "removeDescription": "The block disappears from your week.",
+        "removeSeriesDescription": "Every week of it disappears, past ones included. To drop a single day, use “Not this time”.",
+        "removeConfirm": "Remove",
+        "removed": "The marking time is removed.",
+        "back": "Back",
+        "failed": "Could not change the marking time."
+      },
+      "errors": {
+        "endTimeNotAfterStart": "The block has to end after it starts, on the same day.",
+        "endsBeforeStart": "A series cannot end before its first day.",
+        "oneOffSpansDays": "A one-off block takes a single day.",
+        "invalidTime": "Times run from 00:00 to 23:59.",
+        "targetNotReviewer": "You do not check work in this workspace, so there is nothing to hold time for.",
+        "oneOffCannotSkip": "A one-off block cannot skip its only day — remove it instead.",
+        "notAnOccurrence": "The series does not fall on this day."
+      }
     }
   }
 }

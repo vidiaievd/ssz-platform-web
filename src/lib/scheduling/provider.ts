@@ -58,6 +58,63 @@ export interface RegenerateReport {
   reason: string | null;
 }
 
+/** A rule holding a teacher's time for marking — once, or every week from `startsOn` (plan 81). */
+export interface ReviewBlock {
+  id: string;
+  schoolId: string;
+  teacherId: string;
+  repeat: 'one_off' | 'weekly';
+  startsOn: string;
+  /** Equals `startsOn` for a one-off; null for a series with no end. */
+  endsOn: string | null;
+  start: string;
+  end: string;
+  note: string | null;
+  /** Days taken out of the series. */
+  skips: string[];
+}
+
+/** One dated sitting of a block, as the week draws it. */
+export interface ReviewBlockOccurrence {
+  blockId: string;
+  schoolId: string;
+  teacherId: string;
+  repeat: ReviewBlock['repeat'];
+  date: string;
+  start: string;
+  end: string;
+  note: string | null;
+}
+
+/** A sitting that runs into a lesson, or into another sitting, on one day. */
+export interface ReviewBlockOverlap {
+  kind: 'block_lesson' | 'blocks';
+  date: string;
+  blockId?: string;
+  lessonId?: string;
+  blockAId?: string;
+  blockBId?: string;
+}
+
+/** The rules with a day in a window (for editing) and their sittings (for drawing). */
+export interface ReviewBlockWindow {
+  blocks: ReviewBlock[];
+  occurrences: ReviewBlockOccurrence[];
+  overlaps: ReviewBlockOverlap[];
+}
+
+export interface NewReviewBlockInput {
+  repeat: ReviewBlock['repeat'];
+  startsOn: string;
+  endsOn?: string | null;
+  start: string;
+  end: string;
+  note?: string | null;
+}
+
+/** Absent leaves a field alone; null clears an end or a note. */
+export type ReviewBlockChanges = Partial<NewReviewBlockInput>;
+
 export interface SchedulingProvider {
   // ── existing (groups) ──────────────────────────────────────────────────────
   getSlots(schoolId: string, groupId: string): Promise<Slot[]>;
@@ -104,6 +161,25 @@ export interface SchedulingProvider {
   teacherWeek(schoolId: string, teacherId: string): Promise<RawTimetableEntry[]>;
   teacherConflicts(schoolId: string): Promise<OpsWarning[]>;
   studentClashes(schoolId: string, userId: string): Promise<OpsWarning[]>;
+
+  // ── review blocks (plan 81) ────────────────────────────────────────────────
+  /** The signed-in teacher's time for marking in a window, across every school. */
+  myReviewBlocks(from: string, to: string): Promise<ReviewBlockWindow>;
+  /** Hold time for marking; `teacherId` is `me` for the caller's own. */
+  createReviewBlock(
+    schoolId: string,
+    teacherId: string,
+    input: NewReviewBlockInput,
+  ): Promise<MutationResult<ReviewBlock>>;
+  /** Change a block's rule — every sitting of a series, past ones included. */
+  patchReviewBlock(
+    blockId: string,
+    changes: ReviewBlockChanges,
+  ): Promise<MutationResult<ReviewBlock>>;
+  /** Remove a block, every sitting of it. */
+  deleteReviewBlock(blockId: string): Promise<MutationResult>;
+  /** Take one sitting out of a weekly series. */
+  skipReviewBlockDay(blockId: string, date: string): Promise<MutationResult>;
 
   // ── availability & absence ─────────────────────────────────────────────────
   getAvailability(teacherId: string): Promise<AvailabilityBlock[]>;
