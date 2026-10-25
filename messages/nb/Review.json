@@ -440,6 +440,26 @@
       "saveFailed": "Svartiden kunne ikke lagres.",
       "failed": "Svartiden kunne ikke leses.",
       "fieldLabel": "Svartid i timer"
+    },
+    "coursePolicy": {
+      "title": "Retting med KI",
+      "lede": "Hvordan dette kurset følger skolens retningslinjer når KI retter først.",
+      "schoolTeacherOnly": "Skolen lar lærerne rette alt nå — dette gjelder fra skolen slår på KI.",
+      "ownTerm": "Egen frist for automatisk godkjenning i dette kurset",
+      "fieldLabel": "Frist for automatisk godkjenning i timer",
+      "hours": "timer",
+      "inheritedFrom": "Skolens frist: {n} t.",
+      "noSchoolTerm": "Det finnes ingen skolefrist å arve.",
+      "bounds": "Mellom {min} og {max} timer.",
+      "raised": "Tidligere enn skolens eskalering — teller etter {n} t.",
+      "templates": {
+        "label": "Alltid til læreren",
+        "hint": "Når skolen tar utvalg, går arbeid av disse typene til en lærer og godkjennes aldri av KI alene."
+      },
+      "save": "Lagre",
+      "saved": "Kursets retningslinjer for retting er lagret.",
+      "saveFailed": "Kursets retningslinjer for retting kunne ikke lagres.",
+      "failed": "Kursets retningslinjer for retting kunne ikke leses."
     }
   },
   "student": {

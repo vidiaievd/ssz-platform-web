@@ -440,6 +440,26 @@
       "saveFailed": "The response time could not be saved.",
       "failed": "The response time could not be read.",
       "fieldLabel": "Response time in hours"
+    },
+    "coursePolicy": {
+      "title": "Review by a model",
+      "lede": "How this course follows the school's policy when a model checks first.",
+      "schoolTeacherOnly": "The school has teachers check everything now — this takes effect when the school turns a model on.",
+      "ownTerm": "Its own auto-accept term for this course",
+      "fieldLabel": "Auto-accept term in hours",
+      "hours": "hours",
+      "inheritedFrom": "The school's term: {n} h.",
+      "noSchoolTerm": "There is no school term to inherit.",
+      "bounds": "Between {min} and {max} hours.",
+      "raised": "Earlier than the school's escalation — it will count after {n} h.",
+      "templates": {
+        "label": "Always to the teacher",
+        "hint": "When the school samples, work of these types goes to a teacher, never counted by the model alone."
+      },
+      "save": "Save",
+      "saved": "The course review policy is saved.",
+      "saveFailed": "The course review policy could not be saved.",
+      "failed": "The course review policy could not be read."
     }
   },
   "student": {

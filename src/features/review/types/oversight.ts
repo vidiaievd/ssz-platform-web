@@ -172,6 +172,32 @@ export interface SchoolReviewAiPolicy {
 }
 
 /**
+ * A course's part of the school's policy (plan 80, step 2): its own auto-accept term and the
+ * templates whose work always goes to a teacher when the school samples.
+ *
+ * Read with what it inherits and what it is held to, all resolved by content-service: the
+ * applied term is the course's own raised to the school's escalation (Q2-A), or the school's.
+ */
+export interface CourseReviewAiPolicy {
+  /** What applies now. Null when there is no school behind the course to inherit from. */
+  autoAcceptAfterHours: number | null;
+  inheritedAutoAcceptAfterHours: number | null;
+  overridden: boolean;
+  /** The school's escalation; a course term below it is raised to it on read. */
+  escalationFloorHours: number | null;
+  teacherReviewTemplates: string[];
+  schoolMode: ReviewAiMode | null;
+  samplePercent: number | null;
+  ownerSchoolId: string | null;
+}
+
+/** What a course sends: `null` hands the term back to the school. */
+export interface CourseReviewAiPolicyInput {
+  autoAcceptAfterHours: number | null;
+  teacherReviewTemplates: string[];
+}
+
+/**
  * A course's promise, always alongside the one it would inherit.
  *
  * Both numbers travel together so the field in the settings drawer is never empty: an

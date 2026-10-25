@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { keyFactory } from '@/lib/query/keys';
 
 import type {
+  CourseReviewAiPolicy,
+  CourseReviewAiPolicyInput,
   CourseReviewSettings,
   SchoolReviewAiPolicy,
   SchoolReviewSettings,
@@ -21,6 +23,7 @@ export const reviewSettingsKeys = keyFactory('review-settings', {
   school: (school: string) => ['school', school] as const,
   policy: (school: string) => ['policy', school] as const,
   course: (containerId: string) => ['course', containerId] as const,
+  coursePolicy: (containerId: string) => ['course-policy', containerId] as const,
 });
 
 export function useSchoolReviewSettings(school: string) {
@@ -134,6 +137,39 @@ export function useSaveCourseReviewSettings(containerId: string) {
     },
     onSuccess: (settings) => {
       queryClient.setQueryData(reviewSettingsKeys.course(containerId), settings);
+    },
+  });
+}
+
+export function useCourseReviewPolicy(containerId: string, enabled = true) {
+  return useQuery<CourseReviewAiPolicy>({
+    queryKey: reviewSettingsKeys.coursePolicy(containerId),
+    queryFn: async () => {
+      const response = await fetch(`/api/content/containers/${containerId}/review-policy`);
+      if (!response.ok) throw new Error('Failed to read the course review policy');
+      return response.json() as Promise<CourseReviewAiPolicy>;
+    },
+    enabled: enabled && containerId !== '',
+    staleTime: 60_000,
+  });
+}
+
+/** Set whole, as content-service takes it; the answer is what applies now. */
+export function useSaveCourseReviewPolicy(containerId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<CourseReviewAiPolicy, Error, CourseReviewAiPolicyInput>({
+    mutationFn: async (input) => {
+      const response = await fetch(`/api/content/containers/${containerId}/review-policy`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) throw new Error('Failed to save the course review policy');
+      return response.json() as Promise<CourseReviewAiPolicy>;
+    },
+    onSuccess: (policy) => {
+      queryClient.setQueryData(reviewSettingsKeys.coursePolicy(containerId), policy);
     },
   });
 }
