@@ -39,8 +39,13 @@ export function useReviewQueue(school: string, filters: ReviewQueueFilters) {
     staleTime: 10_000,
     refetchOnWindowFocus: true,
     // The previous list stays on screen while a filter change is in flight, so the queue
-    // does not blink through an empty state on its way to a different one.
-    placeholderData: (previous) => previous,
+    // does not blink through an empty state on its way to a different one. Not across a
+    // change of view: the waiting queue under the "closed at the term" heading would be a
+    // different list passed off as this one (plan 80, step 7f).
+    placeholderData: (previous, previousQuery) =>
+      (previousQuery?.queryKey[3] as ReviewQueueFilters | undefined)?.view === filters.view
+        ? previous
+        : undefined,
   });
 }
 

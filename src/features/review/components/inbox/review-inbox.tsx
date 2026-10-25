@@ -4,10 +4,11 @@ import { useCallback, useId, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { CheckCircle2, Filter } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Filter, History } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 
 import { useBatchApprove } from '../../api/use-batch-approve';
 import { useReviewQueue } from '../../api/use-review-queue';
@@ -60,6 +61,7 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
   const searchParams = useSearchParams();
 
   const filters = parseQueueFilters(searchParams);
+  const termView = filters.view === 'term';
   const selected = searchParams.get('submission');
   const { data, isPending, isError, refetch, hasNextPage, fetchNextPage, isFetchingNextPage } =
     useReviewQueue(school, filters);
@@ -134,12 +136,37 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
     <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
       <div className="flex min-h-0 w-full flex-col border-border lg:w-[352px] lg:shrink-0 lg:border-r">
         <div className="flex flex-col gap-3 border-b border-border px-4 pb-3 pt-5">
-          <div>
-            <div className="label-overline">{t('inbox.eyebrow')}</div>
-            <h1 className="text-xl font-bold tracking-tight">{t('inbox.title')}</h1>
-            <Subtitle summary={data?.summary} />
-            <TermsLine school={school} />
-          </div>
+          {termView ? (
+            <div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-ml-2 mb-1 h-7 px-2 text-[13px] text-muted-foreground"
+                onClick={() => setFilters({ view: 'pending' })}
+              >
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden />
+                {t('inbox.termView.back')}
+              </Button>
+              <h1 className="text-xl font-bold tracking-tight">{t('inbox.termView.title')}</h1>
+              {data === undefined ? (
+                <p className="mt-1 h-5" />
+              ) : (
+                <p className="mt-1 text-[13px] text-muted-foreground">
+                  {t('inbox.termView.subtitle', { count: data.summary.pending })}
+                </p>
+              )}
+              <p className="mt-0.5 text-[12px] leading-snug text-muted-foreground">
+                {t('inbox.termsHint')}
+              </p>
+            </div>
+          ) : (
+            <div>
+              <div className="label-overline">{t('inbox.eyebrow')}</div>
+              <h1 className="text-xl font-bold tracking-tight">{t('inbox.title')}</h1>
+              <Subtitle summary={data?.summary} />
+              <TermsLine school={school} onOpen={() => setFilters({ view: 'term' })} />
+            </div>
+          )}
           <QueueFiltersBar
             filters={filters}
             facets={data?.facets ?? { groups: [], courses: [] }}
@@ -162,7 +189,12 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
               </Button>
             </div>
           ) : data.groups.length === 0 ? (
-            <EmptyQueue filtered={hasActiveFilters(filters)} onClear={clearFilters} />
+            <EmptyQueue
+              filtered={hasActiveFilters(filters)}
+              termView={termView}
+              onClear={clearFilters}
+              onBack={() => setFilters({ view: 'pending' })}
+            />
           ) : (
             <>
               <ul className="flex flex-col pt-0.5">
@@ -286,23 +318,34 @@ function Subtitle({
 
 /**
  * «Засчитано по сроку за неделю: 4, из них ваш вердикт: 1» — what the term closed in this
- * teacher's groups while it waited for them (plan 80, step 7e).
+ * teacher's groups while it waited for them (plan 80, step 7e). A link to that work: the
+ * term view lists what is still without the teacher's verdict (step 7f).
  *
  * Only when there is something to say. Under a teacher-only policy the journal is empty and
  * the line would be a permanent zero about a mechanism the school does not use; and an
  * unreadable journal is no line at all rather than a zero that claims the term closed
  * nothing.
  */
-function TermsLine({ school }: { school: string }) {
+function TermsLine({ school, onOpen }: { school: string; onOpen: () => void }) {
   const t = useTranslations('Review');
   const { data } = useReviewTerms(school);
 
   if (!data || !(data.accepted > 0)) return null;
 
   return (
-    <p className="mt-0.5 text-[13px] text-muted-foreground" title={t('inbox.termsHint')}>
+    <button
+      type="button"
+      onClick={onOpen}
+      title={t('inbox.termsHint')}
+      className={cn(
+        'mt-0.5 flex items-center gap-1.5 rounded text-left text-[13px] text-muted-foreground',
+        'underline-offset-2 outline-none hover:text-foreground hover:underline',
+        'focus-visible:ring-2 focus-visible:ring-ring',
+      )}
+    >
+      <History className="h-3.5 w-3.5 shrink-0" aria-hidden />
       {t('inbox.terms', { accepted: data.accepted, revised: data.revised })}
-    </p>
+    </button>
   );
 }
 
@@ -313,8 +356,35 @@ function TermsLine({ school }: { school: string }) {
  * needs the way out beside it (criterion 10). Showing the first when the second is true
  * tells a teacher they are done when they are one click from a pile of work.
  */
-function EmptyQueue({ filtered, onClear }: { filtered: boolean; onClear: () => void }) {
+function EmptyQueue({
+  filtered,
+  termView,
+  onClear,
+  onBack,
+}: {
+  filtered: boolean;
+  termView: boolean;
+  onClear: () => void;
+  onBack: () => void;
+}) {
   const t = useTranslations('Review');
+
+  // Nothing the term closed is left without the teacher's word — done, and the way back is
+  // the queue itself rather than a filter to clear.
+  if (termView && !filtered) {
+    return (
+      <div className="flex flex-col items-center gap-3 px-6 py-16 text-center">
+        <p className="text-[17px] font-bold tracking-tight">{t('inbox.termView.emptyTitle')}</p>
+        <p className="max-w-sm text-[13.5px] leading-relaxed text-muted-foreground">
+          {t('inbox.termView.emptyBody')}
+        </p>
+        <Button variant="ghost" size="sm" onClick={onBack}>
+          {t('inbox.termView.back')}
+        </Button>
+      </div>
+    );
+  }
+
   const Icon = filtered ? Filter : CheckCircle2;
 
   return (

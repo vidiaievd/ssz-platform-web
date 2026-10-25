@@ -34,7 +34,14 @@ export type ReviewableExerciseType = (typeof REVIEWABLE_EXERCISE_TYPES)[number];
 /** Marking happens in passes: through one exercise, or through one learner's work. */
 export type ReviewGroupBy = 'exercise' | 'student';
 
+/**
+ * What the inbox lists: work waiting on a person, or work a model's verdict closed at the
+ * school's term this week that still has no teacher's verdict (plan 80, step 7f).
+ */
+export type ReviewQueueView = 'pending' | 'term';
+
 export interface ReviewQueueFilters {
+  view: ReviewQueueView;
   groupBy: ReviewGroupBy;
   /** A group of the teacher's own scope; anything else narrows the queue to nothing. */
   group: string | null;
@@ -72,6 +79,8 @@ export interface ReviewQueueItem {
   attemptNo: number;
   /** The machine closed every item. A hint for the batch button; the verdict re-checks. */
   autoClean: boolean;
+  /** When a model's verdict counted at the term — set only in the `term` view. */
+  acceptedAt: string | null;
   lock: ReviewQueueLock | null;
 }
 

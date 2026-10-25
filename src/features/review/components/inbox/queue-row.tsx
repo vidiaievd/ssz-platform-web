@@ -55,6 +55,7 @@ export function QueueRow({ item, slaHours, groupBy, selected, onSelect }: QueueR
       age,
     }),
     locked ? t('inbox.row.lockedByLabel', { name: item.lock?.teacherName ?? '' }) : null,
+    item.acceptedAt ? t('inbox.row.acceptedAtTerm') : null,
     !locked && item.autoClean ? t('inbox.row.autoClean') : null,
   ]
     .filter(Boolean)
@@ -125,6 +126,10 @@ export function QueueRow({ item, slaHours, groupBy, selected, onSelect }: QueueR
             >
               <Lock className="h-2.5 w-2.5" />
               {t('inbox.row.lockedBy', { name: firstName(item.lock?.teacherName) })}
+            </span>
+          ) : item.acceptedAt ? (
+            <span aria-hidden className="mt-0.5 block text-[10.5px] text-muted-foreground">
+              {t('inbox.row.acceptedAtTerm')}
             </span>
           ) : item.autoClean ? (
             <span

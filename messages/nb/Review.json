@@ -8,6 +8,13 @@
     "subtitleOldest": "eldste {age}",
     "terms": "Godkjent ved fristen denne uken: {accepted}, av dem din vurdering: {revised}",
     "termsHint": "KI-vurderingen telte av seg selv da fristen for retting gikk ut. Din vurdering av slikt arbeid endrer fortsatt elevens fremgang og tilbakemelding.",
+    "termView": {
+      "back": "Hele køen",
+      "title": "Godkjent ved fristen",
+      "subtitle": "{count, plural, one {# arbeid venter} other {# arbeider venter}} på din vurdering · denne uken",
+      "emptyTitle": "Ingenting å revurdere",
+      "emptyBody": "Alt arbeid som ble godkjent ved fristen denne uken, har allerede din vurdering — eller fristen lukket ingenting."
+    },
     "groupBy": {
       "label": "Grupper køen etter",
       "exercise": "Etter oppgave",
@@ -35,7 +42,8 @@
       "attempt": "forsøk {n}",
       "label": "{student} · {exercise} · har ventet {age}",
       "exerciseGone": "oppgaven er slettet",
-      "lockedByLabel": "vurderes av {name}"
+      "lockedByLabel": "vurderes av {name}",
+      "acceptedAtTerm": "godkjent ved fristen"
     },
     "empty": {
       "title": "Alt er rettet",

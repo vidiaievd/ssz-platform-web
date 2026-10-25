@@ -69,13 +69,16 @@ export function QueueFiltersBar({ filters, facets, onChange }: QueueFiltersBarPr
           onChange={(type) => onChange({ type: (type as ReviewableExerciseType) ?? null })}
         />
 
-        <Chip
-          active={filters.overdueOnly}
-          onClick={() => onChange({ overdueOnly: !filters.overdueOnly })}
-          tone="var(--color-error)"
-        >
-          {t('inbox.filter.overdue')}
-        </Chip>
+        {/* Work the term closed has no promise left to break. */}
+        {filters.view === 'term' ? null : (
+          <Chip
+            active={filters.overdueOnly}
+            onClick={() => onChange({ overdueOnly: !filters.overdueOnly })}
+            tone="var(--color-error)"
+          >
+            {t('inbox.filter.overdue')}
+          </Chip>
+        )}
       </div>
     </div>
   );

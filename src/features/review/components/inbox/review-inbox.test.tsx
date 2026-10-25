@@ -64,6 +64,7 @@ const QUEUE: ReviewQueueResponse = {
           overdue: false,
           attemptNo: 1,
           autoClean: false,
+          acceptedAt: null,
           lock: null,
         },
         {
@@ -76,6 +77,7 @@ const QUEUE: ReviewQueueResponse = {
           overdue: true,
           attemptNo: 2,
           autoClean: false,
+          acceptedAt: null,
           lock: null,
         },
       ],
@@ -236,6 +238,39 @@ describe('ReviewInbox', () => {
       ).toBe(true),
     );
     expect(screen.queryByText(/Closed at the term/)).not.toBeInTheDocument();
+  });
+
+  it('opens the work the term closed from the line that counts it (plan 80, 7f)', async () => {
+    answer(QUEUE, undefined, { accepted: 4, revised: 1, overturned: 1 });
+    renderInbox();
+
+    await userEvent.click(
+      await screen.findByRole('button', { name: /Closed at the term this week: 4/ }),
+    );
+    expect(replace).toHaveBeenCalledWith('?view=term', { scroll: false });
+  });
+
+  it('lists the term view under its own heading, with the way back and no late filter', async () => {
+    search = 'view=term';
+    answer(QUEUE);
+    renderInbox();
+
+    expect(await screen.findByText('Closed at the term')).toBeInTheDocument();
+    expect(
+      await screen.findByText('2 pieces of work await your verdict · this week'),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Longer than promised' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Whole queue' }));
+    expect(replace).toHaveBeenCalledWith('', { scroll: false });
+  });
+
+  it('says there is nothing to revise when the term view is empty', async () => {
+    search = 'view=term';
+    answer({ ...QUEUE, groups: [], summary: { ...QUEUE.summary, pending: 0 } });
+    renderInbox();
+
+    expect(await screen.findByText('Nothing to revise')).toBeInTheDocument();
   });
 
   it('marks the overdue count as partial while a page is still unread', async () => {

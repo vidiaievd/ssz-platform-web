@@ -208,6 +208,50 @@ describe('GET /api/review/queue', () => {
     expect(body.summary.pending).toBe(1);
   });
 
+  it('asks the engine for work closed at the term since the start of the week (plan 80, 7f)', async () => {
+    upstream();
+    await GET(request(`?school=${SCHOOL_ID}&view=term`));
+
+    const call = vi
+      .mocked(serverFetch)
+      .mock.calls.find(([o]) => o.path === '/internal/attempts/review/queue');
+    const body = call?.[0].body as { view?: string; acceptedSince?: string };
+    expect(body.view).toBe('accepted_at_term');
+    // Midnight UTC six days back — the same week the inbox line counts by.
+    expect(body.acceptedSince).toMatch(/^\d{4}-\d{2}-\d{2}T00:00:00\.000Z$/);
+    const days = (Date.now() - Date.parse(body.acceptedSince ?? '')) / 86_400_000;
+    expect(days).toBeGreaterThan(6);
+    expect(days).toBeLessThanOrEqual(7);
+  });
+
+  it('measures nothing closed at the term against a promise, and ignores the late filter', async () => {
+    const acceptedAt = new Date().toISOString();
+    const [group] = ENGINE_QUEUE.groups;
+    upstream({
+      schoolSla: 24,
+      queue: {
+        ...ENGINE_QUEUE,
+        groups: [{ ...group, items: group!.items.map((item) => ({ ...item, acceptedAt })) }],
+      },
+    });
+    const body = await (await GET(request(`?school=${SCHOOL_ID}&view=term&overdue=true`))).json();
+
+    expect(body.groups[0].slaHours).toBeNull();
+    expect(body.groups[0].items[0]).toMatchObject({ overdue: false, acceptedAt });
+    expect(body.summary.overdue).toBe(0);
+  });
+
+  it('leaves the ordinary queue as it was — no view sent, no acceptance time', async () => {
+    upstream();
+    const body = await (await GET(request())).json();
+
+    const call = vi
+      .mocked(serverFetch)
+      .mock.calls.find(([o]) => o.path === '/internal/attempts/review/queue');
+    expect(call?.[0].body).not.toHaveProperty('view');
+    expect(body.groups[0].items[0].acceptedAt).toBeNull();
+  });
+
   it('marks the overdue count partial while a cursor is still open', async () => {
     upstream({ queue: { ...ENGINE_QUEUE, nextCursor: 'next-page' } });
     const body = await (await GET(request())).json();

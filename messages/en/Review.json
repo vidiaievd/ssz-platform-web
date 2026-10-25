@@ -8,6 +8,13 @@
     "subtitleOldest": "oldest {age}",
     "terms": "Closed at the term this week: {accepted}, of them your verdict: {revised}",
     "termsHint": "A model's verdict counted by itself when the review term ran out. Your verdict on such work still changes the learner's progress and feedback.",
+    "termView": {
+      "back": "Whole queue",
+      "title": "Closed at the term",
+      "subtitle": "{count, plural, one {# piece of work awaits} other {# pieces of work await}} your verdict · this week",
+      "emptyTitle": "Nothing to revise",
+      "emptyBody": "Every piece of work the term closed this week already has your verdict — or the term closed nothing."
+    },
     "groupBy": {
       "label": "Group the queue by",
       "exercise": "By exercise",
@@ -35,7 +42,8 @@
       "attempt": "try {n}",
       "label": "{student} · {exercise} · waiting {age}",
       "exerciseGone": "exercise removed",
-      "lockedByLabel": "being reviewed by {name}"
+      "lockedByLabel": "being reviewed by {name}",
+      "acceptedAtTerm": "closed at the term"
     },
     "empty": {
       "title": "All reviewed",

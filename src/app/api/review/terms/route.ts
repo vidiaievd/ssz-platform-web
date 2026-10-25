@@ -3,10 +3,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { env } from '@/lib/env';
 import { resolveReviewScope } from '@/features/review/lib/review-scope';
+import { termWeek } from '@/features/review/lib/term-window';
 import type { ReviewTermsSummary } from '@/features/review/types';
-
-/** Today and the six days before it — "this week" as the inbox says it. */
-const WEEK_DAYS = 7;
 
 /**
  * The teacher's own line from the auto-acceptance journal (plan 80, step 7e).
@@ -34,16 +32,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(null);
   }
 
-  const now = new Date();
-  const day = (date: Date) => date.toISOString().slice(0, 10);
-  const from = new Date(now.getTime() - (WEEK_DAYS - 1) * 86_400_000);
+  const { from, to } = termWeek(new Date());
 
   try {
     const line = await serverFetch<ReviewTermsSummary>({
       service: 'analytics',
       path: `/internal/review-terms/schools/${scope.schoolId}/teachers/${scope.teacherId}`,
       directBaseUrl: env.ANALYTICS_SERVICE_INTERNAL_URL,
-      query: { from: day(from), to: day(now) },
+      query: { from, to },
       headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN },
       anonymous: true,
     });

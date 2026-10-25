@@ -11,6 +11,7 @@ import {
   queueScopeFor,
   resolveReviewScope,
 } from '@/features/review/lib/review-scope';
+import { engineQueueView } from '@/features/review/lib/term-window';
 import {
   REVIEWABLE_EXERCISE_TYPES,
   type ReviewGroupBy,
@@ -50,6 +51,7 @@ interface EngineQueue {
       submittedAt: string;
       attemptNo: number;
       autoClean: boolean;
+      acceptedAt?: string | null;
       lock: { teacherId: string; expiresAt: string } | null;
     }[];
   }[];
@@ -92,7 +94,10 @@ export async function GET(request: NextRequest) {
   if (scope instanceof NextResponse) return scope;
 
   const groupBy: ReviewGroupBy = searchParams.get('groupBy') === 'student' ? 'student' : 'exercise';
-  const overdueOnly = searchParams.get('overdue') === 'true';
+  // Work closed at the term (plan 80, step 7f) is late by definition and waits on nobody:
+  // no promise is measured against it, and "longer than promised" does not narrow it.
+  const termView = searchParams.get('view') === 'term';
+  const overdueOnly = !termView && searchParams.get('overdue') === 'true';
   const typeParam = searchParams.get('type');
   const type = REVIEWABLE_EXERCISE_TYPES.includes(typeParam as ReviewableExerciseType)
     ? (typeParam as ReviewableExerciseType)
@@ -129,7 +134,13 @@ export async function GET(request: NextRequest) {
       directBaseUrl: env.EXERCISE_SERVICE_INTERNAL_URL,
       headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
       anonymous: true,
-      body: { ...engineScope, groupBy, limit, ...(cursor ? { cursor } : {}) },
+      body: {
+        ...engineScope,
+        ...engineQueueView(termView ? 'term' : 'pending', new Date()),
+        groupBy,
+        limit,
+        ...(cursor ? { cursor } : {}),
+      },
     });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch the review queue' }, { status: 502 });
@@ -162,7 +173,9 @@ export async function GET(request: NextRequest) {
   for (const group of queue.groups) {
     // The promise is the group's, not the request's: a queue crosses courses and each may
     // have set its own (`API_CONTRACT.md` §1).
-    const slaHours = sla.slaFor(group.containerId ?? group.items[0]?.containerId ?? null);
+    const slaHours = termView
+      ? null
+      : sla.slaFor(group.containerId ?? group.items[0]?.containerId ?? null);
 
     const rows: ReviewQueueItem[] = [];
     for (const item of group.items) {
@@ -185,6 +198,7 @@ export async function GET(request: NextRequest) {
         overdue: late,
         attemptNo: item.attemptNo,
         autoClean: item.autoClean,
+        acceptedAt: item.acceptedAt ?? null,
         lock: item.lock
           ? {
               teacherId: item.lock.teacherId,
