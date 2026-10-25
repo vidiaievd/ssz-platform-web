@@ -124,11 +124,16 @@ function answer(
     approved: 0,
     skipped: [],
   },
+  terms: { accepted: number; revised: number; overturned: number } | null = null,
 ) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
+      if (url.includes('/review/terms')) {
+        const body = terms && { ...terms, from: '2026-10-19', to: '2026-10-25' };
+        return new Response(JSON.stringify(body), { status: 200 });
+      }
       if (url.includes('/batch-approve')) {
         return new Response(JSON.stringify(batch), { status: 200 });
       }
@@ -211,6 +216,28 @@ describe('ReviewInbox', () => {
     ).toBeInTheDocument();
   });
 
+  it("says what the term closed this week in the teacher's groups, and how much they re-checked", async () => {
+    answer(QUEUE, undefined, { accepted: 4, revised: 1, overturned: 1 });
+    renderInbox();
+
+    expect(
+      await screen.findByText('Closed at the term this week: 4, of them your verdict: 1'),
+    ).toBeInTheDocument();
+  });
+
+  it('says nothing about the term when it closed nothing, or the journal could not be read', async () => {
+    answer(QUEUE, undefined, { accepted: 0, revised: 0, overturned: 0 });
+    renderInbox();
+
+    await screen.findByText('2 submissions · 1 longer than promised · oldest 1 day');
+    await waitFor(() =>
+      expect(
+        vi.mocked(fetch).mock.calls.some(([input]) => String(input).includes('/review/terms')),
+      ).toBe(true),
+    );
+    expect(screen.queryByText(/Closed at the term/)).not.toBeInTheDocument();
+  });
+
   it('marks the overdue count as partial while a page is still unread', async () => {
     answer({ ...QUEUE, nextCursor: 'more', summary: { ...QUEUE.summary, overduePartial: true } });
     renderInbox();
@@ -257,7 +284,10 @@ describe('ReviewInbox', () => {
   });
 
   it('stops offering more once the last page is in', async () => {
-    answerPages([{ ...QUEUE, nextCursor: 'page-2' }, { ...QUEUE, nextCursor: null }]);
+    answerPages([
+      { ...QUEUE, nextCursor: 'page-2' },
+      { ...QUEUE, nextCursor: null },
+    ]);
     const user = userEvent.setup();
     renderInbox();
 

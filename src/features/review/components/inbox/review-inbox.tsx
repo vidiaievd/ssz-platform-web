@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useBatchApprove } from '../../api/use-batch-approve';
 import { useReviewQueue } from '../../api/use-review-queue';
+import { useReviewTerms } from '../../api/use-review-terms';
 import {
   DEFAULT_FILTERS,
   hasActiveFilters,
@@ -137,6 +138,7 @@ export function ReviewInbox({ school }: ReviewInboxProps) {
             <div className="label-overline">{t('inbox.eyebrow')}</div>
             <h1 className="text-xl font-bold tracking-tight">{t('inbox.title')}</h1>
             <Subtitle summary={data?.summary} />
+            <TermsLine school={school} />
           </div>
           <QueueFiltersBar
             filters={filters}
@@ -280,6 +282,28 @@ function Subtitle({
   }
 
   return <p className="mt-1 text-[13px] text-muted-foreground">{parts.join(' · ')}</p>;
+}
+
+/**
+ * «Засчитано по сроку за неделю: 4, из них ваш вердикт: 1» — what the term closed in this
+ * teacher's groups while it waited for them (plan 80, step 7e).
+ *
+ * Only when there is something to say. Under a teacher-only policy the journal is empty and
+ * the line would be a permanent zero about a mechanism the school does not use; and an
+ * unreadable journal is no line at all rather than a zero that claims the term closed
+ * nothing.
+ */
+function TermsLine({ school }: { school: string }) {
+  const t = useTranslations('Review');
+  const { data } = useReviewTerms(school);
+
+  if (!data || !(data.accepted > 0)) return null;
+
+  return (
+    <p className="mt-0.5 text-[13px] text-muted-foreground" title={t('inbox.termsHint')}>
+      {t('inbox.terms', { accepted: data.accepted, revised: data.revised })}
+    </p>
+  );
 }
 
 /**

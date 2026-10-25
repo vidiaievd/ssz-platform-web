@@ -6,6 +6,8 @@
     "subtitleOverdue": "{count, plural, one {# over fristen} other {# over fristen}}",
     "subtitleOverduePartial": "{count}+ over fristen",
     "subtitleOldest": "eldste {age}",
+    "terms": "Godkjent ved fristen denne uken: {accepted}, av dem din vurdering: {revised}",
+    "termsHint": "KI-vurderingen telte av seg selv da fristen for retting gikk ut. Din vurdering av slikt arbeid endrer fortsatt elevens fremgang og tilbakemelding.",
     "groupBy": {
       "label": "Grupper køen etter",
       "exercise": "Etter oppgave",

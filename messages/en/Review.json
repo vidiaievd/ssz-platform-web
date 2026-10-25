@@ -6,6 +6,8 @@
     "subtitleOverdue": "{count, plural, one {# longer than promised} other {# longer than promised}}",
     "subtitleOverduePartial": "{count}+ longer than promised",
     "subtitleOldest": "oldest {age}",
+    "terms": "Closed at the term this week: {accepted}, of them your verdict: {revised}",
+    "termsHint": "A model's verdict counted by itself when the review term ran out. Your verdict on such work still changes the learner's progress and feedback.",
     "groupBy": {
       "label": "Group the queue by",
       "exercise": "By exercise",

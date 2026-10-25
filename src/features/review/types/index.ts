@@ -142,6 +142,22 @@ export interface ReviewQueueCount {
 }
 
 /**
+ * The teacher's own line from the auto-acceptance journal over the last week (plan 80,
+ * step 7e): work in their groups a model's verdict closed at the term, and how much of it
+ * they still gave a verdict on — "counted at the term: N, of them your verdict: M".
+ *
+ * Days are the days the terms ran out, today and the six before it. `null` from the route
+ * when the journal could not be read: a zero would claim the term closed nothing.
+ */
+export interface ReviewTermsSummary {
+  accepted: number;
+  revised: number;
+  overturned: number;
+  from: string;
+  to: string;
+}
+
+/**
  * A verdict that has already been delivered — on the try before this one, or on this one
  * by a colleague who got here first.
  */
