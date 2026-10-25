@@ -22,6 +22,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type { ReviewBlock } from '@/lib/scheduling/provider';
 import {
   createMyReviewBlock,
+  createTeacherReviewBlock,
   updateReviewBlock,
   type ReviewBlockResult,
 } from '../api/review-block-actions';
@@ -32,6 +33,11 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   /** Where a new block is held. Ignored when editing: a block stays in its school. */
   workspaceId: string;
+  /**
+   * Whose time it is, when the school holds it for a teacher (plan 81, step 7); absent for
+   * the signed-in teacher's own. `workspaceId` is then the school's id.
+   */
+  teacherId?: string;
   /** The block being changed; absent for a new one. */
   block?: ReviewBlock;
   /** The day the week is showing, so a new block lands where the teacher is looking. */
@@ -48,10 +54,18 @@ type Props = {
  * change to a series moves every sitting of it, past ones included — the server's rule,
  * and the dialog says so before the teacher saves rather than after.
  */
-export function ReviewBlockDialog({ open, onOpenChange, workspaceId, block, defaultDate }: Props) {
+export function ReviewBlockDialog({
+  open,
+  onOpenChange,
+  workspaceId,
+  teacherId,
+  block,
+  defaultDate,
+}: Props) {
   const t = useTranslations('Scheduling.my.reviewBlocks.dialog');
   const format = useFormatter();
-  const errorText = useReviewBlockError();
+  const forTeacher = teacherId !== undefined;
+  const errorText = useReviewBlockError(forTeacher);
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -83,14 +97,16 @@ export function ReviewBlockDialog({ open, onOpenChange, workspaceId, block, defa
     startTransition(async () => {
       const result: ReviewBlockResult = block
         ? await updateReviewBlock(block.id, fields)
-        : await createMyReviewBlock(workspaceId, fields);
+        : teacherId
+          ? await createTeacherReviewBlock(workspaceId, teacherId, fields)
+          : await createMyReviewBlock(workspaceId, fields);
 
       if (!result.ok) {
         toast.error(errorText(result, block ? t('saveFailed') : t('createFailed')));
         return;
       }
 
-      toast.success(block ? t('saved') : t('created'));
+      toast.success(block ? t('saved') : forTeacher ? t('createdForTeacher') : t('created'));
       onOpenChange(false);
       router.refresh();
     });
@@ -106,7 +122,11 @@ export function ReviewBlockDialog({ open, onOpenChange, workspaceId, block, defa
         <DialogHeader>
           <DialogTitle>{block ? t('editTitle') : t('title')}</DialogTitle>
           <DialogDescription>
-            {block?.repeat === 'weekly' ? t('editSeriesDescription') : t('description')}
+            {block?.repeat === 'weekly'
+              ? t('editSeriesDescription')
+              : forTeacher
+                ? t('descriptionForTeacher')
+                : t('description')}
           </DialogDescription>
         </DialogHeader>
 

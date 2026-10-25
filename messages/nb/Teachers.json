@@ -122,7 +122,25 @@
     "consecPeakWarning": "{count} sammenhengende timer — tretthetrisiko",
     "preferred": "Foretrukket",
     "available": "Tilgjengelig",
-    "unavailable": "Ikke tilgjengelig"
+    "unavailable": "Ikke tilgjengelig",
+    "reviewBlocks": {
+      "tab": "Rettetid",
+      "title": "Tid til retting",
+      "lede": "Blokker i lærerens uke til å rette elevenes arbeid. Elevene ser dem ikke; læreren ser dem i sin egen timeplan.",
+      "add": "Sett av tid til retting",
+      "loadFailed": "Rettetiden kunne ikke leses.",
+      "empty": "Ingen tid satt av til retting",
+      "emptyBody": "Sett av en ukentlig blokk, så ser skolen når denne læreren retter arbeid.",
+      "perWeek": "≈ {hours} t i uka de neste {weeks} ukene",
+      "weekly": "Hver uke",
+      "oneOff": "Én gang",
+      "everyWeekday": "Hver {weekday}, {time}",
+      "onDay": "{day}, {time}",
+      "between": "fra {since} til {until}",
+      "since": "fra {since}",
+      "sittings": "{count, plural, =0 {ingen økter de neste {weeks} ukene} one {# økt de neste {weeks} ukene} other {# økter de neste {weeks} ukene}}",
+      "overlaps": "{count, plural, one {Kolliderer med en time eller en annen blokk # dag de neste {weeks} ukene} other {Kolliderer med en time eller en annen blokk # dager de neste {weeks} ukene}}"
+    }
   },
   "availability": {
     "available": "Tilgjengelig",

@@ -9,6 +9,8 @@ import type {
   CourseReviewAiPolicyInput,
   CourseReviewSettings,
   SchoolReviewAiPolicy,
+  SchoolReviewEffort,
+  SchoolReviewEffortInput,
   SchoolReviewSettings,
 } from '../types/oversight';
 
@@ -22,6 +24,7 @@ import type {
 export const reviewSettingsKeys = keyFactory('review-settings', {
   school: (school: string) => ['school', school] as const,
   policy: (school: string) => ['policy', school] as const,
+  effort: (school: string) => ['effort', school] as const,
   course: (containerId: string) => ['course', containerId] as const,
   coursePolicy: (containerId: string) => ['course-policy', containerId] as const,
 });
@@ -171,5 +174,38 @@ export function useSaveCourseReviewPolicy(containerId: string) {
     onSuccess: (policy) => {
       queryClient.setQueryData(reviewSettingsKeys.coursePolicy(containerId), policy);
     },
+  });
+}
+
+/** Minutes per submission, with the school's measurements beside them (plan 81, step 7). */
+export function useSchoolReviewEffort(school: string) {
+  return useQuery<SchoolReviewEffort>({
+    queryKey: reviewSettingsKeys.effort(school),
+    queryFn: async () => {
+      const response = await fetch(`/api/schools/${encodeURIComponent(school)}/review-effort`);
+      if (!response.ok) throw new Error('Failed to read the minutes per submission');
+      return response.json() as Promise<SchoolReviewEffort>;
+    },
+    enabled: school !== '',
+    staleTime: 60_000,
+  });
+}
+
+/** Set whole; the measurements are read again with the figures rather than patched in. */
+export function useSaveSchoolReviewEffort(school: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation<unknown, Error, SchoolReviewEffortInput>({
+    mutationFn: async (input) => {
+      const response = await fetch(`/api/schools/${encodeURIComponent(school)}/review-effort`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(input),
+      });
+      if (!response.ok) throw new Error('Failed to save the minutes per submission');
+      return response.json();
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: reviewSettingsKeys.effort(school) }),
   });
 }

@@ -112,6 +112,30 @@ export async function getMyReviewBlocks(
   }
 }
 
+/**
+ * One teacher's time for marking in a school, as the school's timetable reads it (plan 81,
+ * step 7). Unlike {@link getMyReviewBlocks} the read is the school's own, so nothing of
+ * the teacher's other workspaces comes with it.
+ */
+export async function getTeacherReviewBlocks(
+  schoolId: string,
+  teacherId: string,
+  range: DateRange,
+): Promise<MyReviewBlocks> {
+  try {
+    const window = await getSchedulingProvider().schoolReviewBlocks(
+      schoolId,
+      range.from,
+      range.to,
+      teacherId,
+    );
+    return { ...window, error: false };
+  } catch (err) {
+    console.error('[schedule] getTeacherReviewBlocks failed:', err);
+    return { blocks: [], occurrences: [], overlaps: [], error: true };
+  }
+}
+
 /** Unit titles of every course the window touches, keyed by course unit id. */
 async function unitTitles(courseIds: Set<string | null>): Promise<Map<string, string>> {
   const titles = new Map<string, string>();

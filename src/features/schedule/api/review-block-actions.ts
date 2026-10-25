@@ -29,6 +29,20 @@ export async function createMyReviewBlock(
   return shape(await getSchedulingProvider().createReviewBlock(workspaceId, 'me', input));
 }
 
+/**
+ * Hold a teacher's time for marking on the school's behalf (plan 81, step 7). scheduling
+ * decides who may: an owner, an administrator, a manager or a scheduler of the school, and
+ * only for somebody who marks work there.
+ */
+export async function createTeacherReviewBlock(
+  schoolId: string,
+  teacherId: string,
+  input: NewReviewBlockInput,
+): Promise<ReviewBlockResult> {
+  const { getSchedulingProvider } = await import('@/lib/scheduling/provider');
+  return shape(await getSchedulingProvider().createReviewBlock(schoolId, teacherId, input));
+}
+
 export async function updateReviewBlock(
   blockId: string,
   changes: ReviewBlockChanges,

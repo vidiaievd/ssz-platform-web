@@ -10,8 +10,11 @@ import type { ReviewBlockResult } from '../api/review-block-actions';
  * Explicit branches rather than a key built from the code: a template key makes next-intl's
  * types expand every message path, and an unknown code falls back to the caller's own line
  * instead of a missing-message warning.
+ *
+ * `forTeacher` — the school is holding somebody else's time, so a refusal about "who marks
+ * here" is about them, not about the person reading it.
  */
-export function useReviewBlockError() {
+export function useReviewBlockError(forTeacher = false) {
   const t = useTranslations('Scheduling.my.reviewBlocks.errors');
 
   return (result: Extract<ReviewBlockResult, { ok: false }>, fallback: string): string => {
@@ -25,7 +28,7 @@ export function useReviewBlockError() {
       case 'INVALID_TIME':
         return t('invalidTime');
       case 'TARGET_NOT_REVIEWER':
-        return t('targetNotReviewer');
+        return forTeacher ? t('targetNotReviewerForTeacher') : t('targetNotReviewer');
       case 'ONE_OFF_CANNOT_SKIP':
         return t('oneOffCannotSkip');
       case 'NOT_AN_OCCURRENCE':

@@ -248,6 +248,20 @@ function toReviewBlockOccurrence(r: RawReviewBlockOccurrence): ReviewBlockOccurr
   };
 }
 
+interface RawReviewBlockWindow {
+  blocks: RawReviewBlock[];
+  occurrences: RawReviewBlockOccurrence[];
+  overlaps: ReviewBlockWindow['overlaps'];
+}
+
+function toReviewBlockWindow(raw: RawReviewBlockWindow): ReviewBlockWindow {
+  return {
+    blocks: raw.blocks.map(toReviewBlock),
+    occurrences: raw.occurrences.map(toReviewBlockOccurrence),
+    overlaps: raw.overlaps ?? [],
+  };
+}
+
 /** The service's own words, plus its code: a screen translates `TARGET_NOT_REVIEWER`, not an English sentence. */
 function reviewBlockFailure(e: unknown, fallback: string): Extract<MutationResult, { ok: false }> {
   const code = e instanceof AppError ? (e.details as { code?: unknown } | null)?.code : undefined;
@@ -463,20 +477,21 @@ export const realProvider: SchedulingProvider = {
   },
 
   async myReviewBlocks(from: string, to: string) {
-    const raw = await serverFetch<{
-      blocks: RawReviewBlock[];
-      occurrences: RawReviewBlockOccurrence[];
-      overlaps: ReviewBlockWindow['overlaps'];
-    }>({
+    const raw = await serverFetch<RawReviewBlockWindow>({
       service: 'scheduling',
       path: '/scheduling/teachers/me/review-blocks',
       query: { from, to },
     });
-    return {
-      blocks: raw.blocks.map(toReviewBlock),
-      occurrences: raw.occurrences.map(toReviewBlockOccurrence),
-      overlaps: raw.overlaps ?? [],
-    };
+    return toReviewBlockWindow(raw);
+  },
+
+  async schoolReviewBlocks(schoolId: string, from: string, to: string, teacherId?: string) {
+    const raw = await serverFetch<RawReviewBlockWindow>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/review-blocks`,
+      query: { from, to, ...(teacherId ? { teacherId } : {}) },
+    });
+    return toReviewBlockWindow(raw);
   },
 
   async createReviewBlock(schoolId: string, teacherId: string, input: NewReviewBlockInput) {

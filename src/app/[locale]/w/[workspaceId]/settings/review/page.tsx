@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 import { AiPolicySettings } from '@/features/review/components/settings/ai-policy-settings';
 import { SlaSettings } from '@/features/review/components/settings/sla-settings';
+import { ReviewEffortSettings } from '@/features/review/components/settings/review-effort-settings';
 
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
@@ -45,6 +46,9 @@ export default async function SchoolReviewSettingsPage({ params }: Props) {
 
       {/* Who answers first (plan 80) — drawn only where the plan carries it. */}
       <AiPolicySettings school={workspaceId} canEdit={canEdit} />
+
+      {/* What one submission takes to check — the marking forecast's figures (plan 81). */}
+      <ReviewEffortSettings school={workspaceId} canEdit={canEdit} />
     </div>
   );
 }

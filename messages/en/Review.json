@@ -491,6 +491,37 @@
       "saved": "The course review policy is saved.",
       "saveFailed": "The course review policy could not be saved.",
       "failed": "The course review policy could not be read."
+    },
+    "effort": {
+      "title": "Minutes per submission",
+      "sub": "How long a teacher takes over one piece of work of each type. The marking forecast multiplies the queue by these; the school's median takes over once {min} verdicts in {days} days back it.",
+      "type": "Type",
+      "minutes": "Starting figure",
+      "min": "min",
+      "source": {
+        "school": "Set by the school",
+        "default": "Factory figure",
+        "other": "As other types"
+      },
+      "measured": {
+        "title": "Measured in the school",
+        "unavailable": "Measurements could not be read",
+        "none": "No timed verdicts yet",
+        "tooFew": "{n} of {min} timed verdicts — the figure is used",
+        "median": "Median {minutes} min · {n} verdicts",
+        "inUse": "The forecast uses the median"
+      },
+      "other": "Other types",
+      "otherHint": "Any type not listed",
+      "informationTransfer": "Information transfer",
+      "emptyHint": "An empty field is the factory figure; clear a figure to give it back.",
+      "bounds": "Whole minutes from {min} to {max}.",
+      "save": "Save",
+      "cancel": "Cancel",
+      "saved": "The minutes per submission are saved.",
+      "saveFailed": "The minutes per submission could not be saved.",
+      "failed": "The minutes per submission could not be read.",
+      "readOnly": "Only the owner and administrators can change this."
     }
   },
   "student": {

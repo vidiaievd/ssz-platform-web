@@ -165,6 +165,13 @@ export interface SchedulingProvider {
   // ── review blocks (plan 81) ────────────────────────────────────────────────
   /** The signed-in teacher's time for marking in a window, across every school. */
   myReviewBlocks(from: string, to: string): Promise<ReviewBlockWindow>;
+  /** A school's time for marking in a window — the timetable's view; `teacherId` narrows it to one. */
+  schoolReviewBlocks(
+    schoolId: string,
+    from: string,
+    to: string,
+    teacherId?: string,
+  ): Promise<ReviewBlockWindow>;
   /** Hold time for marking; `teacherId` is `me` for the caller's own. */
   createReviewBlock(
     schoolId: string,

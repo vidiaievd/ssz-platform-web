@@ -110,7 +110,9 @@
         "created": "The time is in your week.",
         "saved": "The marking time is changed.",
         "createFailed": "Could not hold the time.",
-        "saveFailed": "Could not change the time."
+        "saveFailed": "Could not change the time.",
+        "descriptionForTeacher": "Time in the teacher's week for checking students' work. Students do not see it.",
+        "createdForTeacher": "The time is in the teacher's week."
       },
       "actions": {
         "label": "Actions for {label}",
@@ -127,7 +129,9 @@
         "removeConfirm": "Remove",
         "removed": "The marking time is removed.",
         "back": "Back",
-        "failed": "Could not change the marking time."
+        "failed": "Could not change the marking time.",
+        "removeDescriptionForTeacher": "The block disappears from the teacher's week.",
+        "removeSeriesDescriptionForTeacher": "Every week of it disappears from the teacher's schedule, past ones included."
       },
       "errors": {
         "endTimeNotAfterStart": "The block has to end after it starts, on the same day.",
@@ -136,7 +140,8 @@
         "invalidTime": "Times run from 00:00 to 23:59.",
         "targetNotReviewer": "You do not check work in this workspace, so there is nothing to hold time for.",
         "oneOffCannotSkip": "A one-off block cannot skip its only day — remove it instead.",
-        "notAnOccurrence": "The series does not fall on this day."
+        "notAnOccurrence": "The series does not fall on this day.",
+        "targetNotReviewerForTeacher": "This person does not check work in the school, so there is nothing to hold time for."
       }
     }
   }

@@ -110,7 +110,9 @@
         "created": "Tiden er lagt inn i uken din.",
         "saved": "Rettetiden er endret.",
         "createFailed": "Kunne ikke sette av tiden.",
-        "saveFailed": "Kunne ikke endre tiden."
+        "saveFailed": "Kunne ikke endre tiden.",
+        "descriptionForTeacher": "Tid i lærerens uke til å rette elevenes arbeid. Elevene ser den ikke.",
+        "createdForTeacher": "Tiden ligger i lærerens uke."
       },
       "actions": {
         "label": "Handlinger for {label}",
@@ -127,7 +129,9 @@
         "removeConfirm": "Fjern",
         "removed": "Rettetiden er fjernet.",
         "back": "Tilbake",
-        "failed": "Kunne ikke endre rettetiden."
+        "failed": "Kunne ikke endre rettetiden.",
+        "removeDescriptionForTeacher": "Blokken forsvinner fra lærerens uke.",
+        "removeSeriesDescriptionForTeacher": "Alle ukene i serien forsvinner fra lærerens timeplan, også de som har vært."
       },
       "errors": {
         "endTimeNotAfterStart": "Blokken må slutte etter at den starter, samme dag.",
@@ -136,7 +140,8 @@
         "invalidTime": "Klokkeslett går fra 00:00 til 23:59.",
         "targetNotReviewer": "Du retter ikke arbeid i dette arbeidsområdet, så det er ingenting å sette av tid til.",
         "oneOffCannotSkip": "En enkeltblokk kan ikke hoppe over sin eneste dag — fjern den i stedet.",
-        "notAnOccurrence": "Serien faller ikke på denne dagen."
+        "notAnOccurrence": "Serien faller ikke på denne dagen.",
+        "targetNotReviewerForTeacher": "Denne personen retter ikke arbeid på skolen, så det er ingen tid å sette av."
       }
     }
   }
