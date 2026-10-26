@@ -4866,7 +4866,8 @@
       "RA_ONE_TAKE": "One take only. Defensible for spontaneity, harsh for a first recording — most students need a throwaway attempt.",
       "RA_CHOOSE_NO_EFFECT": "«Choose the best take» has no effect with a single take.",
       "RA_NO_MIC_CHECK": "No microphone check. Silent recordings reach the queue and cost the teacher the review slot.",
-      "RA_AI_NOT_LIVE": "The AI pre-check is a designed surface, not a live service (plan 48). Nothing is called and the teacher still grades every recording."
+      "RA_AI_NOT_LIVE": "The AI pre-check is a designed surface, not a live service (plan 48). Nothing is called and the teacher still grades every recording.",
+      "RA_AI_READ_ONLY": "The machine checks only reading a given text aloud. In this mode the AI switch does nothing — without a teacher the work stays unchecked."
     },
     "fixes": {
       "RA_NO_PROMPTS": "Add a prompt",
@@ -4891,7 +4892,8 @@
       "RA_ONE_TAKE": "Reconsider",
       "RA_CHOOSE_NO_EFFECT": "Allow more takes",
       "RA_NO_MIC_CHECK": "Turn it on",
-      "RA_AI_NOT_LIVE": "Read the note"
+      "RA_AI_NOT_LIVE": "Read the note",
+      "RA_AI_READ_ONLY": "Read the note"
     },
     "step4": {
       "eyebrow": "Step 4",

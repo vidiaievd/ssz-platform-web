@@ -4866,7 +4866,8 @@
       "RA_ONE_TAKE": "Bare ett forsøk. Forsvarlig for spontanitet, hardt for et første opptak — de fleste studenter trenger et prøveforsøk.",
       "RA_CHOOSE_NO_EFFECT": "«Velg det beste opptaket» har ingen virkning med ett enkelt forsøk.",
       "RA_NO_MIC_CHECK": "Ingen mikrofonsjekk. Stille opptak havner i køen og koster læreren vurderingstid.",
-      "RA_AI_NOT_LIVE": "KI-forsjekken er en tegnet flate, ikke en levende tjeneste (plan 48). Ingenting kalles, og læreren vurderer fortsatt hvert opptak."
+      "RA_AI_NOT_LIVE": "KI-forsjekken er en tegnet flate, ikke en levende tjeneste (plan 48). Ingenting kalles, og læreren vurderer fortsatt hvert opptak.",
+      "RA_AI_READ_ONLY": "Maskinen sjekker bare høytlesing av en gitt tekst. I denne modusen gjør KI-bryteren ingenting — uten lærer blir arbeidet ikke vurdert."
     },
     "fixes": {
       "RA_NO_PROMPTS": "Legg til en oppgave",
@@ -4891,7 +4892,8 @@
       "RA_ONE_TAKE": "Vurder på nytt",
       "RA_CHOOSE_NO_EFFECT": "Tillat flere forsøk",
       "RA_NO_MIC_CHECK": "Slå den på",
-      "RA_AI_NOT_LIVE": "Les merknaden"
+      "RA_AI_NOT_LIVE": "Les merknaden",
+      "RA_AI_READ_ONLY": "Les merknaden"
     },
     "step4": {
       "eyebrow": "Steg 4",
