@@ -415,10 +415,12 @@ export function RubricGuide({ criteria }: { criteria: readonly ProjectedCriterio
 }
 
 /**
- * `ra-steps`: three 4px bars — the recording (done), the AI stage (never live, so never lit —
- * DECISIONS §4) and the teacher (now, then done) — and where the work is.
+ * `ra-steps`: three 4px bars — the recording (done), the AI stage and the teacher — and where
+ * the work is. With a teacher the AI stage stays unlit and the teacher's is now, then done;
+ * with `byAi` the machine checks the reading by itself (plan 82) and the middle bar is the
+ * one that moves.
  */
-export function ReviewSteps({ graded }: { graded: boolean }) {
+export function ReviewSteps({ graded, byAi = false }: { graded: boolean; byAi?: boolean }) {
   const t = useTranslations('ExerciseRunner.readAloud');
   const bar = (s: 'done' | 'now' | null) => (
     <i
@@ -436,10 +438,10 @@ export function ReviewSteps({ graded }: { graded: boolean }) {
   return (
     <div className="flex items-center gap-1.5">
       {bar('done')}
-      {bar(null)}
-      {bar(graded ? 'done' : 'now')}
+      {bar(byAi ? (graded ? 'done' : 'now') : null)}
+      {bar(byAi ? null : graded ? 'done' : 'now')}
       <span className="text-[11px] text-(--ssz-text-muted)" style={{ fontFamily: RA_MONO }}>
-        {graded ? t('steps.graded') : t('steps.atTeacher')}
+        {graded ? t('steps.graded') : byAi ? t('steps.atAi') : t('steps.atTeacher')}
       </span>
     </div>
   );

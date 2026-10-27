@@ -761,13 +761,18 @@
     "submittedTake": "Handed-in recording: {label}",
     "steps": {
       "atTeacher": "with the teacher",
+      "atAi": "machine is checking",
       "graded": "graded"
     },
     "sent": {
       "title": "Handed in.",
       "body": "The teacher listens to the recording and answers within 48 hours. You'll be notified.",
       "unreadTitle": "Saved.",
-      "unreadBody": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will listen to this recording."
+      "unreadBody": "You're studying without a teacher, and AI review isn't part of your plan, so nobody will listen to this recording.",
+      "aiTitle": "Handed in.",
+      "aiBody": "The machine is listening to the recording and comparing it with the text. The result will appear here.",
+      "aiSlow": "Listening is taking longer than usual. The result will appear in “My work” once it is ready.",
+      "droppedBody": "The machine could not check the recording, and nobody else will listen to it."
     },
     "refused": {
       "retake": "The recording for {labels} was not accepted — record it again.",

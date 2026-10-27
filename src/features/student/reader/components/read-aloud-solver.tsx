@@ -6,12 +6,15 @@ import { useTranslations } from 'next-intl';
 
 import { useExerciseForRunner } from '@/features/content/api/use-exercise';
 import { uploadRecording, type AssetResponse } from '@/features/media';
+import { AiReviewPanel } from '@/features/student/ai-review';
 import {
   AttemptRequestError,
   fetchDraft,
   fetchLastAttempt,
+  handedInFromStatus,
   handedInFromSubmit,
   resolveSubmitFailure,
+  useAiVerdictWait,
   useSaveDraft,
   useStartAttempt,
   useSubmitAnswer,
@@ -156,8 +159,18 @@ export function ReadAloudSolver({
 /** Where a session opens: recording, waiting for the teacher, or reading the verdict. */
 type Opening =
   | { stage: 'draft'; draft: Draft | null }
-  /** `unread` — handed in with nobody to listen (`NO_REVIEWER`, plan 79, step 2.1c). */
-  | { stage: 'sent'; recordings: SubmittedRecording[]; unread: boolean }
+  /**
+   * `unread` — handed in with nobody to listen (`NO_REVIEWER`, plan 79, step 2.1c); `byAi` —
+   * a machine checks the reading by itself, and its verdict is worth waiting for (plan 82).
+   * `attemptId` — the attempt handed in, which is not the one the session opened on top.
+   */
+  | {
+      stage: 'sent';
+      attemptId: string;
+      recordings: SubmittedRecording[];
+      unread: boolean;
+      byAi: boolean;
+    }
   | { stage: 'graded'; recordings: SubmittedRecording[]; verdict: AttemptRecord };
 
 interface RunProps {
@@ -236,14 +249,26 @@ function ReadAloudRun({
           );
 
           if (mine !== null && mine.status === 'ROUTED_FOR_REVIEW') {
-            opening = { stage: 'sent', recordings: handedIn, unread: false };
+            opening = {
+              stage: 'sent',
+              attemptId: mine.id,
+              recordings: handedIn,
+              unread: false,
+              byAi: handedInFromStatus(mine.status, mine.schoolId) === 'ai',
+            };
           } else if (Object.keys(draft.takes).length > 0) {
             opening = { stage: 'draft', draft };
           } else if (mine !== null && mine.status === 'NO_REVIEWER') {
             // Final, so nothing to wait for — but the takes are the learner's work all the
             // same, and a blank recorder would say they were never sent. Below a draft, like
             // a verdict: takes recorded after «record again» are the work now.
-            opening = { stage: 'sent', recordings: handedIn, unread: true };
+            opening = {
+              stage: 'sent',
+              attemptId: mine.id,
+              recordings: handedIn,
+              unread: true,
+              byAi: false,
+            };
           } else if (mine !== null && FINISHED.has(mine.status)) {
             opening = { stage: 'graded', recordings: handedIn, verdict: mine };
           }
@@ -395,8 +420,22 @@ function ReadAloudSession({
   const [submitted, setSubmitted] = useState<SubmittedRecording[]>(
     opening.stage === 'draft' ? [] : opening.recordings,
   );
-  const verdict = opening.stage === 'graded' ? opening.verdict : null;
+  const [verdict, setVerdict] = useState<AttemptRecord | null>(
+    opening.stage === 'graded' ? opening.verdict : null,
+  );
   const [unread, setUnread] = useState(opening.stage === 'sent' && opening.unread);
+  /** The machine checks this reading, not a teacher (plan 82) — waiting for it, or its verdict. */
+  const [byAi, setByAi] = useState(
+    opening.stage === 'sent'
+      ? opening.byAi
+      : opening.stage === 'graded' && opening.verdict.reviewedBy === 'ai',
+  );
+  /** The attempt handed in: the one reopened, or this one once it is sent. */
+  const [handedInId, setHandedInId] = useState(
+    opening.stage === 'sent' ? opening.attemptId : attemptId,
+  );
+  /** The machine was asked and could not check it — not the same as nobody to ask. */
+  const [dropped, setDropped] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
   /** The envelope of each take recorded here, by its `blob:` URL — its waveform until upload. */
@@ -531,9 +570,12 @@ function ReadAloudSession({
 
     /** `data` is missing when only the check after a lost response knows it arrived. */
     const delivered = (data?: SubmitAnswerResponse) => {
+      const handedIn = data === undefined ? null : handedInFromSubmit(data);
       setSubmitted(submission.recordings);
       setStage('sent');
-      setUnread(data !== undefined && handedInFromSubmit(data) === 'unread');
+      setUnread(handedIn === 'unread');
+      setByAi(handedIn === 'ai');
+      setHandedInId(attemptId);
       // The takes the teacher will not hear go (DECISIONS §1); a failed delete costs nothing
       // but storage (§8 item 5).
       for (const id of unsentAssets(recorder.state, submission)) {
@@ -573,6 +615,20 @@ function ReadAloudSession({
     );
   }
 
+  // The machine listens to every prompt before it rules — slower than a model reading text,
+  // and the screen that says so waits for it all the same.
+  const aiWait = useAiVerdictWait(exerciseId, handedInId, stage === 'sent' && byAi, (attempt) => {
+    if (attempt.status === 'NO_REVIEWER') {
+      setUnread(true);
+      setDropped(true);
+      setByAi(false);
+      return;
+    }
+    setVerdict(attempt);
+    setByAi(attempt.reviewedBy === 'ai');
+    setStage('graded');
+  });
+
   const graded =
     verdict === null ? null : (
       <ReadAloudGraded
@@ -589,6 +645,22 @@ function ReadAloudSession({
         sourceOf={sourceOf}
         onRedo={onRedo}
         {...(audio.audio.enabled ? { onPlayModel: audio.toggle } : {})}
+        {...(verdict.reviewedBy === 'ai'
+          ? {
+              aiReview: (
+                <AiReviewPanel
+                  exerciseId={exerciseId}
+                  attemptId={verdict.id}
+                  templateCode={TEMPLATE_CODE}
+                  showSummary={false}
+                  promptLabel={labelOf}
+                  passageOf={(itemId) =>
+                    projection.prompts.find((p) => p.id === itemId)?.text ?? null
+                  }
+                />
+              ),
+            }
+          : {})}
       />
     );
 
@@ -602,6 +674,9 @@ function ReadAloudSession({
       {...(instruction === undefined ? {} : { instruction })}
       stage={stage}
       unread={unread}
+      byAi={byAi}
+      aiWait={aiWait}
+      dropped={dropped}
       {...(unread ? { onRedo } : {})}
       sourceOf={sourceOf}
       submitted={submitted}

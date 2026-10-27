@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactNode } from 'react';
 import { Check, Play, RefreshCw, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -44,6 +45,12 @@ export interface ReadAloudGradedProps {
   onPlayModel?: () => void;
   /** Offered when the verdict is a return and `revision: 'return'`. */
   onRedo?: () => void;
+  /**
+   * The machine's check, when it gave the verdict (plan 82): drawn in place of the prompts'
+   * rubric rows — it marked none, and a row at level 0 would say it had — and of their
+   * comments, which are its counts in figures and are drawn there whole.
+   */
+  aiReview?: ReactNode;
   interactive?: boolean;
 }
 
@@ -75,6 +82,7 @@ export function ReadAloudGraded({
   sourceOf,
   onPlayModel,
   onRedo,
+  aiReview,
   interactive = true,
 }: ReadAloudGradedProps) {
   const t = useTranslations('ExerciseRunner.readAloud');
@@ -125,7 +133,13 @@ export function ReadAloudGraded({
               : t('graded.outcome.failed')}
         </span>
         <span className="flex-1" />
-        {single && score !== null && score.prompts[0] !== undefined ? (
+        {aiReview !== undefined ? (
+          !single && (
+            <b className="text-sm tabular-nums">
+              {t('graded.passedCount', { k: passedCount, n: recordings.length })}
+            </b>
+          )
+        ) : single && score !== null && score.prompts[0] !== undefined ? (
           <b className="text-sm tabular-nums">
             {t('graded.points', {
               score: score.prompts[0].outcome.points,
@@ -141,113 +155,118 @@ export function ReadAloudGraded({
         )}
       </div>
 
-      {recordings.map((r, i) => {
-        const result = score?.prompts.find((p) => p.itemId === r.itemId)?.outcome ?? null;
-        const decision = byItem.get(r.itemId);
-        return (
-          <section
-            key={r.itemId}
-            aria-label={labelOf(r.itemId)}
-            className={single ? 'flex flex-col' : 'flex flex-col gap-1.5 border-t pt-2.5'}
-            style={single ? undefined : { borderColor: 'var(--ssz-border-default)' }}
-          >
-            {!single && (
-              <div className="flex items-center gap-2">
-                <TakeNumber n={i + 1} selected={decision?.approved === true} />
-                <strong className="min-w-0 flex-1 truncate text-sm">{labelOf(r.itemId)}</strong>
-                {decision !== undefined && (
-                  <span
-                    className="text-xs font-semibold"
-                    style={{
-                      color: decision.approved
-                        ? 'var(--ssz-color-success-700)'
-                        : 'var(--ssz-color-warning-700)',
-                    }}
-                  >
-                    {r.carried
-                      ? t('carried.inAttempt', { attempt: r.carried.attempt })
-                      : decision.approved
-                        ? t('graded.promptPassed')
-                        : t('graded.promptAgain')}
-                  </span>
-                )}
-                {result !== null && (
-                  <b className="text-sm tabular-nums">
-                    {t('graded.points', { score: result.points, max: result.max })}
-                  </b>
-                )}
-              </div>
-            )}
-            {!single && (
-              <div className="flex items-center gap-2.5" style={takeRowStyle(false)}>
-                <TakePlayer
-                  source={sourceOf(null, r.assetId)}
-                  seconds={r.seconds}
-                  label={labelOf(r.itemId)}
-                  interactive={interactive}
-                />
-              </div>
-            )}
+      {aiReview}
 
-            {showRubric === 'never' || snapshot === null ? (
-              <p className="m-0 text-xs text-(--ssz-text-muted)">{t('graded.hidden')}</p>
-            ) : (
-              criteria.map((c) => {
-                const key = `${r.itemId}:${c.id}`;
-                const level = marks[key] ?? 0;
-                return (
-                  <div
-                    key={c.id}
-                    className="grid items-center gap-2 border-t py-2"
-                    style={{
-                      gridTemplateColumns: 'minmax(0,1fr) auto',
-                      borderColor: 'var(--ssz-border-default)',
-                    }}
-                  >
-                    <div>
-                      <strong className="block text-sm">{c.name}</strong>
-                      {c.levels[level]?.trim() && (
-                        <span
-                          className="mt-0.5 block text-xs text-(--ssz-text-secondary)"
-                          style={{ textWrap: 'pretty' }}
-                        >
-                          {c.levels[level]}
+      {aiReview === undefined &&
+        recordings.map((r, i) => {
+          const result = score?.prompts.find((p) => p.itemId === r.itemId)?.outcome ?? null;
+          const decision = byItem.get(r.itemId);
+          return (
+            <section
+              key={r.itemId}
+              aria-label={labelOf(r.itemId)}
+              className={single ? 'flex flex-col' : 'flex flex-col gap-1.5 border-t pt-2.5'}
+              style={single ? undefined : { borderColor: 'var(--ssz-border-default)' }}
+            >
+              {!single && (
+                <div className="flex items-center gap-2">
+                  <TakeNumber n={i + 1} selected={decision?.approved === true} />
+                  <strong className="min-w-0 flex-1 truncate text-sm">{labelOf(r.itemId)}</strong>
+                  {decision !== undefined && (
+                    <span
+                      className="text-xs font-semibold"
+                      style={{
+                        color: decision.approved
+                          ? 'var(--ssz-color-success-700)'
+                          : 'var(--ssz-color-warning-700)',
+                      }}
+                    >
+                      {r.carried
+                        ? t('carried.inAttempt', { attempt: r.carried.attempt })
+                        : decision.approved
+                          ? t('graded.promptPassed')
+                          : t('graded.promptAgain')}
+                    </span>
+                  )}
+                  {result !== null && (
+                    <b className="text-sm tabular-nums">
+                      {t('graded.points', { score: result.points, max: result.max })}
+                    </b>
+                  )}
+                </div>
+              )}
+              {!single && (
+                <div className="flex items-center gap-2.5" style={takeRowStyle(false)}>
+                  <TakePlayer
+                    source={sourceOf(null, r.assetId)}
+                    seconds={r.seconds}
+                    label={labelOf(r.itemId)}
+                    interactive={interactive}
+                  />
+                </div>
+              )}
+
+              {showRubric === 'never' || snapshot === null ? (
+                <p className="m-0 text-xs text-(--ssz-text-muted)">{t('graded.hidden')}</p>
+              ) : (
+                criteria.map((c) => {
+                  const key = `${r.itemId}:${c.id}`;
+                  const level = marks[key] ?? 0;
+                  return (
+                    <div
+                      key={c.id}
+                      className="grid items-center gap-2 border-t py-2"
+                      style={{
+                        gridTemplateColumns: 'minmax(0,1fr) auto',
+                        borderColor: 'var(--ssz-border-default)',
+                      }}
+                    >
+                      <div>
+                        <strong className="block text-sm">{c.name}</strong>
+                        {c.levels[level]?.trim() && (
+                          <span
+                            className="mt-0.5 block text-xs text-(--ssz-text-secondary)"
+                            style={{ textWrap: 'pretty' }}
+                          >
+                            {c.levels[level]}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span aria-hidden="true" className="inline-flex items-center gap-[3px]">
+                          {[0, 1, 2].map((d) => (
+                            <i
+                              key={d}
+                              className="block size-2 rounded-full"
+                              style={{
+                                background:
+                                  d < level
+                                    ? 'var(--ssz-color-primary-500)'
+                                    : 'var(--ssz-bg-muted)',
+                              }}
+                            />
+                          ))}
                         </span>
-                      )}
+                        <span
+                          className="text-xs tabular-nums text-(--ssz-text-muted)"
+                          style={{ fontFamily: RA_MONO }}
+                        >
+                          {t('graded.mark', { mark: level })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5">
-                      <span aria-hidden="true" className="inline-flex items-center gap-[3px]">
-                        {[0, 1, 2].map((d) => (
-                          <i
-                            key={d}
-                            className="block size-2 rounded-full"
-                            style={{
-                              background:
-                                d < level ? 'var(--ssz-color-primary-500)' : 'var(--ssz-bg-muted)',
-                            }}
-                          />
-                        ))}
-                      </span>
-                      <span
-                        className="text-xs tabular-nums text-(--ssz-text-muted)"
-                        style={{ fontFamily: RA_MONO }}
-                      >
-                        {t('graded.mark', { mark: level })}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+                  );
+                })
+              )}
 
-            {decision?.comment !== undefined && decision.comment.trim() !== '' && (
-              <p className="m-0 text-sm text-(--ssz-text-secondary)">{decision.comment}</p>
-            )}
-          </section>
-        );
-      })}
+              {decision?.comment !== undefined && decision.comment.trim() !== '' && (
+                <p className="m-0 text-sm text-(--ssz-text-secondary)">{decision.comment}</p>
+              )}
+            </section>
+          );
+        })}
 
-      {comment !== null && comment.trim() !== '' && (
+      {aiReview === undefined && comment !== null && comment.trim() !== '' && (
         <p className="m-0 text-sm text-(--ssz-text-secondary)">{comment}</p>
       )}
 

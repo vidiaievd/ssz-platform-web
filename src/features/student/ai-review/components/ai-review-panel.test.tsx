@@ -31,7 +31,40 @@ const REVIEW: AiReview = {
   ],
   summary: 'Almost there — two small slips.',
   marks: null,
+  reading: null,
   reviewedAt: '2026-10-24T10:00:00.000Z',
+  disputedAt: null,
+};
+
+/** «Jeg bor i Oslo nå.» read as «jeg bor på oslo» — `i` misread, `nå` missed. */
+const READING_REVIEW: AiReview = {
+  outcome: 'returned',
+  items: [],
+  summary: null,
+  marks: null,
+  reading: {
+    passPercent: 85,
+    prompts: [
+      {
+        itemId: 'p1',
+        transcript: 'jeg bor på oslo',
+        ops: [
+          { k: 'read', i: 0, n: 1, heard: 'jeg', focus: false },
+          { k: 'read', i: 1, n: 1, heard: 'bor', focus: false },
+          { k: 'misread', i: 2, expected: 'i', heard: 'på', focus: false },
+          { k: 'read', i: 3, n: 1, heard: 'oslo', focus: false },
+          { k: 'missed', i: 4, expected: 'nå', focus: false },
+        ],
+        total: 5,
+        read: 3,
+        percent: 60,
+        passed: false,
+        pronunciation: null,
+      },
+    ],
+    carriedItemIds: ['p0'],
+  },
+  reviewedAt: '2026-10-27T10:00:00.000Z',
   disputedAt: null,
 };
 
@@ -41,12 +74,15 @@ function respond(status: number, body: unknown) {
   return Promise.resolve(new Response(JSON.stringify(body), { status }));
 }
 
-function renderPanel(templateCode = 'translate_to_target') {
+function renderPanel(
+  templateCode = 'translate_to_target',
+  extra: Partial<Parameters<typeof AiReviewPanel>[0]> = {},
+) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <AiReviewPanel exerciseId="ex-1" attemptId="att-1" templateCode={templateCode} />
+        <AiReviewPanel exerciseId="ex-1" attemptId="att-1" templateCode={templateCode} {...extra} />
       </NextIntlClientProvider>
     </QueryClientProvider>,
   );
@@ -183,5 +219,73 @@ describe('AiReviewPanel (plan 79, 2.3c)', () => {
       expect(screen.getByText('Couldn’t send. Please try again.')).toBeInTheDocument(),
     );
     expect(screen.getByRole('button', { name: 'Send' })).toBeEnabled();
+  });
+});
+
+describe('AiReviewPanel — reading aloud (plan 82, step 11)', () => {
+  it('draws the passage with the misread and missed words, against the pass mark', async () => {
+    fetchMock.mockImplementation(() => respond(200, READING_REVIEW));
+    renderPanel('read_aloud', {
+      passageOf: () => 'Jeg bor i Oslo nå.',
+      promptLabel: (id) => (id === 'p0' ? 'Greeting' : 'Where you live'),
+    });
+
+    expect(await screen.findByText('3 of 5 words · 60 %')).toBeInTheDocument();
+    expect(screen.getByText('needs 85 %')).toBeInTheDocument();
+    expect(screen.getByText('Not enough read')).toBeInTheDocument();
+    // Today's passage, with its own case and punctuation.
+    expect(screen.getByText('Oslo')).toBeInTheDocument();
+    expect(screen.getByText('(heard as “på”)', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('(missed)', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('jeg bor på oslo')).toBeInTheDocument();
+    expect(
+      screen.getByText('Greeting — passed in an earlier try, not checked again.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/A machine listened to the recording/)).toBeInTheDocument();
+  });
+
+  it('falls back to the words of the check when the passage has changed since', async () => {
+    fetchMock.mockImplementation(() => respond(200, READING_REVIEW));
+    renderPanel('read_aloud', { passageOf: () => 'Jeg bor i Bergen.' });
+
+    expect(await screen.findByText('oslo')).toBeInTheDocument();
+    // Unnamed carried prompts are counted, not numbered.
+    expect(
+      screen.getByText('1 prompt was passed in an earlier try and not checked again.'),
+    ).toBeInTheDocument();
+  });
+
+  it('shows pronunciation as a hint only', async () => {
+    const prompt = READING_REVIEW.reading!.prompts[0]!;
+    fetchMock.mockImplementation(() =>
+      respond(200, {
+        ...READING_REVIEW,
+        reading: {
+          ...READING_REVIEW.reading!,
+          prompts: [
+            {
+              ...prompt,
+              pronunciation: {
+                accuracy: 71.6,
+                fluency: 80,
+                completeness: 60,
+                prosody: null,
+                words: [
+                  { text: 'bor', accuracy: 40, error: 'mispronunciation' },
+                  { text: 'jeg', accuracy: 95, error: 'none' },
+                ],
+              },
+            },
+          ],
+        },
+      }),
+    );
+    renderPanel('read_aloud');
+
+    expect(
+      await screen.findByText('accuracy 72 · fluency 80 · completeness 60'),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/^Unclear:/).textContent).toBe('Unclear: bor');
+    expect(screen.getByText('A hint only — it does not change the result.')).toBeInTheDocument();
   });
 });

@@ -761,13 +761,18 @@
     "submittedTake": "Innlevert opptak: {label}",
     "steps": {
       "atTeacher": "hos læreren",
+      "atAi": "maskinen sjekker",
       "graded": "vurdert"
     },
     "sent": {
       "title": "Levert.",
       "body": "Læreren hører gjennom opptaket og svarer innen 48 timer. Du får varsel.",
       "unreadTitle": "Lagret.",
-      "unreadBody": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen hører på opptaket."
+      "unreadBody": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen hører på opptaket.",
+      "aiTitle": "Levert.",
+      "aiBody": "Maskinen lytter til opptaket og sammenligner det med teksten. Resultatet kommer her.",
+      "aiSlow": "Det tar lengre tid enn vanlig. Resultatet kommer i «Mitt arbeid» når det er klart.",
+      "droppedBody": "Maskinen kunne ikke sjekke opptaket, og ingen andre kommer til å lytte til det."
     },
     "refused": {
       "retake": "Opptaket for {labels} ble ikke godtatt — ta det opp på nytt.",
