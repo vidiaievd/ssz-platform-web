@@ -8,7 +8,9 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useAiReview, useDisputeAiReview } from '../api/use-ai-review';
-import type { AiReviewMark, AiReviewRemark } from '../types';
+import type { AiReading, AiReviewMark, AiReviewRemark } from '../types';
+
+import { ReadingCheck } from './reading-check';
 
 const READING = 'var(--ssz-font-reading)';
 
@@ -40,6 +42,10 @@ export interface AiReviewPanelProps {
    * a card that says it twice reads as two reviewers.
    */
   showSummary?: boolean;
+  /** A `read_aloud` prompt's name; «Prompt N» without it. */
+  promptLabel?: (itemId: string) => string;
+  /** A `read_aloud` prompt's passage as the screen has it, to draw the check over. */
+  passageOf?: (itemId: string) => string | null;
 }
 
 /**
@@ -57,9 +63,12 @@ export function AiReviewPanel({
   attemptId,
   templateCode,
   showSummary = true,
+  promptLabel,
+  passageOf,
 }: AiReviewPanelProps) {
   const t = useTranslations('Review.aiReview');
   const review = useAiReview(exerciseId, attemptId);
+  const reading = templateCode === 'read_aloud';
 
   return (
     <section
@@ -71,7 +80,9 @@ export function AiReviewPanel({
           <Sparkles aria-hidden className="h-3.5 w-3.5 shrink-0" />
           {t('label')}
         </p>
-        <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">{t('caveat')}</p>
+        <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
+          {reading ? t('caveatReading') : t('caveat')}
+        </p>
       </header>
 
       {review.isPending ? (
@@ -95,7 +106,16 @@ export function AiReviewPanel({
             </p>
           )}
 
-          <Remarks t={t} items={review.data.items} templateCode={templateCode} />
+          {review.data.reading != null ? (
+            <Readings
+              t={t}
+              reading={review.data.reading}
+              promptLabel={promptLabel}
+              passageOf={passageOf}
+            />
+          ) : (
+            <Remarks t={t} items={review.data.items} templateCode={templateCode} />
+          )}
 
           {review.data.marks !== null && review.data.marks.length > 0 && (
             <Marks t={t} marks={review.data.marks} />
@@ -105,10 +125,69 @@ export function AiReviewPanel({
             exerciseId={exerciseId}
             attemptId={attemptId}
             disputedAt={review.data.disputedAt}
+            reading={reading}
           />
         </>
       )}
     </section>
+  );
+}
+
+/**
+ * A reading checked by the machine (plan 82): each prompt under its name, with the passage
+ * marked where it was missed or read as other words, then the prompts passed in an earlier
+ * try, which were not listened to again.
+ */
+function Readings({
+  t,
+  reading,
+  promptLabel,
+  passageOf,
+}: {
+  t: T;
+  reading: AiReading;
+  promptLabel: ((itemId: string) => string) | undefined;
+  passageOf: ((itemId: string) => string | null) | undefined;
+}) {
+  const labelOf = (itemId: string, index: number) =>
+    promptLabel?.(itemId).trim() || t('reading.prompt', { n: index + 1 });
+  const single = reading.prompts.length === 1 && reading.carriedItemIds.length === 0;
+
+  return (
+    <div className="flex flex-col gap-3">
+      {reading.prompts.map((prompt, index) => (
+        <section
+          key={prompt.itemId}
+          aria-label={labelOf(prompt.itemId, index)}
+          className="flex flex-col gap-1.5"
+        >
+          {!single && (
+            <p className="text-[11px] font-bold uppercase tracking-[0.07em] text-(--ssz-text-muted)">
+              {labelOf(prompt.itemId, index)}
+            </p>
+          )}
+          <ReadingCheck
+            prompt={prompt}
+            passPercent={reading.passPercent}
+            passage={passageOf?.(prompt.itemId) ?? null}
+          />
+        </section>
+      ))}
+      {/* Where the screen cannot name them, they are counted: a number made up from their
+          place here would point at the wrong prompt. */}
+      {reading.carriedItemIds.length > 0 &&
+        (promptLabel === undefined ? (
+          <p className="text-[12.5px] text-(--ssz-text-secondary)">
+            {t('reading.carriedCount', { count: reading.carriedItemIds.length })}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-0.5 text-[12.5px] text-(--ssz-text-secondary)">
+            {reading.carriedItemIds.map((itemId) => (
+              <li key={itemId}>{t('reading.carried', { label: promptLabel(itemId) })}</li>
+            ))}
+          </ul>
+        ))}
+    </div>
   );
 }
 
@@ -215,10 +294,13 @@ function Dispute({
   exerciseId,
   attemptId,
   disputedAt,
+  reading,
 }: {
   exerciseId: string;
   attemptId: string;
   disputedAt: string | null;
+  /** A reading aloud: the example says what a wrong hearing looks like. */
+  reading: boolean;
 }) {
   const t = useTranslations('Review.aiReview');
   const format = useFormatter();
@@ -261,7 +343,7 @@ function Dispute({
         maxLength={REASON_MAX}
         rows={3}
         onChange={(event) => setReason(event.target.value)}
-        placeholder={t('reasonPlaceholder')}
+        placeholder={reading ? t('reasonPlaceholderReading') : t('reasonPlaceholder')}
         className="w-full rounded-[9px] border-[1.5px] border-(--ssz-border-default) bg-(--ssz-bg-surface) px-3 py-2 text-[13.5px] outline-none focus-visible:border-(--ssz-border-focus)"
       />
       <p className="text-[12px] text-(--ssz-text-muted)">{t('disputeNote')}</p>

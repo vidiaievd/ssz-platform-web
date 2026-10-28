@@ -18,6 +18,7 @@ import type {
   WritingTaskDetails,
 } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
+import type { AiReading } from '@/features/student/ai-review/types';
 
 /** The templates whose check may refuse to close, and so reach a person. */
 export const REVIEWABLE_EXERCISE_TYPES = [
@@ -351,6 +352,11 @@ export interface ReviewAiDraft {
   summary: string | null;
   /** Null (or absent, from an engine before 1.7c) when the model was not asked for marks. */
   marks?: ReviewAiMark[] | null;
+  /**
+   * A `read_aloud` reading the machine checked (plan 82): what it heard in each prompt and the
+   * check its verdict stood on. Null on every other template, absent from an older engine.
+   */
+  reading?: AiReading | null;
   modelId: string | null;
   promptVersion: string | null;
   /**

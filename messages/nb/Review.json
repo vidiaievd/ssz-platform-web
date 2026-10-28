@@ -632,6 +632,10 @@
     },
     "materialGone": "Oppgaven er endret eller slettet etter innleveringen. Opptaket vurderes som før.",
     "listenFor": "Lyttepunkt:",
+    "machine": {
+      "title": "Maskinens kontroll",
+      "note": "Eleven har sett den. Vurder opptaket med eget øre – kontrollen er et ekstra øre, ikke vurderingen."
+    },
     "situation": "Situasjon:",
     "partner": "Samtalepartneren:",
     "picture": "Bilde:",
@@ -652,6 +656,7 @@
   "aiReview": {
     "label": "Sjekket av KI, ikke av lærer",
     "caveat": "Denne tilbakemeldingen er skrevet av en språkmodell. Den kan ta feil — si fra hvis noe her ikke stemmer.",
+    "caveatReading": "En maskin har lyttet til opptaket og sammenlignet det med teksten. Den kan høre feil – si fra hvis noe her ikke stemmer.",
     "failed": "Kunne ikke laste tilbakemeldingen.",
     "retry": "Prøv igjen",
     "noRemarks": "Ingen merknader.",
@@ -665,6 +670,7 @@
     "dispute": "Tilbakemeldingen er feil",
     "reasonLabel": "Hva er galt med tilbakemeldingen? (valgfritt)",
     "reasonPlaceholder": "For eksempel: Det er ingen feil i setning 2.",
+    "reasonPlaceholderReading": "For eksempel: Jeg leste hele den andre setningen.",
     "disputeNote": "Resultatet endres ikke — slik får vi vite hvor modellen tar feil.",
     "send": "Send",
     "sending": "Sender …",
@@ -681,6 +687,37 @@
       "task": "oppgaven",
       "structure": "struktur",
       "content": "innhold"
+    },
+    "reading": {
+      "prompt": "Oppgave {n}",
+      "passed": "Lest",
+      "notPassed": "For lite lest",
+      "count": "{read} av {total} ord · {percent} %",
+      "mark": "krever {percent} %",
+      "heard": "Det maskinen hørte:",
+      "nothingHeard": "ingenting.",
+      "legend": {
+        "word": "ord",
+        "heard": "hørt",
+        "missed": "hoppet over",
+        "misread": "lest som et annet ord",
+        "extra": "ikke i teksten"
+      },
+      "sr": {
+        "missed": "hoppet over",
+        "misread": "hørt som «{heard}»",
+        "extra": "ikke i teksten"
+      },
+      "carried": "{label} – bestått i et tidligere forsøk, ikke sjekket på nytt.",
+      "carriedCount": "{count, plural, one {# oppgave} other {# oppgaver}} bestått i et tidligere forsøk, ikke sjekket på nytt.",
+      "pace": "Tempo: {wpm} ord i minuttet – bare et hint.",
+      "pronunciation": {
+        "title": "Uttale:",
+        "scores": "nøyaktighet {accuracy} · flyt {fluency} · fullstendighet {completeness}",
+        "prosody": "intonasjon {prosody}",
+        "unclear": "Uklart:",
+        "note": "Bare et hint – det endrer ikke resultatet."
+      }
     }
   }
 }

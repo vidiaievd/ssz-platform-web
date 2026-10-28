@@ -632,6 +632,10 @@
     },
     "materialGone": "The exercise was changed or deleted after this was handed in. The recording is marked as before.",
     "listenFor": "Listen for:",
+    "machine": {
+      "title": "The machine's check",
+      "note": "The learner has seen it. Mark the recording by ear — the check is a second pair of ears, not the verdict."
+    },
     "situation": "Situation:",
     "partner": "The partner says:",
     "picture": "Picture:",
@@ -652,6 +656,7 @@
   "aiReview": {
     "label": "Checked by AI, not a teacher",
     "caveat": "This review was written by a language model. It can be wrong — if something here is off, tell us.",
+    "caveatReading": "A machine listened to the recording and compared it with the text. It can mishear — if something here is off, tell us.",
     "failed": "Couldn’t load the review.",
     "retry": "Try again",
     "noRemarks": "No remarks.",
@@ -665,6 +670,7 @@
     "dispute": "This review is wrong",
     "reasonLabel": "What’s wrong with the review? (optional)",
     "reasonPlaceholder": "For example: the second sentence has no mistake.",
+    "reasonPlaceholderReading": "For example: I read the second sentence in full.",
     "disputeNote": "Your mark won’t change — this tells us where the model gets it wrong.",
     "send": "Send",
     "sending": "Sending…",
@@ -681,6 +687,37 @@
       "task": "task",
       "structure": "structure",
       "content": "content"
+    },
+    "reading": {
+      "prompt": "Prompt {n}",
+      "passed": "Read",
+      "notPassed": "Not enough read",
+      "count": "{read} of {total} words · {percent} %",
+      "mark": "needs {percent} %",
+      "heard": "What the machine heard:",
+      "nothingHeard": "nothing.",
+      "legend": {
+        "word": "word",
+        "heard": "heard",
+        "missed": "missed",
+        "misread": "read as another word",
+        "extra": "not in the text"
+      },
+      "sr": {
+        "missed": "missed",
+        "misread": "heard as “{heard}”",
+        "extra": "not in the text"
+      },
+      "carried": "{label} — passed in an earlier try, not checked again.",
+      "carriedCount": "{count, plural, one {# prompt was} other {# prompts were}} passed in an earlier try and not checked again.",
+      "pace": "Pace: {wpm} words a minute — a hint only.",
+      "pronunciation": {
+        "title": "Pronunciation:",
+        "scores": "accuracy {accuracy} · fluency {fluency} · completeness {completeness}",
+        "prosody": "intonation {prosody}",
+        "unclear": "Unclear:",
+        "note": "A hint only — it does not change the result."
+      }
     }
   }
 }

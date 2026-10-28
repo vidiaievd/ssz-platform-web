@@ -52,6 +52,9 @@ interface ApiOptions {
   assets?: Record<string, unknown>;
   submitStatus?: number;
   submitBody?: unknown;
+  /** What polling the handed-in attempt answers; read on every call, so a test can move it. */
+  status?: string;
+  aiReview?: unknown;
 }
 
 function mockApi(options: ApiOptions = {}) {
@@ -103,8 +106,13 @@ function mockApi(options: ApiOptions = {}) {
       }
       return json({ draftAnswer: options.draft ?? null, draftSavedAt: null });
     }
+    if (path.endsWith('/ai-review')) {
+      return options.aiReview === undefined
+        ? json({ error: 'x', code: 'NO_AI_REVIEW' }, 404)
+        : json(options.aiReview);
+    }
     if (init?.method === undefined) {
-      if (/\/attempts\/[^/]+$/.test(path)) return json({ status: 'IN_PROGRESS' });
+      if (/\/attempts\/[^/]+$/.test(path)) return json({ status: options.status ?? 'IN_PROGRESS' });
       return json({ attempt: options.last ?? null });
     }
     return json({
@@ -203,7 +211,7 @@ describe('ReadAloudSolver', () => {
       }),
     );
 
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
 
@@ -223,7 +231,7 @@ describe('ReadAloudSolver', () => {
     await record();
     await record(25);
     await waitFor(() => expect(uploads).toHaveLength(2));
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     await screen.findByText('Handed in.');
@@ -241,7 +249,7 @@ describe('ReadAloudSolver', () => {
     renderSolver(api);
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await record();
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     expect(await screen.findByRole('alert')).toHaveTextContent(
@@ -260,7 +268,7 @@ describe('ReadAloudSolver', () => {
     await record();
     await record();
     expect(await screen.findByText('You have used all 3 recordings.')).toBeInTheDocument();
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
 
@@ -279,7 +287,7 @@ describe('ReadAloudSolver', () => {
     renderSolver(api);
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await record();
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     expect(await screen.findByRole('alert')).toHaveTextContent("couldn't be checked right now");
@@ -311,7 +319,7 @@ describe('ReadAloudSolver', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await screen.findByRole('button', { name: 'Record again (2 left)' });
     expect(screen.getAllByRole('radio')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Hand in to the teacher' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Hand in for review' })).toBeEnabled();
   });
 
   it('opens straight on «with the teacher» for work already handed in', async () => {
@@ -353,5 +361,108 @@ describe('ReadAloudSolver', () => {
     expect(screen.queryByText('with the teacher')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Start recording' })).toBeNull();
     await act(async () => undefined);
+  });
+
+  // Plan 82: a self-study reading is checked by the machine, and the screen waits for it.
+  it('waits for the machine on a self-study reading, then shows its check', async () => {
+    const handedIn = {
+      id: 'att-0',
+      exerciseId: 'ex-1',
+      templateCode: 'read_aloud',
+      status: 'ROUTED_FOR_REVIEW',
+      schoolId: null,
+      submittedAnswer: {
+        recordings: [{ itemId: 'p1aaaa', assetId: 'a1', seconds: 20, takes: 1 }],
+      },
+    };
+    const options: ApiOptions = {
+      last: handedIn,
+      status: 'ROUTED_FOR_REVIEW',
+      assets: { a1: { id: 'a1', url: 'https://m/a1', entityId: 'att-0', status: 'READY' } },
+    };
+    const api = mockApi(options);
+    renderSolver(api);
+    expect(
+      await screen.findByText(/The machine is listening to the recording/),
+    ).toBeInTheDocument();
+    expect(screen.getByText('machine is checking')).toBeInTheDocument();
+
+    options.status = 'RETURNED';
+    options.last = {
+      ...handedIn,
+      status: 'RETURNED',
+      passed: false,
+      reviewedBy: 'ai',
+      reviewedAt: '2026-10-27T10:00:00Z',
+      reviewDecisions: [{ itemId: 'p1aaaa', approved: false, comment: '1/3 · 33 % < 85 %' }],
+      rubricMarks: {},
+    };
+    options.aiReview = {
+      outcome: 'returned',
+      items: [],
+      summary: null,
+      marks: null,
+      reading: {
+        passPercent: 85,
+        prompts: [
+          {
+            itemId: 'p1aaaa',
+            transcript: 'jeg',
+            ops: [
+              { k: 'read', i: 0, n: 1, heard: 'jeg', focus: false },
+              { k: 'missed', i: 1, expected: 'bor', focus: false },
+              { k: 'missed', i: 2, expected: 'her', focus: false },
+            ],
+            total: 3,
+            read: 1,
+            percent: 33,
+            passed: false,
+            pronunciation: null,
+          },
+        ],
+        carriedItemIds: [],
+      },
+      reviewedAt: '2026-10-27T10:00:00Z',
+      disputedAt: null,
+    };
+
+    expect(
+      await screen.findByText('1 of 3 words · 33 %', undefined, { timeout: 5000 }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Checked by AI, not a teacher')).toBeInTheDocument();
+    // The machine marked no criterion: no rubric rows at level 0, no figures twice.
+    expect(screen.queryByText('1/3 · 33 % < 85 %')).toBeNull();
+    expect(api.mock.calls.some(([url]) => String(url).endsWith('/attempts/att-0/ai-review'))).toBe(
+      true,
+    );
+  });
+
+  it('says the machine could not check it when the wait ends without a verdict', async () => {
+    const handedIn = {
+      id: 'att-0',
+      exerciseId: 'ex-1',
+      templateCode: 'read_aloud',
+      status: 'ROUTED_FOR_REVIEW',
+      schoolId: null,
+      submittedAnswer: {
+        recordings: [{ itemId: 'p1aaaa', assetId: 'a1', seconds: 20, takes: 1 }],
+      },
+    };
+    const options: ApiOptions = {
+      last: handedIn,
+      status: 'NO_REVIEWER',
+      assets: { a1: { id: 'a1', url: 'https://m/a1', entityId: 'att-0', status: 'READY' } },
+    };
+    const api = mockApi(options);
+    renderSolver(api);
+    await screen.findByText(/The machine is listening to the recording/);
+    options.last = { ...handedIn, status: 'NO_REVIEWER' };
+
+    expect(
+      await screen.findByText(/The machine could not check the recording/, undefined, {
+        timeout: 5000,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Record again and hand in' })).toBeInTheDocument();
   });
 });

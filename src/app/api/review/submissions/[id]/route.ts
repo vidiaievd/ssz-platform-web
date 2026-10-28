@@ -8,6 +8,7 @@ import { buildSlaMap } from '@/features/review/lib/sla-map';
 import { fetchGroupNames, resolveReviewScope } from '@/features/review/lib/review-scope';
 import { authorizeSubmission, refuseSubmission } from '@/features/review/lib/submission-access';
 import { fetchRecordingPlayback, recordingIdsOf } from '@/features/review/lib/recording-playback';
+import { readReading } from '@/features/student/ai-review/reading';
 import type { ReviewDetails } from '@/features/content-authoring/types/review';
 import type { RubricSnapshot } from '@/lib/shared-kernel/writing-task';
 import type {
@@ -52,7 +53,7 @@ interface EngineSubmission {
   rubricMarks: Record<string, number> | null;
   reviewDecisions?: ReviewItemDecision[] | null;
   /** Plan 79, 1.4 — absent from an engine older than the draft. */
-  aiDraft?: ReviewAiDraft | null;
+  aiDraft?: (Omit<ReviewAiDraft, 'reading'> & { reading?: unknown }) | null;
   /** Plan 80 — absent from an engine older than the school's review policy. */
   aiVerdict?: (ReviewAiVerdict & Record<string, unknown>) | null;
   autoAcceptAt?: string | null;
@@ -178,7 +179,11 @@ export async function GET(request: NextRequest, context: { params: Promise<{ id:
     rubricMarks: submission.rubricMarks ?? null,
     reviewDecisions: submission.reviewDecisions ?? null,
     playback,
-    aiDraft: submission.aiDraft ?? null,
+    // The reading as the learner's panel has it (plan 82, step 11b): copied field by field, so
+    // the card draws the same check from the same shape and the timings stay behind.
+    aiDraft: submission.aiDraft
+      ? { ...submission.aiDraft, reading: readReading(submission.aiDraft.reading) }
+      : null,
     // Only what the card says about it: the engine's copy also carries the per-item rulings
     // and the model's axes, which are the verdict's business and not the screen's.
     aiVerdict: submission.aiVerdict

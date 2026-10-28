@@ -4866,7 +4866,8 @@
       "RA_ONE_TAKE": "One take only. Defensible for spontaneity, harsh for a first recording — most students need a throwaway attempt.",
       "RA_CHOOSE_NO_EFFECT": "«Choose the best take» has no effect with a single take.",
       "RA_NO_MIC_CHECK": "No microphone check. Silent recordings reach the queue and cost the teacher the review slot.",
-      "RA_AI_NOT_LIVE": "The AI pre-check is a designed surface, not a live service (plan 48). Nothing is called and the teacher still grades every recording."
+      "RA_AI_NO_CHECK": "The machine reading check is on without the check against the text, which is what decides — the machine has nothing to do.",
+      "RA_AI_READ_ONLY": "The machine checks only reading a given text aloud. In this mode the AI switch does nothing — without a teacher the work stays unchecked."
     },
     "fixes": {
       "RA_NO_PROMPTS": "Add a prompt",
@@ -4891,7 +4892,8 @@
       "RA_ONE_TAKE": "Reconsider",
       "RA_CHOOSE_NO_EFFECT": "Allow more takes",
       "RA_NO_MIC_CHECK": "Turn it on",
-      "RA_AI_NOT_LIVE": "Read the note"
+      "RA_AI_NO_CHECK": "Read the note",
+      "RA_AI_READ_ONLY": "Read the note"
     },
     "step4": {
       "eyebrow": "Step 4",
@@ -4930,7 +4932,7 @@
     "step5": {
       "eyebrow": "Step 5",
       "title": "Flow and review",
-      "lede": "Speech is not machine-graded: every recording goes to the review queue and a person marks it. The AI stage is drawn, switchable and calls nothing.",
+      "lede": "In a school every recording ends at a teacher. A reading aloud the machine can check against its text: for a learner without a teacher that is the verdict, in a school it follows the school's review policy.",
       "pipeline": "What happens to a recording",
       "stage": {
         "nowWhen": "now",
@@ -4939,36 +4941,36 @@
         "nowTag": "live",
         "aiWhen": "stage 2",
         "ai": "AI-forsjekk",
-        "aiBody": "Transcript and a pronunciation hint before the teacher opens the card.",
-        "aiOff": "off · plan 48",
-        "aiPreview": "preview · plan 48",
+        "aiBody": "Compares what was read with the text, prompt by prompt. Without a teacher this is the verdict; in a school, as its review policy says.",
+        "aiOff": "off",
+        "aiOn": "on",
         "teacherWhen": "final",
         "teacher": "Lærer",
-        "teacherBody": "Fills the rubric, writes the comment, returns the verdict. Cannot be switched off.",
-        "teacherTag": "always"
+        "teacherBody": "In a school: fills the rubric, writes the comment, has the last word. A learner without a teacher gets the machine's verdict.",
+        "teacherTag": "in a school"
       },
       "aiStage": {
-        "label": "AI pre-check (not live)",
-        "help": "Displays the future stage so the queue layout does not change later. No request is made."
+        "label": "Machine reading check",
+        "help": "The recording goes to speech recognition through the platform's AI. Works on plans with voice review.",
+        "readOnly": "Only in «{mode}» mode: the machine checks a reading against its text, not free speech."
       },
       "ai": {
         "transcript": {
-          "label": "Automatic transcript",
-          "help": "What the machine heard, for the teacher to scan against the text."
+          "label": "Check against the text",
+          "help": "Decides: the share of each prompt's words that were read. Without it the machine has nothing to do."
         },
         "pronunciation": {
-          "label": "Pronunciation hint",
-          "help": "Per focus word: heard / not heard. A hint, never a mark."
+          "label": "Pronunciation feedback",
+          "help": "Accuracy, fluency, completeness and unclear words, on plans that include it. A hint, never a mark."
         },
-        "draft": {
-          "label": "Draft rubric",
-          "help": "Pre-fills the levels. The teacher confirms or moves every one."
+        "fluency": {
+          "label": "Pace",
+          "help": "Words per minute beside the check. A hint, never a mark."
         }
       },
-      "visibilityLabel": "Who sees the AI output",
-      "visibility": {
-        "teacher": "Teacher only",
-        "studentAfter": "Student, after grading"
+      "passPercent": {
+        "label": "Words to pass a prompt",
+        "help": "Share of the prompt's words to read, {min}–{max} %. A skipped word counts against; extra and repeated words do not. The work passes when every prompt does."
       },
       "revisionLabel": "After a weak recording",
       "revision": {

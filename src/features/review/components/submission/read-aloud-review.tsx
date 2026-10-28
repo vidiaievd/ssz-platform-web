@@ -1,7 +1,9 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { FileQuestion } from 'lucide-react';
+import { FileQuestion, Sparkles } from 'lucide-react';
+
+import { ReadingCheck, type AiReadingPrompt } from '@/features/student/ai-review';
 
 import type {
   ReadAloudDetails,
@@ -65,6 +67,10 @@ interface PromptView {
  * the decision below them is the only thing shared. The order is the one the student handed in,
  * which is the order the engine checks the marks in.
  *
+ * Where the machine has checked the reading (plan 82, step 11b), each prompt it checked shows
+ * that check in place of the bare passage — the same panel the learner was shown, so the
+ * teacher answers what the learner read.
+ *
  * Built from the submitted answer first and the breakdown second. The recordings are the
  * student's work and outlive the exercise; the breakdown is recomputed against today's exercise
  * and is null once the author has deleted it — the blocks are then drawn with their recordings
@@ -83,6 +89,14 @@ export function ReadAloudReview({
   const t = useTranslations('Review.readAloud');
   const prompts = promptsOf(submission, details);
   const decided = new Map((submission.reviewDecisions ?? []).map((d) => [d.itemId, d]));
+  const reading = submission.aiDraft?.reading ?? null;
+  const checked = new Map((reading?.prompts ?? []).map((p) => [p.itemId, p]));
+  const checkOf = (itemId: string) => {
+    const check = checked.get(itemId);
+    return reading === null || check === undefined
+      ? null
+      : { prompt: check, passPercent: reading.passPercent };
+  };
 
   return (
     <section className="flex flex-col gap-3">
@@ -110,6 +124,7 @@ export function ReadAloudReview({
             playback={submission.playback?.[prompt.assetId] ?? null}
             playbackKnown={submission.playback !== null}
             snapshot={snapshot}
+            check={checkOf(prompt.itemId)}
             marks={marksOf(marks, prompt.itemId)}
             onMark={(criterionId, mark) => onMark(markKey(prompt.itemId, criterionId), mark)}
             comment={
@@ -237,6 +252,7 @@ function PromptBlock({
   playback,
   playbackKnown,
   snapshot,
+  check,
   marks,
   onMark,
   comment,
@@ -249,6 +265,8 @@ function PromptBlock({
   playback: ReviewPlayback | null;
   playbackKnown: boolean;
   snapshot: SpeakingSnapshot;
+  /** The machine's check of this prompt, when it checked it. */
+  check: { prompt: AiReadingPrompt; passPercent: number } | null;
   marks: RubricMarks;
   onMark: (criterionId: string, mark: number) => void;
   comment: string;
@@ -307,7 +325,20 @@ function PromptBlock({
         />
       )}
 
-      {detail === null ? (
+      {check !== null ? (
+        <>
+          <MachineCheck
+            check={check.prompt}
+            passPercent={check.passPercent}
+            passage={detail?.material?.kind === 'read' ? detail.material.text : null}
+          />
+          {detail !== null && detail.note.trim() !== '' && (
+            <p className="text-[12.5px] leading-relaxed text-(--ssz-text-secondary)">
+              <b>{t('listenFor')}</b> {detail.note}
+            </p>
+          )}
+        </>
+      ) : detail === null ? (
         <p className="text-[12.5px] text-(--ssz-text-muted)">{t('materialGone')}</p>
       ) : (
         <>
@@ -360,6 +391,37 @@ function PromptBlock({
         )}
       </div>
     </article>
+  );
+}
+
+/**
+ * The machine's check of one prompt, as the learner was shown it: the passage with what was
+ * missed or misread, the count against the mark, what was heard. Labelled as the machine's —
+ * the marks below are still the teacher's to give.
+ */
+function MachineCheck({
+  check,
+  passPercent,
+  passage,
+}: {
+  check: AiReadingPrompt;
+  passPercent: number;
+  passage: string | null;
+}) {
+  const t = useTranslations('Review.readAloud.machine');
+  return (
+    <section
+      aria-label={t('title')}
+      className="flex flex-col gap-2 rounded-(--ssz-radius-md) border bg-(--ssz-bg-base) px-3.5 py-3"
+      style={{ borderColor: 'var(--ssz-border-default)' }}
+    >
+      <p className="m-0 flex items-center gap-1.5 text-[12.5px] font-semibold">
+        <Sparkles size={13} aria-hidden="true" style={{ color: 'var(--ssz-color-primary-600)' }} />
+        {t('title')}
+      </p>
+      <ReadingCheck prompt={check} passPercent={passPercent} passage={passage} />
+      <p className="m-0 text-[11.5px] text-(--ssz-text-muted)">{t('note')}</p>
+    </section>
   );
 }
 

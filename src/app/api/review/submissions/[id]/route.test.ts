@@ -70,6 +70,7 @@ function upstream(
           rubricSnapshot?: unknown;
           rubricMarks?: unknown;
           aiVerdict?: unknown;
+          aiDraft?: unknown;
           autoAcceptAt?: string | null;
           acceptedAtTerm?: boolean;
         })
@@ -283,6 +284,91 @@ describe('GET /api/review/submissions/[id]', () => {
     expect(body.aiVerdict).toBeNull();
     expect(body.autoAcceptAt).toBeNull();
     expect(body.acceptedAtTerm).toBe(false);
+  });
+
+  it('hands the card the machine’s reading as the learner’s panel reads it (plan 82, 11b)', async () => {
+    upstream({
+      submission: {
+        templateCode: 'read_aloud',
+        aiDraft: {
+          status: 'ready',
+          items: [],
+          summary: null,
+          marks: null,
+          modelId: 'whisper',
+          promptVersion: null,
+          shownToLearner: true,
+          createdAt: '2026-10-28T09:00:00Z',
+          reading: {
+            passPercent: 85,
+            prompts: [
+              {
+                itemId: 'p1',
+                transcript: 'jeg bor',
+                words: [{ text: 'jeg', startMs: 120, endMs: 480, confidence: 0.91 }],
+                audioMs: 3170,
+                pronunciation: null,
+                check: {
+                  ops: [
+                    { k: 'read', i: 0, n: 1, heard: 'jeg', focus: false },
+                    { k: 'missed', i: 1, expected: 'bor', focus: false },
+                  ],
+                  total: 2,
+                  read: 1,
+                },
+                percent: 50,
+                passed: false,
+                wordsPerMinute: null,
+              },
+            ],
+            carriedItemIds: [],
+          },
+        },
+      },
+    });
+    const body = await (await call()).json();
+
+    expect(body.aiDraft.shownToLearner).toBe(true);
+    expect(body.aiDraft.reading).toEqual({
+      passPercent: 85,
+      prompts: [
+        {
+          itemId: 'p1',
+          transcript: 'jeg bor',
+          ops: [
+            { k: 'read', i: 0, n: 1, heard: 'jeg', focus: false },
+            { k: 'missed', i: 1, expected: 'bor', focus: false },
+          ],
+          total: 2,
+          read: 1,
+          percent: 50,
+          passed: false,
+          pronunciation: null,
+          wordsPerMinute: null,
+        },
+      ],
+      carriedItemIds: [],
+    });
+    expect(JSON.stringify(body)).not.toContain('3170');
+  });
+
+  it('reads a draft without a reading as none', async () => {
+    upstream({
+      submission: {
+        aiDraft: {
+          status: 'ready',
+          items: [],
+          summary: 'Ok.',
+          modelId: 'fake',
+          promptVersion: 'review_draft@1',
+          createdAt: '2026-10-28T09:00:00Z',
+        },
+      },
+    });
+    const body = await (await call()).json();
+
+    expect(body.aiDraft.summary).toBe('Ok.');
+    expect(body.aiDraft.reading).toBeNull();
   });
 
   it('does not reveal whether an attempt of another school exists', async () => {

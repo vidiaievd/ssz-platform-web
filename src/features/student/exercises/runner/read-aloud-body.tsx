@@ -72,6 +72,15 @@ export interface ReadAloudBodyProps {
    * card says the recordings are kept but no one will hear them.
    */
   unread?: boolean;
+  /** A machine checks the reading by itself, not a teacher (plan 82): `sent` and `graded`. */
+  byAi?: boolean;
+  /**
+   * `sent` to the machine: `reading` while the screen waits for its verdict, `slow` once it
+   * stopped waiting — the verdict still comes, to «My work».
+   */
+  aiWait?: 'reading' | 'slow' | null;
+  /** `unread` because the machine could not check it after all, not because none was asked. */
+  dropped?: boolean;
   /**
    * A fresh try from the `unread` card: no verdict is coming to end this one, and without it
    * a self-study learner could never record the exercise again.
@@ -107,7 +116,8 @@ export interface ReadAloudBodyProps {
  * Controlled, and it decides nothing: which phase the recorder is in, which take is chosen,
  * whether the hand-in is allowed and why not are the kernel's (`recorder.ts`), read here
  * through its selectors. Nothing on this screen scores speech (README idea 3); after sending
- * there is only «hos læreren» until a person has listened.
+ * there is only «hos læreren» until a person has listened — or, for a reading a machine checks
+ * by itself (plan 82), «the machine is listening» until its verdict comes.
  *
  * One column on every device, as in the prototype; on a wide screen it centres itself. The
  * mode changes only the material above the recorder (README «What the type is for»).
@@ -120,6 +130,9 @@ export function ReadAloudBody({
   instruction,
   stage,
   unread = false,
+  byAi = false,
+  aiWait = null,
+  dropped = false,
   onRedo,
   sourceOf,
   carried = [],
@@ -245,7 +258,7 @@ export function ReadAloudBody({
         </>
       ) : (
         <>
-          {!unread && <ReviewSteps graded={stage === 'graded'} />}
+          {!unread && <ReviewSteps graded={stage === 'graded'} byAi={byAi} />}
           {submitted.map((r, i) => (
             <div key={r.itemId} className="flex items-center gap-2.5" style={takeRowStyle(false)}>
               <TakeNumber n={i + 1} />
@@ -270,7 +283,13 @@ export function ReadAloudBody({
               <p className="m-0">
                 {unread ? (
                   <>
-                    <b>{t('sent.unreadTitle')}</b> {t('sent.unreadBody')}
+                    <b>{t('sent.unreadTitle')}</b>{' '}
+                    {dropped ? t('sent.droppedBody') : t('sent.unreadBody')}
+                  </>
+                ) : byAi ? (
+                  <>
+                    <b>{t('sent.aiTitle')}</b>{' '}
+                    {aiWait === 'slow' ? t('sent.aiSlow') : t('sent.aiBody')}
                   </>
                 ) : (
                   <>

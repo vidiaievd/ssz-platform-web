@@ -185,7 +185,7 @@
     "itemApprovedWhy": "Svaret er identisk med fasiten — det trenger ingen lærer.",
     "itemWithTeacher": "Til vurdering",
     "itemWithTeacherWhen": "Læreren ser svaret ditt med en gang.",
-    "send": "Lever til læreren",
+    "send": "Lever til vurdering",
     "sending": "Sender…",
     "sendFailedRetry": "Det forsøket ble ikke levert — svaret ditt er fortsatt her, prøv igjen.",
     "sendUnconfirmed": "Fikk ikke bekreftet at dette nådde læreren — prøv igjen.",
@@ -337,7 +337,7 @@
     "rubricTitle": "Slik vurderes teksten",
     "passLine": "{pass} av {max} poeng for å bestå",
     "topLevel": "3 — {descriptor}",
-    "send": "Lever til læreren",
+    "send": "Lever til vurdering",
     "sending": "Leverer…",
     "readByTeacher": "Alle svar leses av en lærer",
     "needMore": "Minst {min} ord kreves — {left} igjen",
@@ -748,7 +748,7 @@
     "chosenNote": "Du leverer opptaket du har valgt.",
     "prev": "Forrige",
     "next": "Neste",
-    "submit": "Lever til læreren",
+    "submit": "Lever til vurdering",
     "sending": "Leverer…",
     "left": "{n} opptak gjenstår.",
     "tooShort": "For kort: {labels} — ta opp på nytt.",
@@ -761,13 +761,18 @@
     "submittedTake": "Innlevert opptak: {label}",
     "steps": {
       "atTeacher": "hos læreren",
+      "atAi": "maskinen sjekker",
       "graded": "vurdert"
     },
     "sent": {
       "title": "Levert.",
       "body": "Læreren hører gjennom opptaket og svarer innen 48 timer. Du får varsel.",
       "unreadTitle": "Lagret.",
-      "unreadBody": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen hører på opptaket."
+      "unreadBody": "Du lærer uten lærer, og KI-retting er ikke med i abonnementet ditt – ingen hører på opptaket.",
+      "aiTitle": "Levert.",
+      "aiBody": "Maskinen lytter til opptaket og sammenligner det med teksten. Resultatet kommer her.",
+      "aiSlow": "Det tar lengre tid enn vanlig. Resultatet kommer i «Mitt arbeid» når det er klart.",
+      "droppedBody": "Maskinen kunne ikke sjekke opptaket, og ingen andre kommer til å lytte til det."
     },
     "refused": {
       "retake": "Opptaket for {labels} ble ikke godtatt — ta det opp på nytt.",

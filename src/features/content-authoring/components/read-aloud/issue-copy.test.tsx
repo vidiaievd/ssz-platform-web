@@ -101,7 +101,7 @@ describe('useIssueCopy', () => {
       rubric: [{ ...newCriterion(), studentVisible: false }],
       settings: { ...base.settings, passScore: 99, showModel: 'never' },
       recording: { ...base.recording, takes: 1, listenBack: false, micCheck: false },
-      review: { ...base.review, aiStage: true },
+      review: { ...base.review, aiStage: true, ai: { ...base.review.ai, transcript: false } },
     };
     const copy = copyFor(everything);
     const raised = [

@@ -62,6 +62,7 @@ describe('GET /api/exercises/[id]/attempts/[attemptId]/ai-review', () => {
       ],
       summary: 'Nesten.',
       marks: null,
+      reading: null,
       reviewedAt: '2026-10-24T10:00:00.000Z',
       disputedAt: null,
     });
@@ -69,6 +70,63 @@ describe('GET /api/exercises/[id]/attempts/[attemptId]/ai-review', () => {
     expect(JSON.stringify(body)).not.toContain('review_direct@1');
     // No marks, no second call for the rubric.
     expect(serverFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes a reading on without the timings, the audio length or the ledger ids (plan 82)', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      ...REVIEW,
+      items: [],
+      summary: null,
+      reading: {
+        passPercent: 85,
+        prompts: [
+          {
+            itemId: 'p1',
+            transcript: 'jeg bor',
+            words: [{ text: 'jeg', startMs: 120, endMs: 480, confidence: 0.91 }],
+            audioMs: 3170,
+            aiCallId: 'call-leak',
+            pronunciation: null,
+            check: {
+              ops: [
+                { k: 'read', i: 0, n: 1, heard: 'jeg', focus: false },
+                { k: 'read', i: 1, n: 1, heard: 'bor', focus: false },
+              ],
+              total: 2,
+              read: 2,
+              misread: 0,
+              missed: 0,
+              extra: 0,
+              accuracy: 1,
+            },
+            percent: 100,
+            passed: true,
+            wordsPerMinute: 110,
+          },
+        ],
+        carriedItemIds: [],
+      },
+    });
+
+    const res = await GET(makeRequest(), { params });
+    const body = await res.json();
+
+    expect(body.reading.prompts[0]).toEqual({
+      itemId: 'p1',
+      transcript: 'jeg bor',
+      ops: [
+        { k: 'read', i: 0, n: 1, heard: 'jeg', focus: false },
+        { k: 'read', i: 1, n: 1, heard: 'bor', focus: false },
+      ],
+      total: 2,
+      read: 2,
+      percent: 100,
+      passed: true,
+      pronunciation: null,
+      wordsPerMinute: 110,
+    });
+    expect(JSON.stringify(body)).not.toContain('call-leak');
+    expect(JSON.stringify(body)).not.toContain('3170');
   });
 
   it('names an essay’s marks from the rubric frozen on the attempt, in its order', async () => {

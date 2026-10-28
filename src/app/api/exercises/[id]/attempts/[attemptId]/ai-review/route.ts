@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { readReading } from '@/features/student/ai-review/reading';
 import type { AiReview } from '@/features/student/ai-review/types';
 
 import { refusal } from './refusal';
@@ -68,6 +69,7 @@ export async function GET(
               mark: mark.mark,
               reason: mark.reason,
             })),
+    reading: readReading(review.reading),
     reviewedAt: review.reviewedAt,
     disputedAt: review.disputedAt ?? null,
   };
