@@ -4866,7 +4866,7 @@
       "RA_ONE_TAKE": "Bare ett forsøk. Forsvarlig for spontanitet, hardt for et første opptak — de fleste studenter trenger et prøveforsøk.",
       "RA_CHOOSE_NO_EFFECT": "«Velg det beste opptaket» har ingen virkning med ett enkelt forsøk.",
       "RA_NO_MIC_CHECK": "Ingen mikrofonsjekk. Stille opptak havner i køen og koster læreren vurderingstid.",
-      "RA_AI_NOT_LIVE": "KI-forsjekken er en tegnet flate, ikke en levende tjeneste (plan 48). Ingenting kalles, og læreren vurderer fortsatt hvert opptak.",
+      "RA_AI_NO_CHECK": "Maskinsjekken av høytlesing er på uten sjekk mot teksten, og det er den som avgjør — maskinen har ingenting å gjøre.",
       "RA_AI_READ_ONLY": "Maskinen sjekker bare høytlesing av en gitt tekst. I denne modusen gjør KI-bryteren ingenting — uten lærer blir arbeidet ikke vurdert."
     },
     "fixes": {
@@ -4892,7 +4892,7 @@
       "RA_ONE_TAKE": "Vurder på nytt",
       "RA_CHOOSE_NO_EFFECT": "Tillat flere forsøk",
       "RA_NO_MIC_CHECK": "Slå den på",
-      "RA_AI_NOT_LIVE": "Les merknaden",
+      "RA_AI_NO_CHECK": "Les merknaden",
       "RA_AI_READ_ONLY": "Les merknaden"
     },
     "step4": {
@@ -4932,7 +4932,7 @@
     "step5": {
       "eyebrow": "Steg 5",
       "title": "Flyt og vurdering",
-      "lede": "Tale vurderes ikke av maskin: hvert opptak går til vurderingskøen, og et menneske setter karakter. KI-trinnet er tegnet, kan slås på og kaller ingenting.",
+      "lede": "I en skole ender hvert opptak hos en lærer. Høytlesing kan maskinen sjekke mot teksten: for en elev uten lærer er det vurderingen, i en skole følger den skolens vurderingsregler.",
       "pipeline": "Hva som skjer med et opptak",
       "stage": {
         "nowWhen": "nå",
@@ -4941,36 +4941,36 @@
         "nowTag": "live",
         "aiWhen": "trinn 2",
         "ai": "AI-forsjekk",
-        "aiBody": "Transkripsjon og et uttalehint før læreren åpner kortet.",
-        "aiOff": "av · plan 48",
-        "aiPreview": "forhåndsvisning · plan 48",
+        "aiBody": "Sammenligner det som ble lest med teksten, punkt for punkt. Uten lærer er dette vurderingen; i en skole slik vurderingsreglene sier.",
+        "aiOff": "av",
+        "aiOn": "på",
         "teacherWhen": "til slutt",
         "teacher": "Lærer",
-        "teacherBody": "Fyller ut skjemaet, skriver kommentaren, gir vurderingen. Kan ikke slås av.",
-        "teacherTag": "alltid"
+        "teacherBody": "I en skole: fyller ut rubrikken, skriver kommentaren og har siste ord. En elev uten lærer får maskinens vurdering.",
+        "teacherTag": "i en skole"
       },
       "aiStage": {
-        "label": "KI-forsjekk (ikke live)",
-        "help": "Viser det kommende trinnet så køens oppsett ikke endres senere. Ingen forespørsel sendes."
+        "label": "Maskinsjekk av høytlesing",
+        "help": "Opptaket går til talegjenkjenning gjennom plattformens KI. Virker på abonnementer med stemmevurdering.",
+        "readOnly": "Bare i modusen «{mode}»: maskinen sjekker lesing mot teksten, ikke fri tale."
       },
       "ai": {
         "transcript": {
-          "label": "Automatisk transkripsjon",
-          "help": "Det maskinen hørte, så læreren kan skanne mot teksten."
+          "label": "Sjekk mot teksten",
+          "help": "Avgjør: andelen av ordene i hvert punkt som ble lest. Uten den har maskinen ingenting å gjøre."
         },
         "pronunciation": {
-          "label": "Uttalehint",
-          "help": "Per fokusord: hørt / ikke hørt. Et hint, aldri en karakter."
+          "label": "Tilbakemelding på uttale",
+          "help": "Nøyaktighet, flyt, fullstendighet og utydelige ord, på abonnementer som har det. Et hint, aldri en karakter."
         },
-        "draft": {
-          "label": "Utkast til skjema",
-          "help": "Fyller ut nivåene på forhånd. Læreren bekrefter eller flytter hvert enkelt."
+        "fluency": {
+          "label": "Tempo",
+          "help": "Ord per minutt ved siden av sjekken. Et hint, aldri en karakter."
         }
       },
-      "visibilityLabel": "Hvem ser KI-resultatet",
-      "visibility": {
-        "teacher": "Bare læreren",
-        "studentAfter": "Studenten, etter vurdering"
+      "passPercent": {
+        "label": "Ord for å bestå et punkt",
+        "help": "Andelen av punktets ord som må leses, {min}–{max} %. Et hoppet-over ord teller mot; ekstra og gjentatte ord gjør ikke det. Arbeidet er bestått når alle punktene er det."
       },
       "revisionLabel": "Etter et svakt opptak",
       "revision": {
