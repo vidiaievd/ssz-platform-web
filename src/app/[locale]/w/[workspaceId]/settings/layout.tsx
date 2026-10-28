@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { SettingsLayout } from '@/components/shared/settings-layout';
 import { UnsavedChangesProvider } from '@/features/account/components/unsaved-changes-provider';
+import { settingsFeaturesOf } from '@/features/workspaces/api/require-settings-page';
 import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { settingsPagesFor } from '@/features/workspaces/lib/settings-pages';
@@ -16,7 +17,9 @@ export default async function SchoolSettingsLayout({ children, params }: Props) 
   const { workspaceId } = await params;
 
   const workspace = await resolveWorkspace(workspaceId);
-  const pages = workspace ? settingsPagesFor(workspace.myRole, workspace.kind) : [];
+  const pages = workspace
+    ? settingsPagesFor(workspace.myRole, workspace.kind, await settingsFeaturesOf(workspace))
+    : [];
   if (pages.length === 0) notFound();
 
   const t = await getTranslations('Settings');

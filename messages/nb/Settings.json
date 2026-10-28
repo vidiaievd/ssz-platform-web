@@ -4,6 +4,7 @@
     "account": "Konto",
     "notifications": "Varsler",
     "review": "Svartid for retting",
+    "assistant": "KI-assistent",
     "progress": "Hva elevene ser",
     "recipe": "Timeoppskrift",
     "new": "Ny"
@@ -21,6 +22,51 @@
       "onHint": "Hver elev ser én setning — «du ligger omtrent midt i gruppa». Aldri en plassering, en persentil, en medelevs resultat eller gruppas median.",
       "offHint": "Elevene får ikke vite noe om gruppa. De ser fortsatt hva det er verdt å jobbe med videre."
     }
+  },
+  "assistant": {
+    "eyebrow": "Skole",
+    "heading": "KI-assistent for elever",
+    "lede": "Velg hvilke elever som spør assistenten på skolens regning. Spørsmålene deres trekkes fra skolens KI-kreditter.",
+    "title": "Hvem skolen betaler for",
+    "sub": "Elever utenfor valget ditt kan fortsatt bruke assistenten på sitt eget abonnement.",
+    "failed": "Vi kunne ikke laste innstillingene for assistenten.",
+    "readOnly": "Bare en eier eller en administrator kan endre dette.",
+    "mode": {
+      "all_students": {
+        "label": "Alle elever",
+        "hint": "Alle aktive elever på skolen."
+      },
+      "selected_groups": {
+        "label": "Valgte grupper",
+        "hint": "Aktive medlemmer av gruppene du velger nedenfor."
+      },
+      "selected_students": {
+        "label": "Valgte elever",
+        "hint": "Bare elevene du velger nedenfor."
+      },
+      "off": {
+        "label": "Ingen",
+        "hint": "Skolen betaler ikke for noen elevs spørsmål."
+      }
+    },
+    "groups": {
+      "title": "Grupper · {n} valgt",
+      "empty": "Skolen har ingen grupper ennå.",
+      "students": "{n, plural, one {# elev} other {# elever}}"
+    },
+    "students": {
+      "title": "Elever · {n} valgt",
+      "empty": "Skolen har ingen aktive elever ennå.",
+      "noMatch": "Ingen elev passer.",
+      "filter": "Finn en elev"
+    },
+    "nobodyChosen": "Ingen er valgt ennå, så skolen betaler ikke for noen. Alle elever spør på sitt eget abonnement.",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "saved": "Lagret.",
+    "saveFailed": "Endringen ble ikke lagret.",
+    "saveNotEntitled": "Skolens abonnement inkluderer ikke assistenten for elever. Bare «Ingen» kan lagres.",
+    "saveInvalid": "En gruppe eller elev du valgte er ikke lenger på skolen. Listene er oppdatert — sjekk dem og lagre igjen."
   },
   "recipe": {
     "eyebrow": "Undervisningsstandard",
