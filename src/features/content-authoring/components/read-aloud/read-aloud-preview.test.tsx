@@ -106,7 +106,7 @@ describe('ReadAloudPreview — live (RA-B17)', () => {
     const { user } = renderPreview();
     await recordOne(user);
     expect(port.calls.start).toBe(1);
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     expect(send).toBeEnabled();
     await user.click(send);
     expect(screen.getByText('Handed in.')).toBeInTheDocument();
@@ -116,7 +116,7 @@ describe('ReadAloudPreview — live (RA-B17)', () => {
   it('simulates the teacher’s verdict with «2» on every criterion, and only here (Q8-A)', async () => {
     const { user } = renderPreview();
     await recordOne(user);
-    await user.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await user.click(screen.getByRole('button', { name: 'Hand in for review' }));
     await user.click(screen.getByRole('button', { name: "Simulate the teacher's verdict" }));
     const card = screen.getByRole('status', { name: '' });
     expect(within(card).getByText(/10 \/ 15/)).toBeInTheDocument();
@@ -131,7 +131,7 @@ describe('ReadAloudPreview — live (RA-B17)', () => {
     await recordOne(user);
     await user.click(screen.getByRole('button', { name: 'Restart the attempt' }));
     expect(screen.getByRole('button', { name: 'Start recording' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Hand in to the teacher' })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Hand in for review' })).toBeDisabled();
   });
 });
 

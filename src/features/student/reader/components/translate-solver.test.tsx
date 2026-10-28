@@ -242,7 +242,7 @@ describe('TranslateSolver', () => {
   it('will not hand in a sentence left empty, and says which', async () => {
     renderSolver(mockApi({ submit: PASSED }));
 
-    await userEvent.click(await screen.findByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Hand in for review' }));
 
     expect(screen.getByText('1 sentence has no answer yet')).toBeInTheDocument();
   });
@@ -252,7 +252,7 @@ describe('TranslateSolver', () => {
     renderSolver(fetchMock);
 
     await answer('Jeg har bodd i Tromsø i tre år.');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     await waitFor(() => {
       const call = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/submit'));
@@ -268,7 +268,7 @@ describe('TranslateSolver', () => {
     renderSolver(mockApi({ submit: PASSED }));
 
     await answer('Jeg har bodd i Tromsø i tre år.');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     expect(
       await screen.findByText('Every sentence matched — approved automatically'),
@@ -282,7 +282,7 @@ describe('TranslateSolver', () => {
     renderSolver(mockApi({ submit: ROUTED }));
 
     await answer('Jeg bor i Tromsø i tre år.');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     expect(await screen.findByText('Handed in. Your teacher will look at it.')).toBeInTheDocument();
     expect(screen.queryByText(/wrong|incorrect|Not quite/i)).not.toBeInTheDocument();
@@ -293,7 +293,7 @@ describe('TranslateSolver', () => {
     renderSolver(mockApi({ submit: ROUTED }), onChecked);
 
     await answer('Jeg bor i Tromsø i tre år.');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     await waitFor(() => expect(onChecked).toHaveBeenCalledWith(null));
   });
@@ -302,7 +302,7 @@ describe('TranslateSolver', () => {
     renderSolver(mockApi({ submit: ROUTED }));
 
     await answer('Jeg bor i Tromsø i tre år.');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     await screen.findByText('Handed in. Your teacher will look at it.');
     expect(screen.getByRole('textbox')).toHaveAttribute('readonly');
@@ -313,7 +313,7 @@ describe('TranslateSolver', () => {
     renderSolver(mockApi({ submit: { ...ROUTED, reviewer: 'none' } }));
 
     await answer('Jeg bor i Tromsø i tre år.');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     expect(await screen.findByText('Handed in. Nobody will check it.')).toBeInTheDocument();
     expect(screen.queryByText(/Your teacher/)).not.toBeInTheDocument();
@@ -390,7 +390,7 @@ describe('TranslateSolver', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Check my answers (2 left)' }));
     expect(await screen.findByText('Close — something differs from the key.')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     await screen.findByText('Handed in. Your teacher will look at it.');
     expect(screen.queryByText('Close — something differs from the key.')).not.toBeInTheDocument();
@@ -606,7 +606,7 @@ describe('TranslateSolver', () => {
       );
 
       await answer('Jeg har bodd i Tromsø i tre år.');
-      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
       expect(
         await screen.findByText('Handed in. Your teacher will look at it.'),
@@ -618,7 +618,7 @@ describe('TranslateSolver', () => {
       renderSolver(mockApi({ submitFails: true, attemptStatus: { status: 'IN_PROGRESS' } }));
 
       await answer('Jeg har bodd i Tromsø i tre år.');
-      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
       expect(
         await screen.findByText(
@@ -626,7 +626,7 @@ describe('TranslateSolver', () => {
         ),
       ).toBeInTheDocument();
       expect(await screen.findByRole('textbox')).toHaveValue('Jeg har bodd i Tromsø i tre år.');
-      expect(screen.getByRole('button', { name: 'Hand in to the teacher' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Hand in for review' })).toBeEnabled();
     });
 
     /**
@@ -640,7 +640,7 @@ describe('TranslateSolver', () => {
       );
 
       await answer('Jeg har bodd i Tromsø i tre år.');
-      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
       await screen.findByText(/didn't go through/i);
       unmount();
 
@@ -653,7 +653,7 @@ describe('TranslateSolver', () => {
       renderSolver(mockApi({ submitFails: true, attemptStatusFails: true }));
 
       await answer('Jeg har bodd i Tromsø i tre år.');
-      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
       expect(
         await screen.findByText("Couldn't confirm that reached your teacher — try again."),
@@ -676,7 +676,7 @@ describe('TranslateSolver', () => {
     it('forgets the draft once the work has reached the engine', async () => {
       const { unmount } = renderSolver(mockApi({ submit: ROUTED }));
       await answer('Jeg har bodd i Tromsø i tre år.');
-      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
       await screen.findByText('Handed in. Your teacher will look at it.');
       unmount();
 

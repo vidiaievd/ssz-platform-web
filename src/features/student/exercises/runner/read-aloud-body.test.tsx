@@ -120,7 +120,7 @@ describe('ReadAloudBody', () => {
   it('says why the hand-in is off — prompts left, then too short (RA-R7, RA-R8)', async () => {
     render(wrap(<Harness ex={quick()} port={port} />));
     expect(screen.getByText('2 recordings left.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Hand in to the teacher' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Hand in for review' })).toBeDisabled();
 
     port.nextTakeSeconds(1);
     await userEvent.click(screen.getByRole('button', { name: 'Start recording' }));
@@ -181,7 +181,7 @@ describe('ReadAloudBody', () => {
     render(wrap(<Harness ex={quick()} port={null} stage="sent" />));
     expect(screen.getByText('with the teacher')).toBeInTheDocument();
     expect(screen.getByRole('status')).toHaveTextContent('Handed in.');
-    expect(screen.queryByRole('button', { name: 'Hand in to the teacher' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Hand in for review' })).toBeNull();
   });
 
   it('lists the carried prompts as passed and counts only what is left (phase 11b)', () => {

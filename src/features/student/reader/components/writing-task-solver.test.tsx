@@ -223,7 +223,7 @@ describe('WritingTaskSolver', () => {
     renderSolver(fetchMock);
     await screen.findByRole('textbox', { name: 'Your text' });
 
-    const button = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const button = screen.getByRole('button', { name: 'Hand in for review' });
     expect(button).toBeDisabled();
 
     write('ett to tre');
@@ -242,7 +242,7 @@ describe('WritingTaskSolver', () => {
     await screen.findByRole('textbox', { name: 'Your text' });
 
     write('ett to tre fire fem');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     expect(await screen.findByText('Handed in.')).toBeInTheDocument();
     // The text becomes a quote; there is nothing left to edit.
@@ -338,7 +338,7 @@ describe('WritingTaskSolver', () => {
     await screen.findByRole('textbox', { name: 'Your text' });
 
     write('ett to tre fire fem');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     expect(await screen.findByText('Handed in. Nobody will read it.')).toBeInTheDocument();
     expect(screen.queryByText(/Your teacher responds/)).not.toBeInTheDocument();
@@ -391,7 +391,7 @@ describe('WritingTaskSolver', () => {
       await screen.findByRole('textbox', { name: 'Your text' });
 
       write('ett to tre fire fem');
-      await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+      await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
       expect(await screen.findByText('Handed in. The AI is reading it.')).toBeInTheDocument();
       expect(await screen.findByText('Passed', {}, { timeout: 4000 })).toBeInTheDocument();
@@ -487,7 +487,7 @@ describe('WritingTaskSolver', () => {
     await screen.findByRole('textbox', { name: 'Your text' });
 
     write('ett to tre fire fem');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     // Only the response was lost: the work is with the teacher, and a second send would
     // hand in what is already there.
@@ -500,7 +500,7 @@ describe('WritingTaskSolver', () => {
     await screen.findByRole('textbox', { name: 'Your text' });
 
     write('ett to tre fire fem');
-    await userEvent.click(screen.getByRole('button', { name: 'Hand in to the teacher' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
 
     expect(await screen.findByText('The text was not handed in. Try again.')).toBeInTheDocument();
     expect(field()).toHaveValue('ett to tre fire fem');

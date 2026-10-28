@@ -211,7 +211,7 @@ describe('ReadAloudSolver', () => {
       }),
     );
 
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
 
@@ -231,7 +231,7 @@ describe('ReadAloudSolver', () => {
     await record();
     await record(25);
     await waitFor(() => expect(uploads).toHaveLength(2));
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     await screen.findByText('Handed in.');
@@ -249,7 +249,7 @@ describe('ReadAloudSolver', () => {
     renderSolver(api);
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await record();
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     expect(await screen.findByRole('alert')).toHaveTextContent(
@@ -268,7 +268,7 @@ describe('ReadAloudSolver', () => {
     await record();
     await record();
     expect(await screen.findByText('You have used all 3 recordings.')).toBeInTheDocument();
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
 
@@ -287,7 +287,7 @@ describe('ReadAloudSolver', () => {
     renderSolver(api);
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await record();
-    const send = screen.getByRole('button', { name: 'Hand in to the teacher' });
+    const send = screen.getByRole('button', { name: 'Hand in for review' });
     await waitFor(() => expect(send).toBeEnabled());
     await userEvent.click(send);
     expect(await screen.findByRole('alert')).toHaveTextContent("couldn't be checked right now");
@@ -319,7 +319,7 @@ describe('ReadAloudSolver', () => {
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await screen.findByRole('button', { name: 'Record again (2 left)' });
     expect(screen.getAllByRole('radio')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Hand in to the teacher' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: 'Hand in for review' })).toBeEnabled();
   });
 
   it('opens straight on «with the teacher» for work already handed in', async () => {
