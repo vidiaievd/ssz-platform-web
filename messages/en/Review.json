@@ -632,6 +632,10 @@
     },
     "materialGone": "The exercise was changed or deleted after this was handed in. The recording is marked as before.",
     "listenFor": "Listen for:",
+    "machine": {
+      "title": "The machine's check",
+      "note": "The learner has seen it. Mark the recording by ear — the check is a second pair of ears, not the verdict."
+    },
     "situation": "Situation:",
     "partner": "The partner says:",
     "picture": "Picture:",
@@ -706,6 +710,7 @@
       },
       "carried": "{label} — passed in an earlier try, not checked again.",
       "carriedCount": "{count, plural, one {# prompt was} other {# prompts were}} passed in an earlier try and not checked again.",
+      "pace": "Pace: {wpm} words a minute — a hint only.",
       "pronunciation": {
         "title": "Pronunciation:",
         "scores": "accuracy {accuracy} · fluency {fluency} · completeness {completeness}",

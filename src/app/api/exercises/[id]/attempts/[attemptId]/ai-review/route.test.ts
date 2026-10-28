@@ -123,6 +123,7 @@ describe('GET /api/exercises/[id]/attempts/[attemptId]/ai-review', () => {
       percent: 100,
       passed: true,
       pronunciation: null,
+      wordsPerMinute: 110,
     });
     expect(JSON.stringify(body)).not.toContain('call-leak');
     expect(JSON.stringify(body)).not.toContain('3170');

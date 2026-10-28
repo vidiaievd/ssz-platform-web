@@ -80,6 +80,8 @@ export interface AiReadingPrompt {
   passed: boolean;
   /** Only on plans that include it; `null` otherwise. */
   pronunciation: AiPronunciation | null;
+  /** Over the speech heard, when the author asks for the pace (`review.ai.fluency`); a hint. */
+  wordsPerMinute: number | null;
 }
 
 /** A `read_aloud` work as the machine checked it (plan 82, step 7). */

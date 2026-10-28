@@ -29,8 +29,9 @@ export interface ReadingCheckProps {
 
 /**
  * The machine's check of one prompt read aloud (plan 82, step 11): the passage with the words
- * missed or read as others marked, the count against the pass mark, what was heard, and —
- * where the plan includes it — pronunciation feedback that never changed the result.
+ * missed or read as others marked, the count against the pass mark, what was heard, the pace
+ * where the author asks for it, and — where the plan includes it — pronunciation feedback;
+ * neither of the last two changed the result.
  *
  * Draws only what the engine ruled; nothing is checked again here.
  */
@@ -97,6 +98,12 @@ export function ReadingCheck({ prompt, passPercent, passage = null }: ReadingChe
           <span style={{ fontFamily: READING }}>{prompt.transcript}</span>
         )}
       </p>
+
+      {prompt.wordsPerMinute !== null && (
+        <p className="m-0 text-[12.5px] tabular-nums text-(--ssz-text-secondary)">
+          {t('pace', { wpm: Math.round(prompt.wordsPerMinute) })}
+        </p>
+      )}
 
       {prompt.pronunciation !== null && <Pronunciation t={t} scores={prompt.pronunciation} />}
     </div>

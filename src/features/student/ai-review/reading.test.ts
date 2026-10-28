@@ -55,6 +55,7 @@ describe('readReading (plan 82, step 11)', () => {
           percent: 33,
           passed: false,
           pronunciation: null,
+          wordsPerMinute: 120,
         },
       ],
       carriedItemIds: ['p0'],

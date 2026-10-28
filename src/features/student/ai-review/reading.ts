@@ -55,6 +55,7 @@ function readPrompt(raw: unknown): AiReadingPrompt | null {
     percent,
     passed: raw.passed,
     pronunciation: readPronunciation(raw.pronunciation),
+    wordsPerMinute: num(raw.wordsPerMinute),
   };
 }
 

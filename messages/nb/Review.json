@@ -632,6 +632,10 @@
     },
     "materialGone": "Oppgaven er endret eller slettet etter innleveringen. Opptaket vurderes som før.",
     "listenFor": "Lyttepunkt:",
+    "machine": {
+      "title": "Maskinens kontroll",
+      "note": "Eleven har sett den. Vurder opptaket med eget øre – kontrollen er et ekstra øre, ikke vurderingen."
+    },
     "situation": "Situasjon:",
     "partner": "Samtalepartneren:",
     "picture": "Bilde:",
@@ -706,6 +710,7 @@
       },
       "carried": "{label} – bestått i et tidligere forsøk, ikke sjekket på nytt.",
       "carriedCount": "{count, plural, one {# oppgave} other {# oppgaver}} bestått i et tidligere forsøk, ikke sjekket på nytt.",
+      "pace": "Tempo: {wpm} ord i minuttet – bare et hint.",
       "pronunciation": {
         "title": "Uttale:",
         "scores": "nøyaktighet {accuracy} · flyt {fluency} · fullstendighet {completeness}",

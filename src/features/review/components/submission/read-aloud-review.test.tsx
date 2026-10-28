@@ -471,6 +471,119 @@ describe('a read_aloud submission in the inbox (plan 70 §7.11)', () => {
   });
 });
 
+/** The machine checked the first prompt only, and the learner was shown it (plan 80). */
+const CHECKED: ReviewSubmission = {
+  ...SUBMISSION,
+  aiDraft: {
+    status: 'ready',
+    items: [],
+    summary: null,
+    marks: null,
+    modelId: 'whisper',
+    promptVersion: null,
+    shownToLearner: true,
+    createdAt: new Date().toISOString(),
+    reading: {
+      passPercent: 85,
+      prompts: [
+        {
+          itemId: 'p1',
+          transcript: 'jeg søker stillingen sykepleier',
+          ops: [
+            { k: 'read', i: 0, n: 3, heard: 'jeg søker stillingen', focus: false },
+            { k: 'missed', i: 3, expected: 'som', focus: false },
+            { k: 'read', i: 4, n: 1, heard: 'sykepleier', focus: true },
+          ],
+          total: 5,
+          read: 4,
+          percent: 80,
+          passed: false,
+          pronunciation: null,
+          wordsPerMinute: 96,
+        },
+      ],
+      carriedItemIds: [],
+    },
+  },
+  aiVerdict: { outcome: 'returned', comment: null, at: new Date().toISOString() },
+};
+
+describe('the machine’s check on the card (plan 82, step 11b)', () => {
+  it('draws the check the learner saw in place of the bare passage, prompt by prompt', async () => {
+    upstream(CHECKED);
+    renderPanel();
+
+    const first = await block('Avsnitt 1');
+    const check = within(first).getByRole('region', { name: "The machine's check" });
+    expect(within(check).getByText('Not enough read')).toBeInTheDocument();
+    expect(within(check).getByText('4 of 5 words · 80 %')).toBeInTheDocument();
+    expect(within(check).getByText('needs 85 %')).toBeInTheDocument();
+    expect(within(check).getByText('som')).toHaveClass('line-through');
+    expect(within(check).getByText('jeg søker stillingen sykepleier')).toBeInTheDocument();
+    expect(within(check).getByText('Pace: 96 words a minute — a hint only.')).toBeInTheDocument();
+    // The passage is drawn once — with the check over it, not again beside it.
+    expect(within(first).queryByText('sykepleier', { selector: 'mark' })).not.toBeInTheDocument();
+    expect(within(first).getByText('Hør etter trykket i «sykepleier».')).toBeInTheDocument();
+    // The marks are still the teacher's to give.
+    expect(within(first).getByRole('group', { name: 'Mark for Flyt' })).toBeEnabled();
+
+    const second = await block('Avsnitt 2');
+    expect(
+      within(second).queryByRole('region', { name: "The machine's check" }),
+    ).not.toBeInTheDocument();
+    expect(second).toHaveTextContent('Jeg har jobbet i fem år.');
+  });
+
+  it('shows no pace when the author did not ask for it', async () => {
+    const reading = CHECKED.aiDraft!.reading!;
+    upstream({
+      ...CHECKED,
+      aiDraft: {
+        ...CHECKED.aiDraft!,
+        reading: { ...reading, prompts: [{ ...reading.prompts[0]!, wordsPerMinute: null }] },
+      },
+    });
+    renderPanel();
+
+    const first = await block('Avsnitt 1');
+    expect(within(first).getByRole('region', { name: "The machine's check" })).toBeInTheDocument();
+    expect(within(first).queryByText(/^Pace:/)).not.toBeInTheDocument();
+  });
+
+  it('keeps the check on a decided submission, as the record of what the learner was told', async () => {
+    upstream({
+      ...CHECKED,
+      status: 'reviewed',
+      aiDraft: { ...CHECKED.aiDraft!, status: 'sent' },
+      decision: {
+        attemptId: 'att-1',
+        outcome: 'approved',
+        at: new Date().toISOString(),
+        reviewerId: 't2',
+        reviewerName: 'Kari Lærer',
+        comment: null,
+      },
+      rubricMarks: { 'p1:flow': 3, 'p1:sounds': 2, 'p2:flow': 2, 'p2:sounds': 2 },
+      reviewDecisions: [
+        { itemId: 'p1', approved: true, comment: 'Fin flyt.' },
+        { itemId: 'p2', approved: true, comment: 'Godt.' },
+      ],
+    });
+    renderPanel();
+
+    const first = await block('Avsnitt 1');
+    expect(within(first).getByRole('region', { name: "The machine's check" })).toBeInTheDocument();
+  });
+
+  it('has no detectable accessibility violations', async () => {
+    upstream(CHECKED);
+    const { container } = renderPanel();
+    await block('Avsnitt 1');
+    const rules = { rules: { region: { enabled: false } } };
+    expect((await axe.run(container, rules)).violations).toEqual([]);
+  });
+});
+
 describe('the reviewer’s player', () => {
   it('scrubs with the arrow keys and plays at the speed chosen', async () => {
     const user = userEvent.setup();

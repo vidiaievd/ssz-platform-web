@@ -60,6 +60,7 @@ const READING_REVIEW: AiReview = {
         percent: 60,
         passed: false,
         pronunciation: null,
+        wordsPerMinute: null,
       },
     ],
     carriedItemIds: ['p0'],
