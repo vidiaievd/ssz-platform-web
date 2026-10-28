@@ -15,6 +15,24 @@ describe('settingsPagesFor', () => {
       ]);
   });
 
+  // Plan 83, step 3c: without the key the school pays for nobody, so there is nothing to set.
+  it('adds the assistant after the review only when the plan carries ai.student_assist', () => {
+    expect(settingsPagesFor('OWNER', 'SCHOOL')).not.toContain('assistant');
+    expect(settingsPagesFor('ADMIN', 'SCHOOL', { studentAssist: true })).toEqual([
+      'profile',
+      'account',
+      'notifications',
+      'review',
+      'assistant',
+      'progress',
+      'recipe',
+    ]);
+    expect(settingsPagesFor('OWNER', 'SOLO', { studentAssist: true })).toContain('assistant');
+    expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL', { studentAssist: true })).toEqual([
+      'recipe',
+    ]);
+  });
+
   it('gives a content admin the lesson recipe and nothing else', () => {
     expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL')).toEqual(['recipe']);
   });

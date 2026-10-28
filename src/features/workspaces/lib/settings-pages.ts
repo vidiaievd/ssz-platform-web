@@ -7,6 +7,7 @@ export type SettingsPage =
   | 'account'
   | 'notifications'
   | 'review'
+  | 'assistant'
   | 'progress'
   | 'recipe';
 
@@ -26,10 +27,25 @@ const WORKSPACE_PAGES: readonly SettingsPage[] = [
  *
  * The recipe is a school's page only: a tutor's courses are not tied to their SOLO
  * workspace, inherit nothing from it, and a recipe saved there would check no lesson.
+ *
+ * The assistant page (plan 83, step 3c) is there only when the plan carries
+ * `ai.student_assist`: without it the school pays for nobody whatever is saved, so there is
+ * nothing to choose. organization-service refuses the save without the key anyway.
  */
-export function settingsPagesFor(role: SchoolRole | null, kind: WorkspaceKind): SettingsPage[] {
+export function settingsPagesFor(
+  role: SchoolRole | null,
+  kind: WorkspaceKind,
+  { studentAssist = false }: { studentAssist?: boolean } = {},
+): SettingsPage[] {
   const recipe: SettingsPage[] = kind === 'SCHOOL' ? ['recipe'] : [];
-  if (role === 'OWNER' || role === 'ADMIN') return [...WORKSPACE_PAGES, ...recipe];
+  if (role === 'OWNER' || role === 'ADMIN') {
+    const pages = studentAssist
+      ? WORKSPACE_PAGES.flatMap((page): SettingsPage[] =>
+          page === 'review' ? [page, 'assistant'] : [page],
+        )
+      : [...WORKSPACE_PAGES];
+    return [...pages, ...recipe];
+  }
   if (role === 'CONTENT_ADMIN') return recipe;
   return [];
 }

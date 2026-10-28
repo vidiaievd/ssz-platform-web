@@ -4,6 +4,7 @@
     "account": "Account",
     "notifications": "Notifications",
     "review": "Review response time",
+    "assistant": "AI assistant",
     "progress": "What students see",
     "recipe": "Lesson recipe",
     "new": "New"
@@ -21,6 +22,51 @@
       "onHint": "Each learner sees one sentence — “you are around the middle of your group”. Never a rank, a percentile, a classmate's result, or the group's median.",
       "offHint": "Learners are told nothing about the group. They still see what is worth working on next."
     }
+  },
+  "assistant": {
+    "eyebrow": "School",
+    "heading": "AI assistant for students",
+    "lede": "Choose which students ask the assistant on the school's account. Their questions are charged to the school's AI credits.",
+    "title": "Who the school pays for",
+    "sub": "Students outside your choice can still use the assistant on their own plan.",
+    "failed": "We could not load the assistant settings.",
+    "readOnly": "Only an owner or an administrator can change this.",
+    "mode": {
+      "all_students": {
+        "label": "All students",
+        "hint": "Every active student of the school."
+      },
+      "selected_groups": {
+        "label": "Chosen groups",
+        "hint": "Active members of the groups you choose below."
+      },
+      "selected_students": {
+        "label": "Chosen students",
+        "hint": "Only the students you choose below."
+      },
+      "off": {
+        "label": "Nobody",
+        "hint": "The school pays for no student's questions."
+      }
+    },
+    "groups": {
+      "title": "Groups · {n} chosen",
+      "empty": "This school has no groups yet.",
+      "students": "{n, plural, one {# student} other {# students}}"
+    },
+    "students": {
+      "title": "Students · {n} chosen",
+      "empty": "This school has no active students yet.",
+      "noMatch": "No student matches.",
+      "filter": "Find a student"
+    },
+    "nobodyChosen": "Nobody is chosen yet, so the school pays for no one. Every student asks on their own plan.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Saved.",
+    "saveFailed": "The change was not saved.",
+    "saveNotEntitled": "The school's plan does not include the assistant for students. Only \"Nobody\" can be saved.",
+    "saveInvalid": "A group or student you chose is no longer at the school. The lists have been refreshed — check them and save again."
   },
   "recipe": {
     "eyebrow": "Teaching standards",

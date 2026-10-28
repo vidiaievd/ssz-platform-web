@@ -2,6 +2,9 @@ import 'server-only';
 
 import { notFound } from 'next/navigation';
 
+import { can } from '@/features/entitlements';
+import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
+
 import { settingsPagesFor, type SettingsPage } from '../lib/settings-pages';
 import { resolveWorkspace, type ResolvedWorkspace } from './resolve-workspace';
 
@@ -16,6 +19,23 @@ export async function requireSettingsPage(
   page: SettingsPage,
 ): Promise<ResolvedWorkspace> {
   const workspace = await resolveWorkspace(workspaceId);
-  if (!workspace || !settingsPagesFor(workspace.myRole, workspace.kind).includes(page)) notFound();
+  if (!workspace) notFound();
+  const pages = settingsPagesFor(
+    workspace.myRole,
+    workspace.kind,
+    await settingsFeaturesOf(workspace),
+  );
+  if (!pages.includes(page)) notFound();
   return workspace;
+}
+
+/**
+ * The plan keys that add a settings page. The workspace layout has read the same
+ * entitlements already, so this is a cache hit, not a second request.
+ */
+export async function settingsFeaturesOf(
+  workspace: ResolvedWorkspace,
+): Promise<{ studentAssist: boolean }> {
+  const entitlements = await getEntitlements(workspace.id);
+  return { studentAssist: can(entitlements, 'ai.student_assist') };
 }
