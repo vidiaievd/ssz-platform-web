@@ -25,6 +25,7 @@ import { ActivityBlock } from './activity-block';
 import { VersionHistoryBlock } from './version-history-block';
 import { CourseRecipeField } from './course-recipe-field';
 import { CourseSlaField } from '@/features/review/components/settings/course-sla-field';
+import { CourseLearningGoalsField } from './course-learning-goals-field';
 import { CourseAiPolicyField } from '@/features/review/components/settings/course-ai-policy-field';
 
 type SettingsTab = 'overview' | 'activity' | 'tags' | 'sharing';
@@ -84,6 +85,12 @@ export function CourseSettingsDrawer({
 
             <TabsContent value={'overview' satisfies SettingsTab} className="space-y-6">
               <ContainerForm mode="edit" container={container} />
+              {container.containerType === 'course' && (
+                <CourseLearningGoalsField
+                  containerId={container.id}
+                  goals={container.learningGoals ?? []}
+                />
+              )}
               <CoursePublishBlock
                 container={container}
                 draftVersionId={draftVersionId}

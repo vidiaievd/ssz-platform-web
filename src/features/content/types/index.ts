@@ -15,6 +15,8 @@ export interface Container {
   title: string;
   description?: string | null;
   containerType: ContainerType;
+  /** On a course «What you will learn»; on a module its own goals. Empty when unset. */
+  learningGoals?: string[];
   targetLanguage: string;
   difficultyLevel: DifficultyLevel;
   visibility: Visibility;
