@@ -8,6 +8,7 @@ export type SettingsPage =
   | 'notifications'
   | 'review'
   | 'assistant'
+  | 'precheck'
   | 'progress'
   | 'recipe';
 
@@ -31,19 +32,28 @@ const WORKSPACE_PAGES: readonly SettingsPage[] = [
  * The assistant page (plan 83, step 3c) is there only when the plan carries
  * `ai.student_assist`: without it the school pays for nobody whatever is saved, so there is
  * nothing to choose. organization-service refuses the save without the key anyway.
+ *
+ * The check-before-hand-in page (plan 84, step 9) follows the same rule for `ai.practice`.
  */
 export function settingsPagesFor(
   role: SchoolRole | null,
   kind: WorkspaceKind,
-  { studentAssist = false }: { studentAssist?: boolean } = {},
+  {
+    studentAssist = false,
+    aiPractice = false,
+  }: { studentAssist?: boolean; aiPractice?: boolean } = {},
 ): SettingsPage[] {
   const recipe: SettingsPage[] = kind === 'SCHOOL' ? ['recipe'] : [];
   if (role === 'OWNER' || role === 'ADMIN') {
-    const pages = studentAssist
-      ? WORKSPACE_PAGES.flatMap((page): SettingsPage[] =>
-          page === 'review' ? [page, 'assistant'] : [page],
-        )
-      : [...WORKSPACE_PAGES];
+    const pages = WORKSPACE_PAGES.flatMap((page): SettingsPage[] =>
+      page === 'review'
+        ? [
+            page,
+            ...(studentAssist ? (['assistant'] as const) : []),
+            ...(aiPractice ? (['precheck'] as const) : []),
+          ]
+        : [page],
+    );
     return [...pages, ...recipe];
   }
   if (role === 'CONTENT_ADMIN') return recipe;

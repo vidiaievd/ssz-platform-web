@@ -5,6 +5,7 @@
     "notifications": "Varsler",
     "review": "Svartid for retting",
     "assistant": "KI-assistent",
+    "precheck": "Sjekk før innlevering",
     "progress": "Hva elevene ser",
     "recipe": "Timeoppskrift",
     "new": "Ny"
@@ -67,6 +68,37 @@
     "saveFailed": "Endringen ble ikke lagret.",
     "saveNotEntitled": "Skolens abonnement inkluderer ikke assistenten for elever. Bare «Ingen» kan lagres.",
     "saveInvalid": "En gruppe eller elev du valgte er ikke lenger på skolen. Listene er oppdatert — sjekk dem og lagre igjen."
+  },
+  "precheck": {
+    "eyebrow": "Skole",
+    "heading": "Sjekk før innlevering",
+    "lede": "La elevene få arbeidet sitt sjekket av en modell før de leverer. Sjekkene belastes skolens KI-kreditter; læreren vurderer fortsatt arbeidet.",
+    "title": "Øving med en modell",
+    "sub": "Eleven ser merknadene, retter arbeidet og leverer. Læreren får en vanlig innlevering.",
+    "failed": "Vi kunne ikke laste innstillingene for sjekken.",
+    "readOnly": "Bare en eier eller en administrator kan endre dette.",
+    "enabled": {
+      "label": "Elevene kan sjekke arbeidet før innlevering",
+      "hint": "Gjelder skriveoppgaver, oversettelser, feilretting og opplesing."
+    },
+    "perExercise": {
+      "label": "Sjekker per elev og oppgave",
+      "hint": "Telles over alle forsøk, så et nytt forsøk starter ikke på nytt. La stå tomt for ingen grense.",
+      "invalid": "Skriv et helt tall fra 1 til {max}, eller la feltet stå tomt."
+    },
+    "monthly": {
+      "label": "Kreditter per elev i måneden",
+      "hint": "Kalendermåned. Abonnementet kan ha et lavere tak, og det laveste gjelder. La stå tomt for ingen grense.",
+      "invalid": "Skriv et helt tall fra 1 til {max}, eller la feltet stå tomt."
+    },
+    "noLimit": "Ingen grense",
+    "unlimited": "Uten egne grenser stopper bare abonnementets kreditter sjekkene: én aktiv elev kan bruke opp hele skolens pott.",
+    "cancel": "Avbryt",
+    "save": "Lagre",
+    "saved": "Lagret.",
+    "saveFailed": "Endringen ble ikke lagret.",
+    "saveNotEntitled": "Skolens abonnement inkluderer ikke sjekk før innlevering.",
+    "saveInvalid": "En verdi er utenfor tillatt område. Sjekk begge grensene og lagre på nytt."
   },
   "recipe": {
     "eyebrow": "Undervisningsstandard",
