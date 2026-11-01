@@ -117,7 +117,7 @@ describe('StepClips — the sources (MP-B11…B13, MP-U1)', () => {
     expect(within(row('skjære')).getByRole('button', { name: 'Record' })).toBeDisabled();
     expect(screen.getByRole('img', { name: 'Recording «kjære»' })).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Stopp' }));
+    await user.click(screen.getByRole('button', { name: 'Stop' }));
     await waitFor(() => expect(last().pairs[0]!.words[0]!.clip.assetId).toBe('up-kjære.webm'));
     const [file, owner] = sources.upload.mock.calls[0]!;
     expect(file.type).toBe('audio/webm');
