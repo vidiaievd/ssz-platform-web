@@ -281,5 +281,27 @@
     "insufficient": "{count, plural, one {# has too little evidence to judge.} other {# have too little evidence to judge.}}",
     "noProduction": "Nothing they have done was a production task at all — that is a fact about the course.",
     "namesUnavailable": "The facts could not be named just now; the findings above still stand."
+  },
+  "weakRules": {
+    "title": "Weak rules",
+    "subtitle": "Grammar rules that checks of the work named as the ground of a mistake.",
+    "windowLabel": "Period",
+    "window": {
+      "7": "7 days",
+      "30": "30 days",
+      "course": "Whole course"
+    },
+    "unavailable": "Could not load the weak rules. The rest of this page is unaffected.",
+    "empty": "No rule was flagged in this period. That means no check named one — the checks only see work that was rehearsed or handed in.",
+    "unnamed": "A rule without a name",
+    "flags": "{count, plural, one {# flag} other {# flags}}",
+    "learners": "{count, plural, one {# learner} other {# learners}}",
+    "since": "Counted from {date}.",
+    "sinceCourse": "Counted over the whole course.",
+    "source": {
+      "teacher": "teacher marked: {count}",
+      "aiReview": "AI remark kept: {count}",
+      "aiPrecheck": "rehearsal: {count}"
+    }
   }
 }

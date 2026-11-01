@@ -18,6 +18,8 @@ vi.mock('next-intl/server', () => ({
     createTranslator({ locale: 'en', messages: en, namespace }),
 }));
 
+// A client panel with its own query and its own tests (weak-rules-panel.test.tsx).
+vi.mock('@/features/analytics/components/weak-rules-panel', () => ({ WeakRulesPanel: () => null }));
 vi.mock('../../../api/get-student-mastery', () => ({ getStudentMastery: vi.fn() }));
 
 import { getStudentMastery, type StudentMastery } from '../../../api/get-student-mastery';

@@ -212,3 +212,30 @@ export interface StudentWorkContext {
   /** Attempts naming no course at all, and so in no bucket. */
   unattributed: number;
 }
+
+/** Which days the weak-rules reading covers (platform plan 85, Q3). */
+export type WeakRulesWindow = '7' | '30' | 'course';
+
+export interface WeakRule {
+  atomId: string;
+  /** `null` when content-service could not name the atom just now — the row stays. */
+  title: string | null;
+  ruleId: string | null;
+  /** Signals in the window: one per learner, exercise, day and source. */
+  flags: number;
+  learners: number;
+  bySource: { aiPrecheck: number; aiReview: number; teacher: number };
+  lastFlaggedAt: string;
+}
+
+/**
+ * Grammar rules the checks of a group's or a learner's work named as the ground of a
+ * mistake. An empty `rules` means no signal in the window, not «no weak rules».
+ */
+export interface WeakRules {
+  window: WeakRulesWindow;
+  /** First UTC day counted; `null` for the whole course. */
+  since: string | null;
+  courseId: string | null;
+  rules: WeakRule[];
+}

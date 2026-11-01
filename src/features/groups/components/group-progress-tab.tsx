@@ -9,6 +9,7 @@ import {
   Note,
   PaDefs,
   Stat,
+  WeakRulesPanel,
   ZeroLegend,
   useHeatmapSort,
   type ChartAbsorbed,
@@ -300,6 +301,13 @@ function Progress({
           workspaceId={workspaceId}
           groupId={groupId}
           legend={legend}
+        />
+      )}
+
+      {canSeePersonalResults && (
+        <WeakRulesPanel
+          endpoint={`/api/schools/${schoolId}/groups/${groupId}/weak-rules`}
+          showLearners
         />
       )}
 

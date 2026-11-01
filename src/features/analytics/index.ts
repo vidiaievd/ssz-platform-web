@@ -32,3 +32,5 @@ export { Stat } from './components/stat';
 export type { StatTone } from './components/stat';
 export { Note } from './components/note';
 export { ramp, rampInk, HATCH, HATCH_WARN, PA } from './lib/ramp';
+export { WeakRulesPanel } from './components/weak-rules-panel';
+export type { WeakRulesPanelProps } from './components/weak-rules-panel';
