@@ -230,6 +230,18 @@
       "send": "send"
     }
   },
+  "rules": {
+    "title": "Rules behind the mistakes",
+    "hint": "Mark the rule the learner got wrong — it comes back in their review sooner, and it shows up in the weak-rules summary.",
+    "add": "Mark a rule",
+    "search": "Search the rules of this course",
+    "none": "No rule matches.",
+    "empty": "No rule of this course is cut into atoms yet.",
+    "loading": "Loading the rules…",
+    "failed": "The rules could not be loaded.",
+    "remove": "Remove {rule}",
+    "close": "Done"
+  },
   "batch": {
     "dialog": {
       "title": "Pass {count} submissions the machine closed?",

@@ -94,6 +94,7 @@ describe('rubric marks', () => {
       sentences: {},
       marks: {},
       ai: {},
+      rules: [],
       touchedAt: 5,
     });
   });
@@ -112,5 +113,17 @@ describe('AI draft outcomes', () => {
     store().setAiOutcome('att-1', 'draft', 'discarded');
 
     expect(store().drafts['att-1']?.ai).toEqual({ draft: 'discarded' });
+  });
+});
+
+describe('marked rules', () => {
+  it('marks a rule once, takes it off on a second mark, and is empty again without it', () => {
+    store().toggleRule('att-1', 'atom-a');
+    store().toggleRule('att-1', 'atom-b');
+    expect(store().drafts['att-1']?.rules).toEqual(['atom-a', 'atom-b']);
+
+    store().toggleRule('att-1', 'atom-a');
+    store().toggleRule('att-1', 'atom-b');
+    expect(store().drafts['att-1']).toBeUndefined();
   });
 });

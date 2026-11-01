@@ -1,6 +1,6 @@
 'use client';
 
-import type { RefObject } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { useTranslations } from 'next-intl';
 import { ArrowRight, Check, Send, Undo2 } from 'lucide-react';
 
@@ -59,6 +59,8 @@ export interface DecisionPanelProps {
   onCommentChange: (value: string) => void;
   /** Whether anything has been written against a single sentence (criterion 14). */
   hasSentenceComments: boolean;
+  /** The picker for the grammar rules behind the mistakes (plan 85, step 9), above the comment. */
+  rules?: ReactNode;
   onDecide: (verdict: ReviewVerdict) => void;
   pending: boolean;
   /** A refusal about what is written, shown beside the field (criterion 18). */
@@ -128,6 +130,7 @@ export function DecisionPanel({
   comment,
   onCommentChange,
   hasSentenceComments,
+  rules = null,
   onDecide,
   pending,
   error,
@@ -166,6 +169,8 @@ export function DecisionPanel({
           {t(settled === 'returned' ? 'sent.returned' : 'sent.approved')}
         </p>
       )}
+
+      {rules}
 
       {/* Kept mounted when read-only rather than swapped for a paragraph: the draft is
           the thing a teacher reaches for after a conflict, and a textarea is where

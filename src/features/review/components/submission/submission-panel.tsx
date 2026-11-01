@@ -35,6 +35,7 @@ import { Note } from '../primitives';
 
 import { appendParagraph, type AiDraftBinding } from './ai-draft';
 import { DecisionPanel, type RubricDecision } from './decision-panel';
+import { RuleMarker } from './rule-marker';
 import { PreviousAttempt } from './previous-attempt';
 import { SentenceList } from './sentence-list';
 import { SubmissionHeader } from './submission-header';
@@ -113,6 +114,7 @@ export function SubmissionPanel({
   const setSentenceComment = useReviewDraftsStore((state) => state.setSentenceComment);
   const setMark = useReviewDraftsStore((state) => state.setMark);
   const setAiOutcome = useReviewDraftsStore((state) => state.setAiOutcome);
+  const toggleRule = useReviewDraftsStore((state) => state.toggleRule);
   const can = useCan();
   const clearDraft = useReviewDraftsStore((state) => state.clear);
 
@@ -183,6 +185,16 @@ export function SubmissionPanel({
           // test as the binding below): absent tells the engine the reviewer saw no draft,
           // which is not the same label as seeing one and leaving it alone (plan 79, 1.5).
           ...(drawsAiDraft(data?.aiDraft ?? null, can) ? { aiOutcomes: draft.ai } : {}),
+          // Rules the reviewer named themselves; absent when none, so a card that never
+          // opened the picker sends exactly what it sent before plan 85.
+          ...(draft.rules.length > 0
+            ? {
+                flaggedAtoms: draft.rules.map((atomId) => ({
+                  atomType: 'grammar_rule_atom' as const,
+                  atomId,
+                })),
+              }
+            : {}),
         },
         {
           onSuccess: (result) => {
@@ -210,6 +222,7 @@ export function SubmissionPanel({
       draft.ai,
       draft.comment,
       draft.marks,
+      draft.rules,
       draft.sentences,
       id,
     ],
@@ -338,6 +351,15 @@ export function SubmissionPanel({
         comment={draft.comment}
         onCommentChange={(value) => setComment(id, value)}
         hasSentenceComments={Object.keys(draft.sentences).length > 0}
+        rules={
+          <RuleMarker
+            school={school}
+            id={id}
+            marked={draft.rules}
+            onToggle={(atomId) => toggleRule(id, atomId)}
+            editable={stillOpen}
+          />
+        }
         onDecide={decide}
         pending={decision.isPending}
         error={

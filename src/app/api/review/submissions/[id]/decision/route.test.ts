@@ -148,6 +148,20 @@ describe('POST /api/review/submissions/[id]/decision', () => {
     expect(sent[1]).not.toHaveProperty('aiOutcomes');
   });
 
+  it('forwards the rules the teacher marked, and nothing when none were', async () => {
+    upstream();
+    const flaggedAtoms = [{ atomType: 'grammar_rule_atom', atomId: 'atom-a' }];
+    await POST(request({ verdict: 'approved', flaggedAtoms }), context);
+    await POST(approve(), context);
+
+    const sent = vi
+      .mocked(serverFetch)
+      .mock.calls.filter(([opts]) => opts.method === 'POST' && opts.path.endsWith(`/review`))
+      .map(([opts]) => opts.body);
+    expect(sent[0]).toMatchObject({ flaggedAtoms });
+    expect(sent[1]).not.toHaveProperty('flaggedAtoms');
+  });
+
   it('sends no rubric field at all when the screen had no rubric', async () => {
     upstream();
     await POST(approve(), context);

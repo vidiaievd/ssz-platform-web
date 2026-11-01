@@ -26,6 +26,11 @@ export interface ReviewDraft {
    * what tells a good model from a bad one.
    */
   ai: Record<string, AiRemarkOutcome>;
+  /**
+   * Ids of the grammar-rule atoms the reviewer marked as the cause of the mistakes (plan 85,
+   * step 9). Sent with the verdict; the titles are read from the course catalogue to draw.
+   */
+  rules: string[];
   /** When it was last written to. Only used to decide what to forget first. */
   touchedAt: number;
 }
@@ -42,6 +47,8 @@ interface ReviewDraftsState {
   setMark: (attemptId: string, criterionId: string, mark: number) => void;
   /** `undefined` takes a decision back — a dropped remark the reviewer wants again. */
   setAiOutcome: (attemptId: string, key: string, outcome: AiRemarkOutcome | undefined) => void;
+  /** Marks the rule, or takes the mark off if it is already there. */
+  toggleRule: (attemptId: string, atomId: string) => void;
   /** The reviewer's own verdict landed. The only thing that empties a draft. */
   clear: (attemptId: string) => void;
 }
@@ -51,6 +58,7 @@ export const EMPTY_DRAFT: ReviewDraft = {
   sentences: {},
   marks: {},
   ai: {},
+  rules: [],
   touchedAt: 0,
 };
 
@@ -65,7 +73,7 @@ export const EMPTY_DRAFT: ReviewDraft = {
 const MAX_DRAFTS = 40;
 
 /** Bumped when the draft shape gains a field an existing entry would come back without. */
-const DRAFTS_VERSION = 3;
+const DRAFTS_VERSION = 4;
 
 /**
  * What the teacher has written and not yet sent, kept where it survives everything.
@@ -119,6 +127,16 @@ export const useReviewDraftsStore = create<ReviewDraftsState>()(
           }),
         ),
 
+      toggleRule: (attemptId, atomId) =>
+        set((state) =>
+          write(state, attemptId, (draft) => ({
+            ...draft,
+            rules: draft.rules.includes(atomId)
+              ? draft.rules.filter((id) => id !== atomId)
+              : [...draft.rules, atomId],
+          })),
+        ),
+
       clear: (attemptId) =>
         set((state) => {
           const { [attemptId]: _sent, ...rest } = state.drafts;
@@ -134,7 +152,7 @@ export const useReviewDraftsStore = create<ReviewDraftsState>()(
 );
 
 /**
- * Give every stored draft the keys added after it was written — `marks`, then `ai`.
+ * Give every stored draft the keys added after it was written — `marks`, then `ai`, then `rules`.
  *
  * Done once on rehydrate rather than in `selectDraft`, which is a Zustand selector: one
  * that patched the object would return a new reference on every render and put the panel
@@ -152,6 +170,7 @@ function fillMarks(persisted: unknown): { drafts: Record<string, ReviewDraft> } 
       sentences: draft.sentences ?? {},
       marks: draft.marks ?? {},
       ai: draft.ai ?? {},
+      rules: draft.rules ?? [],
       touchedAt: draft.touchedAt ?? 0,
     };
   }
@@ -175,7 +194,8 @@ function write(
     next.comment === '' &&
     Object.keys(next.sentences).length === 0 &&
     Object.keys(next.marks).length === 0 &&
-    Object.keys(next.ai).length === 0
+    Object.keys(next.ai).length === 0 &&
+    next.rules.length === 0
   ) {
     delete drafts[attemptId];
     return { drafts };
