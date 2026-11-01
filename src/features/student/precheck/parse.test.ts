@@ -39,6 +39,7 @@ describe('parsePrecheckResult', () => {
       suggestion: null,
       explanation: 'Past participle after «har».',
       severity: 'major',
+      atom: null,
     });
     expect(result?.remaining).toEqual({ exercise: 2, learnerChecksApprox: null });
   });
@@ -78,5 +79,21 @@ describe('parsePrecheckResult', () => {
     expect(parsePrecheckResult(null)).toBeNull();
     expect(parsePrecheckResult({ ai: { status: 'mystery' } })).toBeNull();
     expect(parsePrecheckResult('nope')).toBeNull();
+  });
+
+  it('reads a rule only when all of it is readable', () => {
+    const rule = { atomType: 'grammar_rule_atom', atomId: 'a1', status: 'in_queue', ruleTitle: 'Inversjon', title: 'V2' };
+    const item = (atomRef: unknown) => ({ kind: 'grammar', explanation: 'x', severity: 'minor', atomRef });
+    const result = parsePrecheckResult({
+      ai: { status: 'ok' },
+      courseId: 'c-1',
+      feedback: { summary: 's', items: [item(rule), item({ ...rule, status: 'weird' }), item({ atomType: 'grammar_rule_atom', atomId: 'a2' })] },
+    });
+    expect(result?.courseId).toBe('c-1');
+    expect(result?.feedback?.items.map((i) => i.atom)).toEqual([
+      { atomId: 'a1', status: 'in_queue', ruleTitle: 'Inversjon', title: 'V2' },
+      null,
+      null,
+    ]);
   });
 });

@@ -14,12 +14,25 @@ export type FeedbackKind =
   | 'fluency'
   | 'content';
 
+/**
+ * The rule a remark is about (platform plan 85, step 8) — only one the learner has reached in
+ * the course. `in_queue`: the learner has a card, and the server has already pulled it closer;
+ * `covered`: reached, no card.
+ */
+export interface FeedbackAtom {
+  atomId: string;
+  status: 'in_queue' | 'covered';
+  ruleTitle: string;
+  title: string;
+}
+
 export interface FeedbackItem {
   kind: FeedbackKind;
   original: string | null;
   suggestion: string | null;
   explanation: string;
   severity: 'minor' | 'major';
+  atom: FeedbackAtom | null;
 }
 
 export interface FeedbackWord {
@@ -57,6 +70,8 @@ export interface ReadingPrompt {
 }
 
 export interface PrecheckResult {
+  /** The course of the attempt; what «add the rule to review» is asked with. */
+  courseId: string | null;
   /** The free, key-based half (`error_correction`, `translate_*`); the template reads it. */
   selfCheck: unknown | null;
   ai: PrecheckAi;

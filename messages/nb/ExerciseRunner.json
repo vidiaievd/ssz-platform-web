@@ -936,6 +936,13 @@
     "subtitle": "Et tips før du leverer. Ingenting sendes og ingenting vurderes — læreren din setter karakteren.",
     "noScores": "Ingen uttalepoeng for dette språket — bare ordene som ble hørt.",
     "noRemarks": "Ingen merknader — det leser godt.",
+    "revisit": {
+      "title": "Verdt å repetere",
+      "marked": "Regelen er merket for repetisjon",
+      "add": "Legg til i repetisjon",
+      "added": "Lagt til i repetisjon",
+      "failed": "Kunne ikke legge til – prøv igjen senere"
+    },
     "left": "Omtrent {count} sjekker igjen",
     "line": {
       "keySettles": "Alt stemmer med fasiten. Ingenting å rette.",

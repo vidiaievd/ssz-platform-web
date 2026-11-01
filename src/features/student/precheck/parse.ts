@@ -1,5 +1,6 @@
 import type {
   Feedback,
+  FeedbackAtom,
   FeedbackItem,
   FeedbackKind,
   FeedbackWord,
@@ -31,6 +32,15 @@ function stringOrNull(v: unknown): string | null {
   return typeof v === 'string' ? v : null;
 }
 
+/** Null unless all four fields are readable: half a rule is no rule to offer. */
+function parseAtom(raw: unknown): FeedbackAtom | null {
+  if (!isRecord(raw) || raw.atomType !== 'grammar_rule_atom') return null;
+  if (typeof raw.atomId !== 'string') return null;
+  if (raw.status !== 'in_queue' && raw.status !== 'covered') return null;
+  if (typeof raw.ruleTitle !== 'string' || typeof raw.title !== 'string') return null;
+  return { atomId: raw.atomId, status: raw.status, ruleTitle: raw.ruleTitle, title: raw.title };
+}
+
 function parseFeedback(raw: unknown): Feedback | null {
   if (!isRecord(raw) || typeof raw.summary !== 'string' || !Array.isArray(raw.items)) return null;
   const items: FeedbackItem[] = [];
@@ -43,6 +53,7 @@ function parseFeedback(raw: unknown): Feedback | null {
       suggestion: stringOrNull(entry.suggestion),
       explanation: entry.explanation,
       severity: entry.severity === 'major' ? 'major' : 'minor',
+      atom: parseAtom(entry.atomRef),
     });
   }
   const words: FeedbackWord[] = [];
@@ -108,6 +119,7 @@ export function parsePrecheckResult(raw: unknown): PrecheckResult | null {
   const ai = parseAi(raw.ai);
   if (ai === null) return null;
   return {
+    courseId: stringOrNull(raw.courseId),
     selfCheck: raw.selfCheck ?? null,
     ai,
     feedback: ai.status === 'ok' ? parseFeedback(raw.feedback) : null,

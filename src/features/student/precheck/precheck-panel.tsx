@@ -1,16 +1,18 @@
 'use client';
 
 import { Sparkles } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import {
   accuracyBand,
   checksLeft,
   noticeOf,
+  rulesToRevisit,
   wordsByPassage,
   type AccuracyBand,
 } from './capability';
-import type { Feedback, FeedbackItem, PrecheckResult } from './types';
+import type { Feedback, FeedbackAtom, FeedbackItem, PrecheckResult } from './types';
 
 const BAND_CLASS: Record<AccuracyBand, string> = {
   good: 'border-(--ssz-text-accent) bg-(--ssz-bg-accent)',
@@ -89,7 +91,10 @@ export function PrecheckPanel({
             </ul>
           )}
           {result.feedback !== null && (
-            <FeedbackBody feedback={result.feedback} {...(passageLabel ? { passageLabel } : {})} />
+            <FeedbackBody
+              feedback={result.feedback}
+              courseId={result.courseId}
+              {...(passageLabel ? { passageLabel } : {})} />
           )}
         </>
       )}
@@ -103,9 +108,11 @@ export function PrecheckPanel({
 
 function FeedbackBody({
   feedback,
+  courseId,
   passageLabel,
 }: {
   feedback: Feedback;
+  courseId: string | null;
   passageLabel?: (passageIndex: number) => string;
 }) {
   const t = useTranslations('ExerciseRunner.precheck');
@@ -156,7 +163,83 @@ function FeedbackBody({
       {feedback.items.map((item, i) => (
         <Remark key={i} item={item} />
       ))}
+      <Revisit rules={rulesToRevisit(feedback)} courseId={courseId} />
     </>
+  );
+}
+
+type AddState = 'idle' | 'busy' | 'added' | 'failed' | 'gone';
+
+/**
+ * «Worth revisiting» (platform plan 85, step 8): the rules the remarks point at. A rule already
+ * in the learner's review was pulled closer by the server — said as such, with no button. A
+ * rule reached but without a card gets «Add». Nothing here promises when the rule comes up:
+ * the cards of rules are not drawn in the due queue yet.
+ */
+function Revisit({ rules, courseId }: { rules: FeedbackAtom[]; courseId: string | null }) {
+  const t = useTranslations('ExerciseRunner.precheck.revisit');
+  if (rules.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-2 pt-1">
+      <p className="text-[11.5px] font-semibold text-(--ssz-text-muted)">{t('title')}</p>
+      {rules.map((rule) => (
+        <RevisitRule key={rule.atomId} rule={rule} courseId={courseId} />
+      ))}
+    </div>
+  );
+}
+
+function RevisitRule({ rule, courseId }: { rule: FeedbackAtom; courseId: string | null }) {
+  const t = useTranslations('ExerciseRunner.precheck.revisit');
+  const [state, setState] = useState<AddState>('idle');
+
+  const add = async () => {
+    if (courseId === null || state === 'busy') return;
+    setState('busy');
+    try {
+      const res = await fetch(`/api/srs/atoms/${rule.atomId}/add`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ courseId }),
+      });
+      // 422: the server does not count the rule as reached — the offer was wrong, drop it.
+      setState(res.ok ? 'added' : res.status === 422 ? 'gone' : 'failed');
+    } catch {
+      setState('failed');
+    }
+  };
+
+  const offer = rule.status === 'covered' && courseId !== null && state !== 'gone' && state !== 'added';
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <p className="text-[14px] text-(--ssz-text-primary)">{rule.ruleTitle}</p>
+        <p className="text-[12.5px] text-(--ssz-text-muted)">{rule.title}</p>
+        {rule.status === 'in_queue' && (
+          <p className="text-[12.5px] text-(--ssz-text-muted)">{t('marked')}</p>
+        )}
+        {state === 'added' && (
+          <p role="status" className="text-[12.5px] text-(--ssz-text-muted)">
+            {t('added')}
+          </p>
+        )}
+        {state === 'failed' && (
+          <p role="status" className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+            {t('failed')}
+          </p>
+        )}
+      </div>
+      {offer && (
+        <button
+          type="button"
+          disabled={state === 'busy'}
+          onClick={() => void add()}
+          className="shrink-0 rounded-xl border-[1.5px] border-(--ssz-text-accent) bg-transparent px-3 py-1.5 text-[13px] font-bold text-(--ssz-text-accent) focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ssz-border-focus) disabled:opacity-50"
+        >
+          {t('add')}
+        </button>
+      )}
+    </div>
   );
 }
 

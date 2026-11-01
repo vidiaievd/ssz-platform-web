@@ -6,11 +6,13 @@ import {
   mayAskAgain,
   noticeOf,
   precheckCapable,
+  rulesToRevisit,
   wordsByPassage,
 } from './capability';
 import type { PrecheckResult } from './types';
 
 const base: PrecheckResult = {
+  courseId: null,
   selfCheck: null,
   ai: { status: 'ok' },
   feedback: { summary: 'ok', items: [], words: [] },
@@ -125,5 +127,21 @@ describe('reading helpers', () => {
       [0, 2],
       [1, 1],
     ]);
+  });
+});
+
+describe('rulesToRevisit', () => {
+  const item = (atomId: string | null) => ({
+    kind: 'grammar' as const,
+    original: null,
+    suggestion: null,
+    explanation: 'x',
+    severity: 'minor' as const,
+    atom: atomId === null ? null : { atomId, status: 'covered' as const, ruleTitle: 'R', title: 't' },
+  });
+
+  it('lists each rule once, in the order first named', () => {
+    const feedback = { summary: 's', words: [], items: [item('b'), item(null), item('a'), item('b')] };
+    expect(rulesToRevisit(feedback).map((r) => r.atomId)).toEqual(['b', 'a']);
   });
 });

@@ -1,4 +1,4 @@
-import type { Feedback, FeedbackWord, PrecheckRemaining, PrecheckResult } from './types';
+import type { Feedback, FeedbackAtom, FeedbackWord, PrecheckRemaining, PrecheckResult } from './types';
 
 /**
  * The reading side of «Check» before hand-in (platform plan 84): which exercises have one, and
@@ -108,4 +108,19 @@ export function wordsByPassage(feedback: Feedback): PassageWords[] {
     else groups.push({ passageIndex: word.passageIndex, words: [word] });
   }
   return groups;
+}
+
+/**
+ * The rules the remarks point at, once each in the order first named (platform plan 85,
+ * step 8). Three remarks on one rule are one rule to revisit.
+ */
+export function rulesToRevisit(feedback: Feedback): FeedbackAtom[] {
+  const seen = new Set<string>();
+  const rules: FeedbackAtom[] = [];
+  for (const item of feedback.items) {
+    if (item.atom === null || seen.has(item.atom.atomId)) continue;
+    seen.add(item.atom.atomId);
+    rules.push(item.atom);
+  }
+  return rules;
 }

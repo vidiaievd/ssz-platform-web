@@ -116,4 +116,71 @@ describe('«Check» before hand-in', () => {
     expect(await screen.findByText(/Couldn't check just now/)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Check' })).toBeEnabled();
   });
+
+  describe('worth revisiting (plan 85, step 8)', () => {
+    const withRules = {
+      ...OK,
+      courseId: 'course-1',
+      feedback: {
+        summary: 'Two small slips.',
+        words: [],
+        items: ['queued', 'reached'].map((id) => ({
+          kind: 'grammar',
+          explanation: 'x',
+          severity: 'minor',
+          atomRef: {
+            atomType: 'grammar_rule_atom',
+            atomId: id,
+            status: id === 'queued' ? 'in_queue' : 'covered',
+            ruleTitle: `Rule ${id}`,
+            title: 'Point',
+          },
+        })),
+      },
+    };
+
+    it('says a queued rule was marked and offers «Add» for a reached one only', async () => {
+      vi.stubGlobal('fetch', reply(200, withRules));
+      mount();
+      await userEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(await screen.findByText('Worth revisiting')).toBeInTheDocument();
+      expect(screen.getByText('Rule queued')).toBeInTheDocument();
+      expect(screen.getByText('Marked for review')).toBeInTheDocument();
+      expect(screen.getAllByRole('button', { name: 'Add to review' })).toHaveLength(1);
+    });
+
+    it('adds the reached rule with the attempt’s course and confirms it', async () => {
+      const fetchMock = vi
+        .fn()
+        .mockResolvedValueOnce(new Response(JSON.stringify(withRules), { status: 200 }))
+        .mockResolvedValueOnce(new Response('{}', { status: 200 }));
+      vi.stubGlobal('fetch', fetchMock);
+      mount();
+      await userEvent.click(screen.getByRole('button', { name: 'Check' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Add to review' }));
+
+      expect(await screen.findByText('Added to review')).toBeInTheDocument();
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        '/api/srs/atoms/reached/add',
+        expect.objectContaining({ body: JSON.stringify({ courseId: 'course-1' }) }),
+      );
+      expect(screen.queryByRole('button', { name: 'Add to review' })).toBeNull();
+    });
+
+    it('drops the offer when the server does not count the rule as reached', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi
+          .fn()
+          .mockResolvedValueOnce(new Response(JSON.stringify(withRules), { status: 200 }))
+          .mockResolvedValueOnce(new Response('{}', { status: 422 })),
+      );
+      mount();
+      await userEvent.click(screen.getByRole('button', { name: 'Check' }));
+      await userEvent.click(await screen.findByRole('button', { name: 'Add to review' }));
+
+      await waitFor(() => expect(screen.queryByRole('button', { name: 'Add to review' })).toBeNull());
+    });
+  });
 });
