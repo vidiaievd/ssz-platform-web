@@ -928,5 +928,31 @@
     "marked": "Rettet av KI",
     "sentBack": "Sendt tilbake av KI",
     "gaveUp": "KI klarte ikke å vurdere arbeidet, og ingen andre kommer til å rette det."
+  },
+  "precheck": {
+    "button": "Sjekk",
+    "failed": "Kunne ikke sjekke akkurat nå — prøv igjen om litt",
+    "title": "KI-tips",
+    "subtitle": "Et tips før du leverer. Ingenting sendes og ingenting vurderes — læreren din setter karakteren.",
+    "noScores": "Ingen uttalepoeng for dette språket — bare ordene som ble hørt.",
+    "noRemarks": "Ingen merknader — det leser godt.",
+    "left": "Omtrent {count} sjekker igjen",
+    "line": {
+      "keySettles": "Alt stemmer med fasiten. Ingenting å rette.",
+      "exerciseLimit": "Du har brukt alle sjekkene for denne oppgaven. Du kan fortsatt sende den til læreren.",
+      "learnerLimit": "Du har brukt sjekkene dine for denne måneden. Du kan fortsatt sende den til læreren.",
+      "poolEmpty": "Skolens sjekker er brukt opp for nå. Du kan fortsatt sende den til læreren.",
+      "emptyAnswer": "Skriv eller ta opp noe først, og sjekk deretter.",
+      "notReady": "Opptaket er ikke klart ennå — vent litt og sjekk på nytt.",
+      "failed": "Sjekken fungerte ikke denne gangen. Prøv igjen."
+    },
+    "kind": {
+      "grammar": "Grammatikk",
+      "lexis": "Ordvalg",
+      "spelling": "Rettskriving",
+      "pronunciation": "Uttale",
+      "fluency": "Flyt",
+      "content": "Innhold"
+    }
   }
 }

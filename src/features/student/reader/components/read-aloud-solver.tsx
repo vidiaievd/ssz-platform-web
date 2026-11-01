@@ -53,6 +53,14 @@ import {
   type SubmittedRecording,
 } from '@/lib/shared-kernel/read-aloud';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import {
+  PrecheckButton,
+  PrecheckResultPanel,
+  precheckCapable,
+  usePrecheckAvailability,
+  usePrecheckRun,
+} from '@/features/student/precheck';
+import { toRehearsalDraft } from '@/features/student/precheck/read-aloud-draft';
 
 export interface ReadAloudSolverProps {
   exerciseId: string;
@@ -450,6 +458,10 @@ function ReadAloudSession({
   const audio = useExerciseAudio(document);
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const saveDraft = useSaveDraft(exerciseId, attemptId);
+  // «Check» before the hand-in (plan 84): the takes uploaded so far, a passage at a time —
+  // only for a reading from a text, which is all a model can hold a reading against.
+  const precheckOn = usePrecheckAvailability() && precheckCapable('read_aloud', projection.mode);
+  const precheck = usePrecheckRun(exerciseId, attemptId);
 
   const labelOf = (itemId: string) => {
     const i = projection.prompts.findIndex((p) => p.id === itemId);
@@ -483,6 +495,9 @@ function ReadAloudSession({
       upload(take);
     },
   });
+
+  const rehearsal = toRehearsalDraft(recorder.state, config);
+  const heardIds = new Set((rehearsal?.recordings ?? []).map((r) => r.itemId));
 
   // Every uploaded take and the choice between them, onto the attempt (RA-R10). Keyed by the
   // draft's own content, so a level or a tick does not send it again.
@@ -683,6 +698,29 @@ function ReadAloudSession({
       graded={graded}
       onSubmit={send}
       onRetryUpload={retryUpload}
+      {...(precheckOn && !precheck.closed
+        ? {
+            precheck: (
+              <div>
+                <PrecheckButton
+                  run={precheck}
+                  draft={rehearsal}
+                  disabled={
+                    submit.isPending ||
+                    confirming ||
+                    ['prep', 'count', 'rec', 'stopping'].includes(recorder.state.phase)
+                  }
+                />
+                <PrecheckResultPanel
+                  run={precheck}
+                  passageLabel={(i) => labelOf(projection.prompts[i]?.id ?? '')}
+                  itemLabel={labelOf}
+                  heardItemIds={heardIds}
+                />
+              </div>
+            ),
+          }
+        : {})}
       submitting={submit.isPending || confirming}
       error={error}
       accent={GRADED_ACCENT}

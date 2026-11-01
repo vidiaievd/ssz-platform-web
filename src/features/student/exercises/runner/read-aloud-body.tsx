@@ -99,6 +99,8 @@ export interface ReadAloudBodyProps {
   graded?: ReactNode;
   onSubmit: () => void;
   onRetryUpload: (itemId: string, n: number) => void;
+  /** «Check» before the hand-in and what it answered (plan 84), drawn above the hand-in. */
+  precheck?: ReactNode;
   submitting?: boolean;
   error?: string | null;
   /** False in a static preview: everything renders, nothing accepts input. */
@@ -139,6 +141,7 @@ export function ReadAloudBody({
   submitted = [],
   graded,
   onSubmit,
+  precheck,
   onRetryUpload,
   submitting = false,
   error = null,
@@ -244,6 +247,8 @@ export function ReadAloudBody({
               </NavButton>
             </div>
           )}
+
+          {precheck}
 
           <SubmitActions
             recorder={recorder}

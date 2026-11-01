@@ -33,6 +33,12 @@ import type { AttemptRecord } from '@/features/student/exercises/types/attempts'
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  PrecheckButton,
+  PrecheckResultPanel,
+  usePrecheckAvailability,
+  usePrecheckRun,
+} from '@/features/student/precheck';
 
 export interface ErrorCorrectionSolverProps {
   exerciseId: string;
@@ -112,6 +118,10 @@ export function ErrorCorrectionSolver({
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const selfCheck = useSelfCheck(exerciseId, attemptId);
+  // Where the school allows a rehearsal with a model (plan 84), one «Check» does both: the
+  // engine reads the key first and asks the model only for what the key cannot settle.
+  const precheckOn = usePrecheckAvailability();
+  const precheck = usePrecheckRun(exerciseId, attemptId);
 
   const [value, setValue] = useState<ErrorCorrectionValue>({});
   /** The last self-check the server answered, cleared the moment the work changes. */
@@ -333,6 +343,14 @@ export function ErrorCorrectionSolver({
     );
   }
 
+  /** The key-based half of a «Check» is the self-check's answer, read into the same panel. */
+  function takeSelfCheck(result: { selfCheck: unknown }) {
+    const half = readSelfCheck(result.selfCheck);
+    if (half === null) return;
+    setFeedback({ items: half.items, fixedCount: half.fixedCount, spanCount: half.spanCount });
+    setChecksLeft(half.checksLeft);
+  }
+
   function again() {
     clearAnswerDraft(exerciseId);
     setValue({});
@@ -365,74 +383,89 @@ export function ErrorCorrectionSolver({
       />
 
       {sent === null ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          {/*
+        <>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {/*
             The self-check, when the author granted any. It is rationed on the server —
             unlimited asking would turn the exercise into a search, one word at a time —
             so the count shown here is the engine's answer, not this screen's tally.
           */}
-          {projection.flow.selfCheck > 0 && (
+            {precheckOn ? (
+              <PrecheckButton
+                run={precheck}
+                draft={untouchedCount === totalItems ? null : { items: value }}
+                disabled={submit.isPending || confirmingDelivery}
+                onResult={takeSelfCheck}
+              />
+            ) : (
+              projection.flow.selfCheck > 0 && (
+                <button
+                  type="button"
+                  disabled={
+                    selfCheck.isPending || checksAvailable === 0 || untouchedCount === totalItems
+                  }
+                  onClick={askSelfCheck}
+                  className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60"
+                  style={{
+                    borderColor: 'var(--ssz-border-strong)',
+                    color: 'var(--ssz-text-primary)',
+                  }}
+                >
+                  {selfCheck.isPending
+                    ? t('errorCorrection.selfCheck.checking')
+                    : checksAvailable === 0
+                      ? t('errorCorrection.selfCheck.spent')
+                      : t('errorCorrection.selfCheck.button', { left: checksAvailable })}
+                </button>
+              )
+            )}
+            {feedback !== null && (
+              <span className="text-[12.5px] text-(--ssz-text-secondary)">
+                {t('errorCorrection.selfCheck.summary', {
+                  fixed: feedback.fixedCount,
+                  total: feedback.spanCount,
+                })}
+              </span>
+            )}
+            {selfCheck.isError && checksAvailable > 0 && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('errorCorrection.selfCheck.failed')}
+              </span>
+            )}
             <button
               type="button"
-              disabled={
-                selfCheck.isPending || checksAvailable === 0 || untouchedCount === totalItems
-              }
-              onClick={askSelfCheck}
-              className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60"
-              style={{ borderColor: 'var(--ssz-border-strong)', color: 'var(--ssz-text-primary)' }}
+              disabled={submit.isPending || confirmingDelivery}
+              onClick={allTouched ? send : showUntouched}
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
+              style={{ background: PRACTICE_ACCENT }}
             >
-              {selfCheck.isPending
-                ? t('errorCorrection.selfCheck.checking')
-                : checksAvailable === 0
-                  ? t('errorCorrection.selfCheck.spent')
-                  : t('errorCorrection.selfCheck.button', { left: checksAvailable })}
+              {submit.isPending || confirmingDelivery
+                ? t('errorCorrection.sending')
+                : t('errorCorrection.send')}
             </button>
-          )}
-          {feedback !== null && (
-            <span className="text-[12.5px] text-(--ssz-text-secondary)">
-              {t('errorCorrection.selfCheck.summary', {
-                fixed: feedback.fixedCount,
-                total: feedback.spanCount,
-              })}
-            </span>
-          )}
-          {selfCheck.isError && checksAvailable > 0 && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('errorCorrection.selfCheck.failed')}
-            </span>
-          )}
-          <button
-            type="button"
-            disabled={submit.isPending || confirmingDelivery}
-            onClick={allTouched ? send : showUntouched}
-            className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
-            style={{ background: PRACTICE_ACCENT }}
-          >
-            {submit.isPending || confirmingDelivery
-              ? t('errorCorrection.sending')
-              : t('errorCorrection.send')}
-          </button>
-          {!allTouched && (
-            <span className="text-[12.5px] text-(--ssz-text-muted)">
-              {t('errorCorrection.untouched', { count: untouchedCount })}
-            </span>
-          )}
-          {/*
+            {!allTouched && (
+              <span className="text-[12.5px] text-(--ssz-text-muted)">
+                {t('errorCorrection.untouched', { count: untouchedCount })}
+              </span>
+            )}
+            {/*
             47.0.B: resolved against the server before showing anything — see
             translate-solver.tsx for why "not-delivered" and "unconfirmed" are kept
             apart, and why a delivered attempt skips this and moves `sent` on instead.
           */}
-          {sendFailure === 'not-delivered' && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('errorCorrection.sendFailedRetry')}
-            </span>
-          )}
-          {sendFailure === 'unconfirmed' && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('errorCorrection.sendUnconfirmed')}
-            </span>
-          )}
-        </div>
+            {sendFailure === 'not-delivered' && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('errorCorrection.sendFailedRetry')}
+              </span>
+            )}
+            {sendFailure === 'unconfirmed' && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('errorCorrection.sendUnconfirmed')}
+              </span>
+            )}
+          </div>
+          {precheckOn && <PrecheckResultPanel run={precheck} />}
+        </>
       ) : (
         <div
           className="mt-4 rounded-2xl border px-4 py-3"
@@ -582,4 +615,28 @@ function readReview(attempt: AttemptRecord): AttemptReview {
         : null,
     verdicts,
   };
+}
+
+/**
+ * The self-check half of a check result, as the engine reports it: the same counts the
+ * `self-check` route returns, with the spending beside them. Read, not trusted — a shape
+ * that is not this one costs the colouring, not the screen.
+ */
+function readSelfCheck(raw: unknown): {
+  items: SelfCheckFeedback['items'];
+  fixedCount: number;
+  spanCount: number;
+  checksLeft: number;
+} | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
+  const { items, fixedCount, spanCount, checksLeft } = raw as Record<string, unknown>;
+  if (
+    !Array.isArray(items) ||
+    typeof fixedCount !== 'number' ||
+    typeof spanCount !== 'number' ||
+    typeof checksLeft !== 'number'
+  ) {
+    return null;
+  }
+  return { items: items as SelfCheckFeedback['items'], fixedCount, spanCount, checksLeft };
 }
