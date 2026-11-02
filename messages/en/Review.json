@@ -167,11 +167,13 @@
         "alternative": "also correct",
         "task": "task",
         "structure": "structure",
-        "content": "content"
+        "content": "content",
+        "pronunciation": "pronunciation"
       },
       "wholeText": "about the whole text",
       "wholeAnswer": "about the whole answer",
-      "editLabel": "Goes into the overall comment"
+      "editLabel": "Goes into the overall comment",
+      "editLabelPrompt": "Goes into this prompt's comment"
     },
     "aiVerdict": {
       "approved": "accepted",
@@ -698,7 +700,8 @@
       "alternative": "this is right too",
       "task": "task",
       "structure": "structure",
-      "content": "content"
+      "content": "content",
+      "pronunciation": "pronunciation"
     },
     "reading": {
       "prompt": "Prompt {n}",
@@ -728,7 +731,8 @@
         "scores": "accuracy {accuracy} · fluency {fluency} · completeness {completeness}",
         "prosody": "intonation {prosody}",
         "unclear": "Unclear:",
-        "note": "A hint only — it does not change the result."
+        "note": "A hint only — it does not change the result.",
+        "sounds": "Sounds to work on:"
       }
     }
   }

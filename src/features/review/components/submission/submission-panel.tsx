@@ -170,6 +170,7 @@ export function SubmissionPanel({
     [announceArrival, onAdvance, pathname, router],
   );
 
+  const template = data?.exercise.type;
   const decide = useCallback(
     (verdict: ReviewVerdict) => {
       setConflict(null);
@@ -184,7 +185,7 @@ export function SubmissionPanel({
           // What was done with the model's draft, only when the card drew one (the same
           // test as the binding below): absent tells the engine the reviewer saw no draft,
           // which is not the same label as seeing one and leaving it alone (plan 79, 1.5).
-          ...(drawsAiDraft(data?.aiDraft ?? null, can) ? { aiOutcomes: draft.ai } : {}),
+          ...(drawsAiDraft(data?.aiDraft ?? null, template, can) ? { aiOutcomes: draft.ai } : {}),
           // Rules the reviewer named themselves; absent when none, so a card that never
           // opened the picker sends exactly what it sent before plan 85.
           ...(draft.rules.length > 0
@@ -225,6 +226,7 @@ export function SubmissionPanel({
       draft.rules,
       draft.sentences,
       id,
+      template,
     ],
   );
 
@@ -245,7 +247,7 @@ export function SubmissionPanel({
   // `drawsAiDraft` for when the school's plan keeps it off the card.
   const aiDraft = data?.aiDraft ?? null;
   const ai: AiDraftBinding | null =
-    stillOpen && aiDraft !== null && drawsAiDraft(aiDraft, can)
+    stillOpen && aiDraft !== null && drawsAiDraft(aiDraft, data.exercise.type, can)
       ? {
           draft: aiDraft,
           outcomes: draft.ai,
@@ -442,13 +444,19 @@ function rubricDecisionOf(
  * the screen does not offer what the plan no longer does. A review the learner has already
  * read is a different thing (plan 80): it is what the teacher's verdict answers, and hiding
  * it would leave them replying to something they cannot see.
+ *
+ * A reading's draft is sold under its own key: its remarks are the weak sounds the voice
+ * check found (plan 88, step 5c), which only `ai.voice_review_pronunciation` buys. Its check
+ * of the words read is drawn whatever the plan — that is what the verdict stood on.
  */
 function drawsAiDraft(
   draft: ReviewSubmission['aiDraft'],
-  can: (key: 'ai.review_draft') => boolean,
+  template: string | undefined,
+  can: (key: 'ai.review_draft' | 'ai.voice_review_pronunciation') => boolean,
 ): boolean {
   if (draft === null || draft.status !== 'ready') return false;
-  return draft.shownToLearner === true || can('ai.review_draft');
+  if (draft.shownToLearner === true) return true;
+  return can(template === 'read_aloud' ? 'ai.voice_review_pronunciation' : 'ai.review_draft');
 }
 
 /**

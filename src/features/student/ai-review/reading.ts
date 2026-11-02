@@ -1,4 +1,5 @@
 import type {
+  AiPronouncedPhoneme,
   AiPronouncedWord,
   AiPronunciation,
   AiReading,
@@ -101,10 +102,48 @@ function readPronunciation(raw: unknown): AiPronunciation | null {
           if (score === null || typeof w.error !== 'string' || !PRONOUNCED_ERRORS.has(w.error)) {
             return [];
           }
-          return [{ text: w.text, accuracy: score, error: w.error as AiPronouncedWord['error'] }];
+          const phonemes = readPhonemes(w.phonemes);
+          return [
+            {
+              text: w.text,
+              accuracy: score,
+              error: w.error as AiPronouncedWord['error'],
+              ...(phonemes === null ? {} : { phonemes }),
+            },
+          ];
         })
       : [],
   };
+}
+
+/** The sounds of a word as named — or null when there are none, or one cannot be read. */
+function readPhonemes(raw: unknown): AiPronouncedPhoneme[] | null {
+  if (!Array.isArray(raw) || raw.length === 0) return null;
+  const phonemes: AiPronouncedPhoneme[] = [];
+  for (const p of raw) {
+    const accuracy = isRecord(p) ? num(p.accuracy) : null;
+    if (!isRecord(p) || typeof p.symbol !== 'string' || accuracy === null) return null;
+    phonemes.push({ symbol: p.symbol, accuracy });
+  }
+  return phonemes;
+}
+
+/**
+ * The word a sound remark is about, as it should sound, in IPA — `?` for a sound the lexicon
+ * could not name, as ai-service writes it — or null when its sounds were not named (plan 88,
+ * step 5c). The remark points at the word by index and quotes it; a word left out as
+ * unreadable shifts the indices, so one that does not quote back is not trusted.
+ */
+export function transcriptionOf(
+  prompt: AiReadingPrompt | null | undefined,
+  remark: { wordIndex?: number | null; fragment: string | null },
+): string | null {
+  if (prompt == null || remark.wordIndex == null) return null;
+  const word = prompt.pronunciation?.words[remark.wordIndex];
+  if (word === undefined || word.text !== remark.fragment) return null;
+  const phonemes = word.phonemes;
+  if (phonemes === undefined || phonemes.every((p) => p.symbol === '')) return null;
+  return phonemes.map((p) => (p.symbol === '' ? '?' : p.symbol)).join('');
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

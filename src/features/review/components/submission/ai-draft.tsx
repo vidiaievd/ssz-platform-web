@@ -5,6 +5,7 @@ import { Check, PencilLine, Sparkles, Undo2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { SoundWord } from '@/features/student/ai-review';
 
 import type { AiRemarkOutcome } from '../../stores/review-drafts';
 import type { ReviewAiDraft, ReviewAiRemark } from '../../types';
@@ -22,6 +23,7 @@ const KNOWN_ASPECTS = [
   'task',
   'structure',
   'content',
+  'pronunciation',
 ] as const;
 
 /** As long as the overall comment may run, so a reworded remark is never cut by its own form. */
@@ -205,6 +207,7 @@ export function AiRemarkCard({
   onEdit,
   onDiscard,
   onRestore,
+  transcription,
 }: {
   entry: AiRemarkEntry;
   /** What a remark without a quotation is about: an essay's text, or one answer of a set. */
@@ -214,6 +217,11 @@ export function AiRemarkCard({
   onDiscard: () => void;
   /** Takes a drop back. Taking back a remark already in the comment is the comment's job. */
   onRestore: () => void;
+  /**
+   * A reading's sound remark (plan 88, step 5c): how the word should sound, drawn beside it;
+   * null where its sounds were not named. Left out for every other remark.
+   */
+  transcription?: string | null;
 }) {
   const t = useTranslations('Review.submission.ai');
   const { remark, outcome } = entry;
@@ -265,7 +273,9 @@ export function AiRemarkCard({
           </>
         ) : null}
       </p>
-      {remark.fragment === null ? null : (
+      {remark.fragment === null ? null : transcription !== undefined ? (
+        <SoundWord word={remark.fragment} transcription={transcription} />
+      ) : (
         <p className="text-[13.5px] leading-relaxed" style={{ fontFamily: READING }}>
           <span className="rounded bg-warning-100 px-1 dark:bg-warning-500/20">
             {remark.fragment}
@@ -301,15 +311,46 @@ export function AiRemarkCard({
  * An essay's remarks, under the text (plan 79, 1.7b).
  *
  * An essay is marked as a whole and has no sentence to hang a comment on, so what the
- * teacher takes goes into the comment on the whole work. Rewording happens in a form of its
- * own, opened with the remark alone: the overall comment may already hold the teacher's
- * words, and they are not the remark's to edit. Saved, the reworded text is added and the
- * remark counts as edited; cancelled, it waits as if the button had never been pressed.
+ * teacher takes goes into the comment on the whole work.
  */
 export function EssayAiRemarks({ binding }: { binding: AiDraftBinding }) {
   const t = useTranslations('Review.submission.ai');
+  return (
+    <TakenAiRemarks
+      entries={allRemarks(binding)}
+      setOutcome={binding.setOutcome}
+      take={binding.addToComment}
+      editLabel={t('editLabel')}
+    />
+  );
+}
+
+/**
+ * Remarks whose text goes into one comment the reviewer is also writing themselves — an
+ * essay's overall comment, or a `read_aloud` prompt's (plan 88, step 5c).
+ *
+ * Rewording happens in a form of its own, opened with the remark alone: the comment may
+ * already hold the teacher's words, and they are not the remark's to edit. Saved, the
+ * reworded text is added and the remark counts as edited; cancelled, it waits as if the
+ * button had never been pressed.
+ */
+export function TakenAiRemarks({
+  entries,
+  setOutcome,
+  take,
+  editLabel,
+  transcriptionOf,
+}: {
+  entries: AiRemarkEntry[];
+  setOutcome: AiDraftBinding['setOutcome'];
+  /** Adds a paragraph to the comment the remarks go into. */
+  take: (text: string) => void;
+  /** Names that comment over the rewording form. */
+  editLabel: string;
+  /** How a remark's word should sound, for remarks on a reading's sounds. */
+  transcriptionOf?: (remark: ReviewAiRemark) => string | null;
+}) {
   const [rewording, setRewording] = useState<{ key: string; text: string } | null>(null);
-  const entries = allRemarks(binding);
   if (entries.length === 0) return null;
 
   return (
@@ -318,7 +359,7 @@ export function EssayAiRemarks({ binding }: { binding: AiDraftBinding }) {
         rewording?.key === entry.key ? (
           <CommentBox
             key={entry.key}
-            label={t('editLabel')}
+            label={editLabel}
             value={rewording.text}
             rows={3}
             maxLength={ESSAY_REMARK_MAX}
@@ -327,8 +368,8 @@ export function EssayAiRemarks({ binding }: { binding: AiDraftBinding }) {
             onSave={() => {
               const text = rewording.text.trim();
               if (text !== '') {
-                binding.addToComment(text);
-                binding.setOutcome(entry.key, 'edited');
+                take(text);
+                setOutcome(entry.key, 'edited');
               }
               setRewording(null);
             }}
@@ -338,12 +379,13 @@ export function EssayAiRemarks({ binding }: { binding: AiDraftBinding }) {
             key={entry.key}
             entry={entry}
             onAccept={() => {
-              binding.addToComment(remarkText(entry.remark));
-              binding.setOutcome(entry.key, 'accepted');
+              take(remarkText(entry.remark));
+              setOutcome(entry.key, 'accepted');
             }}
             onEdit={() => setRewording({ key: entry.key, text: remarkText(entry.remark) })}
-            onDiscard={() => binding.setOutcome(entry.key, 'discarded')}
-            onRestore={() => binding.setOutcome(entry.key, undefined)}
+            onDiscard={() => setOutcome(entry.key, 'discarded')}
+            onRestore={() => setOutcome(entry.key, undefined)}
+            {...(transcriptionOf ? { transcription: transcriptionOf(entry.remark) } : {})}
           />
         ),
       )}
@@ -372,6 +414,8 @@ function aspectLabel(
       return t('aspect.structure');
     case 'content':
       return t('aspect.content');
+    case 'pronunciation':
+      return t('aspect.pronunciation');
     default:
       return t('aspect.register');
   }

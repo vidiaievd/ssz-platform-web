@@ -306,7 +306,8 @@ export interface ReviewSubmission {
  * repair differs from the key and is also right — in short_answer (1.7e), that a key point is
  * made in words the phrase match missed; every other aspect names an error. `task` and
  * `structure` (writing_task, 1.7b) are about an essay as a whole; `content` (short_answer) is
- * a key point an answer leaves out or gets wrong.
+ * a key point an answer leaves out or gets wrong. `pronunciation` (read_aloud, plan 88 step 5c)
+ * is a weak sound of one word read.
  */
 export type ReviewAiAspect =
   | 'grammar'
@@ -316,7 +317,8 @@ export type ReviewAiAspect =
   | 'alternative'
   | 'task'
   | 'structure'
-  | 'content';
+  | 'content'
+  | 'pronunciation';
 
 /**
  * One remark of a model's draft, about one sentence. ai-service has checked that
@@ -332,6 +334,13 @@ export interface ReviewAiRemark {
   fragment: string | null;
   comment: string;
   suggestion: string | null;
+  /**
+   * A `read_aloud` remark on a weak sound (plan 88, step 5c): the word's index in its prompt's
+   * `pronunciation.words`, `fragment` being that word. Absent on every other remark.
+   */
+  wordIndex?: number | null;
+  /** The atom the remark is filed under — a grammar rule, or a sound (`nb:kj`); absent when none. */
+  atomRef?: { atomType: string; atomId: string } | null;
 }
 
 /**

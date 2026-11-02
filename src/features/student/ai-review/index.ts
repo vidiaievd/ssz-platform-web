@@ -3,9 +3,11 @@ export type { AiReviewPanelProps } from './components/ai-review-panel';
 export { useAiReview, useDisputeAiReview } from './api/use-ai-review';
 export { aiReviewKeys } from './api/keys';
 export { ReadingCheck } from './components/reading-check';
-export { readReading } from './reading';
+export { SoundWord } from './components/sound-word';
+export { readReading, transcriptionOf } from './reading';
 export type { ReadingCheckProps } from './components/reading-check';
 export type {
+  AiPronouncedPhoneme,
   AiPronouncedWord,
   AiPronunciation,
   AiReading,

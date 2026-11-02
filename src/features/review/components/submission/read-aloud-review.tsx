@@ -3,7 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { FileQuestion, Sparkles } from 'lucide-react';
 
-import { ReadingCheck, type AiReadingPrompt } from '@/features/student/ai-review';
+import { ReadingCheck, transcriptionOf, type AiReadingPrompt } from '@/features/student/ai-review';
 
 import type {
   ReadAloudDetails,
@@ -23,6 +23,14 @@ import { scoreRubric, type RubricMarks } from '@/lib/shared-kernel/writing-task'
 import type { ReviewPlayback, ReviewSubmission } from '../../types';
 import { Note } from '../primitives';
 
+import {
+  AiDraftBanner,
+  appendParagraph,
+  remarksFor,
+  TakenAiRemarks,
+  type AiDraftBinding,
+  type AiRemarkEntry,
+} from './ai-draft';
 import { ReviewTakePlayer } from './review-take-player';
 
 const LEVELS = [0, 1, 2, 3] as const;
@@ -44,6 +52,11 @@ export interface ReadAloudReviewProps {
   comments: Record<string, string>;
   onComment: (itemId: string, value: string | undefined) => void;
   editable: boolean;
+  /**
+   * A model's draft to take from — on a reading, the weak sounds of its words (plan 88, step
+   * 5c) and the model's word on them — or null for the card as it was.
+   */
+  ai?: AiDraftBinding | null;
 }
 
 /** One prompt as the screen draws it — from the breakdown when there is one. */
@@ -69,7 +82,8 @@ interface PromptView {
  *
  * Where the machine has checked the reading (plan 82, step 11b), each prompt it checked shows
  * that check in place of the bare passage — the same panel the learner was shown, so the
- * teacher answers what the learner read.
+ * teacher answers what the learner read. Its remarks on weak sounds (plan 88, step 5c) sit
+ * under the check, taken into that prompt's comment like a sentence's remarks into its own.
  *
  * Built from the submitted answer first and the breakdown second. The recordings are the
  * student's work and outlive the exercise; the breakdown is recomputed against today's exercise
@@ -85,6 +99,7 @@ export function ReadAloudReview({
   comments,
   onComment,
   editable,
+  ai = null,
 }: ReadAloudReviewProps) {
   const t = useTranslations('Review.readAloud');
   const prompts = promptsOf(submission, details);
@@ -105,6 +120,7 @@ export function ReadAloudReview({
           {t('noPlayback.body')}
         </Note>
       )}
+      {ai === null ? null : <AiDraftBanner binding={ai} />}
       {prompts.map((prompt, index) =>
         prompt.carried !== null ? (
           <CarriedBlock
@@ -135,6 +151,8 @@ export function ReadAloudReview({
             onComment={(value) => onComment(prompt.itemId, value)}
             editable={editable}
             fallbackLabel={t('promptFallback', { n: index + 1 })}
+            remarks={remarksFor(ai, prompt.itemId)}
+            onAiOutcome={ai?.setOutcome}
           />
         ),
       )}
@@ -259,6 +277,8 @@ function PromptBlock({
   onComment,
   editable,
   fallbackLabel,
+  remarks,
+  onAiOutcome,
 }: {
   index: number;
   prompt: PromptView;
@@ -273,8 +293,12 @@ function PromptBlock({
   onComment: (value: string | undefined) => void;
   editable: boolean;
   fallbackLabel: string;
+  /** The draft's remarks on this prompt; empty without a draft. */
+  remarks: AiRemarkEntry[];
+  onAiOutcome: AiDraftBinding['setOutcome'] | undefined;
 }) {
   const t = useTranslations('Review.readAloud');
+  const tAi = useTranslations('Review.submission.ai');
   const outcome = scoreRubric(snapshot, marks);
   const label = prompt.label.trim() === '' ? fallbackLabel : prompt.label;
   const seconds =
@@ -349,6 +373,16 @@ function PromptBlock({
             </p>
           )}
         </>
+      )}
+
+      {onAiOutcome === undefined ? null : (
+        <TakenAiRemarks
+          entries={remarks}
+          setOutcome={onAiOutcome}
+          take={(text) => onComment(appendParagraph(comment, text))}
+          editLabel={tAi('editLabelPrompt')}
+          transcriptionOf={(remark) => transcriptionOf(check?.prompt, remark)}
+        />
       )}
 
       <fieldset disabled={!editable} className="flex flex-col">
