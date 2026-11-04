@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { emptyProsodyLayer } from '@/lib/shared-kernel/prosody';
 import { issues, stepState } from '@/lib/shared-kernel/read-aloud';
+import { tokenize } from '@/lib/shared-kernel/text';
 
 import type { ReadAloudDocument } from './edits';
 import { blankDocument, Intl, LOADED_AT, PAGE_RULES, sampleReadAloud } from './test-support';
@@ -31,9 +33,15 @@ vi.mock('@/lib/i18n/navigation', () => ({
   ),
 }));
 vi.mock('../../actions/read-aloud', () => ({ saveReadAloudAction: vi.fn() }));
+vi.mock('../../actions/prosody', () => ({
+  loadPromptProsodyAction: vi.fn(),
+  savePromptProsodyAction: vi.fn(),
+  suggestPromptProsodyAction: vi.fn(),
+}));
 
 const { ReadAloudBuilder } = await import('./builder');
 const { saveReadAloudAction } = await import('../../actions/read-aloud');
+const { loadPromptProsodyAction } = await import('../../actions/prosody');
 
 function renderBuilder(
   initial: ReadAloudDocument,
@@ -100,7 +108,7 @@ describe('ReadAloudBuilder — the rail (RA-B1)', () => {
   it('takes the layer into the count: listening on with nothing to play blocks step 1', async () => {
     const { user } = renderBuilder(sampleReadAloud());
     expect(within(tab('Task')).queryByText(/problem/)).not.toBeInTheDocument();
-    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('switch', { name: /Listening exercise/ }));
     expect(within(tab('Task')).getByText('1 problem')).toBeInTheDocument();
   });
 });
@@ -240,5 +248,91 @@ describe('ReadAloudBuilder — saving (RA-B16)', () => {
     await user.click(screen.getByRole('button', { name: /Undo everything since I opened this/ }));
     await user.click(screen.getByRole('button', { name: 'Put it back' }));
     expect(screen.getByLabelText(/^Title/)).toHaveValue('Les høyt — jobbsøknad');
+  });
+});
+
+describe('ReadAloudBuilder — the pronunciation guide (plan 86, step 6h.3)', () => {
+  const guided = (): ReadAloudDocument => {
+    const base = sampleReadAloud();
+    return { ...base, pronunciationGuide: { ...base.pronunciationGuide, enabled: true } };
+  };
+
+  beforeEach(() => {
+    vi.mocked(loadPromptProsodyAction).mockImplementation(async (_exerciseId, promptId) => {
+      const prompt = sampleReadAloud().prompts.find((p) => p.id === promptId)!;
+      const at = tokenize(prompt.text).findIndex((token) => token.w === 'Kjetil');
+      return {
+        ok: true,
+        value: {
+          status: 'loaded',
+          view: {
+            text: prompt.text,
+            notation: prompt.text,
+            dropped: 0,
+            layer: emptyProsodyLayer(),
+            issues: [],
+            updatedAt: null,
+            lexicon: {
+              stresses: [],
+              sounds: [],
+              unresolved: at === -1 ? [] : [{ i: at, w: 'Kjetil' }],
+            },
+          },
+        },
+      };
+    });
+  });
+  afterEach(() => vi.clearAllMocks());
+
+  it('reads nothing and draws no step while the guide is off', () => {
+    renderBuilder(sampleReadAloud());
+    expect(screen.queryByRole('tab', { name: /Pronunciation/ })).not.toBeInTheDocument();
+    expect(loadPromptProsodyAction).not.toHaveBeenCalled();
+  });
+
+  it('draws the step second and walks it in the rail order', async () => {
+    const { user } = renderBuilder(guided());
+    const names = screen.getAllByRole('tab').map((t) => t.textContent ?? '');
+    expect(names[1]).toMatch(/Pronunciation/);
+    await user.click(screen.getByRole('button', { name: /Next: Pronunciation/ }));
+    expect(tab('Pronunciation')).toHaveAttribute('aria-selected', 'true');
+    await user.click(screen.getByRole('button', { name: /Next: Listen for/ }));
+    expect(tab('Listen for')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('reads each passage and blocks on a word the dictionary does not know', async () => {
+    const { user } = renderBuilder(guided());
+    await vi.waitFor(() =>
+      expect(within(tab('Pronunciation')).getByText('1 problem')).toBeInTheDocument(),
+    );
+    expect(loadPromptProsodyAction).toHaveBeenCalledTimes(2);
+    await user.click(tab('Pronunciation'));
+    expect(screen.getByText('Not in the dictionary: Kjetil')).toBeInTheDocument();
+    expect(screen.getByText(/«Kjetil» is not in the dictionary/)).toBeInTheDocument();
+  });
+
+  it('asks for a sentence end once «Melody» is offered', async () => {
+    const { user } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await user.click(screen.getByRole('checkbox', { name: 'Melody' }));
+    await vi.waitFor(() =>
+      expect(screen.getAllByText(/no end of a group/).length).toBeGreaterThan(0),
+    );
+  });
+
+  it('has no axe violations on the step', async () => {
+    const { user, container } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await vi.waitFor(() =>
+      expect(screen.getByText('Not in the dictionary: Kjetil')).toBeInTheDocument(),
+    );
+    expect((await axe.run(container, PAGE_RULES)).violations).toEqual([]);
+  });
+
+  it('drops the step from the rail when the guide is switched off', async () => {
+    const { user } = renderBuilder(guided());
+    await user.click(screen.getByRole('switch', { name: /Pronunciation guide/ }));
+    expect(screen.queryByRole('tab', { name: /Pronunciation/ })).not.toBeInTheDocument();
+    expect(tab('Task')).toHaveAttribute('aria-selected', 'true');
   });
 });

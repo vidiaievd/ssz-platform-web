@@ -10,6 +10,7 @@ import {
   setAi as setAiOf,
   setCriterion as setCriterionOf,
   setFocusNote as setFocusNoteOf,
+  setGuide as setGuideOf,
   setInstruction as setInstructionOf,
   setLevel as setLevelOf,
   setMode as setModeOf,
@@ -24,6 +25,7 @@ import {
   setTitle as setTitleOf,
   setWeight as setWeightOf,
   toggleFocusWord as toggleFocusWordOf,
+  toggleLens as toggleLensOf,
   togglePointRequired as togglePointRequiredOf,
   toggleStudentVisible as toggleStudentVisibleOf,
   type ReadAloudContent,
@@ -87,3 +89,6 @@ export const setRecording = lift(setRecordingOf);
 export const setSettings = lift(setSettingsOf);
 export const setReview = lift(setReviewOf);
 export const setAi = lift(setAiOf);
+
+export const setGuide = lift(setGuideOf);
+export const toggleLens = lift(toggleLensOf);

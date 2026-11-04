@@ -4799,7 +4799,9 @@
       "textPlaceholder": "Lim inn avsnittet fra leksjonen…",
       "pointPlaceholder": "Hvem er på bildet?",
       "situationPlaceholder": "Du er på legekontoret.",
-      "partnerPlaceholder": "«Hva kan jeg hjelpe deg med i dag?»"
+      "partnerPlaceholder": "«Hva kan jeg hjelpe deg med i dag?»",
+      "guideLabel": "Uttaleveiledning",
+      "guideHelp": "Merker under teksten — trykk, lyder, melodi — og øving setning for setning før opptaket. Legger til steget «Uttale»."
     },
     "step2": {
       "eyebrow": "Steg 2",
@@ -4871,7 +4873,12 @@
       "RA_CHOOSE_NO_EFFECT": "«Velg det beste opptaket» har ingen virkning med ett enkelt forsøk.",
       "RA_NO_MIC_CHECK": "Ingen mikrofonsjekk. Stille opptak havner i køen og koster læreren vurderingstid.",
       "RA_AI_NO_CHECK": "Maskinsjekken av høytlesing er på uten sjekk mot teksten, og det er den som avgjør — maskinen har ingenting å gjøre.",
-      "RA_AI_READ_ONLY": "Maskinen sjekker bare høytlesing av en gitt tekst. I denne modusen gjør KI-bryteren ingenting — uten lærer blir arbeidet ikke vurdert."
+      "RA_AI_READ_ONLY": "Maskinen sjekker bare høytlesing av en gitt tekst. I denne modusen gjør KI-bryteren ingenting — uten lærer blir arbeidet ikke vurdert.",
+      "RA_GUIDE_NO_LENS": "Ingen visning er slått på. Eleven ville fått en uttaleveiledning uten innhold.",
+      "RA_GUIDE_LAYER_INVALID": "{subject}: {count, plural, one {# merke passer} other {# merker passer}} ikke lenger til teksten.",
+      "RA_GUIDE_WORD_UNCONFIRMED": "{subject}: «{word}» finnes ikke i ordboka. Merk trykket eller bekreft at det ikke har noe.",
+      "RA_GUIDE_SENTENCE_NO_END": "{subject}, setning {sentence}: ingen gruppeslutt. Med «Melodi» ville ikke eleven sett hvor stemmen går.",
+      "RA_GUIDE_ORPHANS": "{subject}: {count, plural, one {# merke har} other {# merker har}} mistet ordet sitt etter en endring i teksten."
     },
     "fixes": {
       "RA_NO_PROMPTS": "Legg til en oppgave",
@@ -4897,7 +4904,12 @@
       "RA_CHOOSE_NO_EFFECT": "Tillat flere forsøk",
       "RA_NO_MIC_CHECK": "Slå den på",
       "RA_AI_NO_CHECK": "Les merknaden",
-      "RA_AI_READ_ONLY": "Les merknaden"
+      "RA_AI_READ_ONLY": "Les merknaden",
+      "RA_GUIDE_NO_LENS": "Velg en visning",
+      "RA_GUIDE_LAYER_INVALID": "Rett merkene",
+      "RA_GUIDE_WORD_UNCONFIRMED": "Merk ordet",
+      "RA_GUIDE_SENTENCE_NO_END": "Merk slutten",
+      "RA_GUIDE_ORPHANS": "Sett dem tilbake"
     },
     "step4": {
       "eyebrow": "Steg 4",
@@ -5011,6 +5023,27 @@
       "simulate": "Simuler lærerens vurdering",
       "simulateNote": "Setter «2» på alle kriterier. Den ekte vurderingen er et menneskes.",
       "simulatedComment": "Lærerens kommentar vises her."
+    },
+    "step6": {
+      "eyebrow": "Steg 2",
+      "title": "Uttale",
+      "lede": "Trykk og lyder kommer fra ordboka av seg selv. Du avgjør bare det den ikke kan — ord den ikke kjenner — og, med «Melodi», hvor stemmen går på slutten av hver setning.",
+      "learnerTitle": "Hva eleven ser",
+      "drillLabel": "Setning for setning før opptaket",
+      "drillHelp": "Eleven sier hver setning for seg og får høre hva som bør rettes, så tar hen opp teksten.",
+      "lensesLabel": "Visninger eleven kan bytte mellom",
+      "needMelody": "Melodi er på: hver setning trenger en gruppeslutt før publisering. Ord som mangler i ordboka, trenger ditt trykk eller «uten trykk».",
+      "needWords": "Melodi er av: frasemerker er valgfrie. Bare ord som mangler i ordboka, trenger ditt trykk eller «uten trykk».",
+      "appliesNow": "Merkene gjelder så snart de er lagret, uten publisering — utkastet og den publiserte versjonen deler dem.",
+      "noText": "Lim inn teksten i steg 1 først.",
+      "unresolved": "Ikke i ordboka: {words}",
+      "editorSoon": "Redigering av merkene for denne teksten kommer i neste oppdatering.",
+      "statusLoading": "Leser ordboka…",
+      "statusFailed": "Kunne ikke laste — prøv igjen",
+      "statusBlockers": "{count, plural, one {# hindring} other {# hindringer}}",
+      "statusOk": "Klar",
+      "issuesLabel": "Hva som hindrer publisering",
+      "ready": "Alt er merket — steget er klart for publisering."
     }
   },
   "minimalPairs": {

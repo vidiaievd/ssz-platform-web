@@ -54,6 +54,8 @@ export function useIssueCopy(exercise: ReadAloudContent): IssueCopy {
         limit: 'maxSeconds' in issue ? formatSeconds(issue.maxSeconds) : '',
         ceiling: 'ceiling' in issue ? formatSeconds(issue.ceiling) : '',
         read: 'readSeconds' in issue ? formatSeconds(issue.readSeconds) : '',
+        word: 'w' in issue ? issue.w : '',
+        sentence: 'sentence' in issue ? issue.sentence + 1 : 0,
       });
     },
     fix: (issue) => t(`fixes.${issue.code}` as 'fixes.RA_NO_PROMPTS'),

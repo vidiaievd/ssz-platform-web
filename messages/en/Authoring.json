@@ -4799,7 +4799,9 @@
       "textPlaceholder": "Lim inn avsnittet fra leksjonen…",
       "pointPlaceholder": "Hvem er på bildet?",
       "situationPlaceholder": "Du er på legekontoret.",
-      "partnerPlaceholder": "«Hva kan jeg hjelpe deg med i dag?»"
+      "partnerPlaceholder": "«Hva kan jeg hjelpe deg med i dag?»",
+      "guideLabel": "Pronunciation guide",
+      "guideHelp": "Marks under the passage — stress, sounds, melody — and a sentence-by-sentence drill before the recording. Adds the «Pronunciation» step."
     },
     "step2": {
       "eyebrow": "Step 2",
@@ -4871,7 +4873,12 @@
       "RA_CHOOSE_NO_EFFECT": "«Choose the best take» has no effect with a single take.",
       "RA_NO_MIC_CHECK": "No microphone check. Silent recordings reach the queue and cost the teacher the review slot.",
       "RA_AI_NO_CHECK": "The machine reading check is on without the check against the text, which is what decides — the machine has nothing to do.",
-      "RA_AI_READ_ONLY": "The machine checks only reading a given text aloud. In this mode the AI switch does nothing — without a teacher the work stays unchecked."
+      "RA_AI_READ_ONLY": "The machine checks only reading a given text aloud. In this mode the AI switch does nothing — without a teacher the work stays unchecked.",
+      "RA_GUIDE_NO_LENS": "No view is switched on. The student would get a pronunciation guide with nothing in it.",
+      "RA_GUIDE_LAYER_INVALID": "{subject}: {count, plural, one {# mark does} other {# marks do}} not fit the passage any more.",
+      "RA_GUIDE_WORD_UNCONFIRMED": "{subject}: «{word}» is not in the dictionary. Mark its stress or confirm it has none.",
+      "RA_GUIDE_SENTENCE_NO_END": "{subject}, sentence {sentence}: no end of a group. With «Melody» the student would not see where the voice goes.",
+      "RA_GUIDE_ORPHANS": "{subject}: {count, plural, one {# mark has} other {# marks have}} lost {count, plural, one {its word} other {their words}} after an edit of the text."
     },
     "fixes": {
       "RA_NO_PROMPTS": "Add a prompt",
@@ -4897,7 +4904,12 @@
       "RA_CHOOSE_NO_EFFECT": "Allow more takes",
       "RA_NO_MIC_CHECK": "Turn it on",
       "RA_AI_NO_CHECK": "Read the note",
-      "RA_AI_READ_ONLY": "Read the note"
+      "RA_AI_READ_ONLY": "Read the note",
+      "RA_GUIDE_NO_LENS": "Pick a view",
+      "RA_GUIDE_LAYER_INVALID": "Fix the marks",
+      "RA_GUIDE_WORD_UNCONFIRMED": "Mark the word",
+      "RA_GUIDE_SENTENCE_NO_END": "Mark the end",
+      "RA_GUIDE_ORPHANS": "Put them back"
     },
     "step4": {
       "eyebrow": "Step 4",
@@ -5011,6 +5023,27 @@
       "simulate": "Simulate the teacher's verdict",
       "simulateNote": "Marks every criterion «2». The real verdict is a person's.",
       "simulatedComment": "The teacher's comment appears here."
+    },
+    "step6": {
+      "eyebrow": "Step 2",
+      "title": "Pronunciation",
+      "lede": "Stress and sounds come from the dictionary by themselves. You settle only what it cannot — words it does not know — and, with «Melody», where the voice goes at the end of each sentence.",
+      "learnerTitle": "What the student sees",
+      "drillLabel": "Sentence by sentence before the recording",
+      "drillHelp": "The student says each sentence on its own and hears back what to fix, then records the passage.",
+      "lensesLabel": "Views the student can switch between",
+      "needMelody": "Melody is on: every sentence needs the end of a group before publishing. Words missing from the dictionary need your stress or «no stress».",
+      "needWords": "Melody is off: phrase marks are optional. Only words missing from the dictionary need your stress or «no stress».",
+      "appliesNow": "Marks apply as soon as they are saved, without publishing — they are shared by the draft and the published version.",
+      "noText": "Paste the passage in step 1 first.",
+      "unresolved": "Not in the dictionary: {words}",
+      "editorSoon": "The marks editor for this passage comes in the next update.",
+      "statusLoading": "Reading the dictionary…",
+      "statusFailed": "Could not load — retry",
+      "statusBlockers": "{count, plural, one {# blocker} other {# blockers}}",
+      "statusOk": "Ready",
+      "issuesLabel": "What stands in the way of publishing",
+      "ready": "Everything is marked — this step is ready to publish."
     }
   },
   "minimalPairs": {
