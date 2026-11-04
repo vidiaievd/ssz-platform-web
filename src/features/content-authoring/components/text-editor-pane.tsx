@@ -27,6 +27,7 @@ import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { TextLessonPreview } from './text-lesson-preview';
 import { ParagraphTranslationsPanel } from './paragraph-translations-panel';
+import { LessonProsodyPanel } from './lesson-prosody-panel';
 import { GlossaryMarkButton, GlossaryMarkedWords } from './glossary-mark-panel';
 import { TextSpanMenu } from './text-span-menu';
 import { TextSpanList } from './text-span-list';
@@ -290,6 +291,17 @@ export function TextEditorPane({
           </Button>
 
           <ParagraphTranslationsPanel lessonId={lessonId} variantId={defaultVariant?.id} />
+
+          {/* The reader offers «Pronunciation» only for Norwegian, the lexicon's language. */}
+          {lesson.data?.targetLanguage === 'nb' && (
+            <LessonProsodyPanel
+              lessonId={lessonId}
+              variantId={defaultVariant?.id}
+              savedBody={defaultVariant?.bodyMarkdown ?? ''}
+              body={bodyValue ?? ''}
+              lang="nb"
+            />
+          )}
 
           {/* The check the reader meets after the text, on the same staging
               model an AUDIO lesson uses after its transcript (spec 17). */}

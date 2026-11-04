@@ -35,7 +35,7 @@ import {
   setAccent,
   setBoundary,
 } from './layer-edits';
-import { NotationView } from './notation-view';
+import { NotationView, type TextIn } from './notation-view';
 import { acceptIn, differsIn } from './suggestion';
 import { WordCard } from './word-card';
 
@@ -63,6 +63,13 @@ export interface ProsodyEditorProps {
   /** ✦ Ask the authoring agent for phrase marks. Absent — no button (no `ai.authoring`). */
   onSuggest?: () => Promise<ProsodySuggestion>;
   lang?: string;
+  /** Where the words are edited, for the «As text» mismatch; the builder's step 1 by default. */
+  textIn?: TextIn;
+  /**
+   * Which sentences the author is offered; all by default. A lesson body hides its lines of
+   * media tokens. Hidden sentences keep their marks and their place in the numbering of needs.
+   */
+  showSentence?: (sentence: Sentence) => boolean;
 }
 
 type SuggestState =
@@ -103,7 +110,7 @@ const REFUSAL_KEYS: Record<
  * dashed in their own colour, and taken or dropped there. A mark whose words an edit of the
  * text removed (an orphan) waits above the sentence to be put back on a word or removed.
  *
- * The owner (the read_aloud builder, later the lesson editor) holds the layer and saves it.
+ * The owner (the read_aloud builder, the lesson editor) holds the layer and saves it.
  */
 export function ProsodyEditor({
   text,
@@ -113,10 +120,15 @@ export function ProsodyEditor({
   onChange,
   onSuggest,
   lang,
+  textIn,
+  showSentence,
 }: ProsodyEditorProps) {
   const t = useTranslations('Authoring.prosodyEditor');
   const tokens = useMemo(() => tokenize(text), [text]);
-  const sentences = useMemo(() => splitSentences(text, tokens), [text, tokens]);
+  const sentences = useMemo(() => {
+    const all = splitSentences(text, tokens);
+    return showSentence ? all.filter(showSentence) : all;
+  }, [text, tokens, showSentence]);
   const merged = useMemo(() => mergeProsody(lexicon.stresses, layer), [lexicon.stresses, layer]);
   const marks = useMemo(() => marksByStart(text, merged), [text, merged]);
 
@@ -128,8 +140,12 @@ export function ProsodyEditor({
   const [suggestion, setSuggestion] = useState<SuggestState>({ status: 'idle' });
 
   // A shorter passage after an edit of the text must not leave the editor on a gone sentence.
-  const at = pickedSentence < sentences.length ? pickedSentence : 0;
-  const sentence = sentences[at];
+  const pos = Math.max(
+    0,
+    sentences.findIndex((s) => s.index === pickedSentence),
+  );
+  const sentence = sentences[pos];
+  const at = sentence?.index;
   const selected =
     picked !== null && sentence && picked >= sentence.first && picked < sentence.end
       ? tokens[picked]
@@ -358,11 +374,11 @@ export function ProsodyEditor({
       )}
 
       {mode === 'text' ? (
-        <NotationView text={text} layer={layer} onChange={onChange} lang={lang} />
+        <NotationView text={text} layer={layer} onChange={onChange} lang={lang} textIn={textIn} />
       ) : (
         <div className="grid gap-4 md:grid-cols-[15rem_minmax(0,1fr)] md:items-start">
           <ol aria-label={t('sentencesLabel')} className="m-0 flex list-none flex-col gap-1 p-0">
-            {sentences.map((s) => {
+            {sentences.map((s, k) => {
               const open = needsOf(s);
               const words = tokens.slice(s.first, Math.min(s.end, s.first + 5)).map((x) => x.w);
               return (
@@ -379,7 +395,7 @@ export function ProsodyEditor({
                       s.index === at && 'bg-(--ssz-color-primary-50) text-(--ssz-text-primary)',
                     )}
                   >
-                    <span className="text-xs tabular-nums">{s.index + 1}</span>
+                    <span className="text-xs tabular-nums">{k + 1}</span>
                     <span className="truncate" style={READING}>
                       {words.join(' ')}
                       {s.end - s.first > 5 ? '…' : ''}
@@ -428,7 +444,7 @@ export function ProsodyEditor({
             )}
             <p
               lang={lang}
-              aria-label={t('canvasLabel', { n: at + 1 })}
+              aria-label={t('canvasLabel', { n: pos + 1 })}
               data-canvas=""
               className="m-0 text-2xl"
               style={{ ...READING, lineHeight: MARKS_LEADING + 0.2 }}

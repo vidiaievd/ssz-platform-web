@@ -13,11 +13,11 @@ import {
 } from '@/lib/shared-kernel/read-aloud';
 
 import { Callout, Card, StepHead } from '../highlight-in-text/parts';
-import { ProsodyEditor, type EditorNeed } from '../prosody-editor';
+import { LayerSaveLine, ProsodyEditor, type EditorNeed } from '../prosody-editor';
 import { ToggleRow } from '../toggle-row';
 import { setGuide, toggleLens, type ReadAloudDocument } from './edits';
 import { useIssueCopy } from './issue-copy';
-import type { LayerSaveState, PromptProsody, PromptProsodyState } from './use-prompt-prosody';
+import type { PromptProsody, PromptProsodyState } from './use-prompt-prosody';
 
 const READING = { fontFamily: 'var(--ssz-font-reading)' } as const;
 
@@ -102,7 +102,7 @@ export function StepPronunciation({
       {exercise.prompts.map((prompt, i) => {
         const name =
           prompt.label.trim() === '' ? t('subject.prompt', { index: i + 1 }) : prompt.label;
-        const state = prosody.byPrompt[prompt.id];
+        const state = prosody.byPassage[prompt.id];
         const blockers = own.filter(
           (issue) =>
             'promptId' in issue && issue.promptId === prompt.id && issue.level === 'blocker',
@@ -160,7 +160,7 @@ export function StepPronunciation({
                     onSuggest={can('ai.authoring') ? () => prosody.suggest(prompt.id) : undefined}
                   />
                 )}
-                <SaveLine
+                <LayerSaveLine
                   state={prosody.saves[prompt.id]}
                   onRetry={() => prosody.retry(prompt.id)}
                 />
@@ -183,41 +183,6 @@ export function StepPronunciation({
       </section>
     </div>
   );
-}
-
-function SaveLine({ state, onRetry }: { state: LayerSaveState | undefined; onRetry: () => void }) {
-  const t = useTranslations('Authoring.readAloud.step6');
-  if (state === undefined) return null;
-  const line = (text: string, tone = 'text-(--ssz-text-muted)') => (
-    <p role="status" className={`m-0 text-xs ${tone}`}>
-      {text}
-    </p>
-  );
-  switch (state.status) {
-    case 'pending':
-      return line(t('savePending'));
-    case 'saving':
-      return line(t('saving'));
-    case 'saved':
-      return line(t('saved'), 'text-(--ssz-color-success-700)');
-    case 'conflict':
-      return line(t('conflict'), 'text-(--ssz-color-warning-700)');
-    case 'invalid':
-      return line(t('invalid'), 'text-(--ssz-color-warning-700)');
-    case 'failed':
-      return (
-        <p
-          role="status"
-          className="m-0 flex items-center gap-2 text-xs text-(--ssz-color-error-700)"
-        >
-          {t('saveFailed')}
-          <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={onRetry}>
-            <RotateCw className="size-3.5" aria-hidden />
-            {t('retry')}
-          </Button>
-        </p>
-      );
-  }
 }
 
 function PromptStatus({

@@ -5042,14 +5042,7 @@
       "statusBlockers": "{count, plural, one {# blocker} other {# blockers}}",
       "statusOk": "Ready",
       "issuesLabel": "What stands in the way of publishing",
-      "ready": "Everything is marked — this step is ready to publish.",
-      "savePending": "Not saved yet…",
-      "saving": "Saving the marks…",
-      "saved": "Marks saved",
-      "conflict": "The marks were changed in another window — this is what is stored now; your last change was not saved.",
-      "invalid": "The marks did not fit the saved text and were read again.",
-      "saveFailed": "The marks were not saved.",
-      "retry": "Try again"
+      "ready": "Everything is marked — this step is ready to publish."
     }
   },
   "minimalPairs": {
@@ -5496,6 +5489,26 @@
     "PN_STRESS_NO_VOWEL": "The stress mark in «{word}» has no vowel after it.",
     "PN_DUPLICATE": "The same mark twice on one word.",
     "PN_LINK_WITH_BOUNDARY": "A linking «_» and a group end on the same word.",
-    "PN_TEXT_MISMATCH": "The words differ from the passage from «{from}». Only marks are edited here — the text is changed in step 1."
+    "PN_TEXT_MISMATCH": "The words differ from the passage from «{from}». Only marks are edited here — the text is changed in step 1.",
+    "savePending": "Not saved yet…",
+    "saving": "Saving the marks…",
+    "saved": "Marks saved",
+    "conflict": "The marks were changed in another window — this is what is stored now; your last change was not saved.",
+    "invalid": "The marks did not fit the saved text and were read again.",
+    "saveFailed": "The marks were not saved.",
+    "retry": "Try again",
+    "PN_TEXT_MISMATCH_LESSON": "The words differ from the lesson text from «{from}». Only marks are edited here — the text is changed in the field above and saved."
+  },
+  "lessonProsody": {
+    "title": "Pronunciation",
+    "lede": "Stress, melody and pauses the student sees in the reader's «Pronunciation» mode. Stress comes from the dictionary by itself; mark what it misses and where the voice goes. Optional.",
+    "show": "Mark",
+    "hide": "Hide",
+    "noText": "Write and save the text first — the marks go on the saved text.",
+    "unsaved": "The text has unsaved changes. Save it to mark the new words: the marks lie on the saved text.",
+    "loading": "Reading the dictionary…",
+    "failed": "Could not load — retry",
+    "unresolved": "Not in the dictionary (shown without stress unless you mark them): {words}",
+    "appliesNow": "Marks apply as soon as they are saved — the lesson text is not versioned."
   }
 }

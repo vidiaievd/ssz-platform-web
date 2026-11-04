@@ -15,7 +15,12 @@ export interface NotationViewProps {
   layer: ProsodyLayer;
   onChange: (layer: ProsodyLayer) => void;
   lang?: string;
+  /** Where the words themselves are edited — what a text mismatch sends the author to. */
+  textIn?: TextIn;
 }
+
+/** The builder's step 1, or the body field of the lesson editor. */
+export type TextIn = 'step1' | 'lessonBody';
 
 /**
  * The marks «As text» (plan 86, §4i.3, step 6h.3c): the passage with the author's marks written
@@ -26,7 +31,7 @@ export interface NotationViewProps {
  * The field is the author's while they type: a layer coming back from the owner (the saved
  * one) replaces it only when it means something else than what the field last applied.
  */
-export function NotationView({ text, layer, onChange, lang }: NotationViewProps) {
+export function NotationView({ text, layer, onChange, lang, textIn = 'step1' }: NotationViewProps) {
   const t = useTranslations('Authoring.prosodyEditor');
   const hintId = useId();
   const field = useRef<HTMLTextAreaElement>(null);
@@ -92,7 +97,7 @@ export function NotationView({ text, layer, onChange, lang }: NotationViewProps)
         >
           <span>
             {place !== null && `${t('notationAt', place)} `}
-            <NotationIssueText issue={issue} text={text} />
+            <NotationIssueText issue={issue} text={text} textIn={textIn} />
           </span>
           {at !== null && (
             <Button
@@ -119,7 +124,15 @@ export function NotationView({ text, layer, onChange, lang }: NotationViewProps)
   );
 }
 
-function NotationIssueText({ issue, text }: { issue: NotationIssue; text: string }) {
+function NotationIssueText({
+  issue,
+  text,
+  textIn,
+}: {
+  issue: NotationIssue;
+  text: string;
+  textIn: TextIn;
+}) {
   const t = useTranslations('Authoring.prosodyEditor');
   switch (issue.code) {
     case 'PN_MARKER_NO_WORD':
@@ -136,7 +149,14 @@ function NotationIssueText({ issue, text }: { issue: NotationIssue; text: string
       return <>{t('PN_LINK_WITH_BOUNDARY')}</>;
     case 'PN_TEXT_MISMATCH': {
       const from = text.slice(issue.textAt, issue.textAt + 24).split('\n')[0] ?? '';
-      return <>{t('PN_TEXT_MISMATCH', { from: from === '' ? '…' : from })}</>;
+      const args = { from: from === '' ? '…' : from };
+      return (
+        <>
+          {textIn === 'lessonBody'
+            ? t('PN_TEXT_MISMATCH_LESSON', args)
+            : t('PN_TEXT_MISMATCH', args)}
+        </>
+      );
     }
   }
 }

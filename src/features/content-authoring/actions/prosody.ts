@@ -12,9 +12,9 @@ import type {
 } from '@/lib/shared-kernel/prosody';
 
 /**
- * What content-service gives the editor of one `read_aloud` prompt's marks (plan 86, §4q):
- * the stored layer anchored to the passage the builder edits (the draft), and what the lexicon
- * says under the same text.
+ * What content-service gives the editor of one passage's marks (plan 86, §4q) — a `read_aloud`
+ * prompt (anchored to the draft the builder edits) or a lesson body: the stored layer anchored
+ * to the text, and what the lexicon says under the same text.
  */
 export interface PromptProsodyAuthoring {
   text: string;
@@ -48,23 +48,18 @@ export async function loadPromptProsodyAction(
   exerciseId: string,
   promptId: string,
 ): Promise<Result<PromptProsodyLoad>> {
-  try {
-    const view = await serverFetch<PromptProsodyAuthoring>({
-      service: 'content',
-      path: `/exercises/${exerciseId}/prompts/${encodeURIComponent(promptId)}/prosody/authoring`,
-      expectedErrorStatuses: [404, 422],
-    });
-    return ok({ status: 'loaded', view });
-  } catch (error) {
-    if (
-      isAppError(error) &&
-      (error.code === 'not_found' || upstreamMessage(error.details) === 'PROMPT_HAS_NO_TEXT')
-    ) {
-      return ok({ status: 'absent' });
-    }
-    if (isAppError(error)) return err(error.toJSON());
-    throw error;
-  }
+  return loadAuthoring(promptPath(exerciseId, promptId), 'PROMPT_HAS_NO_TEXT');
+}
+
+/**
+ * The marks of a TEXT lesson variant's body (step 6h.4), anchored to the **saved** body — the
+ * lesson editor saves its text by hand, so the panel reads again once a save has landed.
+ */
+export async function loadLessonProsodyAction(
+  lessonId: string,
+  variantId: string,
+): Promise<Result<PromptProsodyLoad>> {
+  return loadAuthoring(lessonPath(lessonId, variantId), 'NOT_A_TEXT_LESSON');
 }
 
 export interface SavePromptProsodyInput {
@@ -90,10 +85,85 @@ export async function savePromptProsodyAction(
   promptId: string,
   input: SavePromptProsodyInput,
 ): Promise<Result<SavePromptProsodyOutcome>> {
+  return saveAuthoring(promptPath(exerciseId, promptId), input);
+}
+
+/** Autosave of a lesson body's layer; the body is not versioned, so it applies at once. */
+export async function saveLessonProsodyAction(
+  lessonId: string,
+  variantId: string,
+  input: SavePromptProsodyInput,
+): Promise<Result<SavePromptProsodyOutcome>> {
+  return saveAuthoring(lessonPath(lessonId, variantId), input);
+}
+
+export type SuggestionRefusal =
+  | 'language_not_supported'
+  | 'no_words'
+  | 'too_long'
+  | 'not_available'
+  | 'pool_empty';
+
+export type SuggestPromptProsodyOutcome =
+  /** The authoring view of the proposal — nothing is stored until the author saves it. */
+  | { status: 'suggested'; view: PromptProsodyAuthoring }
+  | { status: 'refused'; reason: SuggestionRefusal }
+  | { status: 'failed' };
+
+/** ✦ Suggest phrase marks (§4e, step 5c.2), spending `ai.authoring` credits of the owner. */
+export async function suggestPromptProsodyAction(
+  exerciseId: string,
+  promptId: string,
+): Promise<Result<SuggestPromptProsodyOutcome>> {
+  return suggestAuthoring(promptPath(exerciseId, promptId));
+}
+
+/** ✦ Suggest the phrase marks of a lesson body (step 6h.4). */
+export async function suggestLessonProsodyAction(
+  lessonId: string,
+  variantId: string,
+): Promise<Result<SuggestPromptProsodyOutcome>> {
+  return suggestAuthoring(lessonPath(lessonId, variantId));
+}
+
+/** `…/prosody` of one read_aloud prompt; `/authoring` and `/suggestion` hang off it. */
+function promptPath(exerciseId: string, promptId: string): string {
+  return `/exercises/${exerciseId}/prompts/${encodeURIComponent(promptId)}/prosody`;
+}
+
+function lessonPath(lessonId: string, variantId: string): string {
+  return `/lessons/${lessonId}/variants/${variantId}/prosody`;
+}
+
+/** `noText` — the 422 that means «nothing to mark here» rather than a failure. */
+async function loadAuthoring(path: string, noText: string): Promise<Result<PromptProsodyLoad>> {
   try {
     const view = await serverFetch<PromptProsodyAuthoring>({
       service: 'content',
-      path: `/exercises/${exerciseId}/prompts/${encodeURIComponent(promptId)}/prosody`,
+      path: `${path}/authoring`,
+      expectedErrorStatuses: [404, 422],
+    });
+    return ok({ status: 'loaded', view });
+  } catch (error) {
+    if (
+      isAppError(error) &&
+      (error.code === 'not_found' || upstreamMessage(error.details) === noText)
+    ) {
+      return ok({ status: 'absent' });
+    }
+    if (isAppError(error)) return err(error.toJSON());
+    throw error;
+  }
+}
+
+async function saveAuthoring(
+  path: string,
+  input: SavePromptProsodyInput,
+): Promise<Result<SavePromptProsodyOutcome>> {
+  try {
+    const view = await serverFetch<PromptProsodyAuthoring>({
+      service: 'content',
+      path,
       method: 'PUT',
       body: { layer: input.layer, expectedUpdatedAt: input.expectedUpdatedAt },
       expectedErrorStatuses: [400, 409],
@@ -121,28 +191,11 @@ export async function savePromptProsodyAction(
   }
 }
 
-export type SuggestionRefusal =
-  | 'language_not_supported'
-  | 'no_words'
-  | 'too_long'
-  | 'not_available'
-  | 'pool_empty';
-
-export type SuggestPromptProsodyOutcome =
-  /** The authoring view of the proposal — nothing is stored until the author saves it. */
-  | { status: 'suggested'; view: PromptProsodyAuthoring }
-  | { status: 'refused'; reason: SuggestionRefusal }
-  | { status: 'failed' };
-
-/** ✦ Suggest phrase marks (§4e, step 5c.2), spending `ai.authoring` credits of the owner. */
-export async function suggestPromptProsodyAction(
-  exerciseId: string,
-  promptId: string,
-): Promise<Result<SuggestPromptProsodyOutcome>> {
+async function suggestAuthoring(path: string): Promise<Result<SuggestPromptProsodyOutcome>> {
   try {
     const view = await serverFetch<PromptProsodyAuthoring>({
       service: 'content',
-      path: `/exercises/${exerciseId}/prompts/${encodeURIComponent(promptId)}/prosody/suggestion`,
+      path: `${path}/suggestion`,
       method: 'POST',
       expectedErrorStatuses: [422, 502],
       // A language model answers: the default upstream timeout is for plain reads.

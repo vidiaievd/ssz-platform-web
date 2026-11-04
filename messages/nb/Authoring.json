@@ -5042,14 +5042,7 @@
       "statusBlockers": "{count, plural, one {# hindring} other {# hindringer}}",
       "statusOk": "Klar",
       "issuesLabel": "Hva som hindrer publisering",
-      "ready": "Alt er merket — steget er klart for publisering.",
-      "savePending": "Ikke lagret ennå…",
-      "saving": "Lagrer merkene…",
-      "saved": "Merkene er lagret",
-      "conflict": "Merkene ble endret i et annet vindu — dette er det som er lagret nå; den siste endringen din ble ikke lagret.",
-      "invalid": "Merkene passet ikke til den lagrede teksten og ble lest inn på nytt.",
-      "saveFailed": "Merkene ble ikke lagret.",
-      "retry": "Prøv igjen"
+      "ready": "Alt er merket — steget er klart for publisering."
     }
   },
   "minimalPairs": {
@@ -5496,6 +5489,26 @@
     "PN_STRESS_NO_VOWEL": "Trykkmerket i «{word}» har ingen vokal etter seg.",
     "PN_DUPLICATE": "Samme merke to ganger på ett ord.",
     "PN_LINK_WITH_BOUNDARY": "En binding «_» og en gruppeslutt på samme ord.",
-    "PN_TEXT_MISMATCH": "Ordene skiller seg fra avsnittet fra «{from}». Her redigeres bare merkene — teksten endres i steg 1."
+    "PN_TEXT_MISMATCH": "Ordene skiller seg fra avsnittet fra «{from}». Her redigeres bare merkene — teksten endres i steg 1.",
+    "savePending": "Ikke lagret ennå…",
+    "saving": "Lagrer merkene…",
+    "saved": "Merkene er lagret",
+    "conflict": "Merkene ble endret i et annet vindu — dette er det som er lagret nå; den siste endringen din ble ikke lagret.",
+    "invalid": "Merkene passet ikke til den lagrede teksten og ble lest inn på nytt.",
+    "saveFailed": "Merkene ble ikke lagret.",
+    "retry": "Prøv igjen",
+    "PN_TEXT_MISMATCH_LESSON": "Ordene skiller seg fra leksjonsteksten fra «{from}». Her redigeres bare merkene — teksten endres i feltet over og lagres."
+  },
+  "lessonProsody": {
+    "title": "Uttale",
+    "lede": "Trykk, melodi og pauser eleven ser i «Uttale»-modus i leseren. Trykket kommer fra ordboka av seg selv; marker det den mangler, og hvor stemmen går. Valgfritt.",
+    "show": "Marker",
+    "hide": "Skjul",
+    "noText": "Skriv og lagre teksten først — merkene legges på den lagrede teksten.",
+    "unsaved": "Teksten har ulagrede endringer. Lagre den for å markere de nye ordene: merkene ligger på den lagrede teksten.",
+    "loading": "Leser ordboka…",
+    "failed": "Kunne ikke laste — prøv igjen",
+    "unresolved": "Ikke i ordboka (vises uten trykk hvis du ikke markerer dem): {words}",
+    "appliesNow": "Merkene gjelder så snart de er lagret — leksjonsteksten har ikke versjoner."
   }
 }
