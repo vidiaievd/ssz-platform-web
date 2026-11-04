@@ -5037,13 +5037,19 @@
       "appliesNow": "Marks apply as soon as they are saved, without publishing — they are shared by the draft and the published version.",
       "noText": "Paste the passage in step 1 first.",
       "unresolved": "Not in the dictionary: {words}",
-      "editorSoon": "The marks editor for this passage comes in the next update.",
       "statusLoading": "Reading the dictionary…",
       "statusFailed": "Could not load — retry",
       "statusBlockers": "{count, plural, one {# blocker} other {# blockers}}",
       "statusOk": "Ready",
       "issuesLabel": "What stands in the way of publishing",
-      "ready": "Everything is marked — this step is ready to publish."
+      "ready": "Everything is marked — this step is ready to publish.",
+      "savePending": "Not saved yet…",
+      "saving": "Saving the marks…",
+      "saved": "Marks saved",
+      "conflict": "The marks were changed in another window — this is what is stored now; your last change was not saved.",
+      "invalid": "The marks did not fit the saved text and were read again.",
+      "saveFailed": "The marks were not saved.",
+      "retry": "Try again"
     }
   },
   "minimalPairs": {
@@ -5412,5 +5418,40 @@
       "noteStatic": "Static preview: the first probe is drawn, nothing plays and nothing accepts input.",
       "noteLive": "Live preview: a local sitting over your own clips. Nothing is sent and nothing is saved as an attempt."
     }
+  },
+  "prosodyEditor": {
+    "sentencesLabel": "Sentences of the passage",
+    "sentenceOk": "✓",
+    "sentenceNeeds": "{count} to fix",
+    "canvasLabel": "Sentence {n}",
+    "gapLabel": "Pause after «{word}»",
+    "keysHint": "Word: <k>Enter</k> main word of the group · <k>.</k> end ↘ · <k>?</k> end ↗ · <k>,</k> short pause | · <k>Del</k> clear. A gap between words: pause | → ‖ → none.",
+    "pickWord": "Pick a word to make it the main word of its group, end a group after it or correct its stress.",
+    "cardLabel": "Marks of «{word}»",
+    "noteTone": "Dictionary: tone {toneme}, stressed «{vowel}»",
+    "noteMono": "Dictionary: one syllable, stressed «{vowel}»",
+    "noteNoStress": "Dictionary: no stress (a function word)",
+    "noteUnknown": "Not in the dictionary — give it a stress or mark it «no stress»",
+    "noteAuthored": "Your stress replaces the dictionary's",
+    "noteUnstressed": "Marked «no stress»",
+    "accentLabel": "Main word of the group",
+    "yes": "Yes",
+    "no": "No",
+    "pitchLabel": "The voice at a group end after this word",
+    "pitchFall": "↘ down",
+    "pitchRise": "↗ up",
+    "pitchLevel": "→ level",
+    "pitchNone": "not an end",
+    "pauseLabel": "Pause after the word",
+    "pauseShort": "| short",
+    "pauseLong": "‖ long",
+    "pauseNone": "none",
+    "vowelLabel": "Stressed vowel",
+    "vowelLabelKnown": "Stressed vowel (change it only if the dictionary is wrong)",
+    "unstressed": "no stress",
+    "tonemeLabel": "Toneme",
+    "tone1": "╱ 1",
+    "tone2": "∨ 2",
+    "revert": "Back to the dictionary"
   }
 }

@@ -41,7 +41,7 @@ vi.mock('../../actions/prosody', () => ({
 
 const { ReadAloudBuilder } = await import('./builder');
 const { saveReadAloudAction } = await import('../../actions/read-aloud');
-const { loadPromptProsodyAction } = await import('../../actions/prosody');
+const { loadPromptProsodyAction, savePromptProsodyAction } = await import('../../actions/prosody');
 
 function renderBuilder(
   initial: ReadAloudDocument,
@@ -327,6 +327,68 @@ describe('ReadAloudBuilder — the pronunciation guide (plan 86, step 6h.3)', ()
       expect(screen.getByText('Not in the dictionary: Kjetil')).toBeInTheDocument(),
     );
     expect((await axe.run(container, PAGE_RULES)).violations).toEqual([]);
+  });
+
+  /** «Kjetil» is in the second sentence of the first passage. */
+  const openKjetil = async (user: ReturnType<typeof renderBuilder>['user']) => {
+    const [list] = await screen.findAllByRole('list', { name: 'Sentences of the passage' });
+    await user.click(within(list!).getAllByRole('button')[1]!);
+    await user.click(screen.getByRole('button', { name: 'Kjetil' }));
+  };
+
+  it('settles a word in the editor at once and saves the layer on its own (6h.3b)', async () => {
+    vi.mocked(savePromptProsodyAction).mockImplementation(async (_exerciseId, promptId, input) => {
+      const prompt = sampleReadAloud().prompts.find((p) => p.id === promptId)!;
+      return {
+        ok: true,
+        value: {
+          status: 'saved',
+          view: {
+            text: prompt.text,
+            notation: prompt.text,
+            dropped: 0,
+            layer: input.layer,
+            issues: [],
+            updatedAt: '2026-11-04T12:00:00.000Z',
+            lexicon: { stresses: [], sounds: [], unresolved: [] },
+          },
+        },
+      };
+    });
+    const { user } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await openKjetil(user);
+    await user.click(screen.getByRole('button', { name: 'no stress' }));
+    // The draft is judged before it is saved: the blocker goes at once.
+    expect(screen.queryByText(/«Kjetil» is not in the dictionary/)).not.toBeInTheDocument();
+    await vi.waitFor(() => expect(savePromptProsodyAction).toHaveBeenCalledTimes(1), {
+      timeout: 2000,
+    });
+    const [, , input] = vi.mocked(savePromptProsodyAction).mock.calls[0]!;
+    expect(input.expectedUpdatedAt).toBeNull();
+    expect(input.layer.unstressed).toEqual([
+      expect.objectContaining({ w: 'Kjetil', source: 'teacher' }),
+    ]);
+    expect(await screen.findByText('Marks saved')).toBeInTheDocument();
+  });
+
+  it('drops the edit and reads again when another window saved first', async () => {
+    vi.mocked(savePromptProsodyAction).mockResolvedValue({
+      ok: true,
+      value: { status: 'conflict', currentUpdatedAt: '2026-11-04T12:00:00.000Z' },
+    });
+    const { user } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await openKjetil(user);
+    await user.click(screen.getByRole('button', { name: 'no stress' }));
+    expect(
+      await screen.findByText(/changed in another window/, {}, { timeout: 2000 }),
+    ).toBeInTheDocument();
+    expect(loadPromptProsodyAction).toHaveBeenCalledTimes(3);
+    // The stored layer is back, and with it the blocker.
+    await vi.waitFor(() =>
+      expect(screen.getByText(/«Kjetil» is not in the dictionary/)).toBeInTheDocument(),
+    );
   });
 
   it('drops the step from the rail when the guide is switched off', async () => {

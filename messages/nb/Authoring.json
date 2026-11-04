@@ -5037,13 +5037,19 @@
       "appliesNow": "Merkene gjelder så snart de er lagret, uten publisering — utkastet og den publiserte versjonen deler dem.",
       "noText": "Lim inn teksten i steg 1 først.",
       "unresolved": "Ikke i ordboka: {words}",
-      "editorSoon": "Redigering av merkene for denne teksten kommer i neste oppdatering.",
       "statusLoading": "Leser ordboka…",
       "statusFailed": "Kunne ikke laste — prøv igjen",
       "statusBlockers": "{count, plural, one {# hindring} other {# hindringer}}",
       "statusOk": "Klar",
       "issuesLabel": "Hva som hindrer publisering",
-      "ready": "Alt er merket — steget er klart for publisering."
+      "ready": "Alt er merket — steget er klart for publisering.",
+      "savePending": "Ikke lagret ennå…",
+      "saving": "Lagrer merkene…",
+      "saved": "Merkene er lagret",
+      "conflict": "Merkene ble endret i et annet vindu — dette er det som er lagret nå; den siste endringen din ble ikke lagret.",
+      "invalid": "Merkene passet ikke til den lagrede teksten og ble lest inn på nytt.",
+      "saveFailed": "Merkene ble ikke lagret.",
+      "retry": "Prøv igjen"
     }
   },
   "minimalPairs": {
@@ -5412,5 +5418,40 @@
       "noteStatic": "Statisk forhåndsvisning: den første prøven er tegnet, ingenting spilles og ingenting tar imot svar.",
       "noteLive": "Live-forhåndsvisning: en lokal runde med dine egne klipp. Ingenting sendes og ingenting lagres som forsøk."
     }
+  },
+  "prosodyEditor": {
+    "sentencesLabel": "Setningene i teksten",
+    "sentenceOk": "✓",
+    "sentenceNeeds": "{count} å rette",
+    "canvasLabel": "Setning {n}",
+    "gapLabel": "Pause etter «{word}»",
+    "keysHint": "Ord: <k>Enter</k> hovedordet i gruppen · <k>.</k> slutt ↘ · <k>?</k> slutt ↗ · <k>,</k> kort pause | · <k>Del</k> fjern. Mellomrom mellom ord: pause | → ‖ → ingen.",
+    "pickWord": "Velg et ord for å gjøre det til hovedordet i gruppen, avslutte en gruppe etter det eller rette trykket.",
+    "cardLabel": "Merker på «{word}»",
+    "noteTone": "Ordboka: tonelag {toneme}, trykk på «{vowel}»",
+    "noteMono": "Ordboka: én stavelse, trykk på «{vowel}»",
+    "noteNoStress": "Ordboka: uten trykk (funksjonsord)",
+    "noteUnknown": "Ikke i ordboka — gi det trykk eller merk det «uten trykk»",
+    "noteAuthored": "Ditt trykk erstatter ordbokas",
+    "noteUnstressed": "Merket «uten trykk»",
+    "accentLabel": "Hovedordet i gruppen",
+    "yes": "Ja",
+    "no": "Nei",
+    "pitchLabel": "Stemmen ved gruppeslutt etter ordet",
+    "pitchFall": "↘ ned",
+    "pitchRise": "↗ opp",
+    "pitchLevel": "→ jevn",
+    "pitchNone": "ikke slutt",
+    "pauseLabel": "Pause etter ordet",
+    "pauseShort": "| kort",
+    "pauseLong": "‖ lang",
+    "pauseNone": "ingen",
+    "vowelLabel": "Trykksterk vokal",
+    "vowelLabelKnown": "Trykksterk vokal (endre bare hvis ordboka tar feil)",
+    "unstressed": "uten trykk",
+    "tonemeLabel": "Tonelag",
+    "tone1": "╱ 1",
+    "tone2": "∨ 2",
+    "revert": "Tilbake til ordboka"
   }
 }

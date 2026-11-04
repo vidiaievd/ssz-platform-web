@@ -12,10 +12,11 @@ import {
 } from '@/lib/shared-kernel/read-aloud';
 
 import { Callout, Card, StepHead } from '../highlight-in-text/parts';
+import { ProsodyEditor, type EditorNeed } from '../prosody-editor';
 import { ToggleRow } from '../toggle-row';
 import { setGuide, toggleLens, type ReadAloudDocument } from './edits';
 import { useIssueCopy } from './issue-copy';
-import type { PromptProsody, PromptProsodyState } from './use-prompt-prosody';
+import type { LayerSaveState, PromptProsody, PromptProsodyState } from './use-prompt-prosody';
 
 const READING = { fontFamily: 'var(--ssz-font-reading)' } as const;
 
@@ -46,6 +47,9 @@ export interface StepPronunciationProps {
  * lexicon by themselves; the author settles only what the lexicon could not (a name like
  * *Bartek*) and, with «Melody», the end of every sentence. Those are the step's blockers, the
  * kernel's `guideIssues`, the same list the publish preflight runs.
+ *
+ * Each passage gets the shared `ProsodyEditor` once its marks lie on the text shown (a text being
+ * typed waits for its autosave); edits are saved on their own, as the layer's autosave.
  */
 export function StepPronunciation({
   exercise,
@@ -102,6 +106,15 @@ export function StepPronunciation({
         const view = state?.status === 'loaded' ? state.view : null;
         const stale = view !== null && view.text !== prompt.text;
         const unresolved = view?.lexicon.unresolved ?? [];
+        const layer = prosody.layerOf(prompt.id);
+        const needs = own.flatMap((issue): EditorNeed[] => {
+          if (!('promptId' in issue) || issue.promptId !== prompt.id) return [];
+          if (issue.code === 'RA_GUIDE_WORD_UNCONFIRMED') return [{ kind: 'word', i: issue.i }];
+          if (issue.code === 'RA_GUIDE_SENTENCE_NO_END') {
+            return [{ kind: 'end', sentence: issue.sentence }];
+          }
+          return [];
+        });
 
         return (
           <Card
@@ -132,7 +145,20 @@ export function StepPronunciation({
                     })}
                   </p>
                 )}
-                <p className="m-0 text-xs text-(--ssz-text-muted)">{t('step6.editorSoon')}</p>
+                {view !== null && !stale && layer !== null && (
+                  <ProsodyEditor
+                    text={view.text}
+                    layer={layer}
+                    lexicon={view.lexicon}
+                    needs={needs}
+                    lang={exercise.language || undefined}
+                    onChange={(next) => prosody.edit(prompt.id, next)}
+                  />
+                )}
+                <SaveLine
+                  state={prosody.saves[prompt.id]}
+                  onRetry={() => prosody.retry(prompt.id)}
+                />
               </>
             )}
           </Card>
@@ -152,6 +178,41 @@ export function StepPronunciation({
       </section>
     </div>
   );
+}
+
+function SaveLine({ state, onRetry }: { state: LayerSaveState | undefined; onRetry: () => void }) {
+  const t = useTranslations('Authoring.readAloud.step6');
+  if (state === undefined) return null;
+  const line = (text: string, tone = 'text-(--ssz-text-muted)') => (
+    <p role="status" className={`m-0 text-xs ${tone}`}>
+      {text}
+    </p>
+  );
+  switch (state.status) {
+    case 'pending':
+      return line(t('savePending'));
+    case 'saving':
+      return line(t('saving'));
+    case 'saved':
+      return line(t('saved'), 'text-(--ssz-color-success-700)');
+    case 'conflict':
+      return line(t('conflict'), 'text-(--ssz-color-warning-700)');
+    case 'invalid':
+      return line(t('invalid'), 'text-(--ssz-color-warning-700)');
+    case 'failed':
+      return (
+        <p
+          role="status"
+          className="m-0 flex items-center gap-2 text-xs text-(--ssz-color-error-700)"
+        >
+          {t('saveFailed')}
+          <Button type="button" variant="link" size="sm" className="h-auto p-0" onClick={onRetry}>
+            <RotateCw className="size-3.5" aria-hidden />
+            {t('retry')}
+          </Button>
+        </p>
+      );
+  }
 }
 
 function PromptStatus({
