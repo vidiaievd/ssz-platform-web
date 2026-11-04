@@ -53,6 +53,8 @@ import {
   type SubmittedRecording,
 } from '@/lib/shared-kernel/read-aloud';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { useExerciseProsody, useSentenceCheck } from '@/features/student/prosody';
+import { useReadingModeStore } from '@/features/student/reader/stores/reading-mode-store';
 import {
   PrecheckButton,
   PrecheckResultPanel,
@@ -402,6 +404,19 @@ function ReadAloudSession({
 }: SessionProps) {
   const t = useTranslations('ExerciseRunner.readAloud');
   const [port] = useState(createPort);
+  // Pronunciation under the passage (plan 86, §4i.2): «Meaning» until the learner leaves it, and
+  // only then is the layer fetched. Only a `read` task has a passage to mark.
+  const prosodyMode = useReadingModeStore((s) => s.prosodyMode);
+  const setProsodyMode = useReadingModeStore((s) => s.setProsodyMode);
+  const prosodyLens = useReadingModeStore((s) => s.prosodyLens);
+  const setProsodyLens = useReadingModeStore((s) => s.setProsodyLens);
+  const prosodyLegend = useReadingModeStore((s) => s.showProsodyLegend);
+  const setProsodyLegend = useReadingModeStore((s) => s.setShowProsodyLegend);
+  const sentenceCheck = useSentenceCheck(exerciseId, attemptId);
+  const prosodyQuery = useExerciseProsody(
+    exerciseId,
+    projection.mode === 'read' && prosodyMode !== 'meaning',
+  );
   /*
    * Prompts passed on an earlier try are not recorded again (phase 11b): the recorder, its
    * counter and the hand-in hold only the prompts still to do, and the passed ones are listed
@@ -724,6 +739,18 @@ function ReadAloudSession({
       submitting={submit.isPending || confirming}
       error={error}
       accent={GRADED_ACCENT}
+      prosody={{
+        settings: { mode: prosodyMode, lens: prosodyLens, legend: prosodyLegend },
+        onSettings: (next) => {
+          setProsodyMode(next.mode);
+          setProsodyLens(next.lens);
+          setProsodyLegend(next.legend);
+        },
+        loading: prosodyQuery.isFetching,
+        layers: prosodyQuery.data ?? {},
+        // A sentence can be tried only while the work is open: after the hand-in nothing is checked.
+        ...(stage === 'draft' ? { recording: { createPort, check: sentenceCheck } } : {}),
+      }}
       audio={audio}
     />
   );

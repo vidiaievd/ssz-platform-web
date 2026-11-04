@@ -52,6 +52,15 @@ import type { LessonTextSpan } from '@/features/content/types';
 import { useMyStudentProfile } from '@/features/profile';
 import { useMediaAsset } from '@/features/media';
 import {
+  ProsodyControls,
+  SentenceDrill,
+  hasPhraseMarks,
+  inlineView,
+  useLessonProsody,
+  wantsProsody,
+} from '@/features/student/prosody';
+import type { ProsodySettings, PromptProsody, ProsodyView } from '@/features/student/prosody';
+import {
   findAudioNarration,
   findHeroImage,
   isShownOutsideProse,
@@ -274,6 +283,20 @@ interface ModeProps {
   authoredVocabulary: boolean;
   /** Gloss visibility is `off`: grammar and chunk backdrops are withheld. */
   spansHidden: boolean;
+  /** The pronunciation layer per paragraph index, once a switch is on and it has arrived (plan 86). */
+  prosody?: { view: ProsodyView; byParagraph: ReadonlyMap<number, PromptProsody> };
+}
+
+/**
+ * The layer to draw on a paragraph — only if it was made for exactly this text. A layer that
+ * lags behind an edit would still be re-anchored by the server, but a text that differs here
+ * means two readers of one variant disagree, and plain text is the safe side of that.
+ */
+function prosodyFor(prosody: ModeProps['prosody'], p: { index: number; target: string }) {
+  const found = prosody?.byParagraph.get(p.index);
+  return prosody && found && found.text === p.target
+    ? { prosody: { layer: found.layer, sounds: found.sounds, view: prosody.view } }
+    : {};
 }
 
 function ImmersiveMode({
@@ -286,6 +309,7 @@ function ImmersiveMode({
   spansByParagraph,
   authoredVocabulary,
   spansHidden,
+  prosody,
 }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [showTranslation, setShowTranslation] = useState(false);
@@ -304,6 +328,7 @@ function ImmersiveMode({
               captureParagraph={p.index}
               authoredVocabulary={authoredVocabulary}
               spansHidden={spansHidden}
+              {...prosodyFor(prosody, p)}
               explanationLanguage={translationLang}
               className="text-[19px] leading-[1.9]"
             />
@@ -354,6 +379,7 @@ function BilingualMode({
   spansByParagraph,
   authoredVocabulary,
   spansHidden,
+  prosody,
 }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
 
@@ -384,6 +410,7 @@ function BilingualMode({
             captureParagraph={p.index}
             authoredVocabulary={authoredVocabulary}
             spansHidden={spansHidden}
+            {...prosodyFor(prosody, p)}
             explanationLanguage={translationLang}
             className="text-[17px] leading-[1.8]"
           />
@@ -408,6 +435,7 @@ function FocusMode({
   spansByParagraph,
   authoredVocabulary,
   spansHidden,
+  prosody,
 }: ModeProps) {
   const t = useTranslations('Learning.reader.text.page');
   const [active, setActive] = useState(0);
@@ -447,6 +475,7 @@ function FocusMode({
                 captureParagraph={p.index}
                 authoredVocabulary={authoredVocabulary}
                 spansHidden={spansHidden}
+                {...prosodyFor(prosody, p)}
                 explanationLanguage={translationLang}
                 className={on ? 'text-[20px] leading-[1.9]' : 'text-[18px] leading-[1.9]'}
               />
@@ -505,8 +534,20 @@ export function TextLessonPage({
   const tMode = useTranslations('Learning.reader.text.mode');
   const tGloss = useTranslations('Learning.reader.text.gloss');
   const tWidth = useTranslations('Learning.reader.text.width');
-  const { mode, setMode, glossVisibility, setGlossVisibility, textWidth, setTextWidth } =
-    useReadingModeStore();
+  const {
+    mode,
+    setMode,
+    glossVisibility,
+    setGlossVisibility,
+    textWidth,
+    setTextWidth,
+    prosodyMode,
+    setProsodyMode,
+    prosodyLens,
+    setProsodyLens,
+    showProsodyLegend,
+    setShowProsodyLegend,
+  } = useReadingModeStore();
   const railVisible = useReaderRailVisible();
 
   // Second pass (spec-less "melochi" E3.3): offered once the reader has already
@@ -542,6 +583,33 @@ export function TextLessonPage({
   const variant = useBestLessonVariant(lessonId, nativeLanguage ?? '', cefrLevel, profileReady);
   const paragraphsQuery = useLessonParagraphs(lessonId, variant.data?.id);
   const marksQuery = useLessonGlossaryMarks(lessonId, variant.data?.id);
+  // Pronunciation layer (plan 86): fetched only once a switch is on, and only for a language
+  // that has a lexicon behind it.
+  const prosodyAvailable = lesson.data?.targetLanguage === 'nb';
+  const prosodySettings: ProsodySettings = {
+    mode: prosodyMode,
+    lens: prosodyLens,
+    legend: showProsodyLegend,
+  };
+  const prosodyView: ProsodyView = inlineView(prosodySettings);
+  const changeProsody = (next: ProsodySettings) => {
+    setProsodyMode(next.mode);
+    setProsodyLens(next.lens);
+    setShowProsodyLegend(next.legend);
+  };
+  const prosodyQuery = useLessonProsody(
+    lessonId,
+    variant.data?.id,
+    prosodyAvailable && wantsProsody(prosodySettings),
+  );
+  const prosodyControls = prosodyAvailable ? (
+    <ProsodyControls
+      settings={prosodySettings}
+      onChange={changeProsody}
+      loading={prosodyQuery.isFetching}
+      melody={hasPhraseMarks([...(prosodyQuery.data?.values() ?? [])].map((p) => p.layer))}
+    />
+  ) : null;
   // Broken spans are withheld server-side, so everything here is renderable.
   const spansQuery = useLessonTextSpans(lessonId, variant.data?.id);
   const vocabItems = useUnitVocabularyItems(vocabularyListId ?? '', !!vocabularyListId);
@@ -865,6 +933,7 @@ export function TextLessonPage({
                 <GlossToggle visibility={glossVisibility} onChange={setGlossVisibility} />
               )}
               <WidthToggle width={textWidth} onChange={setTextWidth} />
+              {prosodyControls}
               {glossary.size > 0 && glossVisibility !== 'off' && (
                 <span className="flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
                   <span
@@ -946,6 +1015,7 @@ export function TextLessonPage({
                       <span className="text-xs text-(--ssz-text-secondary)">{tWidth('label')}</span>
                       <WidthToggle width={textWidth} onChange={setTextWidth} />
                     </div>
+                    {prosodyControls}
                   </div>
                   {glossary.size > 0 && glossVisibility !== 'off' && (
                     <p className="mt-2.5 flex items-center gap-1.5 text-xs text-(--ssz-text-muted)">
@@ -988,6 +1058,17 @@ export function TextLessonPage({
             </div>
           )}
 
+          {prosodyAvailable && prosodyMode === 'sentences' && prosodyQuery.data && (
+            <SentenceDrill
+              className="mb-6"
+              settings={prosodySettings}
+              lang={lesson.data.targetLanguage}
+              units={[...prosodyQuery.data.entries()]
+                .sort(([a], [b]) => a - b)
+                .map(([index, p]) => ({ key: String(index), ...p }))}
+            />
+          )}
+
           {proseParagraphs.length === 0 ? (
             <p className="text-sm text-(--ssz-text-muted) italic">{t('noParagraphs')}</p>
           ) : (
@@ -1005,6 +1086,9 @@ export function TextLessonPage({
                       spansByParagraph={spansByParagraph}
                       authoredVocabulary={authoredVocabulary}
                       spansHidden={glossVisibility === 'off'}
+                      {...(prosodyQuery.data
+                        ? { prosody: { view: prosodyView, byParagraph: prosodyQuery.data } }
+                        : {})}
                     />
                   </WordContextMenu>
                 </LookupTelemetryProvider>

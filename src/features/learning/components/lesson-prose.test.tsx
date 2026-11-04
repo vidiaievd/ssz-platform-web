@@ -388,3 +388,60 @@ describe('LessonProse author spans', () => {
     expect(lookups()).toHaveLength(1);
   });
 });
+
+describe('LessonProse — pronunciation layer (plan 86)', () => {
+  const RAW = '## Søvn\n\nJeg **sover** godt.\n\n- har fagbrev';
+
+  function layerOver(): import('@/lib/shared-kernel/prosody').ProsodyLayer {
+    return {
+      tokenizer: 'unicode-word-v1',
+      // Raw tokens: Søvn 0, Jeg 1, sover 2, godt 3, har 4, fagbrev 5.
+      stresses: [
+        { i: 0, w: 'Søvn', toneme: null, vowel: { s: 1, e: 2, long: true }, source: 'lexicon' },
+        { i: 2, w: 'sover', toneme: 2, vowel: { s: 1, e: 2, long: true }, source: 'lexicon' },
+        { i: 5, w: 'fagbrev', toneme: 1, vowel: { s: 1, e: 2, long: false }, source: 'lexicon' },
+      ],
+      accents: [],
+      boundaries: [{ i: 3, w: 'godt', pitch: 'fall', pause: 'long', source: 'teacher' }],
+      links: [],
+      orphans: [],
+    };
+  }
+
+  function renderWith(view: { lens: 'stress' | 'melody' | null }, layer = layerOver()) {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    return render(
+      <QueryClientProvider client={queryClient}>
+        <NextIntlClientProvider locale="en" messages={enMessages}>
+          <LessonProse text={RAW} glossary={buildGlossaryIndex([])} prosody={{ layer, view }} />
+        </NextIntlClientProvider>
+      </QueryClientProvider>,
+    );
+  }
+
+  it('finds the stressed words in a heading, an emphasised word and a list item', () => {
+    const { container } = renderWith({ lens: 'stress' });
+    const vowels = [...container.querySelectorAll('[data-vowel]')].map((n) => n.textContent);
+    expect(vowels).toEqual(['×ø', '×o', '×a']);
+    expect(container.querySelector('h3 [data-vowel]')).not.toBeNull();
+    expect(container.querySelector('strong [data-vowel]')).not.toBeNull();
+    expect(container.querySelector('li [data-vowel]')).not.toBeNull();
+  });
+
+  it('draws the toneme signs and the group end with the melody lens, leaving the text as it was', () => {
+    const { container } = renderWith({ lens: 'melody' });
+    expect(container.querySelectorAll('[data-sign]')).toHaveLength(3);
+    expect(container.querySelector('[data-pitch="fall"]')).not.toBeNull();
+    container.querySelectorAll('[aria-hidden="true"]').forEach((n) => n.remove());
+    expect(container.textContent).toBe('SøvnJeg sover godt.har fagbrev');
+  });
+
+  it('draws nothing without a lens, or on a mark whose word has changed', () => {
+    expect(renderWith({ lens: null }).container.querySelector('[data-word]')).toBeNull();
+
+    const stale = layerOver();
+    stale.stresses = stale.stresses.map((m) => ({ ...m, w: 'annet' }));
+    stale.boundaries = [];
+    expect(renderWith({ lens: 'melody' }, stale).container.querySelector('[data-word]')).toBeNull();
+  });
+});

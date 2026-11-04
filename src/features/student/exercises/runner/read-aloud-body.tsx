@@ -5,6 +5,15 @@ import { ArrowLeft, ArrowRight, Check, CircleAlert, Headphones, Lock } from 'luc
 import { useTranslations } from 'next-intl';
 
 import { useContainerWidth } from '@/hooks';
+import {
+  ProsodyControls,
+  SentenceDrill,
+  type SentenceRecording,
+  hasPhraseMarks,
+  inlineView,
+  type ProsodySettings,
+  type PromptProsody,
+} from '@/features/student/prosody';
 import { ExerciseAudioPlayer, type ExerciseAudioEngine } from '@/features/student/exercises/audio';
 import type { RecorderHandle } from '@/features/student/exercises/recorder';
 import {
@@ -110,6 +119,21 @@ export interface ReadAloudBodyProps {
   accent: string;
   /** The model reading or the partner's line — the audio layer, never a second way (RA-R9). */
   audio?: ExerciseAudioEngine;
+  /**
+   * The pronunciation layer under a `read` passage (plan 86): the switches, and the layer per
+   * prompt id once fetched. Absent in the builder preview and wherever the layer is not offered.
+   */
+  prosody?: ReadAloudProsody;
+}
+
+export interface ReadAloudProsody {
+  settings: ProsodySettings;
+  onSettings: (settings: ProsodySettings) => void;
+  loading: boolean;
+  /** Per prompt id; the text guards against a layer drawn for other words. */
+  layers: Readonly<Record<string, PromptProsody>>;
+  /** Say a sentence and hear it (step 6g); absent once the work is handed in. */
+  recording?: SentenceRecording;
 }
 
 /**
@@ -149,6 +173,7 @@ export function ReadAloudBody({
   layout,
   accent,
   audio,
+  prosody,
 }: ReadAloudBodyProps) {
   const t = useTranslations('ExerciseRunner.readAloud');
   const [root, width] = useContainerWidth();
@@ -217,7 +242,39 @@ export function ReadAloudBody({
           {prompts.length > 1 && prompt.label.trim() !== '' && (
             <span className={`text-(--ssz-text-muted) ${RA_CAPS}`}>{prompt.label}</span>
           )}
-          <Material mode={projection.mode} prompt={prompt} language={projection.language} />
+          {prosody !== undefined && projection.mode === 'read' && (
+            <ProsodyControls
+              settings={prosody.settings}
+              onChange={prosody.onSettings}
+              loading={prosody.loading}
+              melody={hasPhraseMarks(Object.values(prosody.layers).map((p) => p.layer))}
+            />
+          )}
+          {prosody !== undefined &&
+            projection.mode === 'read' &&
+            prosody.settings.mode === 'sentences' &&
+            prosody.layers[prompt.id]?.text === prompt.text && (
+              <SentenceDrill
+                units={[{ key: prompt.id, ...prosody.layers[prompt.id]! }]}
+                settings={prosody.settings}
+                lang={projection.language || undefined}
+                {...(prosody.recording ? { recording: prosody.recording } : {})}
+              />
+            )}
+          <Material
+            mode={projection.mode}
+            prompt={prompt}
+            language={projection.language}
+            {...(prosody !== undefined && prosody.layers[prompt.id]?.text === prompt.text
+              ? {
+                  prosody: {
+                    layer: prosody.layers[prompt.id]!.layer,
+                    sounds: prosody.layers[prompt.id]!.sounds,
+                    view: inlineView(prosody.settings),
+                  },
+                }
+              : {})}
+          />
 
           <RecorderBlock
             recorder={recorder}

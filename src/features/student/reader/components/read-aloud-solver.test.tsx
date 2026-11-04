@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { StrictMode } from 'react';
@@ -318,7 +318,9 @@ describe('ReadAloudSolver', () => {
     renderSolver(api);
     await userEvent.click(await screen.findByRole('button', { name: 'Start' }));
     await screen.findByRole('button', { name: 'Record again (2 left)' });
-    expect(screen.getAllByRole('radio')).toHaveLength(1);
+    // The pronunciation switches are radios too (plan 86); the takes are the ones to count.
+    const takes = screen.getByRole('radiogroup', { name: 'Choose the recording you hand in' });
+    expect(within(takes).getAllByRole('radio')).toHaveLength(1);
     expect(screen.getByRole('button', { name: 'Hand in for review' })).toBeEnabled();
   });
 

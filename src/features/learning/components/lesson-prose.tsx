@@ -14,6 +14,9 @@ import {
 } from '../lib/parse-markdown-blocks';
 import { projectSpansOntoBlocks, type ProjectedSpan } from '../lib/project-span';
 import { type GlossaryIndex } from '../lib/tokenize-glossary';
+import { MARKS_LEADING, marksByStart } from '@/features/student/prosody';
+import type { ProsodyView, TokenMarks } from '@/features/student/prosody';
+import type { ProsodyLayer, WordSounds } from '@/lib/shared-kernel/prosody';
 
 const HEADING_CLASS: Record<number, string> = {
   1: 'text-[22px] font-semibold',
@@ -28,6 +31,8 @@ interface AnnotationProps {
   authoredVocabulary: boolean;
   spansHidden: boolean;
   explanationLanguage?: string;
+  /** What of the pronunciation layer to draw, and each text run's marks (plan 86). */
+  prosody?: { view: ProsodyView; runs: Map<MappedText, Map<number, TokenMarks>> };
 }
 
 function Blocks({
@@ -45,6 +50,13 @@ function Blocks({
   annotations: AnnotationProps;
 }) {
   const { placed, authoredVocabulary, spansHidden, explanationLanguage } = annotations;
+  /** The marks of one text run, in the offsets of that run's own text. */
+  const prosodyOf = (run: MappedText) => {
+    const marks = annotations.prosody?.runs.get(run);
+    return annotations.prosody && marks
+      ? { prosody: { view: annotations.prosody.view, marks } }
+      : {};
+  };
 
   return (
     <>
@@ -69,6 +81,7 @@ function Blocks({
                   authoredVocabulary={authoredVocabulary}
                   spansHidden={spansHidden}
                   explanationLanguage={explanationLanguage}
+                  {...prosodyOf(block)}
                 />
               </Tag>
             );
@@ -87,6 +100,7 @@ function Blocks({
                       authoredVocabulary={authoredVocabulary}
                       spansHidden={spansHidden}
                       explanationLanguage={explanationLanguage}
+                      {...prosodyOf(item)}
                     />
                   </li>
                 ))}
@@ -117,6 +131,7 @@ function Blocks({
                               authoredVocabulary={authoredVocabulary}
                               spansHidden={spansHidden}
                               explanationLanguage={explanationLanguage}
+                              {...prosodyOf(cell)}
                             />
                           </th>
                         ))}
@@ -140,6 +155,7 @@ function Blocks({
                               authoredVocabulary={authoredVocabulary}
                               spansHidden={spansHidden}
                               explanationLanguage={explanationLanguage}
+                              {...prosodyOf(cell)}
                             />
                           </td>
                         ))}
@@ -185,6 +201,7 @@ function Blocks({
                   authoredVocabulary={authoredVocabulary}
                   spansHidden={spansHidden}
                   explanationLanguage={explanationLanguage}
+                  {...prosodyOf(block)}
                 />
               </p>
             );
@@ -192,6 +209,47 @@ function Blocks({
       })}
     </>
   );
+}
+
+/** Every text run of the blocks, in reading order — what a mark can land on. */
+function runsOf(blocks: MarkdownBlock[]): MappedText[] {
+  return blocks.flatMap((block): MappedText[] => {
+    switch (block.kind) {
+      case 'heading':
+      case 'paragraph':
+        return [block];
+      case 'list':
+        return block.items;
+      case 'table':
+        return [...block.head, ...block.rows.flat()];
+      case 'quote':
+        return runsOf(block.blocks);
+      default:
+        return [];
+    }
+  });
+}
+
+/**
+ * The layer's marks re-keyed per text run. Marks are keyed by the word's start in the chunk's
+ * raw markdown; a run knows where each of its characters came from (`sourceIndexOf`), so the
+ * mark lands on the displayed word however much markup (`## `, `- `, `> `) was dropped before it.
+ */
+function marksOfRuns(
+  blocks: MarkdownBlock[],
+  byChunkStart: Map<number, TokenMarks>,
+): Map<MappedText, Map<number, TokenMarks>> {
+  const out = new Map<MappedText, Map<number, TokenMarks>>();
+  if (byChunkStart.size === 0) return out;
+  for (const run of runsOf(blocks)) {
+    const marks = new Map<number, TokenMarks>();
+    for (let k = 0; k < run.text.length; k += 1) {
+      const found = byChunkStart.get(run.sourceIndexOf[k]!);
+      if (found) marks.set(k, found);
+    }
+    if (marks.size > 0) out.set(run, marks);
+  }
+  return out;
 }
 
 export interface LessonProseProps {
@@ -219,6 +277,11 @@ export interface LessonProseProps {
    * (plan 75). Set on the target-language text only — never on a translation.
    */
   captureParagraph?: number;
+  /**
+   * The pronunciation layer of this chunk and what to draw of it (plan 86). `layer` is anchored
+   * to `text` as stored; the caller checks it was made for exactly this text.
+   */
+  prosody?: { layer: ProsodyLayer; sounds?: readonly WordSounds[]; view: ProsodyView };
   className?: string;
   style?: React.CSSProperties;
 }
@@ -234,17 +297,23 @@ export function LessonProse({
   spansHidden = false,
   explanationLanguage,
   captureParagraph,
+  prosody,
   className,
   style,
 }: LessonProseProps) {
   const blocks = useMemo(() => parseMarkdownBlocks(text), [text]);
   const placed = useMemo(() => projectSpansOntoBlocks(blocks, spans ?? []), [blocks, spans]);
+  const prosodyRuns = useMemo(
+    () => (prosody ? marksOfRuns(blocks, marksByStart(text, prosody.layer, prosody.sounds)) : null),
+    [blocks, text, prosody],
+  );
+  const drawn = prosody !== undefined && prosody.view.lens !== null && prosodyRuns !== null && prosodyRuns.size > 0;
 
   return (
     <div
       lang={lang}
       className={cn('flex flex-col gap-3.5', className)}
-      style={style}
+      style={drawn ? { ...style, lineHeight: MARKS_LEADING } : style}
       // Kept in step with CAPTURE_PARAGRAPH_ATTR, which the word context menu looks for.
       data-capture-paragraph={captureParagraph}
     >
@@ -252,7 +321,13 @@ export function LessonProse({
         blocks={blocks}
         glossary={glossary}
         cefrLevel={cefrLevel}
-        annotations={{ placed, authoredVocabulary, spansHidden, explanationLanguage }}
+        annotations={{
+          placed,
+          authoredVocabulary,
+          spansHidden,
+          explanationLanguage,
+          ...(drawn ? { prosody: { view: prosody.view, runs: prosodyRuns } } : {}),
+        }}
       />
     </div>
   );

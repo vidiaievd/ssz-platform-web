@@ -961,5 +961,56 @@
       "fluency": "Fluency",
       "content": "Content"
     }
+  },
+  "prosody": {
+    "group": "Pronunciation",
+    "lensGroup": "What to show",
+    "loading": "Loading marks…",
+    "modeMeaning": "Meaning",
+    "modeSentences": "By sentence",
+    "modeText": "Whole text",
+    "lensStress": "Stress",
+    "lensSounds": "Sounds",
+    "lensRespell": "As it sounds",
+    "lensMelody": "Melody",
+    "legendShow": "Show the legend",
+    "legendTitle": "Legend",
+    "legendStressed": "Stressed vowel",
+    "legendLong": "Long vowel (band under it)",
+    "legendSilent": "Silent letter (pale)",
+    "legendTie": "Letters of one sound (bracket over them)",
+    "legendWeak": "Weak vowel (fainter)",
+    "legendRespell": "The word as it sounds",
+    "legendRespellSigns": "ŋ is «ng»; ː makes the vowel long",
+    "legendTone1": "Tone 1: the voice rises",
+    "legendTone2": "Tone 2: falls, then rises",
+    "legendDot": "Single syllable",
+    "legendAccent": "The main word of the phrase (bold)",
+    "legendFall": "End of a group: the voice goes down, long pause",
+    "legendRise": "End of a group: the voice goes up, short pause",
+    "drillTitle": "Pronunciation by sentence",
+    "drillCounter": "Sentence {n} of {total}",
+    "drillPrev": "Previous",
+    "drillNext": "Next",
+    "drillList": "All sentences",
+    "take": {
+      "record": "Say it",
+      "again": "Say it again",
+      "stop": "Stop",
+      "recording": "Recording…",
+      "hearing": "Listening…",
+      "mic": {
+        "denied": "The microphone is blocked — allow it for this site and try again.",
+        "noDevice": "No microphone found."
+      },
+      "line": {
+        "failed": "Couldn't hear that just now — try again in a moment.",
+        "notReady": "The recording wasn't ready — say it again.",
+        "inaudible": "Too quiet or too noisy to hear — move closer and say it again.",
+        "tryLimit": "You've tried this sentence enough for today — come back tomorrow.",
+        "closed": "Checking sentences isn't available for this work.",
+        "unsupported": "Sentences in this language can't be heard yet."
+      }
+    }
   }
 }

@@ -5,6 +5,8 @@ import { ImageIcon, Loader2, MessageCircle, Pause, Play } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { useMediaAsset } from '@/features/media';
+import { ProsodyText, type ProsodyView } from '@/features/student/prosody';
+import { emptyProsodyLayer, type ProsodyLayer, type WordSounds } from '@/lib/shared-kernel/prosody';
 import { bucketPeaks } from '@/features/student/exercises/recorder';
 import {
   formatSeconds,
@@ -245,10 +247,13 @@ export function Material({
   mode,
   prompt,
   language,
+  prosody,
 }: {
   mode: Mode;
   prompt: ProjectedPrompt;
   language: string;
+  /** The passage's pronunciation layer and what of it to draw (plan 86); plain text without. */
+  prosody?: { layer: ProsodyLayer; sounds: readonly WordSounds[]; view: ProsodyView };
 }) {
   const lang = language || undefined;
   if (mode === 'read') {
@@ -261,13 +266,15 @@ export function Material({
           borderColor: 'var(--ssz-border-default)',
         }}
       >
-        <p
-          lang={lang}
+        <ProsodyText
+          text={prompt.text ?? ''}
+          layer={prosody?.layer ?? emptyProsodyLayer()}
+          sounds={prosody?.sounds ?? []}
+          view={prosody?.view ?? { lens: null }}
+          {...(lang === undefined ? {} : { lang })}
           className="m-0 text-lg leading-(--ssz-leading-relaxed) text-(--ssz-text-primary)"
           style={{ fontFamily: RA_READING, textWrap: 'pretty' }}
-        >
-          {prompt.text}
-        </p>
+        />
       </div>
     );
   }
