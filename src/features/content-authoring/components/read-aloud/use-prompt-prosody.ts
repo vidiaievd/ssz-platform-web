@@ -13,8 +13,10 @@ import type { ProsodyIssue, ProsodyLayer } from '@/lib/shared-kernel/prosody';
 import {
   loadPromptProsodyAction,
   savePromptProsodyAction,
+  suggestPromptProsodyAction,
   type PromptProsodyAuthoring,
 } from '../../actions/prosody';
+import type { ProsodySuggestion } from '../prosody-editor';
 
 /** As the document's autosave (`use-read-aloud-autosave.ts`): the author never presses save. */
 const SAVE_DEBOUNCE_MS = 850;
@@ -58,6 +60,11 @@ export interface PromptProsody {
   /** After a save or a suggestion: the view the server answered with. */
   setView: (promptId: string, view: PromptProsodyAuthoring) => void;
   reload: (promptId: string) => void;
+  /**
+   * ✦ The agent's phrase marks for the prompt's saved passage. Nothing is stored or drafted:
+   * the editor proposes them and an accepted sentence comes back through `edit`.
+   */
+  suggest: (promptId: string) => Promise<ProsodySuggestion>;
 }
 
 export interface UsePromptProsodyOptions {
@@ -279,5 +286,17 @@ export function usePromptProsody({ exerciseId, exercise }: UsePromptProsodyOptio
     return out;
   }, [byPrompt, drafts, exercise.prompts]);
 
-  return { byPrompt, guide, layerOf, saves, edit, retry, setView, reload };
+  const suggest = useCallback(
+    async (promptId: string): Promise<ProsodySuggestion> => {
+      const result = await suggestPromptProsodyAction(exerciseId, promptId);
+      if (!result.ok) return { status: 'failed' };
+      const outcome = result.value;
+      return outcome.status === 'suggested'
+        ? { status: 'suggested', text: outcome.view.text, layer: outcome.view.layer }
+        : outcome;
+    },
+    [exerciseId],
+  );
+
+  return { byPrompt, guide, layerOf, saves, edit, retry, setView, reload, suggest };
 }

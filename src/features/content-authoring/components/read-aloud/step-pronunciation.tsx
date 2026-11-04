@@ -5,6 +5,7 @@ import { Eye, RotateCw, Spline } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useCan } from '@/features/entitlements';
 import {
   PRONUNCIATION_LENSES,
   type Issue,
@@ -49,7 +50,8 @@ export interface StepPronunciationProps {
  * kernel's `guideIssues`, the same list the publish preflight runs.
  *
  * Each passage gets the shared `ProsodyEditor` once its marks lie on the text shown (a text being
- * typed waits for its autosave); edits are saved on their own, as the layer's autosave.
+ * typed waits for its autosave); edits are saved on their own, as the layer's autosave. ✦ is
+ * offered when the workspace's plan has `ai.authoring`.
  */
 export function StepPronunciation({
   exercise,
@@ -60,6 +62,8 @@ export function StepPronunciation({
   const t = useTranslations('Authoring.readAloud');
   const lenses = useTranslations('ExerciseRunner.prosody');
   const copy = useIssueCopy(exercise);
+  // ✦ spends the owner's `ai.authoring` credits; without the key the agent would refuse it.
+  const can = useCan();
   const guide = exercise.pronunciationGuide;
   const own = problems.filter((issue) => issue.step === 6);
 
@@ -153,6 +157,7 @@ export function StepPronunciation({
                     needs={needs}
                     lang={exercise.language || undefined}
                     onChange={(next) => prosody.edit(prompt.id, next)}
+                    onSuggest={can('ai.authoring') ? () => prosody.suggest(prompt.id) : undefined}
                   />
                 )}
                 <SaveLine

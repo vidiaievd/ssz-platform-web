@@ -1,4 +1,5 @@
 import {
+  anchorLength,
   elementsOf,
   layerOf,
   stressedVowelFrom,
@@ -137,4 +138,60 @@ export function stressFor(
   const several = vowelNuclei(word).length > 1;
   const toneme = several ? (shown?.toneme ?? 1) : null;
   return { vowel: { s: vowel.s, e: vowel.e, long }, toneme };
+}
+
+/**
+ * An orphan put back on a word the author picked (plan 86, step 6h.3c). A linking takes the
+ * picked word and the next one. A stress keeps its vowel on the same word; on another word it
+ * moves to the first vowel, and a word with none cannot take it (`null`). The mark becomes the
+ * teacher's and replaces one of its kind on the word.
+ */
+export function placeOrphan(
+  layer: ProsodyLayer,
+  index: number,
+  tokens: readonly Token[],
+  at: number,
+): ProsodyLayer | null {
+  const orphan = layer.orphans[index];
+  const token = tokens[at];
+  if (orphan === undefined || token === undefined) return null;
+  const run = tokens.slice(at, at + anchorLength(orphan.kind));
+  if (run.length < anchorLength(orphan.kind)) return null;
+  const w = run.map((t) => t.w).join(' ');
+
+  let placed: ProsodyElement;
+  if (orphan.kind === 'stress') {
+    const same = orphan.mark.w.toLowerCase() === token.w.toLowerCase();
+    const nuclei = vowelNuclei(token.w);
+    const vowel = same
+      ? orphan.mark.vowel
+      : nuclei[0] && { s: nuclei[0].s, e: nuclei[0].e, long: null };
+    if (!vowel) return null;
+    const toneme = nuclei.length > 1 ? (orphan.mark.toneme ?? 1) : null;
+    placed = {
+      kind: 'stress',
+      mark: { ...orphan.mark, i: at, w, vowel, toneme, source: 'teacher' },
+    };
+  } else {
+    placed = { ...orphan, mark: { ...orphan.mark, i: at, w, source: 'teacher' } } as ProsodyElement;
+  }
+
+  const replaced: ProsodyKind[] =
+    placed.kind === 'stress' || placed.kind === 'unstressed'
+      ? ['stress', 'unstressed']
+      : [placed.kind];
+  const rest = without(layer, token, replaced);
+  rest.push(placed);
+  return layerOf(
+    rest,
+    layer.orphans.filter((_, k) => k !== index),
+  );
+}
+
+/** «Remove»: the orphan is dropped for good. */
+export function dropOrphan(layer: ProsodyLayer, index: number): ProsodyLayer {
+  return layerOf(
+    elementsOf(layer),
+    layer.orphans.filter((_, k) => k !== index),
+  );
 }

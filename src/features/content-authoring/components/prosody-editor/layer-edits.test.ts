@@ -6,6 +6,8 @@ import { tokenize } from '@/lib/shared-kernel/text/words';
 import {
   clearPhrase,
   cyclePause,
+  dropOrphan,
+  placeOrphan,
   revertWord,
   setAccent,
   setBoundary,
@@ -102,5 +104,43 @@ describe('layer edits (plan 86, step 6h.3b)', () => {
       vowel: { s: 4, e: 5, long: null },
       toneme: 1,
     });
+  });
+});
+
+describe('orphans (plan 86, step 6h.3c)', () => {
+  const text = tokenize('Kjetil har bodd i Bergen lenge');
+  const orphans: ProsodyLayer['orphans'] = [
+    {
+      kind: 'stress',
+      mark: { i: 3, w: 'Bergen', toneme: 2, vowel: { s: 1, e: 2, long: false }, source: 'ai' },
+    },
+    { kind: 'link', mark: { i: 2, w: 'bodd i', source: 'ai' } },
+    { kind: 'boundary', mark: { i: 9, w: 'før', pitch: 'fall', pause: null, source: 'teacher' } },
+  ];
+  const layer: ProsodyLayer = { ...emptyProsodyLayer(), orphans };
+
+  it('puts a stress back on its word with its vowel, as the teacher', () => {
+    const next = placeOrphan(layer, 0, text, 4)!;
+    expect(next.stresses).toEqual([
+      { i: 4, w: 'Bergen', toneme: 2, vowel: { s: 1, e: 2, long: false }, source: 'teacher' },
+    ]);
+    expect(next.orphans).toEqual(orphans.slice(1));
+  });
+
+  it('moves a stress on another word to its first vowel; a monosyllable has no toneme', () => {
+    expect(placeOrphan(layer, 0, text, 1)!.stresses).toEqual([
+      { i: 1, w: 'har', toneme: null, vowel: { s: 1, e: 2, long: null }, source: 'teacher' },
+    ]);
+  });
+
+  it('links the picked word with the next one, not past the end', () => {
+    expect(placeOrphan(layer, 1, text, 2)!.links).toEqual([
+      { i: 2, w: 'bodd i', source: 'teacher' },
+    ]);
+    expect(placeOrphan(layer, 1, text, 5)).toBeNull();
+  });
+
+  it('drops an orphan for good', () => {
+    expect(dropOrphan(layer, 2).orphans).toEqual(orphans.slice(0, 2));
   });
 });

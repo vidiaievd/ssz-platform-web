@@ -48,6 +48,8 @@ const ACCENT = 'var(--ssz-color-primary-600)';
 /** Phrase ends and pauses. */
 const PITCH = 'var(--ssz-color-warning-600)';
 const VOWEL_BAND = `color-mix(in srgb, ${ACCENT} 35%, transparent)`;
+/** A mark the authoring agent set and nobody has touched — shown only to the author. */
+const AI_MARK = 'var(--ssz-color-info-600)';
 
 /** Line height that leaves room for the signs over the words. */
 export const MARKS_LEADING = 2.4;
@@ -127,7 +129,17 @@ export function drawnIn(lens: ProsodyLens | null, marks: TokenMarks): boolean {
 }
 
 /** A sign over a letter: out of the line, so the text itself keeps its place and its width. */
-function Over({ children, color = ACCENT, size = '0.62em' }: { children: ReactNode; color?: string; size?: string }) {
+function Over({
+  children,
+  color = ACCENT,
+  size = '0.62em',
+  dashed = false,
+}: {
+  children: ReactNode;
+  color?: string;
+  size?: string;
+  dashed?: boolean;
+}) {
   return (
     <span
       aria-hidden="true"
@@ -141,6 +153,9 @@ function Over({ children, color = ACCENT, size = '0.62em' }: { children: ReactNo
         lineHeight: 1,
         color,
         fontWeight: 700,
+        ...(dashed
+          ? { outline: '1px dashed currentColor', outlineOffset: '1px', borderRadius: '2px' }
+          : {}),
         userSelect: 'none',
         pointerEvents: 'none',
       }}
@@ -283,20 +298,24 @@ function respellFace(word: string, segs: readonly SoundSeg[]): ReactNode {
 
 /**
  * One word with what the lens draws on it. The stressed vowel is always wrapped, so a sign has
- * somewhere to stand; a phrase accent is bold.
+ * somewhere to stand; a phrase accent is bold. `sourced` (the author's editor) underlines an
+ * accent the agent set, dashed in its own colour.
  */
 export function ProsodyWord({
   word,
   marks,
   view,
+  sourced = false,
 }: {
   word: string;
   marks: TokenMarks;
   view: ProsodyView;
+  sourced?: boolean;
 }) {
   const { lens } = view;
   if (lens === null) return <>{word}</>;
   const accent = lens === 'melody' && marks.accent !== undefined;
+  const byAgent = sourced && accent && marks.accent?.source === 'ai';
   let face: ReactNode = word;
   if ((lens === 'stress' || lens === 'melody') && marks.stress !== undefined) {
     face = stressFace(word, marks.stress, lens, accent);
@@ -310,20 +329,41 @@ export function ProsodyWord({
       data-word=""
       data-lens={lens}
       {...(accent ? { 'data-focus': '' } : {})}
+      {...(byAgent ? { 'data-source': 'ai' } : {})}
       className={
         lens === 'melody' && marks.linked === true
           ? "after:text-(--ssz-color-primary-600) after:content-['‿']"
           : undefined
       }
-      style={{ fontWeight: accent ? 700 : undefined }}
+      style={{
+        fontWeight: accent ? 700 : undefined,
+        ...(byAgent
+          ? {
+              textDecorationLine: 'underline',
+              textDecorationStyle: 'dashed',
+              textDecorationColor: AI_MARK,
+              textUnderlineOffset: '0.25em',
+            }
+          : {}),
+      }}
     >
       {face}
     </span>
   );
 }
 
-/** The end of an intonation group: where the voice goes, and the pause, over the end of the word. */
-export function ProsodyBoundary({ boundary }: { boundary: GroupBoundary }) {
+/**
+ * The end of an intonation group: where the voice goes, and the pause, over the end of the word.
+ * `sourced` (the author's editor) draws one the agent set dashed, in its own colour.
+ */
+export function ProsodyBoundary({
+  boundary,
+  sourced = false,
+}: {
+  boundary: GroupBoundary;
+  sourced?: boolean;
+}) {
+  const byAgent = sourced && boundary.source === 'ai';
   const arrow = boundary.pitch === 'rise' ? '↗' : boundary.pitch === 'fall' ? '↘' : boundary.pitch === 'level' ? '→' : '';
   const pause = boundary.pause === 'long' ? '‖' : boundary.pause === 'short' ? '|' : '';
   return (
@@ -331,6 +371,7 @@ export function ProsodyBoundary({ boundary }: { boundary: GroupBoundary }) {
       aria-hidden="true"
       data-mark="boundary"
       {...(boundary.pitch === null ? {} : { 'data-pitch': boundary.pitch })}
+      {...(byAgent ? { 'data-source': 'ai' } : {})}
       style={{
         position: 'relative',
         display: 'inline-block',
@@ -338,7 +379,7 @@ export function ProsodyBoundary({ boundary }: { boundary: GroupBoundary }) {
         userSelect: 'none',
       }}
     >
-      <Over color={PITCH} size="0.7em">
+      <Over color={byAgent ? AI_MARK : PITCH} size="0.7em" dashed={byAgent}>
         {arrow}
         {pause}
       </Over>
