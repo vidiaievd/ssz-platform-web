@@ -8,6 +8,8 @@
 //
 //   ^'1Anna       phrase accent (`^`), then stress: `'1` / `'2` before the stressed syllable,
 //                 a bare `'` at the start of a stressed monosyllable (`'bor`)
+//   '0Bartek      the word has no stress — the author's answer for a word the lexicon does
+//                 not know or got wrong (plan 86, step 6h)
 //   \  /  ~       end of a group — fall, rise, level
 //   |  ||         pause — short, long
 //   _             the word runs into the next one
@@ -17,7 +19,7 @@
 // Rules that keep the text recoverable — without its marks the notation is the text, character
 // for character (`checkProsodyNotation`):
 //   · `^`, `'1`, `'2` and a bare `'` sit inside a word, before a letter. `'1` / `'2` may stand
-//     anywhere in the word; a bare `'` only at its start, because `don't` is a word.
+//     anywhere in the word; a bare `'` and `'0` only at its start, because `don't` is a word.
 //   · `/ \ ~ | || _` are words of their own, after a space or a tab, and belong to the word
 //     before them. Removing one removes the space in front of it. Never in a word: `C#/.NET`
 //     and `snake_case` stay text.
@@ -40,6 +42,7 @@ import type {
   Toneme,
   WordLink,
   WordStress,
+  WordUnstressed,
 } from './model';
 import { emptyProsodyLayer } from './model';
 import { stressedVowelFrom, syllableStart } from './spelling';
@@ -83,6 +86,7 @@ const isSpace = (ch: string | undefined) => ch !== undefined && /\s/.test(ch);
 type Found =
   | { type: 'accent'; pos: number; at: number }
   | { type: 'stress'; pos: number; at: number; toneme: Toneme | null }
+  | { type: 'unstressed'; pos: number; at: number }
   | { type: 'standalone'; pos: number; at: number; marker: string; sign: Standalone };
 
 export function parseProsodyNotation(
@@ -128,6 +132,11 @@ export function parseProsodyNotation(
         k += 2;
         continue;
       }
+      if (digit === '0' && isLetter(notation[k + 2]) && !isWordChar(prevText)) {
+        found.push({ type: 'unstressed', pos: text.length, at: k });
+        k += 2;
+        continue;
+      }
       if (isLetter(digit) && !isWordChar(prevText)) {
         found.push({ type: 'stress', pos: text.length, at: k, toneme: null });
         k += 1;
@@ -147,7 +156,7 @@ export function parseProsodyNotation(
   const links = new Map<number, WordLink & { at: number }>();
 
   for (const f of found) {
-    if (f.type === 'accent' || f.type === 'stress') {
+    if (f.type === 'accent' || f.type === 'stress' || f.type === 'unstressed') {
       // The scan put an inline mark only before a letter, so a token is always under it.
       const t = tokenAt(tokens, f.pos);
       if (!t) continue;
@@ -156,6 +165,15 @@ export function parseProsodyNotation(
         else {
           accented.add(t.i);
           layer.accents.push({ i: t.i, w: t.w, source } satisfies PhraseAccent);
+        }
+        continue;
+      }
+      if (f.type === 'unstressed') {
+        // One answer per word: stressed or not, never both.
+        if (stressed.has(t.i)) issues.push({ code: 'PN_DUPLICATE', at: f.at, kind: 'stress' });
+        else {
+          stressed.add(t.i);
+          (layer.unstressed ??= []).push({ i: t.i, w: t.w, source } satisfies WordUnstressed);
         }
         continue;
       }
@@ -207,6 +225,7 @@ export function parseProsodyNotation(
 
   const byToken = (a: { i: number }, b: { i: number }) => a.i - b.i;
   layer.stresses.sort(byToken);
+  layer.unstressed?.sort(byToken);
   layer.accents.sort(byToken);
   layer.boundaries.sort(byToken);
   layer.links.sort(byToken);
@@ -247,6 +266,11 @@ export function toProsodyNotation(
     }
     if (s.toneme === null) inserts.push({ pos: t.s, order: 1, str: "'" });
     else inserts.push({ pos: t.s + syllableStart(t.w, s.vowel.s), order: 1, str: `'${s.toneme}` });
+  }
+  for (const u of layer.unstressed ?? []) {
+    const t = onWord(u.i, u.w);
+    if (t) inserts.push({ pos: t.s, order: 1, str: "'0" });
+    else dropped++;
   }
 
   const gapAfter = (t: Token): number | null => {
@@ -308,7 +332,7 @@ function startsStressOrLetter(notation: string, k: number): boolean {
   if (isLetter(notation[k])) return true;
   if (notation[k] !== "'") return false;
   const next = notation[k + 1];
-  return isLetter(next) || ((next === '1' || next === '2') && isLetter(notation[k + 2]));
+  return isLetter(next) || ((next === '0' || next === '1' || next === '2') && isLetter(notation[k + 2]));
 }
 
 function tokenAt(tokens: readonly Token[], pos: number): Token | null {

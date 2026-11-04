@@ -23,6 +23,7 @@ export type {
   Toneme,
   WordLink,
   WordStress,
+  WordUnstressed,
 } from './model';
 export { anchorLength, anchorWords, elementsOf, emptyProsodyLayer, layerOf } from './model';
 export type { NotationIssue, ParsedNotation } from './notation';

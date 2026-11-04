@@ -4724,11 +4724,13 @@
       "step3": "Rubric",
       "step4": "Recording",
       "step5": "Flow",
+      "step6": "Pronunciation",
       "stepSub1": "mode and material",
       "stepSub2": "the grader's brief",
       "stepSub3": "how it is scored",
       "stepSub4": "takes and limits",
       "stepSub5": "review and queue",
+      "stepSub6": "marks under the passage",
       "stepsLabel": "Steps of the read-aloud exercise"
     },
     "subject": {

@@ -4724,11 +4724,13 @@
       "step3": "Vurderingsskjema",
       "step4": "Opptak",
       "step5": "Flyt",
+      "step6": "Uttale",
       "stepSub1": "modus og materiale",
       "stepSub2": "læreren sitt notat",
       "stepSub3": "hvordan det poengsettes",
       "stepSub4": "forsøk og grenser",
       "stepSub5": "vurdering og kø",
+      "stepSub6": "merker under teksten",
       "stepsLabel": "Stegene i opplesningsoppgaven"
     },
     "subject": {
