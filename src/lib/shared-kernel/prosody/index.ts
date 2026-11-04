@@ -28,4 +28,6 @@ export { anchorLength, anchorWords, elementsOf, emptyProsodyLayer, layerOf } fro
 export type { NotationIssue, ParsedNotation } from './notation';
 export { checkProsodyNotation, parseProsodyNotation, toProsodyNotation } from './notation';
 export { reanchorProsody } from './reanchor';
+export type { SoundSeg, SoundSegKind, SoundStress, WordSounds } from './sounds';
+export { LENGTH_MARK, respell, respellSound, segsCoverWord } from './sounds';
 export { isVowelLetter, stressedVowelFrom, syllableStart } from './spelling';
