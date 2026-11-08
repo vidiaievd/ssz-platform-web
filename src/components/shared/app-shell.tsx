@@ -22,6 +22,7 @@ import {
   Settings,
   Users,
   Zap,
+  Mic,
 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -232,6 +233,7 @@ function buildStudentNav(reviewsDue: number): NavSection[] {
         { href: '/student/my-courses', icon: BookOpen, labelKey: 'myCourses' },
         { href: '/student/catalogue', icon: Search, labelKey: 'catalogue' },
         { href: '/student/training', icon: Zap, labelKey: 'training' },
+        { href: '/student/pronunciation', icon: Mic, labelKey: 'pronunciation' },
         { href: '/student/my-words', icon: BookMarked, labelKey: 'myWords' },
         { href: '/student/reviews', icon: Bell, labelKey: 'reviews', badge: reviewsDue },
         { href: '/student/submissions', icon: ClipboardCheck, labelKey: 'submissions' },

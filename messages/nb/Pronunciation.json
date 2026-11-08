@@ -1,0 +1,136 @@
+{
+  "eyebrow": "Uttale",
+  "title": "Uttaletrening",
+  "subtitle": "En kort økt på lydene du synes er vanskeligst. Lytt, si det, og få svar på sekunder.",
+  "language": "Norsk",
+  "start": {
+    "begin": "Start en økt",
+    "resume": "Fortsett økten",
+    "starting": "Gjør klar…",
+    "hint": "Økten velger lyder for deg: først de som skal repeteres, så de du nylig bommet på. Er du ny, starter den med en kort sjekk.",
+    "lowBudget": "KI-kvoten din kan være for liten til en hel økt ({remaining} av omtrent {estimated} kreditter igjen). Du kan fortsette; økten stopper når kvoten er brukt opp.",
+    "schoolPays": "Skolen din dekker denne økten.",
+    "trainSound": "Tren lyden [{family}]",
+    "chosen": "Du valgte lyden [{family}]; økten øver på den."
+  },
+  "refused": {
+    "SESSION_LIMIT": "Du har gjort dagens økter. Kom tilbake i morgen.",
+    "POOL_EMPTY": "KI-kvoten for økter er brukt opp for nå.",
+    "NOT_AVAILABLE": "Uttaleøkter er ikke en del av abonnementet ditt.",
+    "generic": "Økten kunne ikke starte. Prøv igjen om litt.",
+    "retry": "Prøv igjen"
+  },
+  "progress": {
+    "diagnostic": "Rask sjekk · ord {n} av {total}",
+    "takes": "Forsøk {n} av {max}",
+    "sounds": "Lyder i denne økten"
+  },
+  "status": {
+    "pending": "venter",
+    "open": "nå",
+    "passed": "ferdig",
+    "failed": "gjenta"
+  },
+  "step": {
+    "sayWord": "Si dette ordet",
+    "sayPair": "Si begge ordene, ett etter ett",
+    "sayPhrase": "Si denne linjen",
+    "sayPairNow": "Si nå: {word}",
+    "frame": "I setningen",
+    "listen": "Lytt",
+    "playing": "Spiller…",
+    "noClip": "Ingen modellopptak for denne.",
+    "howTo": "Slik lager du lyden",
+    "drill": "Prøv dette først",
+    "commonError": "Vanlig feil"
+  },
+  "record": {
+    "record": "Ta opp",
+    "stop": "Stopp",
+    "recording": "Tar opp…",
+    "hearing": "Lytter til deg…",
+    "mic": {
+      "denied": "Mikrofonen er blokkert. Tillat den i nettleseren og prøv igjen.",
+      "noDevice": "Fant ingen mikrofon."
+    }
+  },
+  "notice": {
+    "uploadFailed": "Opptaket ble ikke lastet opp. Prøv igjen.",
+    "notReady": "Opptaket er ikke klart ennå. Prøv en gang til.",
+    "inaudible": "Jeg hørte deg ikke. Snakk litt nærmere og høyere.",
+    "tryAgain": "Det gikk ikke. Prøv igjen; dette forsøket ble ikke telt.",
+    "stale": "Økten har gått videre. Her er du nå."
+  },
+  "verdict": {
+    "passed": "Der satt den.",
+    "missed": "Ikke helt ennå.",
+    "unmeasured": "Kunne ikke vurderes denne gangen; forsøket telles ikke mot deg.",
+    "tone": {
+      "like_reference": "Melodien stemmer med modellen.",
+      "other_tone": "Melodien gikk motsatt vei.",
+      "unsure": "Vanskelig å høre melodien; prøv igjen."
+    },
+    "next": "Neste",
+    "toEnd": "Avslutt",
+    "yours": "Din",
+    "model": "Modell"
+  },
+  "events": {
+    "sound_passed": "Lyden er ferdig.",
+    "sound_failed": "Denne lyden trenger mer tid. Se hintet og leksjonen, så kommer vi tilbake til den.",
+    "element_passed": "Bra, neste steg.",
+    "side_passed": "Ett ord i paret er ferdig.",
+    "diagnostic_done": "Sjekken er ferdig."
+  },
+  "ending": {
+    "title": "Økten er over",
+    "body": "Lever den inn så fremgangen kommer til kortene dine.",
+    "stopped": "Økten stoppet tidlig: KI-kvoten ble brukt opp. Det du gjorde teller.",
+    "take_limit": "Dette er flest forsøk i én økt.",
+    "finish": "Lever inn",
+    "submitting": "Leverer…",
+    "retry": "Kunne ikke levere. Prøv igjen."
+  },
+  "result": {
+    "title": "Resultat av økten",
+    "score": "{score} % av lydene bestått",
+    "GOOD": "Sikker",
+    "HARD": "Ustø",
+    "AGAIN": "Trenger jobb",
+    "none": "Ikke vurdert",
+    "passes": "{n} riktig",
+    "fails": "{n} bom",
+    "weak": "Lyder å følge med på",
+    "flagged": "Notert til senere",
+    "again": "En økt til",
+    "empty": "Ingen lyd ble øvd denne gangen.",
+    "cardsNote": "Vurderingene ligger nå på lydkortene dine."
+  },
+  "broken": {
+    "title": "Noe er galt med økten",
+    "body": "Last den på nytt for å se hvor du er.",
+    "reload": "Last på nytt",
+    "restart": "Start på nytt"
+  },
+  "melody": {
+    "title": "Melodi",
+    "yours": "Din",
+    "model": "Modell",
+    "label": "Tonehøyde i ordet ditt mot modellen: din er hel linje, modellen er stiplet.",
+    "none": "Kunne ikke tegne melodien."
+  },
+  "card": {
+    "back": "Tilbake til treningen",
+    "train": "Tren denne lyden",
+    "ipa": "Lyd",
+    "description": "Hva det er",
+    "howTo": "Slik lager du den",
+    "drill": "Finn den først",
+    "commonError": "Vanlig feil",
+    "carriers": "Ord å prøve",
+    "loading": "Laster…",
+    "failed": "Kortet kunne ikke lastes.",
+    "notFound": "Det finnes ingen slik lyd.",
+    "open": "Lydkort"
+  }
+}

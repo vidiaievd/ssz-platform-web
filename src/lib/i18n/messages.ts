@@ -26,6 +26,7 @@ import Notifications from '../../../messages/en/Notifications.json';
 import Onboarding from '../../../messages/en/Onboarding.json';
 import Placement from '../../../messages/en/Placement.json';
 import Profile from '../../../messages/en/Profile.json';
+import Pronunciation from '../../../messages/en/Pronunciation.json';
 import PublicSchool from '../../../messages/en/PublicSchool.json';
 import Review from '../../../messages/en/Review.json';
 import RouteTitles from '../../../messages/en/RouteTitles.json';
@@ -72,6 +73,7 @@ export const enMessages = {
   Onboarding,
   Placement,
   Profile,
+  Pronunciation,
   PublicSchool,
   Review,
   RouteTitles,
@@ -121,6 +123,7 @@ export const NAMESPACES = [
   'Onboarding',
   'Placement',
   'Profile',
+  'Pronunciation',
   'PublicSchool',
   'Review',
   'RouteTitles',
@@ -203,6 +206,7 @@ export const STUDENT_NAMESPACES = [
   'Discovery',
   'Notifications',
   'Profile',
+  'Pronunciation',
   'PublicSchool',
   'Settings',
   'WorkspaceSwitcher',
