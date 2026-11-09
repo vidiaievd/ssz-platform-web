@@ -19,6 +19,10 @@ vi.mock('./course-recipe-field', () => ({
   CourseRecipeField: () => <div data-testid="course-recipe-field" />,
 }));
 vi.mock('./discard-draft-dialog', () => ({ DiscardDraftDialog: () => null }));
+// Saves through a server action and refreshes the router; it has its own suite.
+vi.mock('./course-learning-goals-field', () => ({
+  CourseLearningGoalsField: () => <div data-testid="course-learning-goals" />,
+}));
 // Pulls a server action through its restore button; it has its own suite.
 vi.mock('./version-history-block', () => ({
   VersionHistoryBlock: () => <div data-testid="version-history" />,
@@ -138,6 +142,11 @@ describe('CourseSettingsDrawer', () => {
     mockPublishState('draft');
     renderDrawer(DRAFT_CONTAINER, { schoolRole: 'teacher' });
     expect(screen.queryByTestId('danger-zone')).not.toBeInTheDocument();
+  });
+
+  it('offers the course its own learning goals on the overview', () => {
+    renderDrawer(DRAFT_CONTAINER);
+    expect(screen.getByTestId('course-learning-goals')).toBeInTheDocument();
   });
 
   it('switches to the Tags and Sharing tabs', () => {

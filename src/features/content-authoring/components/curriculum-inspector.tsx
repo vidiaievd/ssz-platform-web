@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Link } from '@/lib/i18n/navigation';
@@ -30,14 +29,9 @@ import {
   type RenamableItemType,
 } from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
-import {
-  MAX_LEARNING_GOALS,
-  MAX_LEARNING_GOAL_LENGTH,
-  formatLearningGoals,
-  learningGoalsProblem,
-  parseLearningGoals,
-} from '../lib/learning-goals';
+import { formatLearningGoals } from '../lib/learning-goals';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { LearningGoalsField } from './learning-goals-field';
 import { useStructureUndo } from '../hooks/use-structure-undo';
 import {
   renameContainerAction,
@@ -211,72 +205,6 @@ function EditableField({
         <PanelSaveButton unsaved={unsaved} label={saveLabel} successMessage={savedMessage} />
       </div>
       <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
-    </div>
-  );
-}
-
-/**
- * A module's learning goals, one per line. Saved on demand like the other
- * fields; after a save the text is rewritten the way the server keeps it —
- * trimmed, without blank lines — so what the author sees is what was stored.
- */
-function LearningGoalsField({
-  value,
-  onSave,
-}: {
-  value: string[];
-  onSave: (goals: string[]) => Promise<void>;
-}) {
-  const t = useTranslations('Authoring');
-  const [draft, setDraft] = useState(() => formatLearningGoals(value));
-  const goals = parseLearningGoals(draft);
-  const problem = learningGoalsProblem(goals);
-  const unsaved = useUnsavedChanges({
-    onSave: async () => {
-      // The button's own toast reports the failure; the reason is already on screen.
-      if (learningGoalsProblem(goals)) throw new Error(problem ?? 'invalid');
-      await onSave(goals);
-      setDraft(formatLearningGoals(goals));
-    },
-  });
-  const label = t('structure.learningGoals');
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
-      <Textarea
-        value={draft}
-        onChange={(e) => {
-          setDraft(e.target.value);
-          unsaved.markDirty();
-        }}
-        aria-label={label}
-        aria-invalid={problem !== null}
-        aria-describedby="learning-goals-hint"
-        placeholder={t('structure.learningGoalsPlaceholder')}
-        rows={3}
-        className="text-sm"
-      />
-      <p
-        id="learning-goals-hint"
-        className={problem ? 'text-xs text-destructive' : 'text-xs text-muted-foreground'}
-      >
-        {problem === 'tooMany'
-          ? t('structure.learningGoalsTooMany', { max: MAX_LEARNING_GOALS })
-          : problem === 'tooLong'
-            ? t('structure.learningGoalsTooLong', { max: MAX_LEARNING_GOAL_LENGTH })
-            : t('structure.learningGoalsHint')}
-      </p>
-      <div className="flex items-center justify-between gap-2">
-        <SaveStatusIndicator status={unsaved.status} savedAt={unsaved.savedAt} />
-        <PanelSaveButton
-          unsaved={unsaved}
-          label={t('structure.saveLearningGoals')}
-          successMessage={t('structure.learningGoalsSaved')}
-        />
-      </div>
     </div>
   );
 }
