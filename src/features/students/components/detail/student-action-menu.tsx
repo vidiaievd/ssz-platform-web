@@ -47,7 +47,15 @@ export function StudentActionMenu({
 
   function handleArchive() {
     startTransition(async () => {
-      await archiveStudent(schoolId, studentId, !isArchived);
+      const result = await archiveStudent(schoolId, studentId, !isArchived);
+      if (!result.ok) {
+        // Returning a learner from the archive takes a seat; at the ceiling the server refuses.
+        toast.error(
+          result.reason === 'seats_exhausted' ? t("seats.unarchiveRefused") : t("seats.actionFailed"),
+        );
+        router.refresh();
+        return;
+      }
       queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
       router.refresh();
       toast.success(isArchived ? t("detail.actions.unarchive") : t("detail.actions.archive"));

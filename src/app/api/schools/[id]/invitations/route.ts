@@ -1,3 +1,4 @@
+import { seatsExhaustedResponseBody } from '@/features/school-seats/lib/seats-error';
 import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
@@ -96,6 +97,8 @@ export async function POST(request: NextRequest, { params }: Params) {
     if (e instanceof AppError && e.code === 'forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+    const exhausted = seatsExhaustedResponseBody(e);
+    if (exhausted) return NextResponse.json(exhausted, { status: 409 });
     if (e instanceof AppError && e.code === 'validation') {
       return NextResponse.json({ error: 'Invalid invitation data' }, { status: 422 });
     }

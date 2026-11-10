@@ -166,7 +166,7 @@ export interface TeacherAvailability {
 
 export type MutationResult =
   | { ok: true; warnings?: OpsWarning[] }
-  | { ok: false; conflicts?: OpsWarning[]; warnings?: OpsWarning[]; blocked?: 'language' | 'no-primary' };
+  | { ok: false; conflicts?: OpsWarning[]; warnings?: OpsWarning[]; blocked?: 'language' | 'no-primary'; reason?: 'seats_exhausted' };
 /** One teachable item of a course unit, named by the identity a session stores. */
 export interface OutlineItem {
   /** Stable id of the item itself — what `Session.contentLessonId` points at. */

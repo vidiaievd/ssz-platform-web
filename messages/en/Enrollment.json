@@ -147,6 +147,8 @@
     "accepted": "Student accepted and moved to onboarding",
     "rejected": "Student request rejected",
     "transitionFailed": "Action failed. Please try again.",
-    "alreadyHandled": "This request was already handled — the list has been refreshed."
+    "alreadyHandled": "This request was already handled — the list has been refreshed.",
+    "seatsExhausted": "This school has no student seats left — upgrade the plan to accept more students.",
+    "noSeats": "No seats"
   }
 }

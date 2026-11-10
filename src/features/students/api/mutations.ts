@@ -8,6 +8,7 @@ function invalidate(tag: string) {
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
+import { isSeatsExhausted } from '@/features/school-seats/lib/seats-error';
 import type { MutationResult } from '@/features/groups/types';
 import type { EmailResolveResult } from '@/features/students/types';
 import { studentCacheTags } from './keys';
@@ -18,6 +19,10 @@ import { groupCacheTags } from '@/features/groups/api/keys';
 type FailResult = Extract<MutationResult, { ok: false }>;
 
 function mapError(e: unknown): MutationResult {
+  // The school has no student seat left — a refusal of this action, not a roster conflict.
+  if (e instanceof AppError && e.code === 'conflict' && isSeatsExhausted(e)) {
+    return { ok: false, reason: 'seats_exhausted' };
+  }
   if (e instanceof AppError && e.code === 'conflict') {
     const details = e.details as
       | { conflicts?: FailResult['conflicts']; blocked?: FailResult['blocked'] }
@@ -54,8 +59,10 @@ export async function enrollStudent(
         path: `/schools/${schoolId}/members`,
         method: 'POST',
         body: { userId: input.userId, role: 'STUDENT' },
-      }).catch(() => {
-        // May already be a member — ignore 409
+      }).catch((e) => {
+        // May already be a member — ignore a plain 409, but not a refusal for lack of seats:
+        // the learner never joined, so adding them to a group would be wrong.
+        if (isSeatsExhausted(e)) throw e;
       });
 
       // Add to group if specified
@@ -102,10 +109,13 @@ export async function enrollStudents(
   invited: number;
   attached: number;
   failed: number;
+  /** How many of the failures were refusals for lack of student seats. */
+  seatsExhausted: number;
 }> {
   let invited = 0;
   let attached = 0;
   let failed = 0;
+  let seatsExhausted = 0;
 
   await Promise.allSettled(
     inputs.map(async (input) => {
@@ -115,11 +125,12 @@ export async function enrollStudents(
         else attached++;
       } else {
         failed++;
+        if (!result.ok && result.reason === 'seats_exhausted') seatsExhausted++;
       }
     }),
   );
 
-  return { ok: failed === 0, invited, attached, failed };
+  return { ok: failed === 0, invited, attached, failed, seatsExhausted };
 }
 
 // ── Add to group ──────────────────────────────────────────────────────────────

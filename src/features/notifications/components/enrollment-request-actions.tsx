@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
+  isSeatsExhaustedTransition,
   isTransitionConflict,
   useTransitionMembership,
 } from '@/features/enrollment/api/use-transition-membership';
@@ -35,7 +36,9 @@ export function EnrollmentRequestActions({
       onResolved();
       toast.success(t('toasts.markedRead'));
     } catch (err) {
-      if (isTransitionConflict(err)) {
+      if (isSeatsExhaustedTransition(err)) {
+        toast.error(t('toasts.seatsExhausted'));
+      } else if (isTransitionConflict(err)) {
         toast.error(t('toasts.alreadyHandled'));
         onResolved();
       } else {

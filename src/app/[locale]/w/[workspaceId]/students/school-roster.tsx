@@ -7,6 +7,7 @@ import { StudentsRosterClient } from '@/features/students/components/students-ro
 import { EnrollShell } from '@/features/students/components/enroll-shell';
 import { getPendingCount } from '@/features/invitations/api/queries';
 import { PendingInvitesLink } from '@/features/invitations/components/pending-invites-link';
+import { SeatsBadge } from '@/features/school-seats/components/seats-badge';
 import { wsHref } from '@/features/workspaces/lib/href';
 
 type Props = {
@@ -40,6 +41,8 @@ export async function SchoolRoster({ params, searchParams }: Props) {
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 max-w-page mx-auto space-y-6">
+      <SeatsBadge schoolId={school.id} />
+
       {/* Pending invites indicator */}
       {pendingInvitesCount === null ? (
         <p className="text-sm text-destructive">Failed to load pending invitations count.</p>

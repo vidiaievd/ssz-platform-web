@@ -69,6 +69,8 @@ export interface Membership {
   availability?: AvailabilityPref[];
   ageBand?: AgeBand | null;
   groupId?: string;
+  /** `no_seats` — auto-approval was held back because the school has no student seat left (plan 90). */
+  blockedReason?: 'no_seats' | null;
   createdAt: ISODate;
 }
 

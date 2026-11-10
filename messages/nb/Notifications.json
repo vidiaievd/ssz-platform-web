@@ -56,7 +56,8 @@
     "markedRead": "Merket som lest",
     "undo": "Angre",
     "actionFailed": "Noe gikk feil. Prøv igjen.",
-    "alreadyHandled": "Dette er allerede behandlet."
+    "alreadyHandled": "Dette er allerede behandlet.",
+    "seatsExhausted": "Ingen ledige elevplasser — oppgrader abonnementet for å ta imot denne eleven."
   },
   "emptyState": {
     "all": "Ingen nye varsler!",
