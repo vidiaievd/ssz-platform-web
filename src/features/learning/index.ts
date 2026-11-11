@@ -7,7 +7,7 @@ export { useSrsStats } from './api/use-srs-stats';
 export { useReviewsSummary } from './api/use-reviews-summary';
 export { useCourseProgress } from './api/use-course-progress';
 export { useCourseMastery } from './api/use-course-mastery';
-export { useCourseHome } from './api/use-course-home';
+export { useCourseHome, COURSE_SCHOOL_CLOSED } from './api/use-course-home';
 export { useUnitContents } from './api/use-unit-contents';
 export { useUpsertProgress, useFlushProgressOutbox } from './api/use-upsert-progress';
 export { useRefreshProgress, PROGRESS_SETTLE_MS } from './api/use-refresh-progress';

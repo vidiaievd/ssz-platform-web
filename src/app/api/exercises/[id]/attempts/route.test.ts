@@ -362,6 +362,19 @@ describe('POST /api/exercises/[id]/attempts', () => {
     const res = await POST(makeRequest({ language: 'no' }), { params });
     expect(res.status).toBe(502);
   });
+
+  it('says the school is read only instead of pretending an attempt is open', async () => {
+    vi.mocked(serverFetch).mockClear();
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('conflict', 'Conflict', { code: 'SCHOOL_NOT_ACTIVE', schoolStatus: 'suspended' }),
+    );
+    const res = await POST(makeRequest({ language: 'no' }), { params });
+
+    expect(res.status).toBe(409);
+    await expect(res.json()).resolves.toMatchObject({ code: 'SCHOOL_NOT_ACTIVE', schoolStatus: 'suspended' });
+    // No join, no clear-and-restart: there is no stale attempt to recover.
+    expect(serverFetch).toHaveBeenCalledTimes(1);
+  });
 });
 
 function makeGetRequest() {

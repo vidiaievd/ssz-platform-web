@@ -12,6 +12,7 @@ import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { WorkspaceActivator } from '@/features/workspaces/components/workspace-activator';
 import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
 import { EntitlementsProvider } from '@/features/entitlements';
+import { SchoolStatusBanner } from '@/features/school-lifecycle';
 import { AppShell } from '@/components/shared/app-shell';
 import type { SchoolContext } from '@/components/shared/app-shell';
 import type { DashboardRole } from '@/features/dashboard/types';
@@ -65,6 +66,7 @@ export default async function WorkspaceLayout({ children, params }: Props) {
 
   const isSolo = workspace.kind === 'SOLO';
   let schoolContext: SchoolContext | undefined;
+  let lifecycle: Pick<NonNullable<Awaited<ReturnType<typeof getSchool>>>, 'status' | 'closesAt' | 'purgeAt'> | null = null;
 
   if (!isSolo) {
     // The school shell shows more of the school than the workspace answer carries — its
@@ -73,6 +75,8 @@ export default async function WorkspaceLayout({ children, params }: Props) {
       queryKey: schoolKeys.detail(workspace.id),
       queryFn: () => getSchool(workspace.id),
     });
+
+    lifecycle = school ? { status: school.status, closesAt: school.closesAt, purgeAt: school.purgeAt } : null;
 
     schoolContext = {
       role: SCHOOL_ROLE_TO_DASHBOARD[workspace.myRole] ?? 'teacher',
@@ -93,6 +97,15 @@ export default async function WorkspaceLayout({ children, params }: Props) {
           schoolContext={schoolContext}
           tutorWorkspaceId={isSolo ? workspace.id : undefined}
         >
+          {lifecycle && (
+            <SchoolStatusBanner
+              audience="staff"
+              status={lifecycle.status}
+              closesAt={lifecycle.closesAt}
+              purgeAt={lifecycle.purgeAt}
+              className="mx-4 mt-4 md:mx-6"
+            />
+          )}
           {children}
         </AppShell>
       </EntitlementsProvider>

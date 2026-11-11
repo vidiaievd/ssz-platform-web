@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
+import { schoolNotActiveStatus } from '@/features/school-lifecycle/lib/lifecycle-errors';
 import type {
   SubmitAnswerRequest,
   SubmitAnswerResponse,
@@ -51,6 +52,14 @@ export async function POST(
       }
       if (e.code === 'not_found') {
         return NextResponse.json({ error: 'Attempt not found' }, { status: 404 });
+      }
+      // The learner's school is read only (plan 90, phase 5): hand-in is refused, the draft stays.
+      const notActive = e.code === 'conflict' ? schoolNotActiveStatus(e.details) : null;
+      if (notActive !== null) {
+        return NextResponse.json(
+          { error: 'The school is not active', code: 'SCHOOL_NOT_ACTIVE', schoolStatus: notActive },
+          { status: 409 },
+        );
       }
       // `read_aloud` recordings that do not stand up (plan 70 §3.5): the code and the prompts
       // it names, so the runner can point at the take to record again. Nothing was written.

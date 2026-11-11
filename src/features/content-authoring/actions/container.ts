@@ -206,3 +206,24 @@ export async function updateContainerAction(id: string, input: ContainerFormValu
     revalidatePath(`/school/content/${id}`);
   });
 }
+
+/**
+ * The author's say on whether the course is still looked after (plan 90, phase 5, Q5).
+ * `unmaintained` keeps it in the catalogue with a badge; `obsolete` takes it out and closes
+ * it to new learners; `maintained` undoes either.
+ */
+export async function setContainerMaintenanceAction(
+  id: string,
+  status: 'maintained' | 'unmaintained' | 'obsolete',
+) {
+  return tryAction(async () => {
+    await serverFetch({
+      service: 'content',
+      path: `/containers/${id}/maintenance`,
+      method: 'PUT',
+      body: { status },
+    });
+
+    revalidatePath(`/school/content/${id}`);
+  });
+}

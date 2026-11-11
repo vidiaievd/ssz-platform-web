@@ -361,4 +361,47 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     const res = await GET(makeRequest(), PARAMS);
     expect(res.status).toBe(502);
   });
+
+  it('carries the maintenance status and the owning school\'s status (plan 90, phase 5)', async () => {
+    mockUpstreams({
+      container: { ...MOCK_CONTAINER, ownerSchoolId: 'school-1', maintenanceStatus: 'unmaintained' } as Container,
+    });
+    vi.mocked(serverFetch).mockResolvedValueOnce({
+      id: 'school-1',
+      status: 'suspended',
+      closesAt: '2026-12-01T00:00:00Z',
+    });
+
+    const body = (await (await GET(makeRequest(), PARAMS)).json()) as {
+      courseInfo: { maintenanceStatus: string; schoolStatus: string; schoolClosesAt: string };
+    };
+
+    expect(body.courseInfo).toMatchObject({
+      maintenanceStatus: 'unmaintained',
+      schoolStatus: 'suspended',
+      schoolClosesAt: '2026-12-01T00:00:00Z',
+    });
+  });
+
+  it('still answers when the school cannot be read', async () => {
+    mockUpstreams({ container: { ...MOCK_CONTAINER, ownerSchoolId: 'school-1' } as Container });
+    vi.mocked(serverFetch).mockRejectedValueOnce(new Error('org down'));
+
+    const res = await GET(makeRequest(), PARAMS);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { courseInfo: { schoolStatus?: string } };
+    expect(body.courseInfo.schoolStatus).toBeUndefined();
+  });
+
+  it('says 409 SCHOOL_NOT_ACTIVE when the owning school is closed', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('conflict', 'Conflict', { code: 'SCHOOL_NOT_ACTIVE', reason: 'school_not_active' }),
+    );
+
+    const res = await GET(makeRequest(), PARAMS);
+
+    expect(res.status).toBe(409);
+    await expect(res.json()).resolves.toMatchObject({ code: 'SCHOOL_NOT_ACTIVE' });
+  });
 });

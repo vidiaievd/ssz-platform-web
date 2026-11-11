@@ -13,7 +13,9 @@ export type SchoolMemberRecord = {
   joinedAt?: string;
 };
 
-export type School = {
+import type { SchoolLifecycleFields } from '@/features/school-lifecycle/types';
+
+export type School = SchoolLifecycleFields & {
   id: string;
   name: string;
   slug?: string | null;
