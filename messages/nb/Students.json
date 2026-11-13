@@ -244,5 +244,14 @@
   },
   "onboard": {
     "invitationBanner": "Du har blitt invitert til å bli med i en skole. Fullfør profilen din for å komme i gang."
+  },
+  "seats": {
+    "count": "{used} / {limit} plasser",
+    "warning": "Over grensen i abonnementet — nye elever tas kun imot opp til {ceiling}.",
+    "full": "Ingen ledige plasser — oppgrader abonnementet for å legge til flere elever.",
+    "enrollRefused": "Ingen ledige elevplasser. Oppgrader abonnementet for å legge til flere elever.",
+    "someRefused": "{count, plural, one {# elev ble ikke lagt til} other {# elever ble ikke lagt til}}: ingen ledige plasser.",
+    "unarchiveRefused": "Kan ikke gjenopprette eleven: ingen ledige plasser. Oppgrader abonnementet først.",
+    "actionFailed": "Kunne ikke endre eleven. Prøv igjen."
   }
 }

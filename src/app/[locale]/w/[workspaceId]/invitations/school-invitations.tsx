@@ -1,3 +1,4 @@
+import { SeatsBadge } from '@/features/school-seats/components/seats-badge';
 import { Suspense } from 'react';
 import { MailCheck } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -88,6 +89,8 @@ export async function SchoolInvitations({ params, searchParams }: Props) {
           )}
         </div>
       </div>
+
+      <SeatsBadge schoolId={school.id} />
 
       {/* Tabs */}
       <Suspense>

@@ -149,11 +149,13 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
         if (result.invited > 0) parts.push(`${result.invited} invited`);
         if (result.attached > 0) parts.push(`${result.attached} added directly`);
         toast.success(parts.join(', '));
+        if (result.seatsExhausted > 0) toast.warning(t('seats.someRefused', { count: result.seatsExhausted }));
         queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         router.refresh();
         handleClose();
       } else {
-        toast.error(t('enroll.failed'));
+        toast.error(result.seatsExhausted > 0 ? t('seats.enrollRefused') : t('enroll.failed'));
+        if (result.seatsExhausted > 0) router.refresh();
       }
     });
   }

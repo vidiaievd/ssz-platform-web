@@ -9,6 +9,7 @@ import { ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
+  isSeatsExhaustedTransition,
   isTransitionConflict,
   useTransitionMembership,
 } from '@/features/enrollment/api/use-transition-membership';
@@ -42,7 +43,10 @@ export function PendingApprovals({ memberships }: Props) {
       toast.success(to === 'onboarding' ? t('accepted') : t('rejected'));
       router.refresh();
     } catch (err) {
-      if (isTransitionConflict(err)) {
+      if (isSeatsExhaustedTransition(err)) {
+        toast.error(t('seatsExhausted'));
+        router.refresh();
+      } else if (isTransitionConflict(err)) {
         toast.error(t('alreadyHandled'));
         router.refresh();
       } else {
@@ -77,6 +81,11 @@ export function PendingApprovals({ memberships }: Props) {
                 <span className="text-xs text-(--ssz-text-muted)">
                   {new Date(m.createdAt).toLocaleDateString()}
                 </span>
+                {m.blockedReason === 'no_seats' ? (
+                  <Badge variant="warning" className="text-xs">
+                    {t('noSeats')}
+                  </Badge>
+                ) : null}
               </div>
             </div>
 

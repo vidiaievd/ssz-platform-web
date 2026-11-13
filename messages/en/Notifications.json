@@ -56,7 +56,8 @@
     "markedRead": "Marked as read",
     "undo": "Undo",
     "actionFailed": "Something went wrong. Please try again.",
-    "alreadyHandled": "This was already handled."
+    "alreadyHandled": "This was already handled.",
+    "seatsExhausted": "No student seats left — upgrade the plan to accept this student."
   },
   "emptyState": {
     "all": "You're all caught up!",

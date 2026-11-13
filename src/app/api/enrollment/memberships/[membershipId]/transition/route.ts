@@ -3,12 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import type { MembershipStatus } from '@/features/enrollment/types';
+import { seatsExhaustedResponseBody } from '@/features/school-seats/lib/seats-error';
 
 type AdminTransition = 'onboarding' | 'rejected';
 type StudentTransition = 'placement-review';
 
 function mapError(e: unknown) {
   if (isAppError(e)) {
+    // Out of seats is a refusal of this very action, not "someone handled it first".
+    const exhausted = seatsExhaustedResponseBody(e);
+    if (exhausted) return NextResponse.json(exhausted, { status: 409 });
     const status =
       e.code === 'conflict' ? 409
       : e.code === 'not_found' ? 404

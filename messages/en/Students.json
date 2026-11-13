@@ -244,5 +244,14 @@
   },
   "onboard": {
     "invitationBanner": "You have been invited to join a school. Complete your profile to get started."
+  },
+  "seats": {
+    "count": "{used} / {limit} seats",
+    "warning": "Over the plan limit — new students are accepted only up to {ceiling}.",
+    "full": "No seats left — upgrade the plan to add more students.",
+    "enrollRefused": "No student seats left. Upgrade the plan to add more students.",
+    "someRefused": "{count, plural, one {# student was not added} other {# students were not added}}: no seats left.",
+    "unarchiveRefused": "Can't restore the student: no student seats left. Upgrade the plan first.",
+    "actionFailed": "Could not change the student. Please try again."
   }
 }

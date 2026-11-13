@@ -85,7 +85,7 @@ describe('MinimalPairsBuilder — the rail (MP-B27)', () => {
 
     await user.click(tab('Audio'));
     await user.click(screen.getAllByRole('button', { name: 'Record' })[0]!);
-    await user.click(screen.getByRole('button', { name: 'Stopp' }));
+    await user.click(screen.getByRole('button', { name: 'Stop' }));
     await vi.waitFor(() => expect(sources.upload).toHaveBeenCalled());
     await vi.waitFor(() =>
       expect(changes[changes.length - 1]!.pairs[0]!.words[0]!.clip.voice).toBe('Kari Nordmann'),

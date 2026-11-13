@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import { getPublicSchool } from '@/features/school/api/get-public-school';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
+import { SeatsBadge } from '@/features/school-seats/components/seats-badge';
 import { PendingApprovals } from '@/features/enrollment/components/pending-approvals';
 import type { Membership, MembershipStatus, MembershipSource } from '@/features/enrollment/types';
 import type { CEFR, LangCode, ISODate } from '@/features/groups/types';
@@ -19,6 +20,7 @@ type BackendMembership = {
   source: MembershipSource;
   language?: string;
   selfReportedLevel?: CEFR;
+  blockedReason?: 'no_seats' | null;
   createdAt: string;
 };
 
@@ -56,6 +58,7 @@ export default async function RequestsPage({ params }: Props) {
     source: m.source,
     language: (m.language ?? 'nb') as LangCode,
     selfReportedLevel: m.selfReportedLevel,
+    blockedReason: m.blockedReason ?? null,
     createdAt: (m.createdAt?.slice(0, 10) ?? '') as ISODate,
   }));
 
@@ -65,6 +68,8 @@ export default async function RequestsPage({ params }: Props) {
         <h1 className="text-lg font-semibold text-(--ssz-text-primary)">{t('title')}</h1>
         <p className="text-sm text-(--ssz-text-muted)">{t('subtitle')}</p>
       </div>
+
+      <SeatsBadge schoolId={school.schoolId} />
 
       <PendingApprovals memberships={memberships} />
     </div>

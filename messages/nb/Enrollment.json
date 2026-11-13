@@ -147,6 +147,8 @@
     "accepted": "Student godkjent og sendt til onboarding",
     "rejected": "Studentens forespørsel avslått",
     "transitionFailed": "Handling mislyktes. Prøv igjen.",
-    "alreadyHandled": "Denne forespørselen er allerede behandlet — listen er oppdatert."
+    "alreadyHandled": "Denne forespørselen er allerede behandlet — listen er oppdatert.",
+    "seatsExhausted": "Skolen har ingen ledige elevplasser — oppgrader abonnementet for å ta imot flere elever.",
+    "noSeats": "Ingen plasser"
   }
 }
