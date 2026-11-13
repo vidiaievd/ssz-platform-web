@@ -24,6 +24,7 @@ import type {
   SubmitAnswerRequest,
   SubmitAnswerResponse,
 } from '../types/attempts';
+import { SCHOOL_NOT_ACTIVE_EVENT } from '@/features/school-lifecycle/types';
 
 /**
  * The exercise-engine attempt flow: start, check, and — only if asked — reveal.
@@ -81,6 +82,14 @@ async function send<TResponse>(
       itemIds?: unknown;
       allowed?: unknown;
     } | null;
+    if (res.status === 409 && problem?.code === 'SCHOOL_NOT_ACTIVE' && typeof window !== 'undefined') {
+      // The school is read only (plan 90, phase 5): one listener words it for every runner.
+      window.dispatchEvent(
+        new CustomEvent(SCHOOL_NOT_ACTIVE_EVENT, {
+          detail: { status: (problem as { schoolStatus?: unknown }).schoolStatus },
+        }),
+      );
+    }
     throw new AttemptRequestError(
       problem?.error ?? `Request failed with ${res.status}`,
       res.status,

@@ -11,6 +11,7 @@ import { profileKeys } from '@/features/profile/api/keys';
 import { AppShell } from '@/components/shared/app-shell';
 import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
 import { EntitlementsProvider } from '@/features/entitlements';
+import { SchoolNotActiveNotice } from '@/features/school-lifecycle';
 import { GLOBAL_NAMESPACES, STUDENT_NAMESPACES } from '@/lib/i18n/messages';
 import { pickMessages } from '@/lib/i18n/pick-messages';
 
@@ -39,6 +40,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <HydrationBoundary state={dehydrate(queryClient)}>
         <EntitlementsProvider entitlements={entitlements}>
           <AppShell variant="student" user={user}>
+            <SchoolNotActiveNotice />
             {children}
           </AppShell>
         </EntitlementsProvider>

@@ -29,6 +29,7 @@ import Profile from '../../../messages/en/Profile.json';
 import PublicSchool from '../../../messages/en/PublicSchool.json';
 import Review from '../../../messages/en/Review.json';
 import RouteTitles from '../../../messages/en/RouteTitles.json';
+import SchoolLifecycle from '../../../messages/en/SchoolLifecycle.json';
 import Scheduling from '../../../messages/en/Scheduling.json';
 import School from '../../../messages/en/School.json';
 import Settings from '../../../messages/en/Settings.json';
@@ -76,6 +77,7 @@ export const enMessages = {
   Review,
   RouteTitles,
   Scheduling,
+  SchoolLifecycle,
   School,
   Settings,
   Srs,
@@ -125,6 +127,7 @@ export const NAMESPACES = [
   'Review',
   'RouteTitles',
   'Scheduling',
+  'SchoolLifecycle',
   'School',
   'Settings',
   'Srs',
@@ -206,6 +209,7 @@ export const STUDENT_NAMESPACES = [
   'PublicSchool',
   'Settings',
   'WorkspaceSwitcher',
+  'SchoolLifecycle',
 ] as const satisfies readonly Namespace[];
 
 export const SCHOOL_NAMESPACES = [
@@ -242,6 +246,7 @@ export const SCHOOL_NAMESPACES = [
   'TeacherPending',
   'WorkspaceSwitcher',
   'Enrollment',
+  'SchoolLifecycle',
 ] as const satisfies readonly Namespace[];
 
 export const ACCOUNT_NAMESPACES = [

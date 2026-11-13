@@ -1,0 +1,38 @@
+{
+  "banner": {
+    "staff": {
+      "suspendedTitle": "Skolen er blokkert",
+      "suspended": "Skolen er skrivebeskyttet. Kontakt støtten til plattformen.",
+      "suspendedUntil": "Blokkert til {date} ({days, plural, one {# dag} other {# dager}} igjen). Alt er skrivebeskyttet – kontakt støtten til plattformen.",
+      "closedTitle": "Skolen er i arkivet",
+      "closed": "Skolen er arkivert og blir slettet. Kontakt støtten til plattformen for å få den tilbake.",
+      "closedUntil": "I arkivet til {date} ({days, plural, one {# dag} other {# dager}} igjen), deretter slettes materialet. Kontakt støtten til plattformen for å få den tilbake."
+    },
+    "student": {
+      "suspendedTitle": "Skolen er midlertidig utilgjengelig",
+      "suspended": "Du kan fortsatt lese kursene dine og se historikken din, men det er stanset å starte og levere arbeid.",
+      "suspendedUntil": "Du kan fortsatt lese kursene dine og se historikken din, men det er stanset å starte og levere arbeid.",
+      "closedTitle": "Skolen er stengt",
+      "closed": "Skolens kurs er ikke lenger tilgjengelige. Din egen historikk beholder du.",
+      "closedUntil": "Skolens kurs er ikke lenger tilgjengelige. Din egen historikk beholder du."
+    }
+  },
+  "maintenance": {
+    "unmaintained": "Vedlikeholdes ikke lenger",
+    "unmaintainedHint": "Forfatteren oppdaterer ikke lenger dette kurset.",
+    "obsolete": "Utdatert",
+    "obsoleteHint": "Kurset er utdatert og tar ikke imot nye elever.",
+    "label": "Vedlikehold",
+    "hint": "Fortell elevene om du fortsatt tar vare på dette kurset.",
+    "maintained": "Vedlikeholdes",
+    "saved": "Vedlikeholdsstatus lagret.",
+    "saveFailed": "Kunne ikke lagre statusen.",
+    "learnerNote": "Dette kurset vedlikeholdes ikke lenger: det kan være utdatert.",
+    "learnerObsoleteNote": "Dette kurset er utdatert og tar ikke imot nye elever. Du kan fortsette med det."
+  },
+  "errors": {
+    "schoolSuspended": "Skolen er midlertidig blokkert: nytt arbeid kan ikke startes eller leveres, og ingenting kan endres.",
+    "schoolClosed": "Skolen er stengt. Materialet er ikke lenger tilgjengelig.",
+    "courseObsolete": "Dette kurset er utdatert og tar ikke imot nye påmeldinger."
+  }
+}

@@ -40,6 +40,10 @@ export interface Container {
   ownerUserId: string;
   ownerSchoolId?: string | null;
   ownerName?: string;
+  /** Whether the author still looks after the course (plan 90, phase 5, Q5). Absent from an older service. */
+  maintenanceStatus?: 'maintained' | 'unmaintained' | 'obsolete';
+  /** Who set it last: the author by hand, or the school's lifecycle. */
+  maintenanceSource?: 'author' | 'school' | null;
   coverImageMediaId?: string | null;
   lessonCount?: number;
   createdAt: string;
