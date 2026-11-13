@@ -167,11 +167,13 @@
         "alternative": "also correct",
         "task": "task",
         "structure": "structure",
-        "content": "content"
+        "content": "content",
+        "pronunciation": "pronunciation"
       },
       "wholeText": "about the whole text",
       "wholeAnswer": "about the whole answer",
-      "editLabel": "Goes into the overall comment"
+      "editLabel": "Goes into the overall comment",
+      "editLabelPrompt": "Goes into this prompt's comment"
     },
     "aiVerdict": {
       "approved": "accepted",
@@ -229,6 +231,18 @@
       "next": "next",
       "send": "send"
     }
+  },
+  "rules": {
+    "title": "Rules behind the mistakes",
+    "hint": "Mark the rule the learner got wrong — it comes back in their review sooner, and it shows up in the weak-rules summary.",
+    "add": "Mark a rule",
+    "search": "Search the rules of this course",
+    "none": "No rule matches.",
+    "empty": "No rule of this course is cut into atoms yet.",
+    "loading": "Loading the rules…",
+    "failed": "The rules could not be loaded.",
+    "remove": "Remove {rule}",
+    "close": "Done"
   },
   "batch": {
     "dialog": {
@@ -686,7 +700,8 @@
       "alternative": "this is right too",
       "task": "task",
       "structure": "structure",
-      "content": "content"
+      "content": "content",
+      "pronunciation": "pronunciation"
     },
     "reading": {
       "prompt": "Prompt {n}",
@@ -716,7 +731,8 @@
         "scores": "accuracy {accuracy} · fluency {fluency} · completeness {completeness}",
         "prosody": "intonation {prosody}",
         "unclear": "Unclear:",
-        "note": "A hint only — it does not change the result."
+        "note": "A hint only — it does not change the result.",
+        "sounds": "Sounds to work on:"
       }
     }
   }

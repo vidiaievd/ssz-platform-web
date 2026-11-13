@@ -20,6 +20,7 @@ import {
   formatSeconds,
   issues,
   longestMax,
+  railSteps,
   rubricMax,
   stepState,
   withNoteCount,
@@ -37,13 +38,12 @@ import type { ReadAloudDocument } from './edits';
 import { useIssueCopy } from './issue-copy';
 import { StepFlow } from './step-flow';
 import { StepListen } from './step-listen';
+import { StepPronunciation } from './step-pronunciation';
 import { StepRecording } from './step-recording';
 import { StepRubric } from './step-rubric';
 import { StepTask } from './step-task';
+import { usePromptProsody } from './use-prompt-prosody';
 import { sameDocument, useReadAloudAutosave, type SavedDocument } from './use-read-aloud-autosave';
-
-const STEPS: IssueStep[] = [1, 2, 3, 4, 5];
-const LAST_STEP = 5;
 
 /**
  * Where the audio layer's findings go: all of them on step 1, where its card sits (plan 70
@@ -63,7 +63,9 @@ export interface ReadAloudBuilderProps {
 
 /**
  * The `read_aloud` builder: five steps — task, what we listen for, rubric, recording, flow
- * (plan 70 §7.1), saved as the author works.
+ * (plan 70 §7.1), saved as the author works. A `read` exercise with the pronunciation guide on
+ * has a sixth, «Pronunciation», drawn second (plan 86, §4i.4); its marks are read per prompt
+ * beside the document (`usePromptProsody`) and judged by the same kernel list.
  *
  * The rail is not a wizard and nothing is gated until the gate. Everything derived is the
  * kernel's: the rail dots, the signals inside each step and the gate are one issue list read
@@ -105,10 +107,16 @@ export function ReadAloudBuilder({
     reportRef.current?.(exercise);
   }, [exercise]);
 
+  const prosody = usePromptProsody({ exerciseId, exercise });
   const ctx = useMemo<IssueContext>(
-    () => ({ audio: exercise.audio.audio.enabled }),
-    [exercise.audio.audio.enabled],
+    () => ({ audio: exercise.audio.audio.enabled, guide: prosody.guide }),
+    [exercise.audio.audio.enabled, prosody.guide],
   );
+  // The rail's order, not the step numbers: «Pronunciation» is step 6 drawn second (§4i.4).
+  const rail = railSteps(exercise);
+  // Switching the guide off on its own step lands back on the task.
+  const current: IssueStep = rail.includes(step) ? step : 1;
+  const position = rail.indexOf(current) + 1;
   const problems = useMemo(() => issues(exercise, ctx), [exercise, ctx]);
   const audioProblems = useAudioProblems(exercise.audio, [], AUDIO_STEPS);
 
@@ -133,8 +141,9 @@ export function ReadAloudBuilder({
       <EditorToolbarPortal>
         <div className="flex min-w-0 flex-1 items-stretch justify-between gap-3">
           <ReadAloudSteps
-            current={step}
+            current={current}
             exercise={exercise}
+            ctx={ctx}
             audioProblems={audioProblems}
             onSelect={setStep}
           />
@@ -145,19 +154,27 @@ export function ReadAloudBuilder({
       </EditorToolbarPortal>
 
       <div className="min-w-0">
-        {step === 1 && <StepTask exercise={exercise} onChange={setExercise} />}
-        {step === 2 && <StepListen exercise={exercise} onChange={setExercise} />}
-        {step === 3 && <StepRubric exercise={exercise} onChange={setExercise} />}
-        {step === 4 && <StepRecording exercise={exercise} onChange={setExercise} />}
-        {step === 5 && (
+        {current === 1 && <StepTask exercise={exercise} onChange={setExercise} />}
+        {current === 6 && (
+          <StepPronunciation
+            exercise={exercise}
+            onChange={setExercise}
+            prosody={prosody}
+            problems={problems}
+          />
+        )}
+        {current === 2 && <StepListen exercise={exercise} onChange={setExercise} />}
+        {current === 3 && <StepRubric exercise={exercise} onChange={setExercise} />}
+        {current === 4 && <StepRecording exercise={exercise} onChange={setExercise} />}
+        {current === 5 && (
           <StepFlow exercise={exercise} containerId={containerId} onChange={setExercise} />
         )}
 
         <BuilderStepNav
-          current={step}
-          last={LAST_STEP}
-          stepLabel={(n) => names(`step${n as IssueStep}`)}
-          onSelect={(next) => setStep(next as IssueStep)}
+          current={position}
+          last={rail.length}
+          stepLabel={(n) => names(`step${rail[n - 1] ?? 1}`)}
+          onSelect={(next) => setStep(rail[next - 1] ?? 1)}
           onDone={() => setGateOpen(true)}
         />
       </div>
@@ -214,19 +231,20 @@ export function ReadAloudBuilder({
 function ReadAloudSteps({
   current,
   exercise,
+  ctx,
   audioProblems,
   onSelect,
 }: {
   current: IssueStep;
   exercise: ReadAloudDocument;
+  ctx: IssueContext;
   audioProblems: PlacedAudioIssue[];
   onSelect: (step: IssueStep) => void;
 }) {
   const t = useTranslations('Authoring');
   const names = useTranslations('Authoring.readAloud.shell');
-  const ctx: IssueContext = { audio: exercise.audio.audio.enabled };
 
-  const steps: BuilderStep[] = STEPS.map((step) => {
+  const steps: BuilderStep[] = railSteps(exercise).map((step) => {
     const state = foldAudioIntoStep(
       stepState(exercise, step, ctx),
       audioProblems.filter((issue) => issue.step === step),

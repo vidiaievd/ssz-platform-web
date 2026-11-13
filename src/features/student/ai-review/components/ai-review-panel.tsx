@@ -8,9 +8,11 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useAiReview, useDisputeAiReview } from '../api/use-ai-review';
-import type { AiReading, AiReviewMark, AiReviewRemark } from '../types';
+import { transcriptionOf } from '../reading';
+import type { AiReading, AiReadingPrompt, AiReviewMark, AiReviewRemark } from '../types';
 
 import { ReadingCheck } from './reading-check';
+import { SoundWord } from './sound-word';
 
 const READING = 'var(--ssz-font-reading)';
 
@@ -28,6 +30,7 @@ const KNOWN_ASPECTS = [
   'task',
   'structure',
   'content',
+  'pronunciation',
 ] as const;
 
 type T = ReturnType<typeof useTranslations<'Review.aiReview'>>;
@@ -110,6 +113,7 @@ export function AiReviewPanel({
             <Readings
               t={t}
               reading={review.data.reading}
+              items={review.data.items}
               promptLabel={promptLabel}
               passageOf={passageOf}
             />
@@ -141,11 +145,14 @@ export function AiReviewPanel({
 function Readings({
   t,
   reading,
+  items,
   promptLabel,
   passageOf,
 }: {
   t: T;
   reading: AiReading;
+  /** The review's remarks — on a reading, the weak sounds of its words (plan 88, step 5c). */
+  items: AiReviewRemark[];
   promptLabel: ((itemId: string) => string) | undefined;
   passageOf: ((itemId: string) => string | null) | undefined;
 }) {
@@ -171,6 +178,11 @@ function Readings({
             passPercent={reading.passPercent}
             passage={passageOf?.(prompt.itemId) ?? null}
           />
+          <Sounds
+            t={t}
+            prompt={prompt}
+            remarks={items.filter((item) => item.itemId === prompt.itemId)}
+          />
         </section>
       ))}
       {/* Where the screen cannot name them, they are counted: a number made up from their
@@ -187,6 +199,39 @@ function Readings({
             ))}
           </ul>
         ))}
+    </div>
+  );
+}
+
+/**
+ * The weak sounds of one prompt (plan 88, step 5c): the word, how it should sound where its
+ * sounds were named, and what to do about it. Feedback like the scores above it — the verdict
+ * stood on the words read, not on these.
+ */
+function Sounds({
+  t,
+  prompt,
+  remarks,
+}: {
+  t: T;
+  prompt: AiReadingPrompt;
+  remarks: AiReviewRemark[];
+}) {
+  if (remarks.length === 0) return null;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <p className="text-[12.5px] font-semibold">{t('reading.pronunciation.sounds')}</p>
+      {remarks.map((remark, i) => (
+        <div
+          key={`${remark.itemId}-${i}`}
+          className="flex flex-col gap-1 rounded-[9px] bg-(--ssz-bg-surface-subtle) px-3 py-2"
+        >
+          {remark.fragment !== null && (
+            <SoundWord word={remark.fragment} transcription={transcriptionOf(prompt, remark)} />
+          )}
+          <p className="text-[13px] leading-relaxed text-(--ssz-text-primary)">{remark.comment}</p>
+        </div>
+      ))}
     </div>
   );
 }
@@ -388,6 +433,8 @@ function aspectLabel(t: T, aspect: string): string {
       return t('aspect.structure');
     case 'content':
       return t('aspect.content');
+    case 'pronunciation':
+      return t('aspect.pronunciation');
     default:
       return t('aspect.register');
   }

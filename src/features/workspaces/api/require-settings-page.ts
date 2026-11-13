@@ -35,7 +35,10 @@ export async function requireSettingsPage(
  */
 export async function settingsFeaturesOf(
   workspace: ResolvedWorkspace,
-): Promise<{ studentAssist: boolean }> {
+): Promise<{ studentAssist: boolean; aiPractice: boolean }> {
   const entitlements = await getEntitlements(workspace.id);
-  return { studentAssist: can(entitlements, 'ai.student_assist') };
+  return {
+    studentAssist: can(entitlements, 'ai.student_assist'),
+    aiPractice: can(entitlements, 'ai.practice'),
+  };
 }

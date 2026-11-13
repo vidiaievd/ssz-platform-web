@@ -17,7 +17,37 @@ vi.mock('@/features/learning', () => ({
   LearningSkeleton: () => <div>loading</div>,
 }));
 
+// Whether the learner's school lets them rehearse with a model is read from the route and
+// three endpoints; the solver only needs the answer.
+const precheck = vi.hoisted(() => ({ available: false }));
+vi.mock('@/features/student/precheck/use-precheck-availability', () => ({
+  usePrecheckAvailability: () => precheck.available,
+}));
+
 import { WritingTaskSolver } from './writing-task-solver';
+
+/** What the engine answers a rehearsal: remarks, and what the limits leave. */
+const CHECKED = {
+  attemptId: 'att-1',
+  templateCode: 'writing_task',
+  selfCheck: null,
+  ai: { status: 'ok' },
+  feedback: {
+    summary: 'Clear, with one slip.',
+    items: [
+      {
+        kind: 'spelling',
+        original: 'kommunen',
+        suggestion: null,
+        explanation: 'Check the double m.',
+        severity: 'minor',
+      },
+    ],
+    words: [],
+  },
+  reading: null,
+  remaining: { exercise: 2, learnerChecksApprox: null },
+};
 
 /** The task as the server projects it — no keywords, no model answer. */
 const PROJECTION = {
@@ -133,6 +163,7 @@ function mockApi(
         ? json({ code: 'NO_AI_REVIEW' }, 404)
         : json(responses.aiReview);
     }
+    if (path.endsWith('/check')) return json(CHECKED);
     if (path.endsWith('/submit')) {
       handedIn = !responses.submitFails;
       return responses.submitFails
@@ -180,6 +211,7 @@ const field = () => screen.getByRole('textbox', { name: 'Your text' });
 const write = (text: string) => fireEvent.change(field(), { target: { value: text } });
 
 afterEach(() => {
+  precheck.available = false;
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -504,5 +536,34 @@ describe('WritingTaskSolver', () => {
 
     expect(await screen.findByText('The text was not handed in. Try again.')).toBeInTheDocument();
     expect(field()).toHaveValue('ett to tre fire fem');
+  });
+
+  describe('«Check» before hand-in (plan 84)', () => {
+    it('draws no button where the school has not switched it on', async () => {
+      const { fetchMock } = mockApi();
+      renderSolver(fetchMock);
+      await screen.findByRole('textbox', { name: 'Your text' });
+
+      expect(screen.queryByRole('button', { name: 'Check' })).toBeNull();
+    });
+
+    it('rehearses the text on the open attempt and hands in nothing', async () => {
+      precheck.available = true;
+      const { fetchMock, calls } = mockApi();
+      renderSolver(fetchMock);
+      await screen.findByRole('textbox', { name: 'Your text' });
+
+      expect(screen.getByRole('button', { name: 'Check' })).toBeDisabled();
+      write('ett to tre fire fem');
+      await userEvent.click(screen.getByRole('button', { name: 'Check' }));
+
+      expect(await screen.findByText('Clear, with one slip.')).toBeInTheDocument();
+      expect(screen.getByText('Check the double m.')).toBeInTheDocument();
+      const check = calls.find((c) => c.path.endsWith('/attempts/att-1/check'));
+      expect(check?.body).toEqual({ draftAnswer: { text: 'ett to tre fire fem', ticked: [] } });
+      // Still a draft: the hand-in is there to press, and nothing was submitted.
+      expect(calls.some((c) => c.path.endsWith('/submit'))).toBe(false);
+      expect(screen.getByRole('button', { name: 'Hand in for review' })).toBeEnabled();
+    });
   });
 });

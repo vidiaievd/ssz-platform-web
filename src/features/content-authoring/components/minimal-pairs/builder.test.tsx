@@ -1,6 +1,6 @@
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/features/profile', () => ({
   useMyProfile: () => ({ data: { displayName: ' Kari Nordmann ' } }),
@@ -29,6 +29,15 @@ function renderBuilder(initial: MinimalPairsDocument) {
   );
   return { user: userEvent.setup(), changes, sources };
 }
+
+// The mock outlives a test, and so did its calls: an edit made in an earlier test saves on
+// a timer and landed in the next test's count. A save that answers nothing also read
+// `.ok` off undefined as an unhandled rejection.
+beforeEach(() => {
+  vi.mocked(saveMinimalPairsAction)
+    .mockReset()
+    .mockResolvedValue({ ok: true, value: { status: 'saved', updatedAt: 't0' } });
+});
 
 const tab = (name: string) => screen.getByRole('tab', { name: new RegExp(`^\\d?\\s*${name}`) });
 

@@ -28,6 +28,11 @@ export interface ReviewDecisionInput {
    * 1.5): a remark's index, `summary`, `draft`. Sent only when the card drew a draft.
    */
   aiOutcomes?: Record<string, AiRemarkOutcome>;
+  /**
+   * Grammar-rule atoms the reviewer marked (plan 85, step 9). Ids only, in the form the
+   * engine takes; they reach the learner's review queue as a lapse on the rule's card.
+   */
+  flaggedAtoms?: Array<{ atomType: 'grammar_rule_atom'; atomId: string }>;
 }
 
 /** A colleague answered first — everything the banner has to name (criterion 24). */

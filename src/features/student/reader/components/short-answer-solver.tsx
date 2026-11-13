@@ -37,6 +37,12 @@ import type {
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  PrecheckButton,
+  PrecheckResultPanel,
+  usePrecheckAvailability,
+  usePrecheckRun,
+} from '@/features/student/precheck';
 
 export interface ShortAnswerSolverProps {
   exerciseId: string;
@@ -109,6 +115,8 @@ export function ShortAnswerSolver({
 
   const answer = useAnswerQuestion<StudentResult>(exerciseId, attemptId);
   const submit = useSubmitAnswer(exerciseId, attemptId);
+  // The rehearsal with a model (plan 84): the question on screen, read without handing it in.
+  const precheckOn = usePrecheckAvailability();
 
   const [index, setIndex] = useState(0);
   /** Questions handed in and skipped — see `ShortAnswerWalk`. */
@@ -452,6 +460,45 @@ export function ShortAnswerSolver({
           accent={PRACTICE_ACCENT}
         />
       )}
+      {precheckOn && question !== undefined && phase === 'writing' && review === null && (
+        // Remounted per question, so a panel never outlives the text it was about.
+        <QuestionPrecheck
+          key={question.id}
+          exerciseId={exerciseId}
+          attemptId={attemptId}
+          questionId={question.id}
+          text={value}
+          disabled={answer.isPending}
+        />
+      )}
+    </div>
+  );
+}
+
+/** «Check» for the open question of a set: the draft is that one answer, as a hand-in carries it. */
+function QuestionPrecheck({
+  exerciseId,
+  attemptId,
+  questionId,
+  text,
+  disabled,
+}: {
+  exerciseId: string;
+  attemptId: string;
+  questionId: string;
+  text: string;
+  disabled: boolean;
+}) {
+  const run = usePrecheckRun(exerciseId, attemptId);
+  const trimmed = text.trim();
+  return (
+    <div className="mt-3">
+      <PrecheckButton
+        run={run}
+        draft={trimmed === '' ? null : { answers: [{ questionId, text: trimmed }] }}
+        disabled={disabled}
+      />
+      <PrecheckResultPanel run={run} />
     </div>
   );
 }

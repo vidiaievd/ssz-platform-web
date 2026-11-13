@@ -3,7 +3,9 @@ import userEvent from '@testing-library/user-event';
 import axe from 'axe-core';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { emptyProsodyLayer } from '@/lib/shared-kernel/prosody';
 import { issues, stepState } from '@/lib/shared-kernel/read-aloud';
+import { tokenize } from '@/lib/shared-kernel/text';
 
 import type { ReadAloudDocument } from './edits';
 import { blankDocument, Intl, LOADED_AT, PAGE_RULES, sampleReadAloud } from './test-support';
@@ -31,9 +33,15 @@ vi.mock('@/lib/i18n/navigation', () => ({
   ),
 }));
 vi.mock('../../actions/read-aloud', () => ({ saveReadAloudAction: vi.fn() }));
+vi.mock('../../actions/prosody', () => ({
+  loadPromptProsodyAction: vi.fn(),
+  savePromptProsodyAction: vi.fn(),
+  suggestPromptProsodyAction: vi.fn(),
+}));
 
 const { ReadAloudBuilder } = await import('./builder');
 const { saveReadAloudAction } = await import('../../actions/read-aloud');
+const { loadPromptProsodyAction, savePromptProsodyAction } = await import('../../actions/prosody');
 
 function renderBuilder(
   initial: ReadAloudDocument,
@@ -100,7 +108,7 @@ describe('ReadAloudBuilder — the rail (RA-B1)', () => {
   it('takes the layer into the count: listening on with nothing to play blocks step 1', async () => {
     const { user } = renderBuilder(sampleReadAloud());
     expect(within(tab('Task')).queryByText(/problem/)).not.toBeInTheDocument();
-    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('switch', { name: /Listening exercise/ }));
     expect(within(tab('Task')).getByText('1 problem')).toBeInTheDocument();
   });
 });
@@ -240,5 +248,153 @@ describe('ReadAloudBuilder — saving (RA-B16)', () => {
     await user.click(screen.getByRole('button', { name: /Undo everything since I opened this/ }));
     await user.click(screen.getByRole('button', { name: 'Put it back' }));
     expect(screen.getByLabelText(/^Title/)).toHaveValue('Les høyt — jobbsøknad');
+  });
+});
+
+describe('ReadAloudBuilder — the pronunciation guide (plan 86, step 6h.3)', () => {
+  const guided = (): ReadAloudDocument => {
+    const base = sampleReadAloud();
+    return { ...base, pronunciationGuide: { ...base.pronunciationGuide, enabled: true } };
+  };
+
+  beforeEach(() => {
+    vi.mocked(loadPromptProsodyAction).mockImplementation(async (_exerciseId, promptId) => {
+      const prompt = sampleReadAloud().prompts.find((p) => p.id === promptId)!;
+      const at = tokenize(prompt.text).findIndex((token) => token.w === 'Kjetil');
+      return {
+        ok: true,
+        value: {
+          status: 'loaded',
+          view: {
+            text: prompt.text,
+            notation: prompt.text,
+            dropped: 0,
+            layer: emptyProsodyLayer(),
+            issues: [],
+            updatedAt: null,
+            lexicon: {
+              stresses: [],
+              sounds: [],
+              unresolved: at === -1 ? [] : [{ i: at, w: 'Kjetil' }],
+            },
+          },
+        },
+      };
+    });
+  });
+  afterEach(() => vi.clearAllMocks());
+
+  it('reads nothing and draws no step while the guide is off', () => {
+    renderBuilder(sampleReadAloud());
+    expect(screen.queryByRole('tab', { name: /Pronunciation/ })).not.toBeInTheDocument();
+    expect(loadPromptProsodyAction).not.toHaveBeenCalled();
+  });
+
+  it('draws the step second and walks it in the rail order', async () => {
+    const { user } = renderBuilder(guided());
+    const names = screen.getAllByRole('tab').map((t) => t.textContent ?? '');
+    expect(names[1]).toMatch(/Pronunciation/);
+    await user.click(screen.getByRole('button', { name: /Next: Pronunciation/ }));
+    expect(tab('Pronunciation')).toHaveAttribute('aria-selected', 'true');
+    await user.click(screen.getByRole('button', { name: /Next: Listen for/ }));
+    expect(tab('Listen for')).toHaveAttribute('aria-selected', 'true');
+  });
+
+  it('reads each passage and blocks on a word the dictionary does not know', async () => {
+    const { user } = renderBuilder(guided());
+    await vi.waitFor(() =>
+      expect(within(tab('Pronunciation')).getByText('1 problem')).toBeInTheDocument(),
+    );
+    expect(loadPromptProsodyAction).toHaveBeenCalledTimes(2);
+    await user.click(tab('Pronunciation'));
+    expect(screen.getByText('Not in the dictionary: Kjetil')).toBeInTheDocument();
+    expect(screen.getByText(/«Kjetil» is not in the dictionary/)).toBeInTheDocument();
+  });
+
+  it('asks for a sentence end once «Melody» is offered', async () => {
+    const { user } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await user.click(screen.getByRole('checkbox', { name: 'Melody' }));
+    await vi.waitFor(() =>
+      expect(screen.getAllByText(/no end of a group/).length).toBeGreaterThan(0),
+    );
+  });
+
+  it('has no axe violations on the step', async () => {
+    const { user, container } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await vi.waitFor(() =>
+      expect(screen.getByText('Not in the dictionary: Kjetil')).toBeInTheDocument(),
+    );
+    expect((await axe.run(container, PAGE_RULES)).violations).toEqual([]);
+  });
+
+  /** «Kjetil» is in the second sentence of the first passage. */
+  const openKjetil = async (user: ReturnType<typeof renderBuilder>['user']) => {
+    const [list] = await screen.findAllByRole('list', { name: 'Sentences of the passage' });
+    await user.click(within(list!).getAllByRole('button')[1]!);
+    await user.click(screen.getByRole('button', { name: 'Kjetil' }));
+  };
+
+  it('settles a word in the editor at once and saves the layer on its own (6h.3b)', async () => {
+    vi.mocked(savePromptProsodyAction).mockImplementation(async (_exerciseId, promptId, input) => {
+      const prompt = sampleReadAloud().prompts.find((p) => p.id === promptId)!;
+      return {
+        ok: true,
+        value: {
+          status: 'saved',
+          view: {
+            text: prompt.text,
+            notation: prompt.text,
+            dropped: 0,
+            layer: input.layer,
+            issues: [],
+            updatedAt: '2026-11-04T12:00:00.000Z',
+            lexicon: { stresses: [], sounds: [], unresolved: [] },
+          },
+        },
+      };
+    });
+    const { user } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await openKjetil(user);
+    await user.click(screen.getByRole('button', { name: 'no stress' }));
+    // The draft is judged before it is saved: the blocker goes at once.
+    expect(screen.queryByText(/«Kjetil» is not in the dictionary/)).not.toBeInTheDocument();
+    await vi.waitFor(() => expect(savePromptProsodyAction).toHaveBeenCalledTimes(1), {
+      timeout: 2000,
+    });
+    const [, , input] = vi.mocked(savePromptProsodyAction).mock.calls[0]!;
+    expect(input.expectedUpdatedAt).toBeNull();
+    expect(input.layer.unstressed).toEqual([
+      expect.objectContaining({ w: 'Kjetil', source: 'teacher' }),
+    ]);
+    expect(await screen.findByText('Marks saved')).toBeInTheDocument();
+  });
+
+  it('drops the edit and reads again when another window saved first', async () => {
+    vi.mocked(savePromptProsodyAction).mockResolvedValue({
+      ok: true,
+      value: { status: 'conflict', currentUpdatedAt: '2026-11-04T12:00:00.000Z' },
+    });
+    const { user } = renderBuilder(guided());
+    await user.click(tab('Pronunciation'));
+    await openKjetil(user);
+    await user.click(screen.getByRole('button', { name: 'no stress' }));
+    expect(
+      await screen.findByText(/changed in another window/, {}, { timeout: 2000 }),
+    ).toBeInTheDocument();
+    expect(loadPromptProsodyAction).toHaveBeenCalledTimes(3);
+    // The stored layer is back, and with it the blocker.
+    await vi.waitFor(() =>
+      expect(screen.getByText(/«Kjetil» is not in the dictionary/)).toBeInTheDocument(),
+    );
+  });
+
+  it('drops the step from the rail when the guide is switched off', async () => {
+    const { user } = renderBuilder(guided());
+    await user.click(screen.getByRole('switch', { name: /Pronunciation guide/ }));
+    expect(screen.queryByRole('tab', { name: /Pronunciation/ })).not.toBeInTheDocument();
+    expect(tab('Task')).toHaveAttribute('aria-selected', 'true');
   });
 });

@@ -5,6 +5,7 @@
     "notifications": "Notifications",
     "review": "Review response time",
     "assistant": "AI assistant",
+    "precheck": "Check before hand-in",
     "progress": "What students see",
     "recipe": "Lesson recipe",
     "new": "New"
@@ -67,6 +68,37 @@
     "saveFailed": "The change was not saved.",
     "saveNotEntitled": "The school's plan does not include the assistant for students. Only \"Nobody\" can be saved.",
     "saveInvalid": "A group or student you chose is no longer at the school. The lists have been refreshed — check them and save again."
+  },
+  "precheck": {
+    "eyebrow": "School",
+    "heading": "Check before hand-in",
+    "lede": "Let students have a model check their work before they hand it in. The checks are charged to the school's AI credits; the teacher still marks the work.",
+    "title": "Rehearsal with a model",
+    "sub": "A student sees the remarks, fixes the work and hands it in. The teacher gets an ordinary submission.",
+    "failed": "We could not load the check settings.",
+    "readOnly": "Only an owner or an administrator can change this.",
+    "enabled": {
+      "label": "Students can check their work before handing in",
+      "hint": "Applies to written, translation, error-correction and read-aloud exercises."
+    },
+    "perExercise": {
+      "label": "Checks per student and exercise",
+      "hint": "Counted over all attempts, so a new attempt does not start over. Leave empty for no limit.",
+      "invalid": "Enter a whole number from 1 to {max}, or leave empty."
+    },
+    "monthly": {
+      "label": "Credits per student a month",
+      "hint": "Calendar month. The plan may set a lower ceiling, and the lower of the two applies. Leave empty for no limit.",
+      "invalid": "Enter a whole number from 1 to {max}, or leave empty."
+    },
+    "noLimit": "No limit",
+    "unlimited": "With no limit of its own, only the plan's credits stop the checks: one active student can use up the school's pool.",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saved": "Saved.",
+    "saveFailed": "The change was not saved.",
+    "saveNotEntitled": "The school's plan does not include checks before hand-in.",
+    "saveInvalid": "A value is out of range. Check both limits and save again."
   },
   "recipe": {
     "eyebrow": "Teaching standards",

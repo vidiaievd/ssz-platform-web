@@ -31,6 +31,12 @@ import type { StudentProjection } from '@/lib/shared-kernel/writing-task';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  PrecheckButton,
+  PrecheckResultPanel,
+  usePrecheckAvailability,
+  usePrecheckRun,
+} from '@/features/student/precheck';
 
 export interface WritingTaskSolverProps {
   exerciseId: string;
@@ -86,6 +92,10 @@ export function WritingTaskSolver({
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const saveDraft = useSaveDraft(exerciseId, attemptId);
+  // The rehearsal with a model (plan 84): offered where the school allows it, and only while
+  // the work is still a draft. Nothing is handed in by it.
+  const precheckOn = usePrecheckAvailability();
+  const precheck = usePrecheckRun(exerciseId, attemptId);
 
   const [value, setValue] = useState<WritingTaskValue>({ text: '', ticked: [] });
   const [phase, setPhase] = useState<WritingTaskPhase>('draft');
@@ -328,32 +338,42 @@ export function WritingTaskSolver({
       />
 
       {phase === 'draft' ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            disabled={!gate.canSubmit || submit.isPending || confirmingDelivery}
-            onClick={send}
-            className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
-            style={{ background: GRADED_ACCENT }}
-          >
-            {submit.isPending || confirmingDelivery
-              ? t('writingTask.sending')
-              : t('writingTask.send')}
-          </button>
-          <span className="text-[12.5px] text-(--ssz-text-muted)">{note}</span>
+        <>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={!gate.canSubmit || submit.isPending || confirmingDelivery}
+              onClick={send}
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
+              style={{ background: GRADED_ACCENT }}
+            >
+              {submit.isPending || confirmingDelivery
+                ? t('writingTask.sending')
+                : t('writingTask.send')}
+            </button>
+            {precheckOn && (
+              <PrecheckButton
+                run={precheck}
+                draft={value.text.trim() === '' ? null : { text: value.text, ticked: value.ticked }}
+                disabled={submit.isPending || confirmingDelivery}
+              />
+            )}
+            <span className="text-[12.5px] text-(--ssz-text-muted)">{note}</span>
 
-          {/* 47.0.B: what a failed send actually did, resolved against the server first. */}
-          {sendFailure === 'not-delivered' && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('writingTask.sendFailedRetry')}
-            </span>
-          )}
-          {sendFailure === 'unconfirmed' && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('writingTask.sendUnconfirmed')}
-            </span>
-          )}
-        </div>
+            {/* 47.0.B: what a failed send actually did, resolved against the server first. */}
+            {sendFailure === 'not-delivered' && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('writingTask.sendFailedRetry')}
+              </span>
+            )}
+            {sendFailure === 'unconfirmed' && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('writingTask.sendUnconfirmed')}
+              </span>
+            )}
+          </div>
+          {precheckOn && <PrecheckResultPanel run={precheck} />}
+        </>
       ) : phase === 'sent' ? (
         <div
           className="mt-4 rounded-2xl border px-4 py-3"

@@ -21,6 +21,14 @@ import { parseInlineMarkdown, sliceMarks, type InlineMarkKind } from '../lib/par
 import { projectRange, type ProjectedSpan } from '../lib/project-span';
 import { sentenceAt, splitSentences } from '../lib/split-sentences';
 import { useSelectedWordStore } from '../stores/selected-word-store';
+import {
+  ProsodyBoundary,
+  ProsodyWord,
+  drawnIn,
+  type ProsodyView,
+  type TokenMarks,
+} from '@/features/student/prosody';
+import { tokenize } from '@/lib/shared-kernel/text/words';
 
 /**
  * Underline per gloss intensity. Only weight and opacity vary — hue stays put,
@@ -209,6 +217,11 @@ export interface GlossaryTextProps {
    * annotation is opened. Without it the popover shows the rule title alone.
    */
   explanationLanguage?: string;
+  /**
+   * The pronunciation layer for this run (plan 86): what to draw, and the marks keyed by the
+   * offset where each word starts in `text` as passed in (before emphasis is stripped).
+   */
+  prosody?: { view: ProsodyView; marks: ReadonlyMap<number, TokenMarks> };
 }
 
 /**
@@ -229,8 +242,51 @@ export function GlossaryText({
   authoredVocabulary = false,
   spansHidden = false,
   explanationLanguage,
+  prosody,
 }: GlossaryTextProps) {
   const { text, marks, sourceIndexOf } = useMemo(() => parseInlineMarkdown(raw), [raw]);
+  /**
+   * The layer's marks on the words of the stripped string. A word the emphasis delimiters
+   * glued or split differently from the raw text (`**fet**ord`) no longer agrees with its mark
+   * and gets none, rather than a mark on the wrong word.
+   */
+  const wordMarks = useMemo(() => {
+    const out = new Map<number, { end: number; marks: TokenMarks }>();
+    if (!prosody || prosody.marks.size === 0) return out;
+    for (const token of tokenize(text)) {
+      const found = prosody.marks.get(sourceIndexOf[token.s]!);
+      if (found && found.word.toLowerCase() === token.w.toLowerCase()) {
+        out.set(token.s, { end: token.e, marks: found });
+      }
+    }
+    return out;
+  }, [prosody, text, sourceIndexOf]);
+
+  /**
+   * `text.slice(from, to)` with the layer drawn on the words that lie wholly inside it. A word
+   * cut by an emphasis or gloss boundary stays plain — an arc needs the whole word to start under.
+   */
+  function plain(from: number, to: number): ReactNode {
+    if (!prosody || wordMarks.size === 0) return text.slice(from, to);
+    const parts: ReactNode[] = [];
+    let at = from;
+    for (const [start, { end, marks: found }] of wordMarks) {
+      if (start < at || end > to) continue;
+      const { view } = prosody;
+      if (!drawnIn(view.lens, found)) continue;
+      if (start > at) parts.push(text.slice(at, start));
+      parts.push(
+        <ProsodyWord key={start} word={text.slice(start, end)} marks={found} view={prosody.view} />,
+      );
+      if (prosody.view.lens === 'melody' && found.boundary) {
+        parts.push(<ProsodyBoundary key={`b${start}`} boundary={found.boundary} />);
+      }
+      at = end;
+    }
+    if (at === from) return text.slice(from, to);
+    if (at < to) parts.push(text.slice(at, to));
+    return <>{parts}</>;
+  }
   // Spans and the tokenizer are alternatives, never both (spec 16 §5.3).
   const tokens = useMemo(
     () => (authoredVocabulary ? [] : tokenizeGlossary(text, glossary)),
@@ -264,7 +320,7 @@ export function GlossaryText({
   function emphasised(from: number, to: number): ReactNode[] {
     return sliceMarks(marks, from, to).map((piece) => (
       <Fragment key={piece.start}>
-        {withEmphasis(text.slice(piece.start, piece.end), piece.kinds)}
+        {withEmphasis(plain(piece.start, piece.end), piece.kinds)}
       </Fragment>
     ));
   }

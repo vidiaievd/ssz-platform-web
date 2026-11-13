@@ -6,6 +6,7 @@ import {
   PositionScale,
   SkillGrid,
   Stat,
+  WeakRulesPanel,
   ZeroLegend,
   rampInk,
   type LegendItem,
@@ -115,21 +116,24 @@ export async function MasteryTab({
 
   if (data.grid.nothingMeasured) {
     return (
-      <Card>
-        <CardBody className="space-y-2 py-10 text-center">
-          <h3 className="text-base font-bold text-(--ssz-text-primary)">
-            {t('mastery.empty.title')}
-          </h3>
-          <p className="mx-auto max-w-md text-sm text-(--ssz-text-secondary)">
-            {t('mastery.empty.body')}
-          </p>
-          <div className="pt-1">
-            <Button asChild size="sm">
-              <a href={assignHref}>{t('mastery.empty.action')}</a>
-            </Button>
-          </div>
-        </CardBody>
-      </Card>
+      <div className="space-y-5">
+        <Card>
+          <CardBody className="space-y-2 py-10 text-center">
+            <h3 className="text-base font-bold text-(--ssz-text-primary)">
+              {t('mastery.empty.title')}
+            </h3>
+            <p className="mx-auto max-w-md text-sm text-(--ssz-text-secondary)">
+              {t('mastery.empty.body')}
+            </p>
+            <div className="pt-1">
+              <Button asChild size="sm">
+                <a href={assignHref}>{t('mastery.empty.action')}</a>
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+        <WeakRulesPanel endpoint={`/api/schools/${schoolId}/students/${studentId}/weak-rules`} />
+      </div>
     );
   }
 
@@ -183,6 +187,8 @@ export async function MasteryTab({
           <AgainstTheGroup position={data.position} t={t} />
         </div>
       </div>
+
+      <WeakRulesPanel endpoint={`/api/schools/${schoolId}/students/${studentId}/weak-rules`} />
     </div>
   );
 }

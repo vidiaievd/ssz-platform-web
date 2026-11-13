@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { GlossVisibility } from '@/features/learning';
+import type { ProsodyLens, ProsodyMode } from '@/features/student/prosody';
 
 /** Text lesson reading experience (design handoff §"Reader Text Lesson"). */
 export type ReadingMode = 'immersive' | 'bilingual' | 'focus';
@@ -35,6 +36,18 @@ interface ReadingModeState {
   setGlossVisibility: (visibility: GlossVisibility) => void;
   textWidth: TextWidth;
   setTextWidth: (width: TextWidth) => void;
+  /**
+   * Pronunciation under the text (plan 86, §4i.2): «Meaning» (nothing drawn, the default),
+   * one sentence at a time, or one lens over the whole text. The layer is fetched only when the
+   * learner leaves «Meaning».
+   */
+  prosodyMode: ProsodyMode;
+  setProsodyMode: (mode: ProsodyMode) => void;
+  prosodyLens: ProsodyLens;
+  setProsodyLens: (lens: ProsodyLens) => void;
+  /** «Show the legend» under the text and the sentence card. */
+  showProsodyLegend: boolean;
+  setShowProsodyLegend: (on: boolean) => void;
 }
 
 /**
@@ -58,8 +71,14 @@ export const useReadingModeStore = create<ReadingModeState>()(
       // dead space on each side of the prose.
       textWidth: 'medium',
       setTextWidth: (textWidth) => set({ textWidth }),
+      prosodyMode: 'meaning',
+      setProsodyMode: (prosodyMode) => set({ prosodyMode }),
+      prosodyLens: 'stress',
+      setProsodyLens: (prosodyLens) => set({ prosodyLens }),
+      showProsodyLegend: true,
+      setShowProsodyLegend: (showProsodyLegend) => set({ showProsodyLegend }),
     }),
-    // Key stays at v2 — persisted v2 payloads simply lack `glossVisibility`, and
+    // Key stays at v2 — persisted v2 payloads simply lack `glossVisibility` and the pronunciation settings, and
     // persist's shallow merge leaves the default in place for them.
     { name: 'ssz:reader:reading-mode:v2' },
   ),

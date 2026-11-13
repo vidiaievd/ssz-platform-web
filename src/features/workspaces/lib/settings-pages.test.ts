@@ -33,6 +33,23 @@ describe('settingsPagesFor', () => {
     ]);
   });
 
+  // Plan 84, step 9: the rehearsal is paid from the `ai.practice` pool.
+  it('adds the check before hand-in after the review only when the plan carries ai.practice', () => {
+    expect(settingsPagesFor('OWNER', 'SCHOOL')).not.toContain('precheck');
+    expect(settingsPagesFor('ADMIN', 'SCHOOL', { studentAssist: true, aiPractice: true })).toEqual([
+      'profile',
+      'account',
+      'notifications',
+      'review',
+      'assistant',
+      'precheck',
+      'progress',
+      'recipe',
+    ]);
+    expect(settingsPagesFor('OWNER', 'SOLO', { aiPractice: true })).toContain('precheck');
+    expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL', { aiPractice: true })).toEqual(['recipe']);
+  });
+
   it('gives a content admin the lesson recipe and nothing else', () => {
     expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL')).toEqual(['recipe']);
   });

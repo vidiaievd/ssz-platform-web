@@ -8,6 +8,7 @@ export type FeatureKey =
   | 'ai.student_assist'
   | 'ai.practice'
   | 'ai.authoring'
+  | 'ai.voice_review_pronunciation'
   | 'school.review_ai_policy';
 
 export interface FeatureEntitlement {

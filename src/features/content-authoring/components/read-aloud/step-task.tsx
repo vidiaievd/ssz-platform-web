@@ -20,12 +20,14 @@ import {
 
 import { AudioEnableRow, AudioRulesCard, AudioSourceCard } from '../audio';
 import { Callout, Card, Field, StepHead } from '../highlight-in-text/parts';
+import { ToggleRow } from '../toggle-row';
 import { ImageSlot } from '../writing-task/image-slot';
 import {
   addPoint,
   addPrompt,
   removePoint,
   removePrompt,
+  setGuide,
   setInstruction,
   setMode,
   setPointText,
@@ -126,6 +128,16 @@ export function StepTask({ exercise, onChange }: StepTaskProps) {
           <p className="m-0 mt-2 text-xs text-(--ssz-text-muted)">
             {exercise.mode === 'read' ? t('step1.evidenceRead') : t('step1.evidenceProduce')}
           </p>
+          {exercise.mode === 'read' && (
+            <div className="mt-3">
+              <ToggleRow
+                label={t('step1.guideLabel')}
+                help={t('step1.guideHelp')}
+                checked={exercise.pronunciationGuide.enabled}
+                onChange={(enabled) => onChange(setGuide(exercise, { enabled }))}
+              />
+            </div>
+          )}
         </Field>
 
         <Field

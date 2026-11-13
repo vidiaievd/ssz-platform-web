@@ -28,6 +28,8 @@ export const reviewKeys = keyFactory('review', {
   terms: (school: string) => ['terms', school] as const,
   submission: (school: string, id: string) => ['submission', school, id] as const,
   submissions: () => ['submission'] as const,
+  grammarAtoms: (school: string, id: string, language: string) =>
+    ['grammar-atoms', school, id, language] as const,
   oversight: (school: string, period: OversightPeriod) => ['oversight', school, period] as const,
   oversights: () => ['oversight'] as const,
   decisions: (school: string, period: OversightPeriod) => ['decisions', school, period] as const,

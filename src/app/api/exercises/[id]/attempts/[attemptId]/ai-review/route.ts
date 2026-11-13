@@ -51,6 +51,9 @@ export async function GET(
       fragment: item.fragment ?? null,
       comment: item.comment,
       suggestion: item.suggestion ?? null,
+      // A reading's sound remark points at its word (plan 88, step 5c); the sound's atom
+      // stays upstream — the screen names the word, not the catalogue.
+      ...(typeof item.wordIndex === 'number' ? { wordIndex: item.wordIndex } : {}),
     })),
     summary: review.summary ?? null,
     marks:

@@ -167,11 +167,13 @@
         "alternative": "annen riktig retting",
         "task": "oppgaven",
         "structure": "struktur",
-        "content": "innhold"
+        "content": "innhold",
+        "pronunciation": "uttale"
       },
       "wholeText": "om hele teksten",
       "wholeAnswer": "om hele svaret",
-      "editLabel": "Legges til i den samlede kommentaren"
+      "editLabel": "Legges til i den samlede kommentaren",
+      "editLabelPrompt": "Legges til i kommentaren til denne oppgaven"
     },
     "aiVerdict": {
       "approved": "godkjent",
@@ -229,6 +231,18 @@
       "next": "neste",
       "send": "send"
     }
+  },
+  "rules": {
+    "title": "Regler bak feilene",
+    "hint": "Merk regelen eleven feilet på — den kommer tilbake i repetisjonen tidligere og vises i oversikten over svake regler.",
+    "add": "Merk en regel",
+    "search": "Søk i reglene i dette kurset",
+    "none": "Ingen treff.",
+    "empty": "Ingen regler i dette kurset er delt opp i atomer ennå.",
+    "loading": "Laster reglene …",
+    "failed": "Kunne ikke laste reglene.",
+    "remove": "Fjern {rule}",
+    "close": "Ferdig"
   },
   "batch": {
     "dialog": {
@@ -686,7 +700,8 @@
       "alternative": "dette er også riktig",
       "task": "oppgaven",
       "structure": "struktur",
-      "content": "innhold"
+      "content": "innhold",
+      "pronunciation": "uttale"
     },
     "reading": {
       "prompt": "Oppgave {n}",
@@ -716,7 +731,8 @@
         "scores": "nøyaktighet {accuracy} · flyt {fluency} · fullstendighet {completeness}",
         "prosody": "intonasjon {prosody}",
         "unclear": "Uklart:",
-        "note": "Bare et hint – det endrer ikke resultatet."
+        "note": "Bare et hint – det endrer ikke resultatet.",
+        "sounds": "Lyder å øve på:"
       }
     }
   }

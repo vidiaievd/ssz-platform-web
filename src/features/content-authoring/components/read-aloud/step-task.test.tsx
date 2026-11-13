@@ -139,10 +139,21 @@ describe('StepTask — the audio layer (RA-B4)', () => {
 
   it('mounts the shared cards when switched on', async () => {
     const { user } = renderStep(documentOf());
-    await user.click(screen.getByRole('switch'));
+    await user.click(screen.getByRole('switch', { name: /Listening exercise/ }));
     expect(screen.getByText('The clip')).toBeInTheDocument();
     expect(screen.getByText('How they may listen')).toBeInTheDocument();
     expect(screen.queryByText(/A model reading gives the student/)).not.toBeInTheDocument();
+  });
+});
+
+describe('StepTask — the pronunciation guide (plan 86, step 6h.3)', () => {
+  it('offers the switch under «Read aloud» only, and turns the guide on', async () => {
+    const onChange = vi.fn();
+    const { user } = renderStep(documentOf(), onChange);
+    await user.click(screen.getByRole('switch', { name: /Pronunciation guide/ }));
+    expect(onChange.mock.lastCall?.[0].pronunciationGuide.enabled).toBe(true);
+    await user.click(mode(/Monologue/));
+    expect(screen.queryByRole('switch', { name: /Pronunciation guide/ })).not.toBeInTheDocument();
   });
 });
 

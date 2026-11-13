@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { enMessages } from '@/lib/i18n/messages';
+import { EntitlementsProvider, type Entitlements } from '@/features/entitlements';
 import type { ReadAloudDetails } from '@/features/content-authoring/types/review';
 import type { ReviewSubmission } from '@/features/review/types';
 
@@ -143,16 +144,27 @@ function upstream(
   );
 }
 
-function renderPanel() {
+function renderPanel(entitlements: Entitlements | null = null) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={client}>
       <NextIntlClientProvider locale="en" messages={enMessages}>
-        <SubmissionPanel school="oslo-skole" id="att-1" />
+        <EntitlementsProvider entitlements={entitlements}>
+          <SubmissionPanel school="oslo-skole" id="att-1" />
+        </EntitlementsProvider>
       </NextIntlClientProvider>
     </QueryClientProvider>,
   );
 }
+
+const withKeys = (...keys: string[]): Entitlements => ({
+  account: { type: 'workspace', externalId: 'ws-1' },
+  features: Object.fromEntries(
+    keys.map((key) => [key, { enabled: true, monthlyCredits: '50', limits: {} }]),
+  ),
+  validUntil: new Date(Date.now() + 86_400_000).toISOString(),
+  version: 1,
+});
 
 const block = (label: string) => screen.findByRole('article', { name: label });
 
@@ -581,6 +593,113 @@ describe('the machine’s check on the card (plan 82, step 11b)', () => {
     await block('Avsnitt 1');
     const rules = { rules: { region: { enabled: false } } };
     expect((await axe.run(container, rules)).violations).toEqual([]);
+  });
+});
+
+/** A school's draft of the reading: one weak sound in the first prompt (plan 88, step 5c). */
+const SOUNDS: ReviewSubmission = {
+  ...CHECKED,
+  aiVerdict: null,
+  aiDraft: {
+    ...CHECKED.aiDraft!,
+    shownToLearner: false,
+    summary: 'Mostly clear; work on the y in «sykepleier».',
+    items: [
+      {
+        itemId: 'p1',
+        sentenceIndex: 1,
+        aspect: 'pronunciation',
+        fragment: 'sykepleier',
+        comment: 'Round the lips for y, keep the tongue as for i.',
+        suggestion: null,
+        wordIndex: 1,
+        atomRef: { atomType: 'sound', atomId: 'nb:y' },
+      },
+    ],
+    reading: {
+      ...CHECKED.aiDraft!.reading!,
+      prompts: [
+        {
+          ...CHECKED.aiDraft!.reading!.prompts[0]!,
+          pronunciation: {
+            accuracy: 70,
+            fluency: 80,
+            completeness: 80,
+            prosody: null,
+            words: [
+              { text: 'jeg', accuracy: 95, error: 'none' },
+              {
+                text: 'sykepleier',
+                accuracy: 55,
+                error: 'none',
+                phonemes: [
+                  { symbol: 's', accuracy: 95 },
+                  { symbol: 'yː', accuracy: 30 },
+                  { symbol: 'k', accuracy: 90 },
+                  { symbol: 'ə', accuracy: 80 },
+                ],
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+};
+
+describe('weak sounds on the card (plan 88, step 5c)', () => {
+  it('draws a sound remark under its prompt’s check and takes it into that prompt’s comment', async () => {
+    upstream(SOUNDS);
+    const user = userEvent.setup();
+    renderPanel(withKeys('ai.voice_review_pronunciation'));
+
+    const first = await block('Avsnitt 1');
+    expect(within(first).getByText('/syːkə/')).toBeInTheDocument();
+    await user.click(within(first).getByRole('button', { name: 'Add to comment' }));
+    expect(within(first).getByLabelText(/Feedback to the student/)).toHaveValue(
+      '«sykepleier» — Round the lips for y, keep the tongue as for i.',
+    );
+    expect(within(first).getByText('added to comment')).toBeInTheDocument();
+    // The second prompt has no remarks of its own.
+    expect(
+      within(await block('Avsnitt 2')).queryByRole('button', { name: 'Add to comment' }),
+    ).not.toBeInTheDocument();
+
+    await markPrompt(user, 'Avsnitt 1', 3, 3);
+    await markPrompt(user, 'Avsnitt 2', 3, 3);
+    await commentOn(user, 'Avsnitt 2', 'Godt.');
+    await user.click(screen.getByRole('button', { name: /^Approve/ }));
+    await waitFor(() => expect(decisionBody().aiOutcomes).toEqual({ '0': 'accepted' }));
+  });
+
+  it('rewords a remark in a form of its own, then adds it to the prompt’s comment', async () => {
+    upstream(SOUNDS);
+    const user = userEvent.setup();
+    renderPanel(withKeys('ai.voice_review_pronunciation'));
+
+    const first = await block('Avsnitt 1');
+    await commentOn(user, 'Avsnitt 1', 'Fin flyt.');
+    await user.click(within(first).getByRole('button', { name: 'Edit' }));
+    const form = within(first).getByLabelText("Goes into this prompt's comment");
+    await user.clear(form);
+    await user.type(form, 'Øv på y i «sykepleier».');
+    await user.click(within(first).getByRole('button', { name: 'Save' }));
+
+    expect(within(first).getByLabelText(/Feedback to the student/)).toHaveValue(
+      'Fin flyt.\nØv på y i «sykepleier».',
+    );
+    expect(within(first).getByText('edited and added')).toBeInTheDocument();
+  });
+
+  it('keeps the remarks off the card when the plan does not include pronunciation', async () => {
+    upstream(SOUNDS);
+    renderPanel(withKeys('ai.review_draft'));
+
+    const first = await block('Avsnitt 1');
+    // The check of the words read is drawn whatever the plan.
+    expect(within(first).getByRole('region', { name: "The machine's check" })).toBeInTheDocument();
+    expect(within(first).queryByText('/syːkə/')).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: 'AI draft' })).not.toBeInTheDocument();
   });
 });
 

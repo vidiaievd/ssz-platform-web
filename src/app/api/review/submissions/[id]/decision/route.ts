@@ -42,6 +42,11 @@ interface DecisionRequest {
    */
   aiOutcomes?: Record<string, string>;
   /**
+   * Grammar-rule atoms the reviewer marked (plan 85, step 9). Forwarded unread: the engine
+   * validates the shape and turns them into the `teacher` letter.
+   */
+  flaggedAtoms?: Array<{ atomType: string; atomId: string }>;
+  /**
    * The queue as the reviewer currently has it arranged. Sent rather than assumed,
    * because what "the next one" means is exactly the list on their screen.
    */
@@ -129,6 +134,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
         sentenceComments: body.sentenceComments ?? {},
         ...(body.rubricMarks === undefined ? {} : { rubricMarks: body.rubricMarks }),
         ...(body.aiOutcomes === undefined ? {} : { aiOutcomes: body.aiOutcomes }),
+        ...(body.flaggedAtoms === undefined ? {} : { flaggedAtoms: body.flaggedAtoms }),
       },
       // Both are outcomes the screen has a shape for, not faults worth logging as such.
       expectedErrorStatuses: [409, 422],

@@ -37,6 +37,12 @@ import {
 } from '@/features/student/exercises/runner';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  PrecheckButton,
+  PrecheckResultPanel,
+  usePrecheckAvailability,
+  usePrecheckRun,
+} from '@/features/student/precheck';
 
 export interface TranslateSolverProps {
   exerciseId: string;
@@ -76,6 +82,10 @@ export function TranslateSolver({
 
   const submit = useSubmitAnswer(exerciseId, attemptId);
   const selfCheck = useSelfCheck(exerciseId, attemptId);
+  // Where the school allows a rehearsal with a model (plan 84), one «Check» does both: the
+  // engine reads the key first and asks the model only for what the key cannot settle.
+  const precheckOn = usePrecheckAvailability();
+  const precheck = usePrecheckRun(exerciseId, attemptId);
 
   const [value, setValue] = useState<TranslateValue>({});
   /** The last self-check the server answered, cleared the moment the work changes. */
@@ -285,6 +295,14 @@ export function TranslateSolver({
     );
   }
 
+  /** The key-based half of a «Check» is the self-check's answer, read into the same panel. */
+  function takeSelfCheck(result: { selfCheck: unknown }) {
+    const half = readSelfCheck(result.selfCheck);
+    if (half === null) return;
+    setFeedback({ items: half.items, passing: half.passing });
+    setChecksLeft(half.checksLeft);
+  }
+
   function again() {
     clearAnswerDraft(exerciseId);
     setValue({});
@@ -321,85 +339,104 @@ export function TranslateSolver({
       />
 
       {sent === null ? (
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          {/*
+        <>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            {/*
             The self-check, when the author granted any. It is rationed on the server —
             the diff would otherwise hand over the key one word per call, which is also
             why the key's words come back masked — so the count shown here is the
             engine's answer, not this screen's tally.
           */}
-          {projection.flow.selfCheck > 0 && (
-            <button
-              type="button"
-              disabled={selfCheck.isPending || checksAvailable === 0 || emptyCount === items.length}
-              onClick={askSelfCheck}
-              className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60"
-              style={{ borderColor: 'var(--ssz-border-strong)', color: 'var(--ssz-text-primary)' }}
-            >
-              {selfCheck.isPending
-                ? t('translate.selfCheck.checking')
-                : checksAvailable === 0
-                  ? t('translate.selfCheck.spent')
-                  : t('translate.selfCheck.button', { left: checksAvailable })}
-            </button>
-          )}
-          {/*
+            {precheckOn ? (
+              <PrecheckButton
+                run={precheck}
+                draft={emptyCount === items.length ? null : { answers: toSubmission(items, value) }}
+                disabled={submit.isPending || confirmingDelivery}
+                onResult={takeSelfCheck}
+              />
+            ) : (
+              projection.flow.selfCheck > 0 && (
+                <button
+                  type="button"
+                  disabled={
+                    selfCheck.isPending || checksAvailable === 0 || emptyCount === items.length
+                  }
+                  onClick={askSelfCheck}
+                  className="rounded-xl border px-4 py-2.5 text-[13px] font-semibold disabled:opacity-60"
+                  style={{
+                    borderColor: 'var(--ssz-border-strong)',
+                    color: 'var(--ssz-text-primary)',
+                  }}
+                >
+                  {selfCheck.isPending
+                    ? t('translate.selfCheck.checking')
+                    : checksAvailable === 0
+                      ? t('translate.selfCheck.spent')
+                      : t('translate.selfCheck.button', { left: checksAvailable })}
+                </button>
+              )
+            )}
+            {/*
             What the check found, as a count of sentences that would close by themselves.
             It is the only summing-up this template can make before a teacher reads the
             work: everything else it knows is a distance, not a verdict.
           */}
-          {feedback !== null && projection.exactPasses && (
-            <span className="text-[12.5px] text-(--ssz-text-secondary)">
-              {t('translate.selfCheck.summary', {
-                passing: feedback.passing,
-                total: items.length,
-              })}
-            </span>
-          )}
-          {selfCheck.isError && checksAvailable > 0 && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('translate.selfCheck.failed')}
-            </span>
-          )}
-          <button
-            type="button"
-            disabled={submit.isPending || confirmingDelivery}
-            onClick={allWritten ? send : showEmpty}
-            className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
-            style={{ background: PRACTICE_ACCENT }}
-          >
-            {submit.isPending || confirmingDelivery ? t('translate.sending') : t('translate.send')}
-          </button>
-          {/*
+            {feedback !== null && projection.exactPasses && (
+              <span className="text-[12.5px] text-(--ssz-text-secondary)">
+                {t('translate.selfCheck.summary', {
+                  passing: feedback.passing,
+                  total: items.length,
+                })}
+              </span>
+            )}
+            {selfCheck.isError && checksAvailable > 0 && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('translate.selfCheck.failed')}
+              </span>
+            )}
+            <button
+              type="button"
+              disabled={submit.isPending || confirmingDelivery}
+              onClick={allWritten ? send : showEmpty}
+              className="rounded-xl px-5 py-2.5 text-[14px] font-bold text-white disabled:opacity-60"
+              style={{ background: PRACTICE_ACCENT }}
+            >
+              {submit.isPending || confirmingDelivery
+                ? t('translate.sending')
+                : t('translate.send')}
+            </button>
+            {/*
             Why the button is off, or — once it is on — what handing in will do. The
             second half is the one thing this template owes the learner up front: an
             answer that matches the key is done, and everything else is read by a person.
           */}
-          <span className="text-[12.5px] text-(--ssz-text-muted)">
-            {!allWritten
-              ? t('translate.missing', { count: emptyCount })
-              : projection.exactPasses
-                ? t('translate.exactPasses')
-                : t('translate.allRead')}
-          </span>
-          {/*
+            <span className="text-[12.5px] text-(--ssz-text-muted)">
+              {!allWritten
+                ? t('translate.missing', { count: emptyCount })
+                : projection.exactPasses
+                  ? t('translate.exactPasses')
+                  : t('translate.allRead')}
+            </span>
+            {/*
             47.0.B: a failed `submit` is resolved against the server before this shows
             anything — "not-delivered" (nothing arrived, try again) reads differently
             from "unconfirmed" (the check itself failed, so neither "sent" nor "lost"
             would be true). A `resolveSubmitFailure` call that found the work already
             delivered skips this entirely and moves `sent` on instead.
           */}
-          {sendFailure === 'not-delivered' && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('translate.sendFailedRetry')}
-            </span>
-          )}
-          {sendFailure === 'unconfirmed' && (
-            <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
-              {t('translate.sendUnconfirmed')}
-            </span>
-          )}
-        </div>
+            {sendFailure === 'not-delivered' && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('translate.sendFailedRetry')}
+              </span>
+            )}
+            {sendFailure === 'unconfirmed' && (
+              <span className="text-[12.5px] text-(--ssz-feedback-no-fg)">
+                {t('translate.sendUnconfirmed')}
+              </span>
+            )}
+          </div>
+          {precheckOn && <PrecheckResultPanel run={precheck} />}
+        </>
       ) : (
         <div
           className="mt-4 rounded-2xl border px-4 py-3"
@@ -602,4 +639,20 @@ function readRouting(details: unknown): TranslateRouting | null {
     routing[item.itemId] = item.routing;
   }
   return Object.keys(routing).length === 0 ? null : routing;
+}
+
+/**
+ * The self-check half of a check result, as the engine reports it: the same items the
+ * `self-check` route returns, with the spending beside them. Read, not trusted — a shape
+ * that is not this one costs the colouring, not the screen.
+ */
+function readSelfCheck(
+  raw: unknown,
+): { items: SelfCheckFeedback['items']; passing: number; checksLeft: number } | null {
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
+  const { items, passing, checksLeft } = raw as Record<string, unknown>;
+  if (!Array.isArray(items) || typeof passing !== 'number' || typeof checksLeft !== 'number') {
+    return null;
+  }
+  return { items: items as SelfCheckFeedback['items'], passing, checksLeft };
 }

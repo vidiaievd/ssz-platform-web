@@ -289,4 +289,54 @@ describe('AiReviewPanel — reading aloud (plan 82, step 11)', () => {
     expect(screen.getByText(/^Unclear:/).textContent).toBe('Unclear: bor');
     expect(screen.getByText('A hint only — it does not change the result.')).toBeInTheDocument();
   });
+  it('names the weak sounds of a prompt under its check, with how the word should sound (plan 88, step 5c)', async () => {
+    const prompt = READING_REVIEW.reading!.prompts[0]!;
+    fetchMock.mockImplementation(() =>
+      respond(200, {
+        ...READING_REVIEW,
+        items: [
+          {
+            itemId: 'p1',
+            sentenceIndex: 1,
+            aspect: 'pronunciation',
+            fragment: 'bor',
+            comment: 'Tap the r once with the tongue tip.',
+            suggestion: null,
+            wordIndex: 0,
+          },
+        ],
+        reading: {
+          ...READING_REVIEW.reading!,
+          prompts: [
+            {
+              ...prompt,
+              pronunciation: {
+                accuracy: 71.6,
+                fluency: 80,
+                completeness: 60,
+                prosody: null,
+                words: [
+                  {
+                    text: 'bor',
+                    accuracy: 60,
+                    error: 'none',
+                    phonemes: [
+                      { symbol: 'b', accuracy: 90 },
+                      { symbol: 'uː', accuracy: 80 },
+                      { symbol: 'ɾ', accuracy: 20 },
+                    ],
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      }),
+    );
+    renderPanel('read_aloud');
+
+    expect(await screen.findByText('Sounds to work on:')).toBeInTheDocument();
+    expect(screen.getByText('/buːɾ/')).toBeInTheDocument();
+    expect(screen.getByText('Tap the r once with the tongue tip.')).toBeInTheDocument();
+  });
 });

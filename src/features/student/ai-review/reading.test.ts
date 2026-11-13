@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { readReading } from './reading';
+import { readReading, transcriptionOf } from './reading';
 
 /** As the engine keeps it on a `voice_review` review (`readingForView`). */
 const ENGINE = {
@@ -88,6 +88,58 @@ describe('readReading (plan 82, step 11)', () => {
       prosody: null,
       words: [{ text: 'jeg', accuracy: 92, error: 'none' }],
     });
+  });
+
+  it('keeps the sounds of a word where they were named, and only whole (plan 88, step 5c)', () => {
+    const reading = readReading({
+      ...ENGINE,
+      prompts: [
+        {
+          ...ENGINE.prompts[0],
+          pronunciation: {
+            accuracy: 80,
+            fluency: 70,
+            completeness: 90,
+            words: [
+              {
+                text: 'kjøre',
+                accuracy: 60,
+                error: 'none',
+                phonemes: [
+                  { symbol: 'ç', accuracy: 31 },
+                  { symbol: 'øː', accuracy: 88 },
+                  { symbol: 'ɾ', accuracy: 90 },
+                  { symbol: '', accuracy: 70 },
+                ],
+              },
+              { text: 'bil', accuracy: 90, error: 'none', phonemes: [{ symbol: 'b' }] },
+            ],
+          },
+        },
+      ],
+    });
+    const prompt = reading!.prompts[0]!;
+    expect(prompt.pronunciation?.words).toEqual([
+      {
+        text: 'kjøre',
+        accuracy: 60,
+        error: 'none',
+        phonemes: [
+          { symbol: 'ç', accuracy: 31 },
+          { symbol: 'øː', accuracy: 88 },
+          { symbol: 'ɾ', accuracy: 90 },
+          { symbol: '', accuracy: 70 },
+        ],
+      },
+      { text: 'bil', accuracy: 90, error: 'none' },
+    ]);
+
+    expect(transcriptionOf(prompt, { wordIndex: 0, fragment: 'kjøre' })).toBe('çøːɾ?');
+    // Not named, not quoting back, or no word at all: nothing to draw.
+    expect(transcriptionOf(prompt, { wordIndex: 1, fragment: 'bil' })).toBeNull();
+    expect(transcriptionOf(prompt, { wordIndex: 0, fragment: 'bil' })).toBeNull();
+    expect(transcriptionOf(prompt, { wordIndex: null, fragment: 'kjøre' })).toBeNull();
+    expect(transcriptionOf(null, { wordIndex: 0, fragment: 'kjøre' })).toBeNull();
   });
 
   it('is null for anything that is not a reading', () => {

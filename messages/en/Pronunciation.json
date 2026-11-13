@@ -1,0 +1,136 @@
+{
+  "eyebrow": "Pronunciation",
+  "title": "Pronunciation practice",
+  "subtitle": "A short session on the sounds you find hardest. Listen, say it, and get an answer in seconds.",
+  "language": "Norwegian",
+  "start": {
+    "begin": "Start a session",
+    "resume": "Continue the session",
+    "starting": "Preparing…",
+    "hint": "The session picks sounds for you: those due for review first, then the ones you slipped on lately. If you are new, it begins with a short check.",
+    "lowBudget": "Your AI allowance is low for a full session ({remaining} of about {estimated} credits left). You can still go on; a session stops when the allowance runs out.",
+    "schoolPays": "Your school covers this session.",
+    "trainSound": "Train sound [{family}]",
+    "chosen": "You chose the sound [{family}]; the session practises it."
+  },
+  "refused": {
+    "SESSION_LIMIT": "You have done today's sessions. Come back tomorrow.",
+    "POOL_EMPTY": "The AI allowance for sessions has run out for now.",
+    "NOT_AVAILABLE": "Pronunciation sessions are not part of your plan.",
+    "generic": "The session could not start. Try again in a moment.",
+    "retry": "Try again"
+  },
+  "progress": {
+    "diagnostic": "Quick check · word {n} of {total}",
+    "takes": "Take {n} of {max}",
+    "sounds": "Sounds in this session"
+  },
+  "status": {
+    "pending": "waiting",
+    "open": "now",
+    "passed": "done",
+    "failed": "to repeat"
+  },
+  "step": {
+    "sayWord": "Say this word",
+    "sayPair": "Say both words, one after the other",
+    "sayPhrase": "Say this line",
+    "sayPairNow": "Now say: {word}",
+    "frame": "In the sentence",
+    "listen": "Listen",
+    "playing": "Playing…",
+    "noClip": "No model clip for this one.",
+    "howTo": "How to make the sound",
+    "drill": "Try this first",
+    "commonError": "Common slip"
+  },
+  "record": {
+    "record": "Record",
+    "stop": "Stop",
+    "recording": "Recording…",
+    "hearing": "Listening to you…",
+    "mic": {
+      "denied": "The microphone is blocked. Allow it in the browser and try again.",
+      "noDevice": "No microphone found."
+    }
+  },
+  "notice": {
+    "uploadFailed": "The recording did not upload. Try again.",
+    "notReady": "The recording is not ready yet. Try once more.",
+    "inaudible": "I could not hear you. Speak a little closer and louder.",
+    "tryAgain": "That did not work. Try again; this take was not counted.",
+    "stale": "The session moved on. Here is where you are now."
+  },
+  "verdict": {
+    "passed": "That is it.",
+    "missed": "Not quite yet.",
+    "unmeasured": "Could not tell this time; this take was not counted against you.",
+    "tone": {
+      "like_reference": "The melody matches the model.",
+      "other_tone": "The melody went the other way.",
+      "unsure": "Hard to tell the melody; try again."
+    },
+    "next": "Next",
+    "toEnd": "Finish",
+    "yours": "Yours",
+    "model": "Model"
+  },
+  "events": {
+    "sound_passed": "Sound done.",
+    "sound_failed": "This sound needs more time. See the hint and the lesson, and we will come back to it.",
+    "element_passed": "Good, next step.",
+    "side_passed": "One word of the pair done.",
+    "diagnostic_done": "Check finished."
+  },
+  "ending": {
+    "title": "The session is over",
+    "body": "Hand it in so your progress reaches your cards.",
+    "stopped": "The session stopped early: your AI allowance ran out. What you did counts.",
+    "take_limit": "That is the most takes for one session.",
+    "finish": "Hand in",
+    "submitting": "Handing in…",
+    "retry": "Could not hand in. Try again."
+  },
+  "result": {
+    "title": "Session result",
+    "score": "{score}% of sounds passed",
+    "GOOD": "Solid",
+    "HARD": "Shaky",
+    "AGAIN": "Needs work",
+    "none": "Not rated",
+    "passes": "{n} right",
+    "fails": "{n} missed",
+    "weak": "Sounds to watch next time",
+    "flagged": "Noted for later",
+    "again": "Another session",
+    "empty": "No sound was practised this time.",
+    "cardsNote": "Ratings are on your sound cards now."
+  },
+  "broken": {
+    "title": "Something is off with this session",
+    "body": "Reload it to see where you are.",
+    "reload": "Reload",
+    "restart": "Start over"
+  },
+  "melody": {
+    "title": "Melody",
+    "yours": "Yours",
+    "model": "Model",
+    "label": "Pitch of your word against the model: yours is solid, the model is dashed.",
+    "none": "No melody could be drawn."
+  },
+  "card": {
+    "back": "Back to practice",
+    "train": "Train this sound",
+    "ipa": "Sound",
+    "description": "What it is",
+    "howTo": "How to make it",
+    "drill": "Find it first",
+    "commonError": "Common slip",
+    "carriers": "Words to try",
+    "loading": "Loading…",
+    "failed": "The card could not be loaded.",
+    "notFound": "There is no such sound.",
+    "open": "Sound card"
+  }
+}

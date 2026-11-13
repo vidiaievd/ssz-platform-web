@@ -35,6 +35,7 @@ vi.mock('@/features/content', async () => {
 // this file doesn't also pull in the server action module (server-env access
 // isn't valid in a client test environment).
 vi.mock('./paragraph-translations-panel', () => ({ ParagraphTranslationsPanel: () => null }));
+vi.mock('./lesson-prosody-panel', () => ({ LessonProsodyPanel: () => null }));
 vi.mock('./glossary-mark-panel', () => ({
   GlossaryMarkButton: () => null,
   GlossaryMarkedWords: () => null,

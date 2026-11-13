@@ -281,5 +281,27 @@
     "insufficient": "{count, plural, one {# har for tynt grunnlag til å dømmes.} other {# har for tynt grunnlag til å dømmes.}}",
     "noProduction": "Ingenting eleven har gjort var en produksjonsoppgave i det hele tatt — det er et faktum om kurset.",
     "namesUnavailable": "Fakta kunne ikke navngis akkurat nå; funnene over står fortsatt."
+  },
+  "weakRules": {
+    "title": "Svake regler",
+    "subtitle": "Grammatikkregler som kontroller av arbeidet pekte på som årsak til en feil.",
+    "windowLabel": "Periode",
+    "window": {
+      "7": "7 dager",
+      "30": "30 dager",
+      "course": "Hele kurset"
+    },
+    "unavailable": "Kunne ikke laste svake regler. Resten av siden påvirkes ikke.",
+    "empty": "Ingen regel ble markert i denne perioden. Det betyr at ingen kontroll nevnte noen — kontrollene ser bare øvde og innleverte arbeider.",
+    "unnamed": "En regel uten navn",
+    "flags": "{count, plural, one {# markering} other {# markeringer}}",
+    "learners": "{count, plural, one {# elev} other {# elever}}",
+    "since": "Regnet fra {date}.",
+    "sinceCourse": "Regnet over hele kurset.",
+    "source": {
+      "teacher": "læreren markerte: {count}",
+      "aiReview": "KI-merknad beholdt: {count}",
+      "aiPrecheck": "øving: {count}"
+    }
   }
 }

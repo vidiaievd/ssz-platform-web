@@ -23,6 +23,11 @@ export interface AiReviewRemark {
   fragment: string | null;
   comment: string;
   suggestion: string | null;
+  /**
+   * A `read_aloud` remark on one word of a prompt (plan 88, step 5c): its index in that
+   * prompt's `pronunciation.words`. Absent on every other remark.
+   */
+  wordIndex?: number | null;
 }
 
 /** A mark the model gave out of the essay's rubric, with why. */
@@ -48,12 +53,22 @@ export type AiReadingOp =
   | { k: 'missed'; i: number; expected: string; focus: boolean }
   | { k: 'extra'; heard: string };
 
+/** One sound of a pronounced word, named against the lexicon (plan 88). */
+export interface AiPronouncedPhoneme {
+  /** IPA; empty where the sound could not be named. */
+  symbol: string;
+  /** 0–100. */
+  accuracy: number;
+}
+
 /** How a passage word was pronounced — Azure's own alignment, feedback only. */
 export interface AiPronouncedWord {
   text: string;
   /** 0–100. */
   accuracy: number;
   error: 'none' | 'mispronunciation' | 'omission' | 'insertion';
+  /** Only where the sounds of the word were named (plan 88, step 5c). */
+  phonemes?: AiPronouncedPhoneme[];
 }
 
 /** Pronunciation scores, 0–100 — never part of the verdict (plan 82 §2.3). */

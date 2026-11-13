@@ -928,5 +928,89 @@
     "marked": "Rettet av KI",
     "sentBack": "Sendt tilbake av KI",
     "gaveUp": "KI klarte ikke å vurdere arbeidet, og ingen andre kommer til å rette det."
+  },
+  "precheck": {
+    "button": "Sjekk",
+    "failed": "Kunne ikke sjekke akkurat nå — prøv igjen om litt",
+    "title": "KI-tips",
+    "subtitle": "Et tips før du leverer. Ingenting sendes og ingenting vurderes — læreren din setter karakteren.",
+    "noScores": "Ingen uttalepoeng for dette språket — bare ordene som ble hørt.",
+    "noRemarks": "Ingen merknader — det leser godt.",
+    "revisit": {
+      "title": "Verdt å repetere",
+      "marked": "Regelen er merket for repetisjon",
+      "add": "Legg til i repetisjon",
+      "added": "Lagt til i repetisjon",
+      "failed": "Kunne ikke legge til – prøv igjen senere"
+    },
+    "left": "Omtrent {count} sjekker igjen",
+    "line": {
+      "keySettles": "Alt stemmer med fasiten. Ingenting å rette.",
+      "exerciseLimit": "Du har brukt alle sjekkene for denne oppgaven. Du kan fortsatt sende den til læreren.",
+      "learnerLimit": "Du har brukt sjekkene dine for denne måneden. Du kan fortsatt sende den til læreren.",
+      "poolEmpty": "Skolens sjekker er brukt opp for nå. Du kan fortsatt sende den til læreren.",
+      "emptyAnswer": "Skriv eller ta opp noe først, og sjekk deretter.",
+      "notReady": "Opptaket er ikke klart ennå — vent litt og sjekk på nytt.",
+      "failed": "Sjekken fungerte ikke denne gangen. Prøv igjen."
+    },
+    "kind": {
+      "grammar": "Grammatikk",
+      "lexis": "Ordvalg",
+      "spelling": "Rettskriving",
+      "pronunciation": "Uttale",
+      "fluency": "Flyt",
+      "content": "Innhold"
+    }
+  },
+  "prosody": {
+    "group": "Uttale",
+    "lensGroup": "Hva skal vises",
+    "loading": "Laster merker …",
+    "modeMeaning": "Mening",
+    "modeSentences": "Setning for setning",
+    "modeText": "Hele teksten",
+    "lensStress": "Trykk",
+    "lensSounds": "Lyder",
+    "lensRespell": "Slik det høres",
+    "lensMelody": "Melodi",
+    "legendShow": "Vis tegnforklaring",
+    "legendTitle": "Tegnforklaring",
+    "legendStressed": "Trykksterk vokal",
+    "legendLong": "Lang vokal (strek under)",
+    "legendSilent": "Stum bokstav (blek)",
+    "legendTie": "Bokstaver som er én lyd (bue over)",
+    "legendWeak": "Svak vokal (svakere)",
+    "legendRespell": "Ordet slik det høres",
+    "legendRespellSigns": "ŋ er «ng»; ː gjør vokalen lang",
+    "legendTone1": "Tonem 1: stemmen stiger",
+    "legendTone2": "Tonem 2: faller, så stiger",
+    "legendDot": "Enstavelsesord",
+    "legendAccent": "Frasens hovedord (fet)",
+    "legendFall": "Slutt på en gruppe: stemmen går ned, lang pause",
+    "legendRise": "Slutt på en gruppe: stemmen går opp, kort pause",
+    "drillTitle": "Uttale setning for setning",
+    "drillCounter": "Setning {n} av {total}",
+    "drillPrev": "Forrige",
+    "drillNext": "Neste",
+    "drillList": "Alle setninger",
+    "take": {
+      "record": "Si det",
+      "again": "Si det på nytt",
+      "stop": "Stopp",
+      "recording": "Tar opp …",
+      "hearing": "Lytter …",
+      "mic": {
+        "denied": "Mikrofonen er blokkert – tillat den for dette nettstedet og prøv igjen.",
+        "noDevice": "Fant ingen mikrofon."
+      },
+      "line": {
+        "failed": "Kunne ikke høre det akkurat nå – prøv igjen om litt.",
+        "notReady": "Opptaket var ikke klart – si det på nytt.",
+        "inaudible": "For svakt eller for mye støy – kom nærmere og si det på nytt.",
+        "tryLimit": "Du har prøvd denne setningen nok for i dag – kom tilbake i morgen.",
+        "closed": "Setningssjekk er ikke tilgjengelig for dette arbeidet.",
+        "unsupported": "Setninger på dette språket kan ikke høres ennå."
+      }
+    }
   }
 }

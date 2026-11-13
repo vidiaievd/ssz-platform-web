@@ -39,8 +39,8 @@ export interface SentenceListProps {
   /** False once a verdict stands: the rubric becomes a record of what was decided. */
   editable: boolean;
   /**
-   * A model's draft to take from (plan 79, 1.4), or null for the card as it was. Drawn only
-   * over a per-sentence breakdown — the one shape its remarks are written against.
+   * A model's draft to take from (plan 79, 1.4), or null for the card as it was. Drawn over
+   * the shapes its remarks are written against: sentences, an essay, a reading's prompts.
    */
   ai?: AiDraftBinding | null;
 }
@@ -85,6 +85,7 @@ export function SentenceList({
         comments={comments}
         onComment={onComment}
         editable={editable}
+        ai={ai}
       />
     );
   }
