@@ -101,13 +101,13 @@ describe('loginAction', () => {
     expect(result.error.code).toBe('unauthenticated');
   });
 
-  it('returns mfa stage on 423 with mfaChallengeToken', async () => {
+  it('returns mfa stage when auth answers 200 with a challenge', async () => {
     server.use(
       http.post('http://auth.test/api/v1/auth/login', () =>
-        HttpResponse.json(
-          { title: 'MFA Required', mfaChallengeToken: 'challenge-token' },
-          { status: 423 },
-        ),
+        HttpResponse.json({
+          mfaRequired: true,
+          challenge: { mfaChallengeToken: 'challenge-token', expiresAt: '2026-11-18T17:30:00Z' },
+        }),
       ),
     );
 
@@ -118,6 +118,55 @@ describe('loginAction', () => {
     expect(result.value.stage).toBe('mfa');
     if (result.value.stage !== 'mfa') return;
     expect(result.value.mfaChallengeToken).toBe('challenge-token');
+    // No session is written before the second factor.
+    expect(mockCookieSet).not.toHaveBeenCalled();
+  });
+
+  it('returns email_not_verified stage on 403 EMAIL_NOT_VERIFIED', async () => {
+    server.use(
+      http.post('http://auth.test/api/v1/auth/login', () =>
+        HttpResponse.json({ status: 403, code: 'EMAIL_NOT_VERIFIED' }, { status: 403 }),
+      ),
+    );
+
+    const result = await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.stage).toBe('email_not_verified');
+  });
+
+  it('returns a forbidden error, not the email stage, on 403 ACCOUNT_BLOCKED', async () => {
+    server.use(
+      http.post('http://auth.test/api/v1/auth/login', () =>
+        HttpResponse.json({ status: 403, code: 'ACCOUNT_BLOCKED' }, { status: 403 }),
+      ),
+    );
+
+    const result = await loginAction({ email: 'user@example.com', password: 'ValidPass1!' });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe('forbidden');
+    expect(result.error.details).toMatchObject({ code: 'ACCOUNT_BLOCKED' });
+  });
+
+  it('returns a rate_limited error carrying lockedUntil on 423 ACCOUNT_LOCKED', async () => {
+    server.use(
+      http.post('http://auth.test/api/v1/auth/login', () =>
+        HttpResponse.json(
+          { status: 423, code: 'ACCOUNT_LOCKED', lockedUntil: '2026-11-18T17:30:04Z' },
+          { status: 423 },
+        ),
+      ),
+    );
+
+    const result = await loginAction({ email: 'user@example.com', password: 'WrongPass1!' });
+
+    expect(result.ok).toBe(false);
+    if (result.ok) return;
+    expect(result.error.code).toBe('rate_limited');
+    expect(result.error.details).toMatchObject({ lockedUntil: '2026-11-18T17:30:04Z' });
   });
 
   it('returns validation error without hitting the network on invalid input', async () => {
