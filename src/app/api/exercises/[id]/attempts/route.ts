@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
+import { schoolNotActiveStatus } from '@/features/school-lifecycle/lib/lifecycle-errors';
 import type {
   AttemptRecord,
   CheckMode,
@@ -226,6 +227,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         return NextResponse.json(
           { error: 'No sitting can be started', ...refusal },
           { status: 422 },
+        );
+      }
+      // The learner's school is read only (plan 90, phase 5): not a stale attempt, so no
+      // recovery — say why, with the code the runner words.
+      const notActive = e.code === 'conflict' ? schoolNotActiveStatus(e.details) : null;
+      if (notActive !== null) {
+        return NextResponse.json(
+          { error: 'The school is not active', code: 'SCHOOL_NOT_ACTIVE', schoolStatus: notActive },
+          { status: 409 },
         );
       }
       if (e.code === 'conflict') {

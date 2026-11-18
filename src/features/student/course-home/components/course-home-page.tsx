@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useCourseHome, ErrorState, LearningSkeleton } from '@/features/learning';
+import { useCourseHome, COURSE_SCHOOL_CLOSED, ErrorState, LearningSkeleton } from '@/features/learning';
+import { MaintenanceBadge, SchoolStatusBanner } from '@/features/school-lifecycle';
 
 import { CourseHeader } from './course-header';
 import { ContinueHero, deriveContinueScenario } from './continue-hero';
@@ -22,7 +23,8 @@ export interface CourseHomePageProps {
 export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
   const t = useTranslations('Learning.courseHome');
   const [activeView, setActiveView] = useState<CourseView>('units');
-  const { data, isLoading, isError, refetch } = useCourseHome(courseId);
+  const tLifecycle = useTranslations('SchoolLifecycle.maintenance');
+  const { data, isLoading, isError, error, refetch } = useCourseHome(courseId);
 
   /* ── Loading skeleton ────────────────────────────────────────────── */
   if (isLoading) {
@@ -55,6 +57,15 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
             />
           </div>
         </div>
+      </main>
+    );
+  }
+
+  /* ── The school behind the course is closed: its courses are gone, history stays ── */
+  if (isError && error?.message === COURSE_SCHOOL_CLOSED) {
+    return (
+      <main className="container mx-auto max-w-3xl px-4 py-8">
+        <SchoolStatusBanner audience="student" status="closed" />
       </main>
     );
   }
@@ -98,6 +109,24 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
 
   return (
     <main className="container mx-auto max-w-5xl px-4 py-8">
+      <SchoolStatusBanner
+        audience="student"
+        status={courseInfo.schoolStatus}
+        closesAt={courseInfo.schoolClosesAt}
+        className="mb-4"
+      />
+      {courseInfo.maintenanceStatus && courseInfo.maintenanceStatus !== 'maintained' && (
+        <p
+          className="mb-4 flex items-center gap-2 text-sm text-muted-foreground"
+          data-testid="maintenance-note"
+        >
+          <MaintenanceBadge status={courseInfo.maintenanceStatus} />
+          {courseInfo.maintenanceStatus === 'obsolete'
+            ? tLifecycle('learnerObsoleteNote')
+            : tLifecycle('learnerNote')}
+        </p>
+      )}
+
       {/* Full-width header */}
       <CourseHeader courseInfo={courseInfo} progress={progress} />
 

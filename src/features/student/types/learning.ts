@@ -1,3 +1,4 @@
+import type { SchoolLifecycleStatus } from '@/features/school-lifecycle/types';
 import type { LangCode, CEFR, Weekday, HHMM, ISODate, AgeBand, GroupMode } from '@/features/groups/types';
 import type { MembershipStatus } from '@/features/enrollment/types';
 import type { DifficultyLevel } from '@/features/content/types';
@@ -162,6 +163,10 @@ export interface StudentSchool {
   schoolSlug: string;
   schoolName: string;
   status: MembershipStatus;
+  /** Lifecycle of the school itself (plan 90, phase 5) — not the learner's membership. */
+  schoolStatus?: SchoolLifecycleStatus;
+  closesAt?: string | null;
+  purgeAt?: string | null;
   /** Set only while status is 'onboarding' or 'placement-review'. */
   pendingStage?: PendingStage;
   groupId: string | null;

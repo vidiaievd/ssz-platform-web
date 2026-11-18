@@ -2,6 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
+import type { School } from '@/features/school/types';
+import { schoolNotActiveStatus } from '@/features/school-lifecycle/lib/lifecycle-errors';
 import type { Container, ContainerItem, ContainerSection } from '@/features/content/types';
 import type {
   CanDoResponse,
@@ -283,11 +285,25 @@ export async function GET(
     const srsVocabDue = rawSrsDue.cards.filter((c) => c.contentType === 'VOCABULARY_WORD').length;
     const srsExerciseDue = rawSrsDue.cards.filter((c) => c.contentType === 'EXERCISE').length;
 
+    // The school behind the course, so the screen can say it is read only. Best effort: a
+    // failed read must not hide the course, and an older service sends no status.
+    let school: School | null = null;
+    if (container.ownerSchoolId) {
+      try {
+        school = await serverFetch<School>({ service: 'organization', path: `/schools/${container.ownerSchoolId}` });
+      } catch {
+        school = null;
+      }
+    }
+
     const courseInfo: CourseInfo = {
       id: container.id,
       title: container.title,
       cefrLevel: container.difficultyLevel,
       targetLanguage: container.targetLanguage,
+      maintenanceStatus: container.maintenanceStatus,
+      schoolStatus: school?.status,
+      schoolClosesAt: school?.closesAt ?? null,
     };
 
     const payload: CourseHomePayload = {
@@ -309,6 +325,10 @@ export async function GET(
     if (isAppError(e)) {
       if (e.code === 'unauthenticated') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       if (e.code === 'not_found') return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+      // The school that owns the course is closed: its courses are gone for learners.
+      if (e.code === 'conflict' && schoolNotActiveStatus(e.details)) {
+        return NextResponse.json({ error: 'School not active', code: 'SCHOOL_NOT_ACTIVE', schoolStatus: schoolNotActiveStatus(e.details) }, { status: 409 });
+      }
     }
     return NextResponse.json({ error: 'Failed to load course home' }, { status: 502 });
   }

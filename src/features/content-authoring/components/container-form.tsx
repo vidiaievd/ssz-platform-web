@@ -32,6 +32,7 @@ import {
   type ContainerFormValues,
 } from '../schemas/container';
 import { createContainerAction, updateContainerAction } from '../actions/container';
+import { MaintenanceStatusField } from './maintenance-status-field';
 import { useLanguageOptions } from '../hooks/use-language-options';
 import { authoringKeys } from '../api/keys';
 
@@ -312,6 +313,11 @@ export function ContainerForm(props: ContainerFormProps) {
             </SelectContent>
           </Select>
         </Field>
+      )}
+
+      {/* Maintenance status — course-only, saved on its own (plan 90, phase 5) */}
+      {showGatingMode && container && (
+        <MaintenanceStatusField containerId={container.id} initial={container.maintenanceStatus} />
       )}
 
       <Button type="submit" loading={isPending}>

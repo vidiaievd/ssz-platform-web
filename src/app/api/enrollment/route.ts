@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
+import { isCourseObsolete } from '@/features/school-lifecycle/lib/lifecycle-errors';
 
 export async function GET() {
   try {
@@ -36,6 +37,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(data, { status: 201 });
   } catch (e) {
     if (e instanceof AppError && e.code === 'conflict') {
+      // `COURSE_OBSOLETE` is a refusal, not a duplicate: the screen words it differently.
+      if (isCourseObsolete(e.details)) {
+        return NextResponse.json({ error: 'COURSE_OBSOLETE', code: 'COURSE_OBSOLETE' }, { status: 409 });
+      }
       return NextResponse.json({ error: 'Already enrolled' }, { status: 409 });
     }
     return NextResponse.json({ error: 'Failed to create enrollment' }, { status: 502 });

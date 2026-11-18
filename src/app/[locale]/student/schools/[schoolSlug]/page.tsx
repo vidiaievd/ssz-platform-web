@@ -7,6 +7,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getStudentSchool } from '@/features/student/api/get-student-schools';
 import { getAssignedMaterials } from '@/features/student/api/get-assigned-materials';
+import { SchoolStatusBanner } from '@/features/school-lifecycle';
 import { SchoolStatusCard } from '@/features/student/components/school-status-card';
 import { GroupHeader } from '@/features/student/components/group-header';
 import { WeeklySchedule } from '@/features/student/components/weekly-schedule';
@@ -92,6 +93,7 @@ export default async function SchoolDetailPage({ params }: Props) {
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-8 space-y-8">
+      <SchoolStatusBanner audience="student" status={school.schoolStatus} closesAt={school.closesAt} />
       <GroupHeader school={school} />
       <WeeklySchedule schedule={school.schedule} />
       <AssignedMaterials assignments={assignedMaterials} />

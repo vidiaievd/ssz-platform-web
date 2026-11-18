@@ -1,0 +1,38 @@
+{
+  "banner": {
+    "staff": {
+      "suspendedTitle": "This school is blocked",
+      "suspended": "The school is read only. Contact platform support.",
+      "suspendedUntil": "Blocked until {date} ({days, plural, one {# day} other {# days}} left). Everything is read only — contact platform support.",
+      "closedTitle": "This school is in the archive",
+      "closed": "The school is archived and will be deleted. Contact platform support to bring it back.",
+      "closedUntil": "In the archive until {date} ({days, plural, one {# day} other {# days}} left), then its materials are deleted. Contact platform support to bring it back."
+    },
+    "student": {
+      "suspendedTitle": "The school is temporarily unavailable",
+      "suspended": "You can still read your courses and see your history, but starting and handing in work is paused.",
+      "suspendedUntil": "You can still read your courses and see your history, but starting and handing in work is paused.",
+      "closedTitle": "This school is closed",
+      "closed": "The school's courses are no longer available. Your own history stays with you.",
+      "closedUntil": "The school's courses are no longer available. Your own history stays with you."
+    }
+  },
+  "maintenance": {
+    "unmaintained": "No longer maintained",
+    "unmaintainedHint": "The author no longer updates this course.",
+    "obsolete": "Outdated",
+    "obsoleteHint": "This course is outdated and takes no new learners.",
+    "label": "Maintenance",
+    "hint": "Tell learners whether you still look after this course.",
+    "maintained": "Maintained",
+    "saved": "Maintenance status saved.",
+    "saveFailed": "Could not save the status.",
+    "learnerNote": "This course is no longer maintained: it may be out of date.",
+    "learnerObsoleteNote": "This course is outdated and takes no new learners. You can carry on with it."
+  },
+  "errors": {
+    "schoolSuspended": "The school is temporarily blocked: new work cannot be started or handed in, and nothing in it can be changed.",
+    "schoolClosed": "The school is closed. Its materials are no longer available.",
+    "courseObsolete": "This course is outdated and takes no new enrolments."
+  }
+}

@@ -4,6 +4,7 @@ import { BookOpen, Globe, GraduationCap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { MaintenanceBadge } from '@/features/school-lifecycle';
 import { Link } from '@/lib/i18n/navigation';
 import type { BadgeProps } from '@/components/ui/badge';
 import type { Container } from '../types';
@@ -21,7 +22,10 @@ export function ContainerCard({ container, href }: ContainerCardProps) {
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between gap-2">
           <CardTitle className="text-base leading-snug">{container.title}</CardTitle>
-          <AccessTierBadge tier={container.accessTier} />
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <AccessTierBadge tier={container.accessTier} />
+            <MaintenanceBadge status={container.maintenanceStatus} />
+          </div>
         </div>
         {container.description && (
           <p className="text-muted-foreground line-clamp-2 text-sm">{container.description}</p>
