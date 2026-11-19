@@ -8,6 +8,7 @@ import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import { getStudentSchool } from '@/features/student/api/get-student-schools';
 import { getAssignedMaterials } from '@/features/student/api/get-assigned-materials';
 import { SchoolStatusBanner } from '@/features/school-lifecycle';
+import { SchoolUnavailable } from '@/features/school-lifecycle/components/school-unavailable';
 import { SchoolStatusCard } from '@/features/student/components/school-status-card';
 import { GroupHeader } from '@/features/student/components/group-header';
 import { WeeklySchedule } from '@/features/student/components/weekly-schedule';
@@ -74,7 +75,9 @@ export default async function SchoolDetailPage({ params }: Props) {
   if (!user?.userId) notFound();
 
   const school = await getStudentSchool(user.userId, schoolSlug);
-  if (!school) notFound();
+  // A closed school answers nothing to its learners (plan 90, Q13); neither does a school that
+  // is not theirs. One neutral page for both rather than the framework's bare 404.
+  if (!school) return <SchoolUnavailable />;
 
   if (school.status !== 'active') {
     return (

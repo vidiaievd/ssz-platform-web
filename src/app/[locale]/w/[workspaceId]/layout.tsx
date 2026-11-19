@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { requireAnyRole } from '@/lib/auth/protect';
@@ -20,7 +21,7 @@ import type { SchoolRole } from '@/features/school/types';
 
 type Props = {
   children: React.ReactNode;
-  params: Promise<{ workspaceId: string }>;
+  params: Promise<{ locale: string; workspaceId: string }>;
 };
 
 const SCHOOL_ROLE_TO_DASHBOARD: Record<SchoolRole, DashboardRole> = {
@@ -42,7 +43,7 @@ const SCHOOL_ROLE_TO_DASHBOARD: Record<SchoolRole, DashboardRole> = {
  * which is why the address no longer says "school" (plan 61).
  */
 export default async function WorkspaceLayout({ children, params }: Props) {
-  const { workspaceId } = await params;
+  const { locale, workspaceId } = await params;
   const user = await requireAnyRole(['tutor', 'school_admin', 'teacher', 'student']);
 
   const workspace = await resolveWorkspace(workspaceId);
@@ -50,6 +51,12 @@ export default async function WorkspaceLayout({ children, params }: Props) {
   // Not yours, closed and no such workspace are the same answer, here as on the server
   // (plan 90, Q13): say "school unavailable" rather than a bare 404.
   if (!workspace) return <SchoolUnavailable />;
+
+  // A learner of this school has no business in its staff shell (plan 90, live check, block 9):
+  // the old `/school/<slug>` links land here too. Their own screen of the school is elsewhere.
+  // It is the role in this school that decides, not the platform role — a platform student may
+  // teach in another school.
+  if (workspace.myRole === 'STUDENT') redirect(`/${locale}/student/schools/${workspace.id}`);
 
   // A school's slug still opens its workspace — it is an alias, and every link the app
   // builds already carries the id. Canonicalising it here would mean redirecting from a
