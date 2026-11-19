@@ -24,7 +24,7 @@ import type {
   SubmitAnswerRequest,
   SubmitAnswerResponse,
 } from '../types/attempts';
-import { SCHOOL_NOT_ACTIVE_EVENT } from '@/features/school-lifecycle/types';
+import { SCHOOL_NOT_ACTIVE_EVENT, rememberSchoolRefusal } from '@/features/school-lifecycle/types';
 
 /**
  * The exercise-engine attempt flow: start, check, and — only if asked — reveal.
@@ -84,6 +84,7 @@ async function send<TResponse>(
     } | null;
     if (res.status === 409 && problem?.code === 'SCHOOL_NOT_ACTIVE' && typeof window !== 'undefined') {
       // The school is read only (plan 90, phase 5): one listener words it for every runner.
+      rememberSchoolRefusal((problem as { schoolStatus?: unknown }).schoolStatus);
       window.dispatchEvent(
         new CustomEvent(SCHOOL_NOT_ACTIVE_EVENT, {
           detail: { status: (problem as { schoolStatus?: unknown }).schoolStatus },

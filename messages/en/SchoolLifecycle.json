@@ -32,6 +32,7 @@
     "learnerObsoleteHistoryNote": "The school that ran this course is gone: it stays only as your history, and new exercises cannot be started."
   },
   "errors": {
+    "schoolNotActiveTitle": "The school is not accepting new work",
     "schoolSuspended": "The school is temporarily blocked: new work cannot be started or handed in, and nothing in it can be changed.",
     "schoolClosed": "The school is closed. Its materials are no longer available.",
     "courseObsolete": "This course is outdated and takes no new enrolments."

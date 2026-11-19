@@ -32,6 +32,7 @@
     "learnerObsoleteHistoryNote": "Skolen som drev dette kurset, finnes ikke lenger: kurset står igjen bare for historikken din, og nye øvinger kan ikke startes."
   },
   "errors": {
+    "schoolNotActiveTitle": "Skolen tar ikke imot nytt arbeid",
     "schoolSuspended": "Skolen er midlertidig blokkert: nytt arbeid kan ikke startes eller leveres, og ingenting kan endres.",
     "schoolClosed": "Skolen er stengt. Materialet er ikke lenger tilgjengelig.",
     "courseObsolete": "Dette kurset er utdatert og tar ikke imot nye påmeldinger."

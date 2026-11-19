@@ -3,6 +3,8 @@
 import { XCircle, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
+import { recentSchoolRefusal } from '@/features/school-lifecycle/types';
+
 interface RunnerErrorBodyProps {
   onRetry?: () => void;
   accent: string;
@@ -11,6 +13,9 @@ interface RunnerErrorBodyProps {
 /** Error body shown when the exercise item failed to load. */
 export function RunnerErrorBody({ onRetry, accent }: RunnerErrorBodyProps) {
   const t = useTranslations('ExerciseRunner');
+  const tLifecycle = useTranslations('SchoolLifecycle.errors');
+  // A start refused because the school is read only (plan 90): say so; trying again cannot help.
+  const refusal = recentSchoolRefusal();
 
   return (
     <div
@@ -35,17 +40,21 @@ export function RunnerErrorBody({ onRetry, accent }: RunnerErrorBodyProps) {
         className="mb-2 font-bold"
         style={{ fontSize: 19, color: 'var(--ssz-text-primary)' }}
       >
-        {t('error.title')}
+        {refusal ? tLifecycle('schoolNotActiveTitle') : t('error.title')}
       </h2>
 
       <p
         className="mb-6 text-[14px] leading-[1.55]"
         style={{ color: 'var(--ssz-text-secondary)' }}
       >
-        {t('error.body')}
+        {refusal
+          ? refusal === 'closed'
+            ? tLifecycle('schoolClosed')
+            : tLifecycle('schoolSuspended')
+          : t('error.body')}
       </p>
 
-      {onRetry && (
+      {onRetry && !refusal && (
         <button
           onClick={onRetry}
           style={{

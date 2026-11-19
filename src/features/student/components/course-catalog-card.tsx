@@ -4,6 +4,7 @@ import { Target } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Link } from '@/lib/i18n/navigation';
+import { MaintenanceBadge } from '@/features/school-lifecycle';
 import type { Container } from '@/features/content/types';
 import { CoverArt } from './cover-art';
 import { AccessMarker, resolveAccessState } from './access-marker';
@@ -57,8 +58,9 @@ export function CourseCatalogCard({ container, href, isEnrolled = false }: Cours
             )}
           </div>
 
-          <div className="mt-1">
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
             <AccessMarker state={accessState} schoolName={container.ownerName} labels={markerLabels} />
+            <MaintenanceBadge status={container.maintenanceStatus} />
           </div>
         </div>
       </div>

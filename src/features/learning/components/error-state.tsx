@@ -3,6 +3,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { recentSchoolRefusal } from '@/features/school-lifecycle/types';
 
 export interface ErrorStateProps {
   title?: string;
@@ -13,6 +14,15 @@ export interface ErrorStateProps {
 
 export function ErrorState({ title, description, onRetry, className }: ErrorStateProps) {
   const t = useTranslations('Learning.errorState');
+  const tLifecycle = useTranslations('SchoolLifecycle.errors');
+  // A start or hand-in refused because the school is read only (plan 90): name the reason and
+  // drop the retry — it would be refused again.
+  const refusal = recentSchoolRefusal();
+  if (refusal) {
+    title = tLifecycle('schoolNotActiveTitle');
+    description = refusal === 'closed' ? tLifecycle('schoolClosed') : tLifecycle('schoolSuspended');
+    onRetry = undefined;
+  }
 
   return (
     <div
