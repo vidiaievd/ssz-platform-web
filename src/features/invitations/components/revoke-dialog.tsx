@@ -18,6 +18,7 @@ import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Ban } from 'lucide-react';
 import type { Invitation } from '@/features/invitations/types';
 import type { RevokeResult } from '@/features/invitations/api/mutations';
+import { useSchoolWritable } from '@/features/school-lifecycle';
 
 type Props = {
   invitation: Invitation;
@@ -36,6 +37,7 @@ export function RevokeDialog({
   onOptimisticRemove,
   onRestoreRow,
 }: Props) {
+  const writable = useSchoolWritable();
   const t = useTranslations('Invitations');
   const [pending, startTransition] = useTransition();
 
@@ -71,6 +73,9 @@ export function RevokeDialog({
       }
     });
   }
+
+  // Nothing to resend or revoke in a suspended or closed school (plan 90, live check, block 9).
+  if (!writable) return null;
 
   return (
     <AlertDialog>

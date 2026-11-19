@@ -16,6 +16,7 @@ import { getGroupsForSelect } from '@/features/students/api/queries';
 import { isoDay, parseDay, rangeOf, shift, type RangeKind } from '@/features/schedule/lib/range';
 import { Button } from '@/components/ui/button';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { WritableOnly } from '@/features/school-lifecycle';
 
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
@@ -126,12 +127,16 @@ export default async function SchedulePage({ params, searchParams }: Props) {
             </Link>
           </Button>
 
-          <AddReviewBlockButton workspaceId={workspace.id} defaultDate={isoDay(anchor)} />
-          <AddLessonDialog
-            workspaceId={workspace.id}
-            targets={targets}
-            defaultDate={isoDay(anchor)}
-          />
+          <WritableOnly>
+            <AddReviewBlockButton workspaceId={workspace.id} defaultDate={isoDay(anchor)} />
+          </WritableOnly>
+          <WritableOnly>
+            <AddLessonDialog
+              workspaceId={workspace.id}
+              targets={targets}
+              defaultDate={isoDay(anchor)}
+            />
+          </WritableOnly>
         </div>
       </div>
 

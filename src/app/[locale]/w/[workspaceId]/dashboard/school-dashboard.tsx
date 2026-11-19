@@ -43,6 +43,7 @@ import { KpiStrip } from '@/features/dashboard/components/kpi-strip';
 import { ActivityFeed } from '@/features/dashboard/components/activity-feed';
 import { OnboardingChecklist } from '@/features/dashboard/components/onboarding-checklist';
 import { QuickActions } from '@/features/dashboard/components/quick-actions';
+import { isWorkspaceWritable } from '@/features/school-lifecycle/api/get-workspace-lifecycle';
 import { TipCard } from '@/features/dashboard/components/tip-card';
 import { CourseHealth } from '@/features/dashboard/components/course-health';
 import { AtRiskList } from '@/features/dashboard/components/at-risk-list';
@@ -287,6 +288,8 @@ export async function SchoolDashboard({ params }: Props) {
 
   const ctx = { role, dataState, schoolType };
   const schoolSlugDisplay = school.slug ?? school.id;
+  // Suspended or closed: no setup checklist and no "create / invite" shortcuts (plan 90, block 9).
+  const writable = await isWorkspaceWritable(workspaceId);
 
   return (
     <main className="p-4 sm:p-6 lg:p-8 space-y-5 max-w-page mx-auto">
@@ -313,7 +316,7 @@ export async function SchoolDashboard({ params }: Props) {
       {canSeeWidget('trialBanner', ctx) && null /* trial always null until billing service */}
 
       {/* Onboarding checklist (hidden at full state or for editor) */}
-      {canSeeWidget('onboarding', ctx) && (
+      {canSeeWidget('onboarding', ctx) && writable && (
         <OnboardingChecklist onboarding={onboarding} />
       )}
 
@@ -400,7 +403,7 @@ export async function SchoolDashboard({ params }: Props) {
           )}
 
           {/* Quick actions */}
-          <QuickActions role={role} workspaceId={schoolSlugDisplay} />
+          <QuickActions role={role} workspaceId={schoolSlugDisplay} readOnly={!writable} />
 
           {/* Review queue — owner, full state */}
           {canSeeWidget('reviewQueue', ctx) && (

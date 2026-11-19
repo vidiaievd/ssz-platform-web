@@ -46,5 +46,9 @@
     "courseGoneTitle": "Course deleted",
     "courseGoneBody": "The course no longer exists — it was deleted together with its school. Your progress is kept.",
     "myCourses": "To my courses"
+  },
+  "readOnly": {
+    "title": "Nothing can be changed right now",
+    "body": "The school is read only. The notice above says why and until when."
   }
 }

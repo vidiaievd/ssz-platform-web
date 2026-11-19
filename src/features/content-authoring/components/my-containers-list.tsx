@@ -1,5 +1,6 @@
 'use client';
 
+import { WritableOnly } from '@/features/school-lifecycle';
 import { useDeferredValue } from 'react';
 import {
   Plus,
@@ -275,17 +276,19 @@ function ListEmptyState() {
         <p className="text-base font-semibold">{t('emptyTitle')}</p>
         <p className="text-sm text-muted-foreground max-w-sm">{t('emptyBody')}</p>
       </div>
-      <div className="flex flex-wrap gap-3 justify-center">
-        <Button asChild>
-          <Link href={newHref}>
-            <Plus className="mr-1 h-4 w-4" />
-            {t('emptyCreate')}
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href={`${newHref}?flow=quick`}>{t('emptyTemplate')}</Link>
-        </Button>
-      </div>
+      <WritableOnly>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Button asChild>
+            <Link href={newHref}>
+              <Plus className="mr-1 h-4 w-4" />
+              {t('emptyCreate')}
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={`${newHref}?flow=quick`}>{t('emptyTemplate')}</Link>
+          </Button>
+        </div>
+      </WritableOnly>
     </div>
   );
 }
@@ -393,14 +396,16 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             </p>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" asChild>
-            <Link href={newContainerHref}>
-              <Plus className="mr-1 h-4 w-4" />
-              {t('newCourse')}
-            </Link>
-          </Button>
-        </div>
+        <WritableOnly>
+          <div className="flex gap-2">
+            <Button size="sm" asChild>
+              <Link href={newContainerHref}>
+                <Plus className="mr-1 h-4 w-4" />
+                {t('newCourse')}
+              </Link>
+            </Button>
+          </div>
+        </WritableOnly>
       </div>
 
       {/* Toolbar */}
@@ -468,13 +473,15 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
               <ContainerGridCard key={c.id} container={c} />
             ))}
             {/* "+ New" tile */}
-            <Link
-              href={newContainerHref}
-              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border min-h-30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-            >
-              <Plus className="h-6 w-6 mb-1" />
-              <span className="text-xs font-medium">{t('newCourseTile')}</span>
-            </Link>
+            <WritableOnly>
+              <Link
+                href={newContainerHref}
+                className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border min-h-30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              >
+                <Plus className="h-6 w-6 mb-1" />
+                <span className="text-xs font-medium">{t('newCourseTile')}</span>
+              </Link>
+            </WritableOnly>
           </div>
         ) : (
           <Table role="table">

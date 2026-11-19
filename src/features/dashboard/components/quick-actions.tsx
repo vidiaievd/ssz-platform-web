@@ -54,6 +54,8 @@ const ACTION_LABELS: Record<string, string> = {
 type QuickActionsProps = {
   role: DashboardRole;
   workspaceId: string;
+  /** Suspended or closed school: only the shortcuts that look. */
+  readOnly?: boolean;
 };
 
 function resolveHref(action: QuickAction, workspaceId: string): string {
@@ -76,8 +78,12 @@ function resolveHref(action: QuickAction, workspaceId: string): string {
   return routes[action.id] ?? wsHref(workspaceId, 'dashboard');
 }
 
-export function QuickActions({ role, workspaceId }: QuickActionsProps) {
-  const actions = quickActionsFor(role);
+/** Shortcuts that only open a screen to look at; the rest create or change something. */
+const VIEW_ONLY_ACTIONS = new Set(['teacher-timetable', 'monthly-report', 'my-groups', 'my-timetable']);
+
+export function QuickActions({ role, workspaceId, readOnly = false }: QuickActionsProps) {
+  // A suspended or closed school keeps only the shortcuts that look (plan 90, live check, block 9).
+  const actions = quickActionsFor(role).filter((a) => !readOnly || VIEW_ONLY_ACTIONS.has(a.id));
 
   if (actions.length === 0) return null;
 

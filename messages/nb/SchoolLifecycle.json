@@ -46,5 +46,9 @@
     "courseGoneTitle": "Kurset er slettet",
     "courseGoneBody": "Kurset finnes ikke lenger – det ble slettet sammen med skolen. Fremgangen din er bevart.",
     "myCourses": "Til mine kurs"
+  },
+  "readOnly": {
+    "title": "Ingenting kan endres nå",
+    "body": "Skolen er skrivebeskyttet. Meldingen over forteller hvorfor og hvor lenge."
   }
 }

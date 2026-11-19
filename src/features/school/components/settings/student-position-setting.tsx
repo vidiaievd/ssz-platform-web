@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Panel } from '@/features/review/components/primitives';
 
 import { useSchool, useUpdateSchool } from '../../api/use-schools';
+import { ReadOnlyReason } from '@/features/school-lifecycle';
 
 export interface StudentPositionSettingProps {
   schoolId: string;
@@ -70,7 +71,7 @@ export function StudentPositionSetting({ schoolId, canEdit }: StudentPositionSet
         />
       </div>
 
-      {!canEdit && <p className="mt-3 text-[12.5px] text-muted-foreground">{t('readOnly')}</p>}
+      {!canEdit && <p className="mt-3 text-[12.5px] text-muted-foreground"><ReadOnlyReason>{t('readOnly')}</ReadOnlyReason></p>}
     </Panel>
   );
 }

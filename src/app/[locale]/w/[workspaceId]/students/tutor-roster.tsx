@@ -13,6 +13,7 @@ import { TutorRosterList } from '@/features/tutoring/components/tutor-roster-lis
 import type { RosterRow } from '@/features/tutoring/components/tutor-roster-list';
 import { CreateTutorGroupDialog } from '@/features/tutoring/components/create-tutor-group-dialog';
 import { splitRosterByGroup } from '@/features/tutoring/lib/roster-groups';
+import { WritableOnly } from '@/features/school-lifecycle';
 
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
@@ -72,21 +73,25 @@ export async function TutorRoster({ params, searchParams }: Props) {
           {/* A group is made from people who are already here, so the picker has nothing
               to offer until somebody has accepted an invitation. */}
           {all.length > 0 && (
-            <CreateTutorGroupDialog
-              workspaceId={workspace.schoolId}
-              candidates={all.map((s) => ({
-                userId: s.userId,
-                name: s.name,
-                email: s.email,
-                avatarUrl: s.avatarUrl ?? null,
-              }))}
-            />
+            <WritableOnly>
+              <CreateTutorGroupDialog
+                workspaceId={workspace.schoolId}
+                candidates={all.map((s) => ({
+                  userId: s.userId,
+                  name: s.name,
+                  email: s.email,
+                  avatarUrl: s.avatarUrl ?? null,
+                }))}
+              />
+            </WritableOnly>
           )}
           <Button size="sm" asChild>
-            <Link href={invitationsHref}>
-              <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
-              {t('invite')}
-            </Link>
+            <WritableOnly>
+              <Link href={invitationsHref}>
+                <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
+                {t('invite')}
+              </Link>
+            </WritableOnly>
           </Button>
         </div>
       </div>
@@ -102,10 +107,12 @@ export async function TutorRoster({ params, searchParams }: Props) {
           </div>
           {!q && (
             <Button size="sm" asChild>
-              <Link href={invitationsHref}>
-                <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
-                {t('invite')}
-              </Link>
+              <WritableOnly>
+                <Link href={invitationsHref}>
+                  <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
+                  {t('invite')}
+                </Link>
+              </WritableOnly>
             </Button>
           )}
         </div>

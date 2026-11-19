@@ -16,6 +16,7 @@ import {
 import { canResend, resendCooldownRemaining } from '@/lib/invitations/status';
 import type { Invitation } from '@/features/invitations/types';
 import type { ResendResult } from '@/features/invitations/api/mutations';
+import { useSchoolWritable } from '@/features/school-lifecycle';
 
 type Props = {
   invitation: Invitation;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 export function ResendAction({ invitation, onResend, schoolId, onSuccess }: Props) {
+  const writable = useSchoolWritable();
   const t = useTranslations('Invitations');
   const [pending, startTransition] = useTransition();
   const [localNow] = useState(() => Date.now());
@@ -74,6 +76,9 @@ export function ResendAction({ invitation, onResend, schoolId, onSuccess }: Prop
       </TooltipProvider>
     );
   }
+
+  // Nothing to resend or revoke in a suspended or closed school (plan 90, live check, block 9).
+  if (!writable) return null;
 
   return (
     <DropdownMenuItem onSelect={handleResend} disabled={pending || !allowed}>

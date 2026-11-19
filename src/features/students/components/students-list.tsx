@@ -10,6 +10,7 @@ import { StudentRow } from './student-row';
 import type { StudentListItem, SegmentKey } from '@/features/students/types';
 import { segmentPredicate } from '@/lib/students/status';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { WritableOnly } from '@/features/school-lifecycle';
 
 type Props = {
   students: StudentListItem[];
@@ -52,10 +53,12 @@ export function StudentsList({
         </p>
         {students.length === 0 && (
           <Button asChild>
-            <Link href="?enroll=1">
-              <UserPlus className="mr-2 h-4 w-4" aria-hidden />
-              {t('list.enroll')}
-            </Link>
+            <WritableOnly>
+              <Link href="?enroll=1">
+                <UserPlus className="mr-2 h-4 w-4" aria-hidden />
+                {t('list.enroll')}
+              </Link>
+            </WritableOnly>
           </Button>
         )}
       </div>
