@@ -2,6 +2,7 @@ export { SchoolStatusBanner } from './components/school-status-banner';
 export { SchoolNotActiveNotice } from './components/school-not-active-notice';
 export { MaintenanceBadge } from './components/maintenance-badge';
 export { daysLeft } from './lib/days-left';
+export { isObsoleteHistoryOnly } from './lib/obsolete-course';
 export {
   isCourseObsolete,
   lifecycleErrorKey,

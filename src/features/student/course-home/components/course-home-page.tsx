@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { useCourseHome, COURSE_SCHOOL_CLOSED, ErrorState, LearningSkeleton } from '@/features/learning';
-import { MaintenanceBadge, SchoolStatusBanner } from '@/features/school-lifecycle';
+import { MaintenanceBadge, SchoolStatusBanner, isObsoleteHistoryOnly } from '@/features/school-lifecycle';
 
 import { CourseHeader } from './course-header';
 import { ContinueHero, deriveContinueScenario } from './continue-hero';
@@ -121,9 +121,11 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
           data-testid="maintenance-note"
         >
           <MaintenanceBadge status={courseInfo.maintenanceStatus} />
-          {courseInfo.maintenanceStatus === 'obsolete'
-            ? tLifecycle('learnerObsoleteNote')
-            : tLifecycle('learnerNote')}
+          {courseInfo.maintenanceStatus !== 'obsolete'
+            ? tLifecycle('learnerNote')
+            : isObsoleteHistoryOnly(courseInfo)
+              ? tLifecycle('learnerObsoleteHistoryNote')
+              : tLifecycle('learnerObsoleteNote')}
         </p>
       )}
 

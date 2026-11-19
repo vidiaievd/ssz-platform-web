@@ -302,6 +302,7 @@ export async function GET(
       cefrLevel: container.difficultyLevel,
       targetLanguage: container.targetLanguage,
       maintenanceStatus: container.maintenanceStatus,
+      maintenanceSource: container.maintenanceSource ?? null,
       schoolStatus: school?.status,
       schoolClosesAt: school?.closesAt ?? null,
     };

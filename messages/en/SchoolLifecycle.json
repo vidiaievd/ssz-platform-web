@@ -28,7 +28,8 @@
     "saved": "Maintenance status saved.",
     "saveFailed": "Could not save the status.",
     "learnerNote": "This course is no longer maintained: it may be out of date.",
-    "learnerObsoleteNote": "This course is outdated and takes no new learners. You can carry on with it."
+    "learnerObsoleteNote": "This course is outdated and takes no new learners. You can carry on with it.",
+    "learnerObsoleteHistoryNote": "The school that ran this course is gone: it stays only as your history, and new exercises cannot be started."
   },
   "errors": {
     "schoolSuspended": "The school is temporarily blocked: new work cannot be started or handed in, and nothing in it can be changed.",
