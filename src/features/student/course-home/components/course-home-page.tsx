@@ -3,7 +3,15 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useCourseHome, COURSE_SCHOOL_CLOSED, ErrorState, LearningSkeleton } from '@/features/learning';
+import {
+  useCourseHome,
+  COURSE_SCHOOL_CLOSED,
+  COURSE_FORBIDDEN,
+  COURSE_GONE,
+  ErrorState,
+  LearningSkeleton,
+} from '@/features/learning';
+import { CourseUnavailable } from '@/features/school-lifecycle/components/course-unavailable';
 import { MaintenanceBadge, SchoolStatusBanner, isObsoleteHistoryOnly } from '@/features/school-lifecycle';
 
 import { CourseHeader } from './course-header';
@@ -68,6 +76,11 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
         <SchoolStatusBanner audience="student" status="closed" />
       </main>
     );
+  }
+
+  /* ── Not open to this learner / deleted with its school (plan 90, Q11) ── */
+  if (isError && (error?.message === COURSE_FORBIDDEN || error?.message === COURSE_GONE)) {
+    return <CourseUnavailable kind={error.message === COURSE_GONE ? 'gone' : 'forbidden'} />;
   }
 
   /* ── Error state ─────────────────────────────────────────────────── */

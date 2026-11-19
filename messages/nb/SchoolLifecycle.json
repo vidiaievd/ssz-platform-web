@@ -36,5 +36,15 @@
     "schoolSuspended": "Skolen er midlertidig blokkert: nytt arbeid kan ikke startes eller leveres, og ingenting kan endres.",
     "schoolClosed": "Skolen er stengt. Materialet er ikke lenger tilgjengelig.",
     "courseObsolete": "Dette kurset er utdatert og tar ikke imot nye påmeldinger."
+  },
+  "unavailable": {
+    "title": "Skolen er utilgjengelig",
+    "body": "Skolen er stengt, finnes ikke, eller du har ikke tilgang til den. Læringshistorikken din blir hos deg.",
+    "home": "Til forsiden",
+    "courseForbiddenTitle": "Kurset er utilgjengelig",
+    "courseForbiddenBody": "Kurset tilhører en skole som er stengt, eller du har ikke fått tilgang til det. Hvis du studerte ved skolen, blir historikken din hos deg.",
+    "courseGoneTitle": "Kurset er slettet",
+    "courseGoneBody": "Kurset finnes ikke lenger – det ble slettet sammen med skolen. Fremgangen din er bevart.",
+    "myCourses": "Til mine kurs"
   }
 }

@@ -288,11 +288,15 @@ export async function GET(
     // The school behind the course, so the screen can say it is read only. Best effort: a
     // failed read must not hide the course, and an older service sends no status.
     let school: School | null = null;
+    let closedByNotFound = false;
     if (container.ownerSchoolId) {
       try {
         school = await serverFetch<School>({ service: 'organization', path: `/schools/${container.ownerSchoolId}` });
-      } catch {
+      } catch (e) {
         school = null;
+        // Organization answers 404 to a learner for a closed school (plan 90, Q13): the course
+        // is still readable as history, and the screen must say the school is closed.
+        if (isAppError(e) && e.code === 'not_found') closedByNotFound = true;
       }
     }
 
@@ -303,7 +307,7 @@ export async function GET(
       targetLanguage: container.targetLanguage,
       maintenanceStatus: container.maintenanceStatus,
       maintenanceSource: container.maintenanceSource ?? null,
-      schoolStatus: school?.status,
+      schoolStatus: school?.status ?? (closedByNotFound ? 'closed' : undefined),
       schoolClosesAt: school?.closesAt ?? null,
     };
 
@@ -326,6 +330,8 @@ export async function GET(
     if (isAppError(e)) {
       if (e.code === 'unauthenticated') return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
       if (e.code === 'not_found') return NextResponse.json({ error: 'Course not found' }, { status: 404 });
+      // A closed school's private course, asked by someone who never studied in it (plan 90, Q11).
+      if (e.code === 'forbidden') return NextResponse.json({ error: 'Course not available' }, { status: 403 });
       // The school that owns the course is closed: its courses are gone for learners.
       if (e.code === 'conflict' && schoolNotActiveStatus(e.details)) {
         return NextResponse.json({ error: 'School not active', code: 'SCHOOL_NOT_ACTIVE', schoolStatus: schoolNotActiveStatus(e.details) }, { status: 409 });

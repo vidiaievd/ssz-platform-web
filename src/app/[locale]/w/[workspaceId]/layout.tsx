@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { requireAnyRole } from '@/lib/auth/protect';
@@ -13,6 +12,7 @@ import { WorkspaceActivator } from '@/features/workspaces/components/workspace-a
 import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
 import { EntitlementsProvider } from '@/features/entitlements';
 import { SchoolStatusBanner } from '@/features/school-lifecycle';
+import { SchoolUnavailable } from '@/features/school-lifecycle/components/school-unavailable';
 import { AppShell } from '@/components/shared/app-shell';
 import type { SchoolContext } from '@/components/shared/app-shell';
 import type { DashboardRole } from '@/features/dashboard/types';
@@ -47,8 +47,9 @@ export default async function WorkspaceLayout({ children, params }: Props) {
 
   const workspace = await resolveWorkspace(workspaceId);
 
-  // Not yours and no such workspace are the same answer, here as on the server.
-  if (!workspace) notFound();
+  // Not yours, closed and no such workspace are the same answer, here as on the server
+  // (plan 90, Q13): say "school unavailable" rather than a bare 404.
+  if (!workspace) return <SchoolUnavailable />;
 
   // A school's slug still opens its workspace — it is an alias, and every link the app
   // builds already carries the id. Canonicalising it here would mean redirecting from a

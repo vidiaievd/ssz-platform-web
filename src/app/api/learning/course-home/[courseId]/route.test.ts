@@ -350,6 +350,12 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     expect(res.status).toBe(401);
   });
 
+  it('returns 403 when the course is not open to the learner (closed school, plan 90 Q11)', async () => {
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('forbidden', 'Forbidden'));
+    const res = await GET(makeRequest(), PARAMS);
+    expect(res.status).toBe(403);
+  });
+
   it('returns 404 when the course is not found', async () => {
     vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('not_found', 'Course not found'));
     const res = await GET(makeRequest(), PARAMS);
@@ -392,6 +398,17 @@ describe('GET /api/learning/course-home/[courseId]', () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { courseInfo: { schoolStatus?: string } };
     expect(body.courseInfo.schoolStatus).toBeUndefined();
+  });
+
+  it('reads a 404 for the owning school as closed (plan 90, Q13)', async () => {
+    mockUpstreams({ container: { ...MOCK_CONTAINER, ownerSchoolId: 'school-1' } as Container });
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('not_found', 'Not found'));
+
+    const res = await GET(makeRequest(), PARAMS);
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { courseInfo: { schoolStatus?: string } };
+    expect(body.courseInfo.schoolStatus).toBe('closed');
   });
 
   it('says 409 SCHOOL_NOT_ACTIVE when the owning school is closed', async () => {
