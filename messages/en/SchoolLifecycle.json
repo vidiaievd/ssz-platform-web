@@ -49,6 +49,7 @@
   },
   "readOnly": {
     "title": "Nothing can be changed right now",
-    "body": "The school is read only. The notice above says why and until when."
+    "body": "The school is read only. The notice above says why and until when.",
+    "learnerTask": "This task can't be started or handed in right now. The notice above says why; your earlier work is under My work."
   }
 }

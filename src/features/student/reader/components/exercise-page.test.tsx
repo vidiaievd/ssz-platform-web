@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/test/render';
 import type { ExerciseWithAnswers } from '@/features/content/types';
+import { SchoolWritableProvider } from '@/features/school-lifecycle';
 import { ExercisePage } from './exercise-page';
 
 const useExerciseForRunner = vi.fn();
@@ -128,6 +129,40 @@ describe('ExercisePage', () => {
     renderWithProviders(<ExercisePage exerciseId="e1" title="Kjøkkenet" />);
 
     expect(screen.getByText('dictation runner: Kjøkkenet')).toBeInTheDocument();
+  });
+
+  describe('in a school that takes no new work (plan 90, block 9)', () => {
+    it('locks a server-graded task instead of opening its runner', () => {
+      mockExercise({
+        templateCode: 'dictation',
+        content: { instruction: '', mode: 'segments', segments: [{ id: 's1' }], settings: {} },
+      });
+      renderWithProviders(
+        <SchoolWritableProvider status="suspended">
+          <ExercisePage exerciseId="e1" title="Kjøkkenet" />
+        </SchoolWritableProvider>,
+      );
+
+      expect(screen.queryByText(/dictation runner/)).not.toBeInTheDocument();
+      expect(screen.getByTestId('school-task-locked')).toHaveTextContent('Kjøkkenet');
+      expect(screen.getByText('The school is not accepting new work')).toBeInTheDocument();
+    });
+
+    it('leaves a task the browser grades open', () => {
+      mockExercise({
+        templateCode: 'short_answer',
+        content: { question: 'Q?' },
+        expectedAnswers: { reference_answer: 'På radio.', accepted_answers: ['på radio'] },
+      });
+      renderWithProviders(
+        <SchoolWritableProvider status="closed">
+          <ExercisePage exerciseId="e1" />
+        </SchoolWritableProvider>,
+      );
+
+      expect(screen.queryByTestId('school-task-locked')).not.toBeInTheDocument();
+      expect(screen.getByLabelText('Your answer')).toBeInTheDocument();
+    });
   });
 
   it('auto-grades a short_answer that matches an accepted answer', () => {

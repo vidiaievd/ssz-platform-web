@@ -49,6 +49,7 @@
   },
   "readOnly": {
     "title": "Ingenting kan endres nå",
-    "body": "Skolen er skrivebeskyttet. Meldingen over forteller hvorfor og hvor lenge."
+    "body": "Skolen er skrivebeskyttet. Meldingen over forteller hvorfor og hvor lenge.",
+    "learnerTask": "Denne oppgaven kan ikke startes eller leveres nå. Meldingen over forteller hvorfor; tidligere arbeid finner du under Mitt arbeid."
   }
 }

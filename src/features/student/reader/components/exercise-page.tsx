@@ -30,6 +30,7 @@ import {
 } from '@/features/student/exercises/lib/grading-side';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { SchoolTaskLocked, useSchoolWritable } from '@/features/school-lifecycle';
 import { SentenceSchemaSolver } from './sentence-schema-solver';
 import {
   McqBody,
@@ -896,6 +897,8 @@ export function ExerciseSolver({
 }: ExerciseSolverProps) {
   const t = useTranslations('ExerciseRunner');
   const { data, isLoading, isError, refetch } = useExerciseForRunner(exerciseId);
+  /** False while the course's school is not active — the reader provides it. */
+  const writable = useSchoolWritable();
   const [phase, setPhase] = useState<'answering' | 'feedback'>('answering');
   const [graded, setGraded] = useState<Graded | null>(null);
   /* Attempts are unlimited; the answers appear only when asked for. */
@@ -914,6 +917,20 @@ export function ExerciseSolver({
   // moving them to server-side grading is separate work with a shape of its own.
   const ServerSolver = SERVER_SOLVERS[data.templateCode];
   if (ServerSolver !== undefined && gradedOnServer(data)) {
+    // The course's school takes no new work (plan 90, block 9): no start, no hand-in. Tasks the
+    // browser grades never reach the engine, so they stay open below.
+    if (!writable) {
+      return (
+        <div>
+          {index != null && (
+            <div className="mb-2 text-[12px] font-bold text-(--ssz-text-muted)">
+              {t('taskNumber', { n: index })}
+            </div>
+          )}
+          <SchoolTaskLocked line={foldedLine(data) || title} bare={stacked === true} />
+        </div>
+      );
+    }
     const questions = setSize(data);
     // A set inside the stack: it says what it is, and waits to be started.
     const folded = stacked === true && questions !== null && !opened;
