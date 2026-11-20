@@ -19,7 +19,7 @@ import type { Container, ListeningStageType } from '@/features/content/types';
 import { useAuthoringExercises } from '../api/use-authoring-exercises';
 import { useListeningStages } from '../api/use-authoring-lessons';
 import { saveListeningStagesAction } from '../actions/listening-stages';
-import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveRefusedError, useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { EditorCard } from './editor-card';
@@ -119,7 +119,7 @@ export function ListeningStageListEditor({
           stageType: row.stageType,
         }));
       const result = await saveListeningStagesAction(lessonId, variantId, entries);
-      if (!result.ok) throw new Error(result.error.code);
+      if (!result.ok) throw new SaveRefusedError(result.error);
     },
   });
 

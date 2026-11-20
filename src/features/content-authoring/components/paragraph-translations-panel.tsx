@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useLessonParagraphs } from '../api/use-authoring-lessons';
 import { saveParagraphTranslationsAction } from '../actions/lesson-paragraphs';
-import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveRefusedError, useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { EditorCard } from './editor-card';
@@ -47,7 +47,7 @@ export function ParagraphTranslationsPanel({
         .map((translation, paragraphIndex) => ({ paragraphIndex, translation: translation.trim() }))
         .filter((entry) => entry.translation.length > 0);
       const result = await saveParagraphTranslationsAction(lessonId, variantId, entries);
-      if (!result.ok) throw new Error(result.error.code);
+      if (!result.ok) throw new SaveRefusedError(result.error);
     },
   });
 

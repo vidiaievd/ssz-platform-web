@@ -4,8 +4,9 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
-import type { UseUnsavedChangesReturn } from '../hooks/use-unsaved-changes';
+import { SaveRefusedError, type UseUnsavedChangesReturn } from '../hooks/use-unsaved-changes';
 
 import { useSaveScopeDescription } from './save-scope';
 
@@ -34,6 +35,7 @@ export function PanelSaveButton({
   className,
 }: PanelSaveButtonProps) {
   const t = useTranslations('Authoring');
+  const tErrors = useErrorMessage();
   const saveScope = useSaveScopeDescription();
 
   return (
@@ -50,7 +52,13 @@ export function PanelSaveButton({
             toast.success(successMessage ?? t('lessons.saveSuccess'), {
               description: saveScope,
             });
-          else toast.error(t('lessons.saveFailed'));
+          else {
+            // One toast per failure: the server's reason when it refused, else the generic text.
+            const error = unsaved.lastError();
+            toast.error(
+              error instanceof SaveRefusedError ? tErrors(error.error) : t('lessons.saveFailed'),
+            );
+          }
         })();
       }}
     >

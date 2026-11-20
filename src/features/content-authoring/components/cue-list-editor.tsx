@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useLessonCues } from '../api/use-authoring-lessons';
 import { saveLessonCuesAction } from '../actions/lesson-cues';
-import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveRefusedError, useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { SaveStatusIndicator } from './save-status-indicator';
 import { PanelSaveButton } from './panel-save-button';
 import { EditorCard } from './editor-card';
@@ -77,7 +77,7 @@ export function CueListEditor({ lessonId, variantId }: CueListEditorProps) {
         }))
         .filter((entry) => entry.targetLine.length > 0);
       const result = await saveLessonCuesAction(lessonId, variantId, entries);
-      if (!result.ok) throw new Error(result.error.code);
+      if (!result.ok) throw new SaveRefusedError(result.error);
     },
   });
 

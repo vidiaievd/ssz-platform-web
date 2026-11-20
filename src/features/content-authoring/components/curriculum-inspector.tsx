@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ClipboardList, Layers, BookOpen, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,7 @@ import {
 } from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
 import { formatLearningGoals } from '../lib/learning-goals';
-import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveRefusedError, useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { LearningGoalsField } from './learning-goals-field';
 import { useStructureUndo } from '../hooks/use-structure-undo';
 import {
@@ -50,7 +49,6 @@ import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
 import { SectionAssignSelect } from './section-assign-select';
 import type { DeleteNodeTarget } from './delete-node-dialog';
-import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -301,7 +299,6 @@ function InspectorFields({
 }: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
-  const tErrors = useErrorMessage();
   const undo = useStructureUndo();
 
   const publishOptions = [
@@ -337,10 +334,7 @@ function InspectorFields({
               onSave={async (title) => {
                 const previous = level.title ?? '';
                 const result = await renameSectionAction(courseContainerId, level.id!, title);
-                if (!result.ok) {
-                  toast.error(tErrors(result.error));
-                  throw new Error(result.error.code);
-                }
+                if (!result.ok) throw new SaveRefusedError(result.error);
                 undo.record({
                   label: t('undo.renamed', { name: title }),
                   revert: async () =>
@@ -407,10 +401,7 @@ function InspectorFields({
             onSave={async (title) => {
               const previous = mod.title ?? '';
               const result = await renameContainerAction(mod.containerId, title);
-              if (!result.ok) {
-                toast.error(tErrors(result.error));
-                throw new Error(result.error.code);
-              }
+              if (!result.ok) throw new SaveRefusedError(result.error);
               undo.record({
                 label: t('undo.renamed', { name: title }),
                 revert: async () => (await renameContainerAction(mod.containerId, previous)).ok,
@@ -445,10 +436,7 @@ function InspectorFields({
                 next,
                 previous !== null,
               );
-              if (!result.ok) {
-                toast.error(tErrors(result.error));
-                throw new Error(result.error.code);
-              }
+              if (!result.ok) throw new SaveRefusedError(result.error);
               undo.record({
                 label: t('undo.renamed', { name: next }),
                 // Whether the localization row exists now is what the save just
@@ -480,10 +468,7 @@ function InspectorFields({
             onSave={async (next) => {
               const previous = mod.learningGoals;
               const result = await setContainerLearningGoalsAction(mod.containerId, next);
-              if (!result.ok) {
-                toast.error(tErrors(result.error));
-                throw new Error(result.error.code);
-              }
+              if (!result.ok) throw new SaveRefusedError(result.error);
               undo.record({
                 label: t('undo.learningGoalsChanged', { name: mod.title ?? '' }),
                 revert: async () =>
@@ -557,10 +542,7 @@ function InspectorFields({
             const previous = ownTitleOf(item);
             const itemType = item.itemType as RenamableItemType;
             const result = await renameItemAction(itemType, item.refId, containerId, next);
-            if (!result.ok) {
-              toast.error(tErrors(result.error));
-              throw new Error(result.error.code);
-            }
+            if (!result.ok) throw new SaveRefusedError(result.error);
             undo.record({
               label: next.trim()
                 ? t('undo.renamed', { name: next.trim() })
