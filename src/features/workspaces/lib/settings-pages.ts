@@ -3,6 +3,7 @@ import type { SchoolRole } from '@/features/school/types';
 import type { WorkspaceKind } from '../api/resolve-workspace';
 
 export type SettingsPage =
+  | 'school'
   | 'profile'
   | 'account'
   | 'notifications'
@@ -38,6 +39,9 @@ const WORKSPACE_PAGES: readonly SettingsPage[] = [
  * is never deleted by its tutor (`SOLO_WORKSPACE_NOT_DELETABLE`); only an administrator closes it.
  *
  * The check-before-hand-in page (plan 84, step 9) follows the same rule for `ai.practice`.
+ *
+ * The school page (logo, name, description, contacts; plan 90 §8, step 11) comes first for a
+ * school's owner and administrators; a SOLO workspace's name is the tutor's and has no page.
  */
 export function settingsPagesFor(
   role: SchoolRole | null,
@@ -58,8 +62,9 @@ export function settingsPagesFor(
           ]
         : [page],
     );
+    const school: SettingsPage[] = kind === 'SCHOOL' ? ['school'] : [];
     const danger: SettingsPage[] = role === 'OWNER' && kind === 'SCHOOL' ? ['danger'] : [];
-    return [...pages, ...recipe, ...danger];
+    return [...school, ...pages, ...recipe, ...danger];
   }
   if (role === 'CONTENT_ADMIN') return recipe;
   return [];

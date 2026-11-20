@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -37,12 +36,13 @@ export function CourseCard({
       {/* Thumbnail */}
       <div className="relative h-20 overflow-hidden bg-(--ssz-bg-muted)">
         {item.coverImageUrl ? (
-          <Image
+          // A plain img: covers live on the deployment's media host, which next/image would need
+          // in remotePatterns (there are none) — an unlisted host throws and takes the page down.
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={item.coverImageUrl}
             alt={item.containerTitle}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 400px"
+            className="absolute inset-0 size-full object-cover"
           />
         ) : (
           <div

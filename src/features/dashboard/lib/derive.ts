@@ -105,8 +105,7 @@ export function computeOnboarding(input: OnboardingInput): OnboardingState {
       done: Boolean(school.avatarUrl && school.description),
       labelKey: 'fillBranding',
       estMinutes: onboardingEst('fill-branding'),
-      // The school has no logo / description screen in the web yet (plan 90 §8, step 11).
-      href: null,
+      href: 'settings/school',
     },
     {
       key: 'create-course',

@@ -1,5 +1,6 @@
 {
   "nav": {
+    "school": "Skole",
     "profile": "Profil",
     "account": "Konto",
     "notifications": "Varsler",
@@ -250,5 +251,33 @@
     "failed": "Skolen kunne ikke slettes.",
     "alreadyArchived": "Skolen er ikke aktiv – ingen endringer er mulig.",
     "notActive": "Skolen er allerede arkivert eller sperret."
+  },
+  "school": {
+    "eyebrow": "Skole",
+    "title": "Skoleprofil",
+    "lede": "Det elever og foreldre ser på skolesiden og i katalogen.",
+    "logo": "Logo",
+    "noLogo": "Ingen logo.",
+    "name": "Skolens navn",
+    "description": "Beskrivelse",
+    "descriptionPlaceholder": "Hvem dere underviser, hvordan, og hva som gjør skolen deres annerledes.",
+    "write": "Skriv",
+    "preview": "Forhåndsvis",
+    "previewEmpty": "Ingenting å forhåndsvise ennå.",
+    "counter": "{count} / {max}",
+    "website": "Nettsted",
+    "contactEmail": "Kontakt-e-post",
+    "city": "By",
+    "save": "Lagre",
+    "saved": "Skoleprofilen er lagret",
+    "failed": "Kunne ikke laste skolen.",
+    "readOnly": "Bare eieren og administratorer kan endre skoleprofilen.",
+    "errors": {
+      "nameRequired": "Skriv inn skolens navn.",
+      "nameTooLong": "Høyst 100 tegn.",
+      "descriptionTooLong": "Høyst 500 tegn.",
+      "website": "Skriv inn en full adresse som begynner med https://",
+      "email": "Skriv inn en gyldig e-postadresse."
+    }
   }
 }

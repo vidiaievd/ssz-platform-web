@@ -1,5 +1,6 @@
 {
   "nav": {
+    "school": "School",
     "profile": "Profile",
     "account": "Account",
     "notifications": "Notifications",
@@ -250,5 +251,33 @@
     "failed": "The school could not be deleted.",
     "alreadyArchived": "The school is not active — no changes can be made.",
     "notActive": "The school is already archived or suspended."
+  },
+  "school": {
+    "eyebrow": "School",
+    "title": "School profile",
+    "lede": "What students and parents see on the school page and in the catalogue.",
+    "logo": "Logo",
+    "noLogo": "No logo.",
+    "name": "School name",
+    "description": "Description",
+    "descriptionPlaceholder": "Who you teach, how, and what makes your school different.",
+    "write": "Write",
+    "preview": "Preview",
+    "previewEmpty": "Nothing to preview yet.",
+    "counter": "{count} / {max}",
+    "website": "Website",
+    "contactEmail": "Contact email",
+    "city": "City",
+    "save": "Save",
+    "saved": "School profile saved",
+    "failed": "Couldn't load the school.",
+    "readOnly": "Only the owner and administrators change the school profile.",
+    "errors": {
+      "nameRequired": "Enter the school name.",
+      "nameTooLong": "At most 100 characters.",
+      "descriptionTooLong": "At most 500 characters.",
+      "website": "Enter a full address starting with https://",
+      "email": "Enter a valid email address."
+    }
   }
 }

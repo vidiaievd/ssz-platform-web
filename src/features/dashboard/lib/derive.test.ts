@@ -120,7 +120,7 @@ describe('computeOnboarding', () => {
   it('points every item at a real workspace screen, never a dead hash link', () => {
     const items = computeOnboarding(baseInput).items;
     expect(items.map((i) => [i.labelKey, i.href])).toEqual([
-      ['fillBranding', null],
+      ['fillBranding', 'settings/school'],
       ['createCourse', 'content/new'],
       ['createGroupSchedule', 'groups/new'],
       ['inviteTeacher', 'teachers'],
