@@ -12,6 +12,12 @@ vi.mock('@/lib/api/server-fetcher', () => ({
   serverFetch: vi.fn(),
 }));
 
+// The school is found through the caller's workspace, by id or slug, in any lifecycle status.
+const resolveSchoolWorkspace = vi.fn();
+vi.mock('@/features/workspaces/api/resolve-school-workspace', () => ({
+  resolveSchoolWorkspace: (idOrSlug: string) => resolveSchoolWorkspace(idOrSlug),
+}));
+
 const { GET, PUT } = await import('./route');
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors/app-error';
@@ -29,11 +35,12 @@ const BASE_BACKEND_SETTINGS = {
 };
 
 function mockPublicSchool() {
-  vi.mocked(serverFetch).mockResolvedValueOnce({
-    schoolId: SCHOOL_ID,
-    schoolName: 'Oslo Language School',
-    schoolSlug: 'oslo-language-school',
-    isOpenForApplications: true,
+  resolveSchoolWorkspace.mockResolvedValueOnce({
+    id: SCHOOL_ID,
+    kind: 'SCHOOL',
+    name: 'Oslo Language School',
+    slug: 'oslo-language-school',
+    myRole: 'OWNER',
   });
 }
 
@@ -58,6 +65,7 @@ function params(schoolSlug: string) {
 
 beforeEach(() => {
   vi.mocked(serverFetch).mockReset();
+  resolveSchoolWorkspace.mockReset().mockResolvedValue(null);
 });
 
 describe('GET /api/enrollment/schools/[schoolSlug]/settings', () => {
@@ -79,6 +87,32 @@ describe('GET /api/enrollment/schools/[schoolSlug]/settings', () => {
     expect(res.status).toBe(200);
     const body = await res.json() as typeof DEFAULT_ONBOARDING_SETTINGS;
     expect(body.placement.mode).toBe(DEFAULT_ONBOARDING_SETTINGS.placement.mode);
+  });
+});
+
+describe('the school behind the address (plan 90, live check, session 12)', () => {
+  it('reads the settings of a school addressed by its uuid', async () => {
+    mockPublicSchool();
+    vi.mocked(serverFetch).mockResolvedValueOnce({ ...BASE_BACKEND_SETTINGS, approvalMode: 'auto' });
+
+    const res = await GET(getReq(SCHOOL_ID), params(SCHOOL_ID));
+
+    expect(res.status).toBe(200);
+    expect(resolveSchoolWorkspace).toHaveBeenCalledWith(SCHOOL_ID);
+    const call = vi.mocked(serverFetch).mock.calls[0]![0] as { path: string };
+    expect(call.path).toBe(`/schools/${SCHOOL_ID}/enrollment/settings`);
+  });
+
+  it('answers 404 for a school that is not the caller\'s, instead of defaults', async () => {
+    const res = await GET(getReq('elsewhere'), params('elsewhere'));
+    expect(res.status).toBe(404);
+    expect(serverFetch).not.toHaveBeenCalled();
+  });
+
+  it('saves nothing for a school that is not the caller\'s', async () => {
+    const res = await PUT(putReq({ approval: { mode: 'auto' } }, 'elsewhere'), params('elsewhere'));
+    expect(res.status).toBe(404);
+    expect(serverFetch).not.toHaveBeenCalled();
   });
 });
 

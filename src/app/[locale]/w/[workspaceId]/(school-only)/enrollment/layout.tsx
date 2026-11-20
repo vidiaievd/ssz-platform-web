@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
-import { getPublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { SettingsLayout } from '@/components/shared/settings-layout';
@@ -35,17 +35,25 @@ export default async function EnrollmentLayout({ children, params }: Props) {
 
   const t = await getTranslations('Enrollment.Admin');
 
-  const school = await getPublicSchool(workspaceId);
+  const school = await resolveSchoolWorkspace(workspaceId);
   let showRequests = false;
   if (school) {
-    const dto = await serverFetch<BackendSettings>({
-      service: 'organization',
-      path: `/schools/${school.schoolId}/enrollment/settings`,
-    });
+    const [dto, pending] = await Promise.all([
+      serverFetch<BackendSettings>({
+        service: 'organization',
+        path: `/schools/${school.id}/enrollment/settings`,
+      }).catch(() => null),
+      serverFetch<{ items: unknown[] }>({
+        service: 'organization',
+        path: `/schools/${school.id}/memberships`,
+        query: { status: 'pending' },
+      }).catch(() => null),
+    ]);
     const settings = resolveOnboardingSettings(
       dto ? { approval: { mode: dto.approvalMode as 'auto' | 'manual' } } : undefined,
     );
-    showRequests = settings.approval.mode === 'manual';
+    // Manual approval always has the tab; auto-approval only while requests wait for a seat.
+    showRequests = settings.approval.mode === 'manual' || (pending?.items.length ?? 0) > 0;
   }
 
   const nav = [

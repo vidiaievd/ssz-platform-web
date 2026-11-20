@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
-import type { PublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import type { SchoolOnboardingSettings, PlacementMode } from '@/features/enrollment/types';
 
 type Params = { params: Promise<{ schoolSlug: string }> };
@@ -54,19 +54,18 @@ function toBackend(s: SchoolOnboardingSettings): BackendSettings {
   };
 }
 
-async function resolveSchoolId(schoolSlug: string): Promise<string> {
-  const school = await serverFetch<PublicSchool>({
-    service: 'organization',
-    path: `/schools/public/${schoolSlug}`,
-    anonymous: true,
-  });
-  return school.schoolId;
+/** The school behind a workspace id or slug; null when it is not the caller's school. */
+async function resolveSchoolId(idOrSlug: string): Promise<string | null> {
+  return (await resolveSchoolWorkspace(idOrSlug))?.id ?? null;
 }
+
+const notFound = () => NextResponse.json({ error: 'School not found' }, { status: 404 });
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { schoolSlug } = await params;
   try {
     const schoolId = await resolveSchoolId(schoolSlug);
+    if (!schoolId) return notFound();
     const dto = await serverFetch<BackendSettings>({
       service: 'organization',
       path: `/schools/${schoolId}/enrollment/settings`,
@@ -92,6 +91,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   try {
     const schoolId = await resolveSchoolId(schoolSlug);
+    if (!schoolId) return notFound();
     const merged = resolveOnboardingSettings(
       body as Partial<SchoolOnboardingSettings>,
     );

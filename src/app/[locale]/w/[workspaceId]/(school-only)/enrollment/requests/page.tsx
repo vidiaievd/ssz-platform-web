@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getPublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import { serverFetch } from '@/lib/api/server-fetcher';
-import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { SeatsBadge } from '@/features/school-seats/components/seats-badge';
 import { PendingApprovals } from '@/features/enrollment/components/pending-approvals';
 import type { Membership, MembershipStatus, MembershipSource } from '@/features/enrollment/types';
@@ -28,32 +27,23 @@ export default async function RequestsPage({ params }: Props) {
   const { workspaceId } = await params;
   const t = await getTranslations('Enrollment.Approvals');
 
-  const school = await getPublicSchool(workspaceId);
+  const school = await resolveSchoolWorkspace(workspaceId);
   if (!school) notFound();
 
-  const dto = await serverFetch<{ approvalMode: string }>({
-    service: 'organization',
-    path: `/schools/${school.schoolId}/enrollment/settings`,
-  });
-
-  const settings = resolveOnboardingSettings(
-    dto ? { approval: { mode: dto.approvalMode as 'auto' | 'manual' } } : undefined,
-  );
-
-  // Guard: this page should only appear for manual approval schools
-  if (settings.approval.mode !== 'manual') notFound();
-
+  // Open under either approval mode: auto-approval leaves a request `pending` when the school
+  // has no seat for it (`blockedReason: no_seats`), and this is where the owner approves it
+  // once seats are added (plan 90, live check, session 12).
   const result = await serverFetch<{ items: BackendMembership[] }>({
     service: 'organization',
-    path: `/schools/${school.schoolId}/memberships`,
+    path: `/schools/${school.id}/memberships`,
     query: { status: 'pending' },
   });
 
   const memberships: Membership[] = result.items.map((m) => ({
     id: m.id,
     schoolId: m.schoolId,
-    schoolSlug: workspaceId,
-    schoolName: school.schoolName,
+    schoolSlug: school.slug ?? workspaceId,
+    schoolName: school.name,
     status: m.status,
     source: m.source,
     language: (m.language ?? 'nb') as LangCode,
@@ -69,7 +59,7 @@ export default async function RequestsPage({ params }: Props) {
         <p className="text-sm text-(--ssz-text-muted)">{t('subtitle')}</p>
       </div>
 
-      <SeatsBadge schoolId={school.schoolId} />
+      <SeatsBadge schoolId={school.id} />
 
       <PendingApprovals memberships={memberships} />
     </div>
