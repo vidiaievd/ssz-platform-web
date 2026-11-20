@@ -3,6 +3,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { SeatsBadge } from '@/features/school-seats/components/seats-badge';
 import { PendingApprovals } from '@/features/enrollment/components/pending-approvals';
 import type { Membership, MembershipStatus, MembershipSource } from '@/features/enrollment/types';
@@ -15,6 +16,7 @@ type Props = {
 type BackendMembership = {
   id: string;
   schoolId: string;
+  studentId: string;
   status: MembershipStatus;
   source: MembershipSource;
   language?: string;
@@ -39,8 +41,13 @@ export default async function RequestsPage({ params }: Props) {
     query: { status: 'pending' },
   });
 
+  // The owner decides on a person, so the row names them (a failed lookup leaves the name out).
+  const profiles = await fetchProfileSummaries(result.items.map((m) => m.studentId));
+
   const memberships: Membership[] = result.items.map((m) => ({
     id: m.id,
+    studentId: m.studentId,
+    studentName: profiles[m.studentId]?.displayName || undefined,
     schoolId: m.schoolId,
     schoolSlug: school.slug ?? workspaceId,
     schoolName: school.name,

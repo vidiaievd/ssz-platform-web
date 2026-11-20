@@ -33,6 +33,18 @@ export function schoolNotActiveStatus(body: unknown): 'suspended' | 'closed' | n
   return status === 'closed' || status === 'purged' ? 'closed' : 'suspended';
 }
 
+/**
+ * What a BFF route answers the browser with when the school refused an action because it is read only:
+ * `{ code: 'SCHOOL_NOT_ACTIVE', schoolStatus }` with 409, so the screen can say why instead of "try again".
+ * `null` for any other error.
+ */
+export function schoolNotActiveResponseBody(
+  error: unknown,
+): { error: string; code: typeof SCHOOL_NOT_ACTIVE; schoolStatus: 'suspended' | 'closed' } | null {
+  const status = schoolNotActiveStatus((error as { details?: unknown } | null | undefined)?.details);
+  return status ? { error: 'The school is not active', code: SCHOOL_NOT_ACTIVE, schoolStatus: status } : null;
+}
+
 export function isCourseObsolete(body: unknown): boolean {
   return readCode(body)?.code === COURSE_OBSOLETE;
 }

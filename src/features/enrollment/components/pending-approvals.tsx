@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   isSeatsExhaustedTransition,
   isTransitionConflict,
+  schoolNotActiveTransition,
   useTransitionMembership,
 } from '@/features/enrollment/api/use-transition-membership';
 import type { Membership, MembershipStatus } from '@/features/enrollment/types';
@@ -21,6 +22,7 @@ type Props = {
 
 export function PendingApprovals({ memberships }: Props) {
   const t = useTranslations('Enrollment.Approvals');
+  const tLifecycle = useTranslations('SchoolLifecycle.errors');
   const router = useRouter();
   const transition = useTransitionMembership();
   const [pending, setPending] = useState<Record<string, boolean>>({});
@@ -43,7 +45,10 @@ export function PendingApprovals({ memberships }: Props) {
       toast.success(to === 'onboarding' ? t('accepted') : t('rejected'));
       router.refresh();
     } catch (err) {
-      if (isSeatsExhaustedTransition(err)) {
+      const notActive = schoolNotActiveTransition(err);
+      if (notActive) {
+        toast.error(tLifecycle(notActive === 'closed' ? 'schoolClosed' : 'schoolSuspended'));
+      } else if (isSeatsExhaustedTransition(err)) {
         toast.error(t('seatsExhausted'));
         router.refresh();
       } else if (isTransitionConflict(err)) {
@@ -69,7 +74,9 @@ export function PendingApprovals({ memberships }: Props) {
           >
             {/* Info */}
             <div className="flex-1 flex flex-col gap-0.5">
-              <span className="text-sm font-medium text-(--ssz-text-primary)">{m.id}</span>
+              <span className="text-sm font-medium text-(--ssz-text-primary)">
+                {m.studentName ?? t('unnamedStudent')}
+              </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-(--ssz-text-muted)">
                   {m.language.toUpperCase()}

@@ -164,4 +164,27 @@ describe('PUT /api/enrollment/schools/[schoolSlug]/settings', () => {
     expect(lastCall.body.collectAvailability).toBe(true);
     expect(lastCall.body.approvalMode).toBe('manual');
   });
+
+  it('passes a read-only school refusal on as 409 with its reason, not as an upstream failure', async () => {
+    mockPublicSchool();
+    vi.mocked(serverFetch).mockRejectedValueOnce(
+      new AppError('conflict', 'Upstream 409', {
+        error: { code: 'SCHOOL_NOT_ACTIVE', status: 'suspended' },
+      }),
+    );
+
+    const res = await PUT(putReq({ approval: { mode: 'auto' } }), params('oslo-language-school'));
+
+    expect(res.status).toBe(409);
+    expect(await res.json()).toMatchObject({ code: 'SCHOOL_NOT_ACTIVE', schoolStatus: 'suspended' });
+  });
+
+  it('still answers 502 for any other upstream conflict', async () => {
+    mockPublicSchool();
+    vi.mocked(serverFetch).mockRejectedValueOnce(new AppError('conflict', 'Upstream 409', { error: 'other' }));
+
+    const res = await PUT(putReq({ approval: { mode: 'auto' } }), params('oslo-language-school'));
+
+    expect(res.status).toBe(502);
+  });
 });

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
+import { schoolNotActiveResponseBody } from '@/features/school-lifecycle/lib/lifecycle-errors';
 
 export async function POST(
   request: NextRequest,
@@ -30,6 +31,8 @@ export async function POST(
     });
     return NextResponse.json({ ok: true });
   } catch (e) {
+    const notActive = schoolNotActiveResponseBody(e);
+    if (notActive) return NextResponse.json(notActive, { status: 409 });
     if (isAppError(e)) {
       const status =
         e.code === 'conflict' ? 409 : e.code === 'not_found' ? 404 : e.code === 'forbidden' ? 403 : 502;

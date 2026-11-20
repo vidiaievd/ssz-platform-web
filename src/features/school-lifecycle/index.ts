@@ -9,6 +9,7 @@ export {
   lifecycleErrorKey,
   lifecycleErrorKeyOf,
   schoolNotActiveStatus,
+  schoolNotActiveResponseBody,
 } from './lib/lifecycle-errors';
 export type { MaintenanceStatus, SchoolLifecycleFields, SchoolLifecycleStatus } from './types';
 export { COURSE_OBSOLETE, SCHOOL_NOT_ACTIVE } from './types';

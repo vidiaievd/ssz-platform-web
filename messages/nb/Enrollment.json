@@ -117,6 +117,9 @@
     "manualApproval": "Krev manuell godkjenning",
     "stepPreviewLabel": "Studenten vil se disse trinnene",
     "stepPreviewEmpty": "Ingen trinn — studenter registreres umiddelbart.",
+    "stepPlacement": "Nivåtest",
+    "stepAvailability": "Timeplanønsker",
+    "stepInterview": "Intervju",
     "save": "Lagre innstillinger",
     "saving": "Lagrer...",
     "saved": "Innstillinger lagret",
@@ -149,6 +152,7 @@
     "transitionFailed": "Handling mislyktes. Prøv igjen.",
     "alreadyHandled": "Denne forespørselen er allerede behandlet — listen er oppdatert.",
     "seatsExhausted": "Skolen har ingen ledige elevplasser — oppgrader abonnementet for å ta imot flere elever.",
-    "noSeats": "Ingen plasser"
+    "noSeats": "Ingen plasser",
+    "unnamedStudent": "Elev uten navn"
   }
 }

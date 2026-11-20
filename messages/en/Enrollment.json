@@ -117,6 +117,9 @@
     "manualApproval": "Require manual approval",
     "stepPreviewLabel": "Student will see these steps",
     "stepPreviewEmpty": "No steps — students are enrolled immediately.",
+    "stepPlacement": "Placement test",
+    "stepAvailability": "Schedule preferences",
+    "stepInterview": "Interview",
     "save": "Save settings",
     "saving": "Saving...",
     "saved": "Settings saved",
@@ -149,6 +152,7 @@
     "transitionFailed": "Action failed. Please try again.",
     "alreadyHandled": "This request was already handled — the list has been refreshed.",
     "seatsExhausted": "This school has no student seats left — upgrade the plan to accept more students.",
-    "noSeats": "No seats"
+    "noSeats": "No seats",
+    "unnamedStudent": "Student without a name"
   }
 }

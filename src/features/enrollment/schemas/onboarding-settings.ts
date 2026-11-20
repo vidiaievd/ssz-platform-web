@@ -4,7 +4,12 @@ export const onboardingSettingsSchema = z.object({
   placement: z.object({
     mode: z.enum(['platform', 'school', 'none']),
     reusePlatformResult: z.boolean(),
-    maxResultAgeDays: z.number().int().positive().optional(),
+    // An empty number input reads as NaN (valueAsNumber) and a never-set value comes back as null:
+    // both mean "no limit", not an invalid form that silently refuses to submit.
+    maxResultAgeDays: z.preprocess(
+      (v) => (v === null || v === '' || (typeof v === 'number' && Number.isNaN(v)) ? undefined : v),
+      z.number().int().positive().optional(),
+    ),
   }),
   interview: z.object({
     required: z.boolean(),
@@ -22,4 +27,6 @@ export const onboardingSettingsSchema = z.object({
   }),
 });
 
+/** What the form holds before validation (the max age may still be empty). */
+export type OnboardingSettingsFormValues = z.input<typeof onboardingSettingsSchema>;
 export type OnboardingSettingsInput = z.infer<typeof onboardingSettingsSchema>;

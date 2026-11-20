@@ -4,6 +4,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
 import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
+import { schoolNotActiveResponseBody } from '@/features/school-lifecycle/lib/lifecycle-errors';
 import type { SchoolOnboardingSettings, PlacementMode } from '@/features/enrollment/types';
 
 type Params = { params: Promise<{ schoolSlug: string }> };
@@ -103,6 +104,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
     });
     return NextResponse.json(toFrontend(dto));
   } catch (e) {
+    // A suspended or closed school is read only: pass the reason on, it is not an upstream failure.
+    const notActive = schoolNotActiveResponseBody(e);
+    if (notActive) return NextResponse.json(notActive, { status: 409 });
     if (isAppError(e)) return NextResponse.json({ error: e.message }, { status: 502 });
     return NextResponse.json({ error: 'Failed to save settings' }, { status: 502 });
   }
