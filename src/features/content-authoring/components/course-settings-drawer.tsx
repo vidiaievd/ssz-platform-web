@@ -127,7 +127,11 @@ export function CourseSettingsDrawer({
             </TabsContent>
 
             <TabsContent value={'tags' satisfies SettingsTab}>
-              <TagInput entityType="container" entityId={container.id} />
+              <TagInput
+                entityType="container"
+                entityId={container.id}
+                ownerSchoolId={container.ownerSchoolId ?? null}
+              />
             </TabsContent>
 
             <TabsContent value={'sharing' satisfies SettingsTab}>

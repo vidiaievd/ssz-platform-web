@@ -2,26 +2,27 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 
-// Backend returns PaginatedResult<TagResponseDto>
-type TagResponseDto = { id: string; name: string; slug: string };
+type TagResponseDto = { id: string; name: string };
 type PaginatedTags = { items: TagResponseDto[] };
 
+/**
+ * Tags an author may put on a material: the platform's global ones plus, with `schoolId`, the
+ * school's own (content-service answers exactly that set to a non-admin without a scope).
+ * `?q=` filters by name. Best effort: a failure is an empty list.
+ */
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
   const q = searchParams.get('q') ?? '';
+  const schoolId = searchParams.get('schoolId');
 
   try {
-    // The backend exposes GET /api/v1/tags with a `search` param for full-text
-    // filtering — use it as the autocomplete/suggestions source (first 10 results).
     const data = await serverFetch<PaginatedTags>({
       service: 'content',
       path: '/tags',
-      query: { search: q || undefined, limit: 10, page: 1 },
+      query: { search: q || undefined, schoolId: schoolId || undefined, limit: 10, page: 1 },
     });
-    const names = (data?.items ?? []).map((t) => t.name);
-    return NextResponse.json(names);
+    return NextResponse.json((data?.items ?? []).map(({ id, name }) => ({ id, name })));
   } catch {
-    // Suggestions are best-effort; return empty array on failure
     return NextResponse.json([]);
   }
 }

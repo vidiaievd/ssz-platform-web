@@ -410,7 +410,8 @@
     "searchPlaceholder": "Søk eller opprett tagg…",
     "create": "Opprett «{name}»",
     "noResults": "Ingen treff.",
-    "removeAriaLabel": "Fjern tagg {name}"
+    "removeAriaLabel": "Fjern tagg {name}",
+    "createForbidden": "Bare skolens eier eller innholdsadministrator kan lage nye tagger. Velg en som finnes."
   },
   "empty": {
     "containers": "Ingen innhold ennå. Opprett din første beholder."

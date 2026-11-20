@@ -414,7 +414,8 @@
     "searchPlaceholder": "Search or create tag…",
     "create": "Create \"{name}\"",
     "noResults": "No matching tags.",
-    "removeAriaLabel": "Remove tag {name}"
+    "removeAriaLabel": "Remove tag {name}",
+    "createForbidden": "Only the school's owner or content admin can create new tags. Pick an existing one."
   },
   "empty": {
     "containers": "No content yet. Create your first container."
