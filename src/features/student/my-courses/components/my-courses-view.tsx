@@ -13,6 +13,7 @@ import { useMyCourses } from '@/features/student/api/use-my-courses';
 import { myCoursesFiltersSchema, type MyCoursesFilter } from '@/features/student/schemas/my-courses-filters';
 import { Link, useRouter } from '@/lib/i18n/navigation';
 import { useUrlFilters } from '@/lib/url-filters/use-url-filters';
+import { HistorySection } from './history-section';
 import { SourceFilterPills } from './source-filter-pills';
 
 const GRID_CLASS = 'grid gap-3.5 grid-cols-[repeat(auto-fill,minmax(280px,1fr))]';
@@ -84,6 +85,10 @@ export function MyCoursesView() {
           </div>
         )}
       </div>
+
+      {active === 'all' && !isLoading && !error && (
+        <HistorySection shownIds={new Set(courses.map((c) => c.containerId))} />
+      )}
     </div>
   );
 }

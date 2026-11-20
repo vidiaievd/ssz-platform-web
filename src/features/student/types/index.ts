@@ -7,6 +7,7 @@ export type {
   SchoolTeacherSummary,
   NextClass,
   StudentCourse,
+  StudentHistoryItem,
   SchoolMaterial,
   SelfStudyCourse,
   SchoolCourse,
