@@ -31,6 +31,7 @@ import {
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { SchoolTaskLocked, useSchoolWritable } from '@/features/school-lifecycle';
+import { LockedWritingTask } from './locked-writing-task';
 import { SentenceSchemaSolver } from './sentence-schema-solver';
 import {
   McqBody,
@@ -927,7 +928,11 @@ export function ExerciseSolver({
               {t('taskNumber', { n: index })}
             </div>
           )}
-          <SchoolTaskLocked line={foldedLine(data) || title} bare={stacked === true} />
+          {data.templateCode === 'writing_task' ? (
+            <LockedWritingTask exerciseId={exerciseId} line={foldedLine(data) || title} bare={stacked === true} />
+          ) : (
+            <SchoolTaskLocked line={foldedLine(data) || title} bare={stacked === true} />
+          )}
         </div>
       );
     }

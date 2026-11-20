@@ -50,6 +50,9 @@
   "readOnly": {
     "title": "Nothing can be changed right now",
     "body": "The school is read only. The notice above says why and until when.",
-    "learnerTask": "This task can't be started or handed in right now. The notice above says why; your earlier work is under My work."
+    "learnerTask": "This task can't be started or handed in right now. The notice above says why; your earlier work is under My work.",
+    "draftHeading": "Your draft",
+    "draftSuspended": "Your draft is saved. You can hand it in once the school is unblocked.",
+    "draftClosed": "The school is closed: the draft can no longer be handed in; it stays here to read."
   }
 }

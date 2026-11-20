@@ -395,9 +395,12 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     const open = page.items.find((a) => a.status === 'IN_PROGRESS');
     const resumable = (open !== undefined && holdsItemStates(open)) || holdsOpenBoard(page.items);
 
+    const openDraft = (open as { draftAnswer?: unknown } | undefined)?.draftAnswer ?? null;
+
     return NextResponse.json({
       attempt: last,
       ...(resumable ? { resumable: true as const } : {}),
+      ...(openDraft === null ? {} : { openDraft }),
     } satisfies LastAttemptResponse);
   } catch (e) {
     if (isAppError(e)) {

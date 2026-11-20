@@ -86,6 +86,11 @@ export interface StartAttemptResponse {
    * table's) and `passPct` (the blank's).
    */
   boardCheck?: InflectionTableSubmitDetails | InformationTransferSubmitDetails | null;
+  /**
+   * Only on an attempt opened before the school that owns the course stopped (plan 90, live
+   * check block 12): its draft is shown read only and nothing can be handed in.
+   */
+  schoolStatus?: 'suspended' | 'closed' | 'purged';
 }
 
 /** One question of a `short_answer` set already handed in on the resumed attempt. */
@@ -811,6 +816,11 @@ export interface LastAttemptResponse {
    * otherwise, including for an open attempt with nothing on it.
    */
   resumable?: true;
+  /**
+   * The draft saved on the open attempt, when there is one (plan 90, live check block 12): what
+   * the reader shows read only under the lock of a school that stopped after it was begun.
+   */
+  openDraft?: unknown;
 }
 
 /**

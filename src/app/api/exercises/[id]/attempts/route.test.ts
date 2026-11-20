@@ -397,6 +397,24 @@ describe('GET /api/exercises/[id]/attempts', () => {
     scoredAt: '2026-08-08T10:00:01.000Z',
   };
 
+  it('hands back the draft of the open attempt, so a stopped school can show it read only (plan 90, block 12)', async () => {
+    const open = { id: 'att-3', exerciseId: 'ex-1', templateCode: 'writing_task', status: 'IN_PROGRESS', draftAnswer: { text: 'Jeg bor i Oslo.' } };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [open] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    await expect(res.json()).resolves.toEqual({ attempt: null, openDraft: { text: 'Jeg bor i Oslo.' } });
+  });
+
+  it('says nothing about a draft when the open attempt holds none', async () => {
+    const open = { id: 'att-3', exerciseId: 'ex-1', templateCode: 'writing_task', status: 'IN_PROGRESS', draftAnswer: null };
+    vi.mocked(serverFetch).mockResolvedValue({ items: [open] });
+
+    const res = await GET(makeGetRequest(), { params });
+
+    await expect(res.json()).resolves.toEqual({ attempt: null });
+  });
+
   it('returns the newest finished attempt', async () => {
     const older = { ...scored, id: 'att-1' };
     vi.mocked(serverFetch).mockResolvedValue({ items: [scored, older] });

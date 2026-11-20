@@ -22,6 +22,11 @@ export function SchoolWritableProvider({
   return <SchoolStatusContext.Provider value={status}>{children}</SchoolStatusContext.Provider>;
 }
 
+/** The workspace's lifecycle status, or `undefined` outside a workspace / while unknown. */
+export function useSchoolStatus(): SchoolLifecycleStatus | undefined {
+  return useContext(SchoolStatusContext);
+}
+
 /** False in a suspended or closed workspace. Outside a workspace, or status unknown: true. */
 export function useSchoolWritable(): boolean {
   const status = useContext(SchoolStatusContext);

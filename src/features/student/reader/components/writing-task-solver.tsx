@@ -8,6 +8,7 @@ import {
   fetchLastAttempt,
   handedInFromStatus,
   handedInFromSubmit,
+  AttemptRequestError,
   resolveSubmitFailure,
   useAiVerdictWait,
   useSaveDraft,
@@ -29,6 +30,8 @@ import {
 } from '@/features/student/exercises/runner';
 import type { StudentProjection } from '@/lib/shared-kernel/writing-task';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
+import { SchoolTaskLocked } from '@/features/school-lifecycle';
+import { recentSchoolRefusal } from '@/features/school-lifecycle/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
 import { AiReviewPanel } from '@/features/student/ai-review';
 import {
@@ -112,6 +115,12 @@ export function WritingTaskSolver({
   const [awaited, setAwaited] = useState<string | null>(null);
   const [sendFailure, setSendFailure] = useState<SubmitFailureResolution | null>(null);
   const [confirmingDelivery, setConfirmingDelivery] = useState(false);
+  /**
+   * Set when the school that owns the course stopped after this attempt was opened (plan 90, live
+   * check block 12; owner's decision): the draft is shown read only and nothing is handed in. From
+   * the resume answer, or from a hand-in refused because the school stopped meanwhile.
+   */
+  const [lockedBy, setLockedBy] = useState<'suspended' | 'closed' | 'purged' | null>(null);
 
   /** Wall-clock since the attempt opened; the engine records it per submission. */
   const openedAt = useRef(0);
@@ -132,6 +141,7 @@ export function WritingTaskSolver({
 
           setAttemptId(data.attemptId);
           setProjection(task);
+          setLockedBy(data.schoolStatus ?? null);
           setDocument(data.exerciseContent);
           openedAt.current = Date.now();
 
@@ -209,7 +219,8 @@ export function WritingTaskSolver({
   const autosaveOn = projection?.settings.autosave ?? false;
   const saveDraftMutate = saveDraft.mutate;
   useEffect(() => {
-    if (!autosaveOn || phase !== 'draft' || attemptId === null) return;
+    // A locked draft is only read: putting the restored text back would be a write for nothing.
+    if (!autosaveOn || phase !== 'draft' || attemptId === null || lockedBy !== null) return;
     if (value.text === '' && value.ticked.length === 0) return;
 
     const id = setTimeout(() => {
@@ -232,13 +243,23 @@ export function WritingTaskSolver({
       );
     }, AUTOSAVE_QUIET_MS);
     return () => clearTimeout(id);
-  }, [value, autosaveOn, phase, attemptId, saveDraftMutate]);
+  }, [value, autosaveOn, phase, attemptId, saveDraftMutate, lockedBy]);
 
   if (!unusable && (start.isPending || (start.isSuccess && projection === null))) {
     return <LearningSkeleton variant="list" rows={4} />;
   }
   if (unusable || start.isError || projection === null || attemptId === null) {
     return <ErrorState onRetry={retry} />;
+  }
+
+  if (lockedBy !== null && phase === 'draft') {
+    return (
+      <SchoolTaskLocked
+        line={instruction === undefined || instruction === '' ? projection.instruction : instruction}
+        draft={value.text}
+        status={lockedBy}
+      />
+    );
   }
 
   const gate = submitGate(projection, value.text);
@@ -266,8 +287,13 @@ export function WritingTaskSolver({
           // anything else would put a verdict on the reader's card that no one gave.
           onChecked?.(null);
         },
-        onError: async () => {
+        onError: async (error) => {
           if (attemptId === null) return;
+          if (error instanceof AttemptRequestError && error.code === 'SCHOOL_NOT_ACTIVE') {
+            // Retrying will not help until the school is open again: lock instead of «try again».
+            setLockedBy(recentSchoolRefusal() ?? 'suspended');
+            return;
+          }
           setConfirmingDelivery(true);
           const resolution = await resolveSubmitFailure(exerciseId, attemptId);
           setConfirmingDelivery(false);
@@ -447,7 +473,7 @@ export function WritingTaskSolver({
  * shape that is not this one must cost the restore, not the render. A missing `ticked`
  * is normal — every task with `showPlan: false` submits without one.
  */
-function readSubmitted(raw: unknown): WritingTaskValue | null {
+export function readSubmitted(raw: unknown): WritingTaskValue | null {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return null;
 
   const { text, ticked } = raw as { text?: unknown; ticked?: unknown };

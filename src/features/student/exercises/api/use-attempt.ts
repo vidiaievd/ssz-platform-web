@@ -141,6 +141,23 @@ export async function fetchResumable(exerciseId: string): Promise<boolean> {
 }
 
 /**
+ * The draft saved on this learner's open attempt, or `null` (none, or the lookup failed).
+ *
+ * Read without starting anything (plan 90, live check block 12): the reader uses it where a
+ * school that stopped refuses new attempts, to show a draft begun before that read only.
+ */
+export async function fetchOpenDraft(exerciseId: string): Promise<unknown | null> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as LastAttemptResponse;
+    return data.openDraft ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Handed-in free-form work as the learner should read it (plan 79, steps 2.1d and 2.3c2):
  * closed by the auto-check (`passed`), waiting for a teacher (`review`), being read by a
  * model (`ai` — seconds, not days), or with nobody to read it (`unread` — no school, no AI
