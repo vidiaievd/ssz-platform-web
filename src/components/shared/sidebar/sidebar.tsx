@@ -20,6 +20,7 @@ type SidebarProps = {
 
 export function Sidebar({ sections, schoolType, header }: SidebarProps) {
   const t = useTranslations("Common");
+  const tNav = useTranslations("Nav");
   const collapsed = useUiStore((s) => s.sidebarCollapsed);
   const toggleSidebar = useUiStore((s) => s.toggleSidebar);
 
@@ -69,13 +70,13 @@ export function Sidebar({ sections, schoolType, header }: SidebarProps) {
           {schoolType && !collapsed && (
             <div className="px-2 py-1">
               <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium bg-primary/10 text-primary">
-                {schoolType === 'hybrid' ? 'Hybrid' : 'Online only'}
+                {tNav(schoolType === 'hybrid' ? 'schoolType.hybrid' : 'schoolType.online')}
               </span>
             </div>
           )}
           <button
             onClick={toggleSidebar}
-            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            aria-label={tNav(collapsed ? 'expandSidebar' : 'collapseSidebar')}
             className={cn(
               "flex w-full items-center rounded-md px-2 py-2 text-sm text-(--ssz-text-secondary)",
               "hover:bg-accent hover:text-accent-foreground transition-colors",
@@ -88,7 +89,7 @@ export function Sidebar({ sections, schoolType, header }: SidebarProps) {
             ) : (
               <>
                 <ChevronLeft className="size-4 mr-2" />
-                <span className="text-xs">Collapse</span>
+                <span className="text-xs">{tNav('collapse')}</span>
               </>
             )}
           </button>

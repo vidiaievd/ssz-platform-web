@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Pen, Mic, ClipboardList } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -23,23 +24,24 @@ type TeacherQueueCardProps = {
 };
 
 export function TeacherQueueCard({ items, loading }: TeacherQueueCardProps) {
+  const t = useTranslations('School.dashboard.teacherQueue');
   return (
     <WidgetCard
-      title="Grade queue"
-      subtitle="Submissions awaiting your review"
+      title={t('title')}
+      subtitle={t('subtitle')}
       loading={loading}
       empty={
         !loading && items.length === 0 ? (
           <WidgetEmptyState
             icon={ClipboardList}
-            title="Nothing to grade yet"
-            body="New student submissions will appear here."
+            title={t('emptyTitle')}
+            body={t('emptyBody')}
           />
         ) : undefined
       }
     >
       {items.length > 0 && (
-        <ul role="list" aria-label="Grade queue" className="divide-y divide-border -mx-4 -mb-4">
+        <ul role="list" aria-label={t('title')} className="divide-y divide-border -mx-4 -mb-4">
           {items.map((item) => {
             const Icon = KIND_ICON[item.kind];
             return (
@@ -56,7 +58,7 @@ export function TeacherQueueCard({ items, loading }: TeacherQueueCardProps) {
                     {item.what} · {item.age}
                   </p>
                 </div>
-                <Icon className="size-4 shrink-0 text-(--ssz-text-muted)" aria-label={item.kind === 'pen' ? 'writing submission' : 'speaking submission'} />
+                <Icon className="size-4 shrink-0 text-(--ssz-text-muted)" aria-label={item.kind === 'pen' ? t('writing') : t('speaking')} />
               </li>
             );
           })}

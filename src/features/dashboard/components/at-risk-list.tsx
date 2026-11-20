@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { Users } from 'lucide-react';
 
 import { WidgetCard } from './widget-card';
@@ -11,20 +12,19 @@ type AtRiskListProps = {
   schoolId: string;
 };
 
-function formatLastSeen(iso: string): string {
-  try {
-    const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
-    if (days === 0) return 'today';
-    if (days === 1) return '1 day ago';
-    return `${days} days ago`;
-  } catch {
-    return 'unknown';
-  }
+function formatLastSeen(
+  iso: string,
+  t: ReturnType<typeof useTranslations<'School.dashboard.atRisk'>>,
+): string {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  if (Number.isNaN(days)) return t('never');
+  return days <= 0 ? t('today') : t('daysAgo', { count: days });
 }
 
 export function AtRiskList({ atRisk, workspaceId, schoolId }: AtRiskListProps) {
+  const t = useTranslations('School.dashboard.atRisk');
   if (atRisk.status === 'unavailable') {
-    return <WidgetCard title="At-risk students" loading />;
+    return <WidgetCard title={t('title')} unavailable />;
   }
 
   const { students, total } = atRisk.status === 'ok'
@@ -37,19 +37,19 @@ export function AtRiskList({ atRisk, workspaceId, schoolId }: AtRiskListProps) {
 
   return (
     <WidgetCard
-      title="At-risk students"
-      subtitle={`Inactive 7+ days${total > students.length ? ` · ${total} total` : ''}`}
+      title={t('title')}
+      subtitle={total > students.length ? t('subtitleTotal', { total }) : t('subtitle')}
       headerRight={total > 0 ? footerRight : undefined}
       empty={
         students.length === 0 ? (
-          <WidgetEmptyState icon={Users} title="No at-risk students" body="All students are active — great work!" />
+          <WidgetEmptyState icon={Users} title={t('emptyTitle')} body={t('emptyBody')} />
         ) : undefined
       }
     >
       {students.length > 0 && (
         <ul
           role="list"
-          aria-label="At-risk students"
+          aria-label={t('title')}
           className="divide-y divide-border -mx-4 -mb-4"
         >
           {students.map((student) => {
@@ -65,14 +65,14 @@ export function AtRiskList({ atRisk, workspaceId, schoolId }: AtRiskListProps) {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-(--ssz-text-primary) truncate">{student.name}</p>
                   <p className="font-mono text-[11px] text-(--ssz-text-muted) truncate">
-                    {student.course} · {student.lastSeen ? formatLastSeen(student.lastSeen) : 'never active'}
+                    {student.course} · {student.lastSeen ? formatLastSeen(student.lastSeen, t) : t('never')}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="font-mono text-sm text-(--ssz-text-muted)">{pct}%</span>
                   <span
                     className="inline-flex items-center justify-center rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-bold text-neutral-600 uppercase"
-                    aria-label={`language: ${student.lang}`}
+                    aria-label={t('language', { lang: student.lang })}
                   >
                     {student.lang}
                   </span>

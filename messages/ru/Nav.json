@@ -47,5 +47,12 @@
     "schools": "Школы"
   },
   "myWords": "Мои слова",
-  "pronunciation": "Произношение"
+  "pronunciation": "Произношение",
+  "schoolType": {
+    "online": "Только онлайн",
+    "hybrid": "Смешанная"
+  },
+  "collapse": "Свернуть",
+  "collapseSidebar": "Свернуть боковую панель",
+  "expandSidebar": "Развернуть боковую панель"
 }

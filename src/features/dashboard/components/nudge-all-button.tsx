@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 import { useOptimistic, useState, useTransition } from 'react';
 import { CheckCircle2, Send } from 'lucide-react';
 import { toast } from 'sonner';
@@ -14,6 +16,7 @@ type NudgeAllButtonProps = {
 };
 
 export function NudgeAllButton({ count, workspaceId, schoolId }: NudgeAllButtonProps) {
+  const t = useTranslations('School.dashboard.atRisk');
   const [isPending, startTransition] = useTransition();
   const [nudged, setOptimisticNudged] = useOptimistic(false);
   const [done, setDone] = useState(false);
@@ -25,10 +28,10 @@ export function NudgeAllButton({ count, workspaceId, schoolId }: NudgeAllButtonP
       const result = await nudgeAtRiskStudents(workspaceId, schoolId);
       if (result.success) {
         setDone(true);
-        toast.success(`Nudged ${result.nudged} students`);
+        toast.success(t('nudged', { count: result.nudged }));
       } else {
         setOptimisticNudged(false);
-        toast.error('Failed to send reminders. Please try again.');
+        toast.error(t('nudgeFailed'));
       }
     });
   }
@@ -41,7 +44,7 @@ export function NudgeAllButton({ count, workspaceId, schoolId }: NudgeAllButtonP
         aria-atomic="true"
       >
         <CheckCircle2 className="size-4" />
-        Sent ✓
+        {t('sent')}
       </span>
     );
   }
@@ -55,7 +58,7 @@ export function NudgeAllButton({ count, workspaceId, schoolId }: NudgeAllButtonP
       aria-busy={isPending}
     >
       <Send className="size-3.5 mr-1.5" aria-hidden="true" />
-      Nudge all {count}
+      {t('nudgeAll', { count })}
     </Button>
   );
 }

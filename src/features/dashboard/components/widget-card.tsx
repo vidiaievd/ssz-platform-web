@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert } from '@/components/ui/alert';
+import { useTranslations } from 'next-intl';
 
 type WidgetCardProps = {
   title: string;
@@ -12,6 +13,11 @@ type WidgetCardProps = {
   accent?: boolean;
   /** Render skeleton shimmer instead of children. */
   loading?: boolean;
+  /**
+   * The data could not be fetched (the service is down or does not serve it yet): says so
+   * instead of a skeleton that never ends.
+   */
+  unavailable?: boolean;
   /** Render per-widget error state. Mutually exclusive with loading. */
   error?: string;
   /** Render empty state slot. Used when data exists but is empty. */
@@ -26,11 +32,13 @@ export function WidgetCard({
   headerRight,
   accent,
   loading,
+  unavailable,
   error,
   empty,
   children,
   className,
 }: WidgetCardProps) {
+  const t = useTranslations('School.dashboard');
   return (
     <div
       className={cn(
@@ -60,6 +68,8 @@ export function WidgetCard({
             <Skeleton className="h-4 w-1/2" />
             <Skeleton className="h-4 w-2/3" />
           </div>
+        ) : unavailable ? (
+          <p className="text-sm text-(--ssz-text-muted)">{t('unavailable')}</p>
         ) : error ? (
           <Alert variant="error" icon={<AlertCircle className="size-4" />} title={error} />
         ) : empty ? (

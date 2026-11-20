@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import type { TeacherLoad } from '@/features/dashboard/types';
 
@@ -12,6 +13,7 @@ function barColor(pct: number): string {
 }
 
 export function TeacherWorkloadBar({ teacher }: TeacherWorkloadBarProps) {
+  const t = useTranslations('Common.operations');
   const { name, hours, max, pct, overloaded, groups, langs, conflicts } = teacher;
   const fill = Math.min(pct, 100);
 
@@ -33,13 +35,13 @@ export function TeacherWorkloadBar({ teacher }: TeacherWorkloadBarProps) {
         </div>
 
         <div className="hidden sm:block text-xs text-(--ssz-text-muted) mb-1.5 truncate">
-          {groups} {groups === 1 ? 'group' : 'groups'}
+          {t('groups', { count: groups })}
           {langs && langs.length > 0 ? ` · ${langs.join(', ')}` : ''}
         </div>
 
         <div
           role="progressbar"
-          aria-label={`${name}: ${hours.toFixed(1)} of ${max} contracted hours${overloaded ? ', overloaded' : ''}`}
+          aria-label={t(overloaded ? 'hoursOver' : 'hours', { name, hours: hours.toFixed(1), max })}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}

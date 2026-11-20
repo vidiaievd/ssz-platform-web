@@ -1,4 +1,16 @@
 {
   "appName": "SSZ Learn",
-  "loading": "Loading…"
+  "loading": "Loading…",
+  "operations": {
+    "alerts": {
+      "no-primary": "No teacher",
+      "conflict": "Time clash",
+      "overload": "Overloaded",
+      "over": "Over cap",
+      "under": "Under min"
+    },
+    "groups": "{count, plural, one {# group} other {# groups}}",
+    "hours": "{name}: {hours} of {max} contracted hours",
+    "hoursOver": "{name}: {hours} of {max} contracted hours, overloaded"
+  }
 }

@@ -78,6 +78,8 @@ export interface Kpi {
   delta?: string;
   trend?: Trend;
   hint?: string;
+  /** The numbers inside `hint` (analytics), to word it in the reader's language. */
+  hintValues?: Record<string, number>;
   spark?: number[];
   sub?: string;
   locked?: boolean;
@@ -85,8 +87,11 @@ export interface Kpi {
 
 export interface ActivityItem {
   id: string;
-  who: string;
+  /** null = the actor's name is not known; the feed says "someone" in the reader's language. */
+  who: string | null;
+  /** The stored English verb; worded anew from `eventType` when that is known. */
   what: string;
+  eventType?: string;
   target: string;
   time: string; // ISO — formatted client-side
   iconKey: 'check' | 'user' | 'flag' | 'star' | 'book';

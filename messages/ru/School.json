@@ -17,6 +17,194 @@
         "assignTeacherGroup": "Назначьте преподавателя группе",
         "inviteStudents": "Добавьте первых учеников"
       }
+    },
+    "unavailable": "Данные временно недоступны.",
+    "loadingTitle": {
+      "groups": "Группы",
+      "groupGaps": "Пройдено против усвоенного",
+      "activity": "Последняя активность",
+      "courseHealth": "Состояние курсов",
+      "atRisk": "Ученики в зоне риска",
+      "todaysClasses": "Занятия сегодня",
+      "teacherWorkload": "Нагрузка преподавателей",
+      "reviewQueue": "Требует вашей проверки"
+    },
+    "kpis": {
+      "label": "Ключевые показатели",
+      "ownerOnly": "Показатель только для владельца",
+      "ownerBadge": "Владелец",
+      "trend": "Тренд: {delta}",
+      "spark": "Тренд за 7 дней",
+      "labels": {
+        "active_groups": "Активные группы",
+        "active_students_7d": "Активные ученики · 7 д",
+        "avg_teacher_load": "Ср. нагрузка",
+        "scheduling_conflicts": "Конфликты расписания",
+        "my_groups": "Мои группы",
+        "my_students": "Мои ученики",
+        "lessons_per_week": "Занятий · нед",
+        "my_load": "Моя нагрузка",
+        "lessons_completed_7d": "Уроков пройдено · 7 д",
+        "pending_reviews": "Ждут проверки",
+        "at_risk": "Ученики в зоне риска"
+      },
+      "hints": {
+        "active_students_7d": "из {enrolled} зачисленных",
+        "lessons_completed_7d": "в {courses, plural, one {# курсе} other {# курсах}}",
+        "at_risk": "не заходили {days}+ дней"
+      }
+    },
+    "operations": {
+      "conflicts": "{count, plural, one {# конфликт расписания} few {# конфликта расписания} many {# конфликтов расписания} other {# конфликта расписания}}",
+      "noTeacher": "{count, plural, one {# группа} few {# группы} many {# групп} other {# группы}} без преподавателя",
+      "both": "{first} и {second}",
+      "body": "<b>{problems}</b> мешают безопасно проводить занятия.",
+      "timetable": "Расписание преподавателей",
+      "reviewGroups": "Посмотреть группы"
+    },
+    "groups": {
+      "title": "Группы",
+      "myTitle": "Мои группы",
+      "titleCounts": "Группы · активных {active} · требуют внимания {attention}",
+      "empty": "Групп пока нет",
+      "newGroup": "Новая группа",
+      "all": "Все группы →",
+      "allHealthy": "Все {count} группы с преподавателем, расписанием и свободными местами.",
+      "summary": "в порядке {healthy} · требуют внимания {attention}",
+      "resolve": "Разобраться в «Группах» →",
+      "students": "{count}/{max} учеников",
+      "teacherStudents": "{teacher} · {count}/{max} учеников"
+    },
+    "workload": {
+      "title": "Нагрузка преподавателей",
+      "empty": "Назначений пока нет",
+      "over": "перегружено {count} · ср. {pct}%",
+      "avg": "ср. {pct}%",
+      "timetable": "Расписание",
+      "conflicts": "{count, plural, one {# накладка} few {# накладки} many {# накладок} other {# накладки}} на этой неделе",
+      "open": "Открыть расписание →"
+    },
+    "activity": {
+      "title": "Последняя активность",
+      "emptyTitle": "Пока ничего не произошло",
+      "emptyBody": "Здесь появится активность, когда школа будет расти.",
+      "filtersLabel": "Фильтр активности",
+      "feedLabel": "Лента активности",
+      "noneFiltered": "Такой активности пока нет.",
+      "someone": "Кто-то",
+      "filters": {
+        "all": "Всё",
+        "people": "Люди",
+        "content": "Контент",
+        "review": "Проверка"
+      },
+      "time": {
+        "justNow": "только что",
+        "minutes": "{count} мин назад",
+        "hours": "{count} ч назад",
+        "days": "{count} д назад"
+      },
+      "what": {
+        "joined": "присоединился как {role}",
+        "published": "опубликовал",
+        "enrolled": "записался на",
+        "submitted": "сдал на проверку",
+        "reviewed": "проверил работу — {outcome}"
+      },
+      "roles": {
+        "owner": "владелец",
+        "admin": "администратор",
+        "teacher": "преподаватель",
+        "student": "ученик",
+        "content_admin": "администратор контента",
+        "observer": "наблюдатель",
+        "trial": "пробный ученик"
+      },
+      "outcomes": {
+        "passed": "зачтено",
+        "failed": "не зачтено",
+        "returned": "возвращено",
+        "accepted": "принято",
+        "rejected": "отклонено",
+        "approved": "одобрено"
+      }
+    },
+    "courseHealth": {
+      "title": "Состояние курсов",
+      "subtitle": "По числу записанных",
+      "emptyTitle": "Курсов пока нет",
+      "emptyBody": "Создайте первый курс, чтобы видеть его показатели.",
+      "completion": "{name}: пройдено {pct}%",
+      "up": "растёт",
+      "down": "падает",
+      "flat": "без изменений",
+      "dropoff": "ученики отваливаются",
+      "line": "{pct}% · {count, plural, one {# ученик} few {# ученика} many {# учеников} other {# ученика}}"
+    },
+    "atRisk": {
+      "title": "Ученики в зоне риска",
+      "subtitle": "Неактивны 7+ дней",
+      "subtitleTotal": "Неактивны 7+ дней · всего {total}",
+      "emptyTitle": "Учеников в зоне риска нет",
+      "emptyBody": "Все ученики активны — отличная работа!",
+      "today": "сегодня",
+      "daysAgo": "{count, plural, one {# день назад} few {# дня назад} many {# дней назад} other {# дня назад}}",
+      "never": "ещё не занимался",
+      "language": "язык: {lang}",
+      "nudgeAll": "Напомнить всем ({count})",
+      "sent": "Отправлено ✓",
+      "nudged": "{count, plural, one {Напомнили # ученику} other {Напомнили # ученикам}}",
+      "nudgeFailed": "Не удалось отправить напоминания. Попробуйте ещё раз."
+    },
+    "classes": {
+      "title": "Занятия сегодня",
+      "mine": "Мои занятия",
+      "emptyTitle": "Сегодня занятий нет",
+      "emptyBody": "На сегодня расписание свободно.",
+      "online": "Онлайн",
+      "now": "сейчас",
+      "low": "мало",
+      "underEnrolled": "мало учеников"
+    },
+    "quick": {
+      "title": "Быстрые действия",
+      "actions": {
+        "new-course": "Новый курс",
+        "new-group": "Новая группа",
+        "invite-teacher": "Пригласить преподавателя",
+        "enroll-student": "Зачислить ученика",
+        "import-csv": "Импорт CSV",
+        "edit-branding": "Профиль школы",
+        "teacher-timetable": "Расписание преподавателей",
+        "monthly-report": "Отчёт за месяц",
+        "new-lesson": "Новый урок",
+        "my-groups": "Мои группы",
+        "my-timetable": "Моё расписание",
+        "schedule-class": "Запланировать занятие",
+        "grade-queue": "Очередь проверки",
+        "message-class": "Написать группе"
+      }
+    },
+    "review": {
+      "title": "Требует вашей проверки",
+      "subtitle": "Для публикации нужно одобрение владельца",
+      "emptyTitle": "Всё проверено!",
+      "emptyBody": "Ни один материал не ждёт вашей проверки.",
+      "by": "{author} · {age}"
+    },
+    "teacherQueue": {
+      "title": "Очередь проверки",
+      "subtitle": "Работы, ждущие вашей проверки",
+      "emptyTitle": "Пока нечего проверять",
+      "emptyBody": "Здесь появятся новые работы учеников.",
+      "writing": "письменная работа",
+      "speaking": "устная работа"
+    },
+    "tips": {
+      "ownerFull": "Закрепите самые нужные ярлыки в боковой панели, чтобы быстрее переходить.",
+      "ownerPartial": "Часть преподавателей ещё не приняла приглашения. Напомните им.",
+      "admin": "Настройте автоодобрение типовых материалов, чтобы ускорить очередь проверки.",
+      "teacher": "Оценивайте несколько работ сразу, чтобы сэкономить время."
     }
   },
   "common": {

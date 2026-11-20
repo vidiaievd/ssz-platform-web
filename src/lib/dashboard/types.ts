@@ -9,6 +9,8 @@ export type Kpi = {
   delta?: string | null;
   trend?: KpiTrend | null;
   hint?: string;
+  /** The numbers inside `hint` (analytics, live check of plan 90): enrolled / courses / days. */
+  hintValues?: Record<string, number>;
   spark?: number[];
   sub?: string;
 };
@@ -53,6 +55,8 @@ export type ActivityItem = {
   target?: string | null;
   occurredAt: string;
   tag: 'people' | 'content' | 'review' | 'milestone';
+  /** The event behind the row; absent from an older analytics image. */
+  eventType?: string;
 };
 
 export type ActivityPayload = {

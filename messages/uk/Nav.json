@@ -47,5 +47,12 @@
     "schools": "Школи"
   },
   "myWords": "Мої слова",
-  "pronunciation": "Вимова"
+  "pronunciation": "Вимова",
+  "schoolType": {
+    "online": "Лише онлайн",
+    "hybrid": "Змішана"
+  },
+  "collapse": "Згорнути",
+  "collapseSidebar": "Згорнути бокову панель",
+  "expandSidebar": "Розгорнути бокову панель"
 }

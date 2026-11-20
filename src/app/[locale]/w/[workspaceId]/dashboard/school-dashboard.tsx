@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { Suspense } from 'react';
+import { getTranslations } from 'next-intl/server';
 
 import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
 import { deriveViewerRole, deriveSchoolType, deriveDataState, computeOnboarding } from '@/features/dashboard/lib/derive';
@@ -71,6 +72,7 @@ function adaptKpis(result: WidgetResult<KpisPayload>): WidgetData<Kpi[]> {
     delta: k.delta ?? undefined,
     trend: k.trend ?? undefined,
     hint: k.hint,
+    hintValues: k.hintValues,
     spark: k.spark,
     sub: k.sub,
   }));
@@ -115,8 +117,9 @@ function adaptActivity(result: WidgetResult<ActivityPayload>): WidgetData<Activi
   if (!payload.items || payload.items.length === 0) return { status: 'empty' };
   const items: ActivityItem[] = payload.items.map((item) => ({
     id: item.id,
-    who: item.who ?? 'Someone',
+    who: item.who ?? null,
     what: item.what,
+    eventType: item.eventType,
     target: item.target ?? '',
     time: item.occurredAt,
     iconKey: tagToIconKey(item.tag),
@@ -287,6 +290,7 @@ export async function SchoolDashboard({ params }: Props) {
   });
 
   const ctx = { role, dataState, schoolType };
+  const tLoading = await getTranslations('School.dashboard.loadingTitle');
   const schoolSlugDisplay = school.slug ?? school.id;
   // Suspended or closed: no setup checklist and no "create / invite" shortcuts (plan 90, block 9).
   const writable = await isWorkspaceWritable(workspaceId);
@@ -337,7 +341,7 @@ export async function SchoolDashboard({ params }: Props) {
 
           {/* Groups widget — leads the left column (v3) */}
           {canSeeWidget('groupsWidget', ctx) && (
-            <Suspense fallback={<WidgetCard title="Groups" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('groups')} loading />}>
               <GroupsWidget
                 groupsHealth={groupsHealthWidget}
                 role={role}
@@ -348,28 +352,28 @@ export async function SchoolDashboard({ params }: Props) {
 
           {/* Taught against taken away (plan 58, screen D) */}
           {canSeeWidget('groupGaps', ctx) && (
-            <Suspense fallback={<WidgetCard title="Taught against taken away" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('groupGaps')} loading />}>
               <DeliveredAbsorbedRow gaps={groupGapsWidget} workspaceId={schoolSlugDisplay} />
             </Suspense>
           )}
 
           {/* Activity feed */}
           {canSeeWidget('activity', ctx) && (
-            <Suspense fallback={<WidgetCard title="Recent activity" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('activity')} loading />}>
               <ActivityFeed activity={activityWidget} />
             </Suspense>
           )}
 
           {/* Course health — owner/admin, full state */}
           {canSeeWidget('courseHealth', ctx) && (
-            <Suspense fallback={<WidgetCard title="Course health" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('courseHealth')} loading />}>
               <CourseHealth courseHealth={courseHealthWidget} />
             </Suspense>
           )}
 
           {/* At-risk students — owner/admin, non-empty */}
           {canSeeWidget('atRisk', ctx) && (
-            <Suspense fallback={<WidgetCard title="At-risk students" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('atRisk')} loading />}>
               <AtRiskList
                 atRisk={atRiskWidget}
                 workspaceId={schoolSlugDisplay}
@@ -380,7 +384,7 @@ export async function SchoolDashboard({ params }: Props) {
 
           {/* Today's classes — hybrid only */}
           {canSeeWidget('todaysClasses', ctx) && (
-            <Suspense fallback={<WidgetCard title="Today's classes" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('todaysClasses')} loading />}>
               <TodaysClassesCard
                 todaysClasses={{ status: 'unavailable' }}
                 teacherView={role === 'teacher'}
@@ -394,7 +398,7 @@ export async function SchoolDashboard({ params }: Props) {
 
           {/* Teacher workload — leads the right column (v3) */}
           {canSeeWidget('teacherWorkload', ctx) && (
-            <Suspense fallback={<WidgetCard title="Teacher workload" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('teacherWorkload')} loading />}>
               <TeacherWorkloadWidget
                 teacherWorkload={teacherWorkloadWidget}
                 workspaceId={schoolSlugDisplay}
@@ -407,7 +411,7 @@ export async function SchoolDashboard({ params }: Props) {
 
           {/* Review queue — owner, full state */}
           {canSeeWidget('reviewQueue', ctx) && (
-            <Suspense fallback={<WidgetCard title="Needs your review" loading />}>
+            <Suspense fallback={<WidgetCard title={tLoading('reviewQueue')} loading />}>
               <ReviewQueueCard reviewQueue={{ status: 'unavailable' }} />
             </Suspense>
           )}

@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { AlertCircle, Clock, TrendingUp, Users } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -11,20 +12,13 @@ const ICON_MAP: Record<AlertType, React.ReactNode> = {
   'under':      <AlertCircle className="size-3" aria-hidden="true" />,
 };
 
-const SHORT_LABEL: Record<AlertType, string> = {
-  'no-primary': 'No teacher',
-  'conflict':   'Time clash',
-  'overload':   'Overloaded',
-  'over':       'Over cap',
-  'under':      'Under min',
-};
-
 type AlertChipProps = {
   alert: Alert;
   className?: string;
 };
 
 export function AlertChip({ alert, className }: AlertChipProps) {
+  const t = useTranslations('Common.operations.alerts');
   const isDanger = alert.severity === 'danger';
 
   return (
@@ -39,7 +33,7 @@ export function AlertChip({ alert, className }: AlertChipProps) {
       )}
     >
       {ICON_MAP[alert.type]}
-      <span>{SHORT_LABEL[alert.type]}</span>
+      <span>{t(alert.type)}</span>
     </span>
   );
 }

@@ -47,5 +47,12 @@
     "schools": "Skoler"
   },
   "myWords": "Mine ord",
-  "pronunciation": "Uttale"
+  "pronunciation": "Uttale",
+  "schoolType": {
+    "online": "Kun nett",
+    "hybrid": "Hybrid"
+  },
+  "collapse": "Skjul",
+  "collapseSidebar": "Skjul sidepanelet",
+  "expandSidebar": "Vis sidepanelet"
 }

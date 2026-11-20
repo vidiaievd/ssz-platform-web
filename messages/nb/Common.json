@@ -1,4 +1,16 @@
 {
   "appName": "SSZ Learn",
-  "loading": "Laster…"
+  "loading": "Laster…",
+  "operations": {
+    "alerts": {
+      "no-primary": "Ingen lærer",
+      "conflict": "Tidskollisjon",
+      "overload": "Overbelastet",
+      "over": "Over grensen",
+      "under": "Under minimum"
+    },
+    "groups": "{count, plural, one {# gruppe} other {# grupper}}",
+    "hours": "{name}: {hours} av {max} avtalte timer",
+    "hoursOver": "{name}: {hours} av {max} avtalte timer, overbelastet"
+  }
 }
