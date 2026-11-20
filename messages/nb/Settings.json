@@ -8,7 +8,8 @@
     "precheck": "Sjekk før innlevering",
     "progress": "Hva elevene ser",
     "recipe": "Timeoppskrift",
-    "new": "Ny"
+    "new": "Ny",
+    "danger": "Faresone"
   },
   "progress": {
     "eyebrow": "Skole",
@@ -232,5 +233,22 @@
       "modeOwn": "{count, plural, one {Egen oppskrift · # regel} other {Egen oppskrift · # regler}}",
       "modeNone": "Ingen oppskrift"
     }
+  },
+  "danger": {
+    "eyebrow": "Skole",
+    "title": "Faresone",
+    "heading": "Slett skolen",
+    "body": "Skolen havner i arkivet: elever og lærere mister tilgangen med en gang, og om {days} dager ({date}) slettes dataene. Frem til da kan bare plattformstøtten hente den tilbake.",
+    "open": "Slett skolen",
+    "dialogTitle": "Slette «{name}»?",
+    "dialogBody": "Skolen havner i arkivet, og elever og lærere mister tilgangen med en gang. Om {days} dager ({date}) slettes dataene. Frem til da kan bare plattformstøtten hente den tilbake.",
+    "typeName": "Skriv inn skolens navn for å bekrefte: {name}",
+    "typeNameLabel": "Skolens navn",
+    "cancel": "Avbryt",
+    "confirm": "Slett for godt",
+    "done": "Skolen er lagt i arkivet.",
+    "failed": "Skolen kunne ikke slettes.",
+    "alreadyArchived": "Skolen er ikke aktiv – ingen endringer er mulig.",
+    "notActive": "Skolen er allerede arkivert eller sperret."
   }
 }

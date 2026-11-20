@@ -8,7 +8,8 @@
     "precheck": "Check before hand-in",
     "progress": "What students see",
     "recipe": "Lesson recipe",
-    "new": "New"
+    "new": "New",
+    "danger": "Danger zone"
   },
   "progress": {
     "eyebrow": "School",
@@ -232,5 +233,22 @@
       "modeOwn": "{count, plural, one {Own recipe · # rule} other {Own recipe · # rules}}",
       "modeNone": "No recipe"
     }
+  },
+  "danger": {
+    "eyebrow": "School",
+    "title": "Danger zone",
+    "heading": "Delete school",
+    "body": "The school goes to the archive: students and teachers lose access at once, and in {days} days ({date}) its data is deleted. Until then only platform support can bring it back.",
+    "open": "Delete school",
+    "dialogTitle": "Delete “{name}”?",
+    "dialogBody": "The school goes to the archive and students and teachers lose access at once. In {days} days ({date}) its data is deleted. Until then only platform support can bring it back.",
+    "typeName": "To confirm, type the school name: {name}",
+    "typeNameLabel": "School name",
+    "cancel": "Cancel",
+    "confirm": "Delete for good",
+    "done": "The school has been archived.",
+    "failed": "The school could not be deleted.",
+    "alreadyArchived": "The school is not active — no changes can be made.",
+    "notActive": "The school is already archived or suspended."
   }
 }

@@ -10,7 +10,8 @@ export type SettingsPage =
   | 'assistant'
   | 'precheck'
   | 'progress'
-  | 'recipe';
+  | 'recipe'
+  | 'danger';
 
 const WORKSPACE_PAGES: readonly SettingsPage[] = [
   'profile',
@@ -33,6 +34,9 @@ const WORKSPACE_PAGES: readonly SettingsPage[] = [
  * `ai.student_assist`: without it the school pays for nobody whatever is saved, so there is
  * nothing to choose. organization-service refuses the save without the key anyway.
  *
+ * The danger zone (plan 90, block 9, step 5) is the owner's, and a school's: a SOLO workspace
+ * is never deleted by its tutor (`SOLO_WORKSPACE_NOT_DELETABLE`); only an administrator closes it.
+ *
  * The check-before-hand-in page (plan 84, step 9) follows the same rule for `ai.practice`.
  */
 export function settingsPagesFor(
@@ -54,7 +58,8 @@ export function settingsPagesFor(
           ]
         : [page],
     );
-    return [...pages, ...recipe];
+    const danger: SettingsPage[] = role === 'OWNER' && kind === 'SCHOOL' ? ['danger'] : [];
+    return [...pages, ...recipe, ...danger];
   }
   if (role === 'CONTENT_ADMIN') return recipe;
   return [];
