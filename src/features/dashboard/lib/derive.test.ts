@@ -117,6 +117,18 @@ describe('computeOnboarding', () => {
     expect(result.minutesLeft).toBe(22); // 5+5+5+2+2+3
   });
 
+  it('points every item at a real workspace screen, never a dead hash link', () => {
+    const items = computeOnboarding(baseInput).items;
+    expect(items.map((i) => [i.labelKey, i.href])).toEqual([
+      ['fillBranding', null],
+      ['createCourse', 'content/new'],
+      ['createGroupSchedule', 'groups/new'],
+      ['inviteTeacher', 'teachers'],
+      ['assignTeacherGroup', 'groups'],
+      ['inviteStudents', 'students'],
+    ]);
+  });
+
   it('marks create-course done when coursesCount > 0', () => {
     const result = computeOnboarding({ ...baseInput, coursesCount: 1 });
     const item = result.items.find((i) => i.key === 'create-course');

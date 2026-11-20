@@ -133,12 +133,23 @@ export interface TodaysClass {
   status: 'now' | 'upcoming' | 'low';
 }
 
+export type OnboardingItemLabel =
+  | 'fillBranding'
+  | 'createCourse'
+  | 'createGroupSchedule'
+  | 'inviteTeacher'
+  | 'assignTeacherGroup'
+  | 'inviteStudents';
+
 export interface OnboardingItem {
   key: string;
   done: boolean;
-  labelKey: string;
-  est: string;
-  href: string;
+  /** Key under `School.dashboard.onboarding.items`. */
+  labelKey: OnboardingItemLabel;
+  /** Estimated minutes to do it. */
+  estMinutes: number;
+  /** Workspace-relative path (`wsHref`), or null when no screen does it yet. */
+  href: string | null;
 }
 
 export interface OnboardingState {

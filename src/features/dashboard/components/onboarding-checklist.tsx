@@ -2,9 +2,11 @@
 
 import { useState } from 'react';
 import { CheckCircle2, Circle, X } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
+import { Link } from '@/lib/i18n/navigation';
 import { cn } from '@/lib/utils';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { Button } from '@/components/ui/button';
 import { ProgressBar } from '@/components/ui/progress';
 import { WidgetCard } from './widget-card';
@@ -12,18 +14,12 @@ import type { OnboardingState } from '../types';
 
 type OnboardingChecklistProps = {
   onboarding: OnboardingState;
+  /** The workspace segment of the current URL (id or slug); item links hang off it. */
+  workspaceId: string;
 };
 
-const ITEM_LABELS: Record<string, string> = {
-  'fill-branding':         'Upload your school logo',
-  'create-course':         'Create your first course',
-  'create-group-schedule': 'Create a group & set its schedule',
-  'invite-teacher':        'Invite a teacher',
-  'assign-teacher-group':  'Assign a teacher to the group',
-  'invite-students':       'Add your first students',
-};
-
-export function OnboardingChecklist({ onboarding }: OnboardingChecklistProps) {
+export function OnboardingChecklist({ onboarding, workspaceId }: OnboardingChecklistProps) {
+  const t = useTranslations('School.dashboard.onboarding');
   const [dismissed, setDismissed] = useState(false);
 
   if (dismissed) return null;
@@ -33,14 +29,14 @@ export function OnboardingChecklist({ onboarding }: OnboardingChecklistProps) {
 
   return (
     <WidgetCard
-      title="Get your school running"
+      title={t('title')}
       accent
-      subtitle={`${completed} of ${total} complete · ~${minutesLeft} min left`}
+      subtitle={t('progress', { completed, total, minutes: minutesLeft })}
       headerRight={
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Hide onboarding checklist"
+          aria-label={t('hide')}
           className="size-7 -mr-1"
           onClick={() => setDismissed(true)}
         >
@@ -50,7 +46,7 @@ export function OnboardingChecklist({ onboarding }: OnboardingChecklistProps) {
     >
       <div
         role="progressbar"
-        aria-label="Onboarding progress"
+        aria-label={t('progressLabel')}
         aria-valuenow={percent}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -61,7 +57,7 @@ export function OnboardingChecklist({ onboarding }: OnboardingChecklistProps) {
 
       <ul className="space-y-2.5">
         {items.map((item) => {
-          const label = ITEM_LABELS[item.key] ?? item.key;
+          const label = t(`items.${item.labelKey}`);
           return (
             <li key={item.key} className="flex items-center gap-3">
               {item.done ? (
@@ -88,16 +84,16 @@ export function OnboardingChecklist({ onboarding }: OnboardingChecklistProps) {
                 </span>
                 {!item.done && (
                   <span className="font-mono text-[11px] text-(--ssz-text-muted) shrink-0">
-                    ~{item.est}
+                    {t('minutes', { minutes: item.estMinutes })}
                   </span>
                 )}
               </div>
-              {!item.done && (
+              {!item.done && item.href !== null && (
                 <Link
-                  href={item.href}
+                  href={wsHref(workspaceId, item.href)}
                   className="shrink-0 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
                 >
-                  Go →
+                  {t('go')}
                 </Link>
               )}
             </li>

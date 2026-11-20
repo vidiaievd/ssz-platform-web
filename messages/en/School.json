@@ -1,7 +1,23 @@
 {
   "dashboard": {
     "notFound": "School not found.",
-    "placeholder": "Full dashboard metrics coming soon."
+    "placeholder": "Full dashboard metrics coming soon.",
+    "onboarding": {
+      "title": "Get your school running",
+      "progress": "{completed} of {total} complete · ~{minutes} min left",
+      "minutes": "~{minutes} min",
+      "go": "Go →",
+      "hide": "Hide onboarding checklist",
+      "progressLabel": "Onboarding progress",
+      "items": {
+        "fillBranding": "Upload your school logo",
+        "createCourse": "Create your first course",
+        "createGroupSchedule": "Create a group & set its schedule",
+        "inviteTeacher": "Invite a teacher",
+        "assignTeacherGroup": "Assign a teacher to the group",
+        "inviteStudents": "Add your first students"
+      }
+    }
   },
   "common": {
     "close": "Close",

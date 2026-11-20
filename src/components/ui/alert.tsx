@@ -8,10 +8,11 @@ const alertVariants = cva(
   {
     variants: {
       variant: {
-        success: "bg-success-50 border-success-300 text-success-700",
-        warning: "bg-warning-50 border-warning-300 text-warning-700",
-        error:   "bg-error-50   border-error-300   text-error-700",
-        info:    "bg-info-50    border-info-300     text-info-700",
+        // Theme-aware aliases (globals.css): the scale tokens are tuned for light surfaces only.
+        success: "bg-[var(--ssz-alert-success-bg)] border-[var(--ssz-alert-success-border)] text-[var(--ssz-alert-success-fg)]",
+        warning: "bg-[var(--ssz-alert-warning-bg)] border-[var(--ssz-alert-warning-border)] text-[var(--ssz-alert-warning-fg)]",
+        error:   "bg-[var(--ssz-alert-error-bg)] border-[var(--ssz-alert-error-border)] text-[var(--ssz-alert-error-fg)]",
+        info:    "bg-[var(--ssz-alert-info-bg)] border-[var(--ssz-alert-info-border)] text-[var(--ssz-alert-info-fg)]",
         default: "bg-[var(--ssz-bg-subtle)] border-border text-[var(--ssz-text-primary)]",
       },
     },

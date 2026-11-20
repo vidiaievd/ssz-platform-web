@@ -36,7 +36,8 @@ export function BottomTabBar({ items }: BottomTabBarProps) {
             href={href}
             aria-current={active ? 'page' : undefined}
             className={cn(
-              'flex flex-1 flex-col items-center justify-center gap-0.5 py-2 text-[11px] font-medium',
+              // min-w-0 lets a tab shrink below its label, or `truncate` never cuts and labels overlap.
+              'flex min-w-0 flex-1 flex-col items-center justify-center gap-0.5 px-1 py-2 text-[11px] font-medium',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset',
               active ? 'text-primary' : 'text-(--ssz-text-secondary)',
             )}
@@ -52,7 +53,7 @@ export function BottomTabBar({ items }: BottomTabBarProps) {
                 </span>
               )}
             </span>
-            <span className="truncate">{label}</span>
+            <span className="max-w-full truncate">{label}</span>
           </Link>
         );
       })}

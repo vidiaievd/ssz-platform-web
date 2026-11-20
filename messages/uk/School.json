@@ -1,7 +1,23 @@
 {
   "dashboard": {
     "notFound": "Школу не знайдено.",
-    "placeholder": "Повна статистика дашборду з'явиться незабаром."
+    "placeholder": "Повна статистика дашборду з'явиться незабаром.",
+    "onboarding": {
+      "title": "Запустіть свою школу",
+      "progress": "Виконано {completed} з {total} · ще ~{minutes} хв",
+      "minutes": "~{minutes} хв",
+      "go": "Перейти →",
+      "hide": "Сховати чек-лист запуску",
+      "progressLabel": "Прогрес запуску",
+      "items": {
+        "fillBranding": "Завантажте логотип школи",
+        "createCourse": "Створіть перший курс",
+        "createGroupSchedule": "Створіть групу й задайте розклад",
+        "inviteTeacher": "Запросіть викладача",
+        "assignTeacherGroup": "Призначте викладача групі",
+        "inviteStudents": "Додайте перших учнів"
+      }
+    }
   },
   "common": {
     "close": "Закрити",

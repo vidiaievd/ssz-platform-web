@@ -317,7 +317,7 @@ export async function SchoolDashboard({ params }: Props) {
 
       {/* Onboarding checklist (hidden at full state or for editor) */}
       {canSeeWidget('onboarding', ctx) && writable && (
-        <OnboardingChecklist onboarding={onboarding} />
+        <OnboardingChecklist onboarding={onboarding} workspaceId={workspaceId} />
       )}
 
       {/* KPI strip — always visible */}

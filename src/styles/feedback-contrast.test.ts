@@ -58,6 +58,11 @@ const PAIRS: Array<[string, string]> = [
   // The bold correction inside a wrong or near chip.
   ['ssz-feedback-ok-fg', 'ssz-feedback-no-bg'],
   ['ssz-feedback-ok-fg', 'ssz-feedback-near-bg'],
+  // The shared Alert's label on its fill (plan 90, live check step 8).
+  ['ssz-alert-success-fg', 'ssz-alert-success-bg'],
+  ['ssz-alert-warning-fg', 'ssz-alert-warning-bg'],
+  ['ssz-alert-error-fg', 'ssz-alert-error-bg'],
+  ['ssz-alert-info-fg', 'ssz-alert-info-bg'],
   // Small labels — «Rettet», the word counter, the attempt line.
   ['ssz-text-muted', 'ssz-bg-base'],
   ['ssz-text-muted', 'ssz-bg-surface'],
@@ -77,6 +82,9 @@ describe('feedback colours (AC-R6)', () => {
   it('turns the fills dark in the dark theme, not a light slab on a dark page', () => {
     for (const fill of ['ok', 'no', 'near', 'key']) {
       expect(luminance(token(`ssz-feedback-${fill}-bg`, 'dark'))).toBeLessThan(0.1);
+    }
+    for (const fill of ['success', 'warning', 'error', 'info']) {
+      expect(luminance(token(`ssz-alert-${fill}-bg`, 'dark'))).toBeLessThan(0.1);
     }
   });
 });

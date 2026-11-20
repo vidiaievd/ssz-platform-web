@@ -75,17 +75,17 @@ type OnboardingInput = {
   hasAssignedTeacher: boolean; // any group with a primary teacher
 };
 
-const ONBOARDING_ITEMS_EST = {
-  'fill-branding': '5 min',
-  'create-course': '5 min',
-  'create-group-schedule': '5 min',
-  'invite-teacher': '2 min',
-  'assign-teacher-group': '2 min',
-  'invite-students': '3 min',
-} as const satisfies Record<string, string>;
+const ONBOARDING_ITEMS_EST: Record<string, number> = {
+  'fill-branding': 5,
+  'create-course': 5,
+  'create-group-schedule': 5,
+  'invite-teacher': 2,
+  'assign-teacher-group': 2,
+  'invite-students': 3,
+};
 
-function onboardingEst(key: string): string {
-  return (ONBOARDING_ITEMS_EST as Record<string, string | undefined>)[key] ?? '0 min';
+function onboardingEst(key: string): number {
+  return ONBOARDING_ITEMS_EST[key] ?? 0;
 }
 
 export function computeOnboarding(input: OnboardingInput): OnboardingState {
@@ -103,53 +103,51 @@ export function computeOnboarding(input: OnboardingInput): OnboardingState {
     {
       key: 'fill-branding',
       done: Boolean(school.avatarUrl && school.description),
-      labelKey: 'Dashboard.school.onboarding.fillBranding',
-      est: onboardingEst('fill-branding'),
-      href: '#settings/branding',
+      labelKey: 'fillBranding',
+      estMinutes: onboardingEst('fill-branding'),
+      // The school has no logo / description screen in the web yet (plan 90 §8, step 11).
+      href: null,
     },
     {
       key: 'create-course',
       done: coursesCount > 0,
-      labelKey: 'Dashboard.school.onboarding.createCourse',
-      est: onboardingEst('create-course'),
-      href: '#courses/new',
+      labelKey: 'createCourse',
+      estMinutes: onboardingEst('create-course'),
+      href: 'content/new',
     },
     {
       key: 'create-group-schedule',
       done: groupsCount > 0,
-      labelKey: 'Dashboard.school.onboarding.createGroupSchedule',
-      est: onboardingEst('create-group-schedule'),
-      href: '#groups/new',
+      labelKey: 'createGroupSchedule',
+      estMinutes: onboardingEst('create-group-schedule'),
+      href: 'groups/new',
     },
     {
       key: 'invite-teacher',
       done: membersCount > 1 || hasPendingInvitation,
-      labelKey: 'Dashboard.school.onboarding.inviteTeacher',
-      est: onboardingEst('invite-teacher'),
-      href: '#members/invite',
+      labelKey: 'inviteTeacher',
+      estMinutes: onboardingEst('invite-teacher'),
+      href: 'teachers',
     },
     {
       key: 'assign-teacher-group',
       done: hasAssignedTeacher,
-      labelKey: 'Dashboard.school.onboarding.assignTeacherGroup',
-      est: onboardingEst('assign-teacher-group'),
-      href: '#groups',
+      labelKey: 'assignTeacherGroup',
+      estMinutes: onboardingEst('assign-teacher-group'),
+      href: 'groups',
     },
     {
       key: 'invite-students',
       done: membersCount > 2,
-      labelKey: 'Dashboard.school.onboarding.inviteStudents',
-      est: onboardingEst('invite-students'),
-      href: '#students/invite',
+      labelKey: 'inviteStudents',
+      estMinutes: onboardingEst('invite-students'),
+      href: 'students',
     },
   ];
 
   const completed = items.filter((i) => i.done).length;
   const remaining = items.filter((i) => !i.done);
-  const minutesLeft = remaining.reduce((acc, item) => {
-    const mins = parseInt(item.est, 10);
-    return acc + (isNaN(mins) ? 0 : mins);
-  }, 0);
+  const minutesLeft = remaining.reduce((acc, item) => acc + item.estMinutes, 0);
 
   return { items, completed, total: items.length, minutesLeft };
 }

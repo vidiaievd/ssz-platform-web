@@ -1,7 +1,23 @@
 {
   "dashboard": {
     "notFound": "Skolen ble ikke funnet.",
-    "placeholder": "Fullstendige dashbord-statistikker kommer snart."
+    "placeholder": "Fullstendige dashbord-statistikker kommer snart.",
+    "onboarding": {
+      "title": "Kom i gang med skolen",
+      "progress": "{completed} av {total} fullført · ~{minutes} min igjen",
+      "minutes": "~{minutes} min",
+      "go": "Gå →",
+      "hide": "Skjul sjekklisten for oppstart",
+      "progressLabel": "Fremdrift i oppstarten",
+      "items": {
+        "fillBranding": "Last opp skolens logo",
+        "createCourse": "Lag ditt første kurs",
+        "createGroupSchedule": "Opprett en gruppe og sett timeplanen",
+        "inviteTeacher": "Inviter en lærer",
+        "assignTeacherGroup": "Tildel en lærer til gruppen",
+        "inviteStudents": "Legg til de første elevene"
+      }
+    }
   },
   "common": {
     "close": "Lukk",

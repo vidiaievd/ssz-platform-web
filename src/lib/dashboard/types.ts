@@ -141,7 +141,8 @@ export type DashboardCompositeResponse = {
   /** Out of scope — billing service not yet built. */
   trial: Unavailable;
   onboarding: {
-    items: Array<{ key: string; done: boolean; labelKey: string; est: string; href: string }>;
+    /** `labelKey` under `School.dashboard.onboarding.items`; `href` workspace-relative or null. */
+    items: Array<{ key: string; done: boolean; labelKey: string; estMinutes: number; href: string | null }>;
     completed: number;
     total: number;
     minutesLeft: number;
