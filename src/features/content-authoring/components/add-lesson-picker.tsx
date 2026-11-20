@@ -62,6 +62,7 @@ import { assignItemSectionAction } from '../actions/container-item';
 import { minimalExerciseValues } from '../lib/exercise-content';
 import { CREATABLE_EXERCISE_TYPES, type CreatableExerciseType } from '../schemas/exercise';
 import { exerciseType } from '../lib/exercise-type-registry';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface AddLessonPickerProps {
   open: boolean;
@@ -218,7 +219,7 @@ export function AddLessonPicker({
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
   const tExercises = useTranslations('Authoring.exercises');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
   const [pendingKind, setPendingKind] = useState<MaterialKind | null>(null);
   /* An exercise can't be created from a title alone: its shape depends on the
@@ -327,7 +328,7 @@ export function AddLessonPicker({
   /** Shared tail of both steps: report, close, and hand the new item to the caller. */
   async function finish(result: Result<{ itemId?: string }>) {
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       return;
     }
     if (!result.value.itemId) {
@@ -342,7 +343,7 @@ export function AddLessonPicker({
         result.value.itemId,
         sectionId,
       );
-      if (!assigned.ok) toast.error(tErrors(assigned.error.code));
+      if (!assigned.ok) toast.error(tErrors(assigned.error));
     }
     reset();
     onOpenChange(false);

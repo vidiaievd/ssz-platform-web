@@ -17,6 +17,7 @@ import { primaryInstructionText } from '@/features/content/lib/instruction-text'
 import { submitAttemptAction } from '../actions/submit-attempt';
 import type { AttemptResult } from '../types/exercise';
 import { FeedbackPanel } from './feedback-panel';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface FreeTextExerciseProps {
   exercise: ExerciseDisplay;
@@ -24,7 +25,7 @@ interface FreeTextExerciseProps {
 
 export function FreeTextExercise({ exercise }: FreeTextExerciseProps) {
   const t = useTranslations('Exercise');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const content = exercise.content;
 
   const prompt = typeof content.prompt === 'string' ? content.prompt : '';
@@ -48,7 +49,7 @@ export function FreeTextExercise({ exercise }: FreeTextExerciseProps) {
         timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
-        toast.error(tErrors(res.error.code));
+        toast.error(tErrors(res.error));
         return;
       }
       setResult(res.value);

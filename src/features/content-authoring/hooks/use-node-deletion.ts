@@ -18,6 +18,7 @@ import {
 import type { DeleteNodeTarget } from '../components/delete-node-dialog';
 
 import { useStructureUndo } from './use-structure-undo';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 export interface NodeDeletion {
   /** The node awaiting confirmation, or null when the dialog is closed. */
@@ -59,7 +60,7 @@ export function useNodeDeletion({
   onChanged,
   onBulkDelete,
 }: UseNodeDeletionOptions): NodeDeletion {
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const t = useTranslations('Authoring');
   const { record } = useStructureUndo();
   const [target, setTarget] = useState<DeleteNodeTarget | null>(null);
@@ -99,7 +100,7 @@ export function useNodeDeletion({
           : await removeContainerItemAction(owningContainerId, node.id);
 
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       setTarget(null);

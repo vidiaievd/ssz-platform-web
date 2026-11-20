@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label";
 import { registerAction } from "../actions/register";
 import { passwordSchema } from "../schemas";
 import { track } from "@/lib/analytics/track";
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 const schoolSchema = z
   .object({
@@ -43,7 +44,7 @@ type Props = {
 
 export function UserRegisterForm({ role, prefillEmail, next, inviteToken }: Props) {
   const t = useTranslations("Auth.Register");
-  const tErrors = useTranslations("Errors");
+  const tErrors = useErrorMessage();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -75,7 +76,7 @@ export function UserRegisterForm({ role, prefillEmail, next, inviteToken }: Prop
           const firstBackendMessage = backendErrors
             ? Object.values(backendErrors).flat()[0]
             : (details?.detail as string | undefined);
-          const message = firstBackendMessage ?? tErrors(result.error.code);
+          const message = firstBackendMessage ?? tErrors(result.error);
           setServerError(message);
           toast.error(message);
         }

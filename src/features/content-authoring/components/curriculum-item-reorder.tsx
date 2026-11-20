@@ -1,6 +1,5 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -13,6 +12,7 @@ import type {
 } from '@/features/content/types';
 
 import { reorderSectionsAction } from '../actions/section';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 /** Moves the element at `index` one slot toward `direction`; no-op past either end. */
 export function moveInArray<T>(items: readonly T[], index: number, direction: -1 | 1): T[] {
@@ -73,7 +73,7 @@ interface MoveSectionProps {
 
 /** Move-up/down for a section (item group) among its siblings within the same module. */
 export function MoveSection({ moduleContainerId, sections, section, onMoved }: MoveSectionProps) {
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const index = sections.findIndex((s) => s.id === section.id);
 
   function handleMove(direction: -1 | 1) {
@@ -83,7 +83,7 @@ export function MoveSection({ moduleContainerId, sections, section, onMoved }: M
       reordered.map((s) => s.id),
     ).then((result) => {
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       onMoved();

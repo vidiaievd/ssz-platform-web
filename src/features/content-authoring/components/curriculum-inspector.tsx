@@ -50,6 +50,7 @@ import { ItemChangeBadge } from './item-change-badge';
 import { ItemLiveBadge } from './item-live-badge';
 import { SectionAssignSelect } from './section-assign-select';
 import type { DeleteNodeTarget } from './delete-node-dialog';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface CurriculumInspectorProps {
   selection: CurriculumTreeSelection | null;
@@ -300,7 +301,7 @@ function InspectorFields({
 }: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const undo = useStructureUndo();
 
   const publishOptions = [
@@ -337,7 +338,7 @@ function InspectorFields({
                 const previous = level.title ?? '';
                 const result = await renameSectionAction(courseContainerId, level.id!, title);
                 if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
+                  toast.error(tErrors(result.error));
                   throw new Error(result.error.code);
                 }
                 undo.record({
@@ -407,7 +408,7 @@ function InspectorFields({
               const previous = mod.title ?? '';
               const result = await renameContainerAction(mod.containerId, title);
               if (!result.ok) {
-                toast.error(tErrors(result.error.code));
+                toast.error(tErrors(result.error));
                 throw new Error(result.error.code);
               }
               undo.record({
@@ -445,7 +446,7 @@ function InspectorFields({
                 previous !== null,
               );
               if (!result.ok) {
-                toast.error(tErrors(result.error.code));
+                toast.error(tErrors(result.error));
                 throw new Error(result.error.code);
               }
               undo.record({
@@ -480,7 +481,7 @@ function InspectorFields({
               const previous = mod.learningGoals;
               const result = await setContainerLearningGoalsAction(mod.containerId, next);
               if (!result.ok) {
-                toast.error(tErrors(result.error.code));
+                toast.error(tErrors(result.error));
                 throw new Error(result.error.code);
               }
               undo.record({
@@ -557,7 +558,7 @@ function InspectorFields({
             const itemType = item.itemType as RenamableItemType;
             const result = await renameItemAction(itemType, item.refId, containerId, next);
             if (!result.ok) {
-              toast.error(tErrors(result.error.code));
+              toast.error(tErrors(result.error));
               throw new Error(result.error.code);
             }
             undo.record({

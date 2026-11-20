@@ -17,6 +17,7 @@ import { createExerciseAction, updateExerciseAction } from '../actions/exercise'
 import { useAuthoringExercise } from '../api/use-authoring-exercises';
 import { authoringKeys } from '../api/keys';
 import { ExerciseFields } from './exercise-fields';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface ExerciseEditorProps {
   exerciseId: string | null;
@@ -27,7 +28,7 @@ interface ExerciseEditorProps {
 
 export function ExerciseEditor({ exerciseId, container, onClose, onCreated }: ExerciseEditorProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
@@ -49,7 +50,7 @@ export function ExerciseEditor({ exerciseId, container, onClose, onCreated }: Ex
       if (exerciseId) {
         const result = await updateExerciseAction(exerciseId, container.id, data);
         if (!result.ok) {
-          toast.error(tErrors(result.error.code));
+          toast.error(tErrors(result.error));
           return;
         }
         await queryClient.invalidateQueries({ queryKey: authoringKeys.exercise(exerciseId) });
@@ -64,7 +65,7 @@ export function ExerciseEditor({ exerciseId, container, onClose, onCreated }: Ex
           data,
         );
         if (!result.ok) {
-          toast.error(tErrors(result.error.code));
+          toast.error(tErrors(result.error));
           return;
         }
         await queryClient.invalidateQueries({ queryKey: authoringKeys.exercises(container.id) });

@@ -10,6 +10,7 @@ import type { CurriculumTree } from '@/features/content/types';
 
 import { createSectionAction } from '../actions/section';
 import { levelCollapseKey, levelDomId, stripLevelPrefix } from '../lib/structure-nodes';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface OutlineRailProps {
   tree: CurriculumTree;
@@ -41,7 +42,7 @@ export function OutlineRail({
   onChanged,
 }: OutlineRailProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
 
   function handleAddLevel() {
@@ -49,7 +50,7 @@ export function OutlineRail({
     startTransition(async () => {
       const result = await createSectionAction(courseContainerId, t('structure.newLevelTitle'));
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       onChanged(result.value.sectionId, 'level');

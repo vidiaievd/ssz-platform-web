@@ -33,6 +33,7 @@ import { useLessonGlossaryMarks } from '../api/use-authoring-lessons';
 import { markGlossaryWordAction } from '../actions/lesson-glossary';
 import { unmarkGlossaryWordAction } from '../actions/lesson-spans';
 import { authoringKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface GlossaryMarkProps {
   lessonId: string;
@@ -74,7 +75,7 @@ function useGlossaryMarkData({ lessonId, variantId, container }: GlossaryMarkPro
  */
 export function GlossaryMarkButton({ lessonId, variantId, container }: GlossaryMarkProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -87,7 +88,7 @@ export function GlossaryMarkButton({ lessonId, variantId, container }: GlossaryM
     startTransition(async () => {
       const result = await markGlossaryWordAction(lessonId, variantId, selectedItemId);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       setSelectedItemId('');
@@ -150,7 +151,7 @@ export function GlossaryMarkButton({ lessonId, variantId, container }: GlossaryM
  */
 export function GlossaryMarkedWords({ lessonId, variantId, container }: GlossaryMarkProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [pendingUnmark, setPendingUnmark] = useState<{ id: string; lemma: string } | null>(null);
@@ -164,7 +165,7 @@ export function GlossaryMarkedWords({ lessonId, variantId, container }: Glossary
     startTransition(async () => {
       const result = await unmarkGlossaryWordAction(lessonId, variantId, target.id);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       toast.success(t('spans.unmarked'));

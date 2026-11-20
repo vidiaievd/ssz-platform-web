@@ -24,6 +24,7 @@ import { useLessonVariants } from '../api/use-authoring-lessons';
 import { authoringKeys } from '../api/keys';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { SaveStatusIndicator } from './save-status-indicator';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface LessonEditorProps {
   lessonId: string;
@@ -34,7 +35,7 @@ interface LessonEditorProps {
 
 export function LessonEditor({ lessonId, lessonTitle, container, onClose }: LessonEditorProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [editorTab, setEditorTab] = useState<'write' | 'preview'>('write');
@@ -97,7 +98,7 @@ export function LessonEditor({ lessonId, lessonTitle, container, onClose }: Less
         data,
       );
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.lessonVariants(lessonId) });

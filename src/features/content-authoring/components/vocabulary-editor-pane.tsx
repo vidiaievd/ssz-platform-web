@@ -37,6 +37,7 @@ import { EditorCard } from './editor-card';
 import { VocabularyForm } from './vocabulary-form';
 import { VocabularyLessonPreview } from './vocabulary-lesson-preview';
 import { VocabularyBulkPasteDialog } from './vocabulary-bulk-paste-dialog';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface VocabularyEditorPaneProps {
   kind: MaterialKind;
@@ -91,7 +92,7 @@ export function VocabularyEditorPane({
 
 function CreateListCard({ container }: { container: Container }) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
@@ -114,7 +115,7 @@ function CreateListCard({ container }: { container: Container }) {
         data,
       );
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({
@@ -152,7 +153,7 @@ function CreateListCard({ container }: { container: Container }) {
 
 function WordListCard({ container, listId }: { container: Container; listId: string }) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [page, setPage] = useState(1);
@@ -170,7 +171,7 @@ function WordListCard({ container, listId }: { container: Container; listId: str
     startTransition(async () => {
       const result = await deleteVocabularyItemAction(listId, target.id, container.id);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItemsAll(listId) });

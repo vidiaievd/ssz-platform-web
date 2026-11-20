@@ -21,6 +21,7 @@ import { LessonEditorShell } from './lesson-editor-shell';
 import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { LiveLessonPreview } from './live-lesson-preview';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface LiveEditorPaneProps {
   kind: MaterialKind;
@@ -78,7 +79,7 @@ export function LiveEditorPane({
 }: LiveEditorPaneProps) {
   const t = useTranslations('Authoring');
   const saveScope = useSaveScopeText(isLive);
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
 
   const { data: lesson, isLoading } = useLesson(lessonId);
@@ -252,7 +253,7 @@ export function LiveEditorPane({
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
+                  toast.error(tErrors(result.error));
                   return;
                 }
                 unsaved.markSaved();

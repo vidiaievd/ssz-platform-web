@@ -17,6 +17,7 @@ import { saveVocabularyItemAction } from '../actions/vocabulary';
 import { useAuthoringVocabularyItem } from '../api/use-authoring-vocabulary';
 import { authoringKeys } from '../api/keys';
 import { useSaveScopeDescription } from './save-scope';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface VocabularyFormProps {
   listId: string;
@@ -27,7 +28,7 @@ interface VocabularyFormProps {
 
 export function VocabularyForm({ listId, containerId, itemId, onDone }: VocabularyFormProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const saveScope = useSaveScopeDescription();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
@@ -105,7 +106,7 @@ export function VocabularyForm({ listId, containerId, itemId, onDone }: Vocabula
         exampleIds: removedExampleIds,
       });
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItemsAll(listId) });

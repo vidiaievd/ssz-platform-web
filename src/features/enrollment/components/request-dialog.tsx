@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/select';
 import type { School } from '@/features/discovery/types';
 import { requestEnrollmentAction } from '../api/request-enrollment';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
 
@@ -34,7 +35,7 @@ interface RequestDialogProps {
 
 export function RequestDialog({ school, open, onClose }: RequestDialogProps) {
   const t = useTranslations('Enrollment');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
   const [language, setLanguage] = useState<string>('');
   const [level, setLevel] = useState<string>('');
@@ -60,7 +61,7 @@ export function RequestDialog({ school, open, onClose }: RequestDialogProps) {
         selfReportedLevel: level ? (level as (typeof CEFR_LEVELS)[number]) : undefined,
       });
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       toast.success(t('request.success', { name: school.name }));

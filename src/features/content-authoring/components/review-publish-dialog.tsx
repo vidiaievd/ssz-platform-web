@@ -25,6 +25,7 @@ import { publishContainerAction } from '../actions/publish-container';
 import { usePreflightCheckText } from '../lib/preflight-check-text';
 import { groupChecksByRule } from '../lib/group-checks-by-rule';
 import { PublishStateBadge } from './publish-state-badge';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type RowOutcome = 'idle' | 'publishing' | 'published' | 'failed';
 
@@ -97,7 +98,7 @@ function ReviewRow({
   onFixNavigate,
 }: RowProps) {
   const t = useTranslations('Authoring.reviewPublish');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const checkText = usePreflightCheckText();
 
   const isLoading = preflight?.isLoading ?? false;

@@ -32,6 +32,7 @@ import type { ContainerShare, ShareRole } from '@/features/content/types';
 import { useEntityShares } from '../api/use-authoring-shares';
 import { authoringKeys } from '../api/keys';
 import { addShareAction, removeShareAction } from '../actions/share';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface SharingPanelProps {
   entityType: string;
@@ -42,7 +43,7 @@ const SHARE_ROLES: ShareRole[] = ['viewer', 'co_author'];
 
 export function SharingPanel({ entityType, entityId }: SharingPanelProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [pendingRemove, setPendingRemove] = useState<ContainerShare | null>(null);
@@ -57,7 +58,7 @@ export function SharingPanel({ entityType, entityId }: SharingPanelProps) {
     startTransition(async () => {
       const result = await addShareAction(entityType, entityId, trimmed, role);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({
@@ -75,7 +76,7 @@ export function SharingPanel({ entityType, entityId }: SharingPanelProps) {
     startTransition(async () => {
       const result = await removeShareAction(target.id, entityType, entityId);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({

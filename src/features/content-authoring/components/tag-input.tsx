@@ -23,6 +23,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useEntityTags, useTagSuggestions } from '../api/use-authoring-tags';
 import { authoringKeys } from '../api/keys';
 import { addTagAction, removeTagAction } from '../actions/tag';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface TagInputProps {
   entityType: string;
@@ -32,7 +33,7 @@ interface TagInputProps {
 
 export function TagInput({ entityType, entityId, disabled }: TagInputProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -60,7 +61,7 @@ export function TagInput({ entityType, entityId, disabled }: TagInputProps) {
     startTransition(async () => {
       const result = await addTagAction(entityType, entityId, trimmed);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({
@@ -73,7 +74,7 @@ export function TagInput({ entityType, entityId, disabled }: TagInputProps) {
     startTransition(async () => {
       const result = await removeTagAction(tagId, entityType, entityId);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({

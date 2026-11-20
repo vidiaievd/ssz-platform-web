@@ -11,6 +11,7 @@ import { Field, Input } from "@/components/ui/input";
 
 import { resetPasswordAction } from "../actions/reset-password";
 import { resetPasswordSchema, type ResetPasswordInput } from "../schemas";
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type ResetPasswordFormProps = {
   token: string;
@@ -18,7 +19,7 @@ type ResetPasswordFormProps = {
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const t = useTranslations("Auth.ResetPassword");
-  const tErrors = useTranslations("Errors");
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -37,7 +38,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     startTransition(async () => {
       const result = await resetPasswordAction(data);
       if (!result.ok) {
-        setServerError(tErrors(result.error.code));
+        setServerError(tErrors(result.error));
         return;
       }
       setSuccess(true);

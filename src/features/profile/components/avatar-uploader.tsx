@@ -2,7 +2,6 @@
 
 import { useTransition } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { AssetPicker } from '@/features/media';
@@ -10,9 +9,10 @@ import { useMyProfile } from '../api/use-my-profile';
 import { updateAvatarAction } from '../actions/update-avatar';
 import { removeAvatarAction } from '../actions/remove-avatar';
 import { profileKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 export function AvatarUploader() {
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const { data: profile } = useMyProfile();
   const queryClient = useQueryClient();
   const [, startTransition] = useTransition();
@@ -21,7 +21,7 @@ export function AvatarUploader() {
     startTransition(async () => {
       const result = await updateAvatarAction(assetUrl);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: profileKeys.me() });
@@ -32,7 +32,7 @@ export function AvatarUploader() {
     startTransition(async () => {
       const result = await removeAvatarAction();
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: profileKeys.me() });

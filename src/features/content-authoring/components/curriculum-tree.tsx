@@ -111,6 +111,7 @@ import {
   type LevelDropData,
   type StructureDragData,
 } from '../lib/structure-dnd';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type ChangeKind = 'level' | 'module' | 'item';
 
@@ -738,7 +739,7 @@ function ModuleCard({
   ownerSchoolId?: string | null;
 }) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const { record: recordUndo } = useStructureUndo();
   const [addLessonIn, setAddLessonIn] = useState<string | null | undefined>(undefined);
   const selected = selectedId === mod.id;
@@ -760,7 +761,7 @@ function ModuleCard({
     const moved = moduleItems(mod).find((item) => item.id === itemId);
     assignItemSectionAction(mod.containerId, itemId, sectionId).then((result) => {
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       recordUndo(
@@ -793,7 +794,7 @@ function ModuleCard({
     const targetTitle = courseModules.find((m) => m.containerId === containerId)?.title ?? '';
     placeItemAgainAction(containerId, item.itemType, item.refId, sectionId).then((result) => {
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       const rowId = result.value.id;
@@ -1091,7 +1092,7 @@ export function CurriculumTree({
   recipeIssues,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const { record: recordUndo } = useStructureUndo();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -1131,7 +1132,7 @@ export function CurriculumTree({
       const previousTitle = savedTitleOf(id);
       save.then((result) => {
         if (!result.ok) {
-          toast.error(tErrors(result.error.code));
+          toast.error(tErrors(result.error));
           return;
         }
         recordUndo({
@@ -1228,7 +1229,7 @@ export function CurriculumTree({
       targetOrder,
     });
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       return;
     }
     const movedId = result.value.id;
@@ -1274,7 +1275,7 @@ export function CurriculumTree({
   async function duplicateOne(target: DuplicateTarget): Promise<DuplicateToDiscard | null> {
     const result = await duplicateContainerItemAction(target.containerId, target.rowId);
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       return null;
     }
     return {
@@ -1599,14 +1600,14 @@ export function CurriculumTree({
     if (plan.kind === 'move') {
       const filed = await assignItemSectionAction(containerId, itemId, plan.sectionId);
       if (!filed.ok) {
-        toast.error(tErrors(filed.error.code));
+        toast.error(tErrors(filed.error));
         setPreview(null);
         return;
       }
     }
     const ordered = await reorderContainerItemsAction(containerId, plan.orderedItemIds);
     if (!ordered.ok) {
-      toast.error(tErrors(ordered.error.code));
+      toast.error(tErrors(ordered.error));
       setPreview(null);
       return;
     }
@@ -1628,7 +1629,7 @@ export function CurriculumTree({
     const before = tree.levels.map((level) => level.id).filter((id): id is string => id !== null);
     const result = await reorderSectionsAction(courseContainerId, orderedSectionIds);
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       setPreview(null);
       return;
     }
@@ -1948,7 +1949,7 @@ export function CurriculumTree({
       );
       setPendingLevelId(null);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       onChanged(result.value.itemId, 'module');

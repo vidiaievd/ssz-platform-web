@@ -22,6 +22,7 @@ import { LOCALES, LOCALE_LABELS } from '@/lib/i18n/config';
 import { bulkCreateVocabularyItemsAction } from '../actions/vocabulary';
 import { parseVocabularyBulkPaste } from '../lib/parse-vocabulary-bulk-paste';
 import { authoringKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface VocabularyBulkPasteDialogProps {
   listId: string;
@@ -30,7 +31,7 @@ interface VocabularyBulkPasteDialogProps {
 
 export function VocabularyBulkPasteDialog({ listId, containerId }: VocabularyBulkPasteDialogProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
@@ -49,7 +50,7 @@ export function VocabularyBulkPasteDialog({ listId, containerId }: VocabularyBul
     startTransition(async () => {
       const result = await bulkCreateVocabularyItemsAction(listId, containerId, rows, languageCode);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.vocabularyItemsAll(listId) });

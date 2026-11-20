@@ -31,6 +31,7 @@ import { VideoLessonPreview } from './video-lesson-preview';
 import { VideoSourceSlot } from './video-source-slot';
 import { CueListEditor } from './cue-list-editor';
 import { ComprehensionQuestionRow } from './comprehension-question-row';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface VideoEditorPaneProps {
   kind: MaterialKind;
@@ -54,7 +55,7 @@ export function VideoEditorPane({
 }: VideoEditorPaneProps) {
   const t = useTranslations('Authoring');
   const saveScope = useSaveScopeText(isLive);
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
 
   const { data: variants, isLoading: variantsLoading } = useLessonVariants(lessonId);
@@ -158,7 +159,7 @@ export function VideoEditorPane({
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
+                  toast.error(tErrors(result.error));
                   return;
                 }
                 unsaved.markSaved();

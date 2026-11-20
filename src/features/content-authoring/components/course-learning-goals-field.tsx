@@ -7,6 +7,7 @@ import { useRouter } from '@/lib/i18n/navigation';
 import { formatLearningGoals } from '../lib/learning-goals';
 import { setContainerLearningGoalsAction } from '../actions/container';
 import { LearningGoalsField } from './learning-goals-field';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 /**
  * A course's own learning goals — what the catalogue shows as «What you will learn» before a
@@ -21,7 +22,7 @@ export function CourseLearningGoalsField({
   goals: string[];
 }) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const router = useRouter();
 
   return (
@@ -34,7 +35,7 @@ export function CourseLearningGoalsField({
       onSave={async (next) => {
         const result = await setContainerLearningGoalsAction(containerId, next);
         if (!result.ok) {
-          toast.error(tErrors(result.error.code));
+          toast.error(tErrors(result.error));
           throw new Error(result.error.code);
         }
         router.refresh();

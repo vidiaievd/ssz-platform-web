@@ -27,6 +27,7 @@ import { useSaveScopeText } from './save-scope';
 import { EditorCard } from './editor-card';
 import { GrammarLessonPreview } from './grammar-lesson-preview';
 import { GrammarAtomsPanel } from './grammar-atoms-panel';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface GrammarEditorPaneProps {
   kind: MaterialKind;
@@ -50,7 +51,7 @@ export function GrammarEditorPane({
 }: GrammarEditorPaneProps) {
   const t = useTranslations('Authoring');
   const saveScope = useSaveScopeText(isLive);
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [localExplanationId, setLocalExplanationId] = useState<string | null>(null);
@@ -266,7 +267,7 @@ export function GrammarEditorPane({
               startTransition(async () => {
                 const result = await saveAll(getValues());
                 if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
+                  toast.error(tErrors(result.error));
                   return;
                 }
                 unsaved.markSaved();
