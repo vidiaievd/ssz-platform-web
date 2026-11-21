@@ -5,6 +5,6 @@
     "comingSoon": "Søk kommer snart"
   },
   "trial": {
-    "daysLeft": "Prøve · {days} dager igjen"
+    "daysLeft": "Prøve · {days, plural, one {# dag} other {# dager}} igjen"
   }
 }

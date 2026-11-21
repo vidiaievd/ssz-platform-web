@@ -77,7 +77,7 @@
     "learner": {
       "title": "Next lessons",
       "all": "Whole schedule →",
-      "none": "Nothing scheduled in the next {days} days.",
+      "none": "Nothing scheduled in the next {days, plural, one {# day} other {# days}}.",
       "noTopic": "No topic yet"
     },
     "reviewBlocks": {
