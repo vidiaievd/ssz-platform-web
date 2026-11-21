@@ -13,8 +13,8 @@
       "suspended": "You can still read your courses and see your history, but starting and handing in work is paused.",
       "suspendedUntil": "You can still read your courses and see your history, but starting and handing in work is paused.",
       "closedTitle": "This school is closed",
-      "closed": "The school's courses are no longer available. Your own history stays with you.",
-      "closedUntil": "The school's courses are no longer available. Your own history stays with you."
+      "closed": "You can no longer start or hand in work. The courses stay open to read, and your history stays with you.",
+      "closedUntil": "You can no longer start or hand in work. The courses stay open to read, and your history stays with you."
     }
   },
   "maintenance": {
@@ -34,7 +34,7 @@
   "errors": {
     "schoolNotActiveTitle": "The school is not accepting new work",
     "schoolSuspended": "The school is temporarily blocked: new work cannot be started or handed in, and nothing in it can be changed.",
-    "schoolClosed": "The school is closed. Its materials are no longer available.",
+    "schoolClosed": "The school is closed: nothing in it can be started, handed in or changed.",
     "courseObsolete": "This course is outdated and takes no new enrolments."
   },
   "unavailable": {

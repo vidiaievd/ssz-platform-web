@@ -13,8 +13,8 @@
       "suspended": "Du kan fortsatt lese kursene dine og se historikken din, men det er stanset å starte og levere arbeid.",
       "suspendedUntil": "Du kan fortsatt lese kursene dine og se historikken din, men det er stanset å starte og levere arbeid.",
       "closedTitle": "Skolen er stengt",
-      "closed": "Skolens kurs er ikke lenger tilgjengelige. Din egen historikk beholder du.",
-      "closedUntil": "Skolens kurs er ikke lenger tilgjengelige. Din egen historikk beholder du."
+      "closed": "Du kan ikke lenger starte eller levere arbeid. Kursene kan fortsatt leses, og historikken din beholder du.",
+      "closedUntil": "Du kan ikke lenger starte eller levere arbeid. Kursene kan fortsatt leses, og historikken din beholder du."
     }
   },
   "maintenance": {
@@ -34,7 +34,7 @@
   "errors": {
     "schoolNotActiveTitle": "Skolen tar ikke imot nytt arbeid",
     "schoolSuspended": "Skolen er midlertidig blokkert: nytt arbeid kan ikke startes eller leveres, og ingenting kan endres.",
-    "schoolClosed": "Skolen er stengt. Materialet er ikke lenger tilgjengelig.",
+    "schoolClosed": "Skolen er stengt: ingenting i den kan startes, leveres eller endres.",
     "courseObsolete": "Dette kurset er utdatert og tar ikke imot nye påmeldinger."
   },
   "unavailable": {
