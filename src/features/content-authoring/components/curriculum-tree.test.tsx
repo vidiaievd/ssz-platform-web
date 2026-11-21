@@ -1370,3 +1370,58 @@ describe('CurriculumTree', () => {
     });
   });
 });
+
+// Plan 90, Q17 (a): a suspended / closed school or a teacher without the edit right opens the
+// course for viewing — the tree still shows and selects, but nothing that changes it is drawn.
+describe('CurriculumTree — open for viewing', () => {
+  async function renderReadOnly(readOnly: boolean, selectedId?: string) {
+    const { CourseReadOnlyProvider } = await import('./course-read-only');
+    const onSelect = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CourseReadOnlyProvider readOnly={readOnly}>
+          <CollapsibleTree tree={TREE} onSelect={onSelect} onChanged={vi.fn()} selectedId={selectedId} />
+        </CourseReadOnlyProvider>
+      </NextIntlClientProvider>,
+    );
+    return { onSelect };
+  }
+
+  it('draws the edit tools when the course may be edited (sanity)', async () => {
+    await renderReadOnly(false, 'item-1');
+    expect(screen.queryAllByRole('button', { name: /^Drag to move/ }).length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole('checkbox').length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole('button', { name: /^Add / }).length).toBeGreaterThan(0);
+  });
+
+  it('draws no drag grips, ticks, add buttons or row tools', async () => {
+    await renderReadOnly(true, 'item-1');
+    expect(screen.queryAllByRole('button', { name: /^Drag to move/ })).toHaveLength(0);
+    expect(screen.queryAllByRole('checkbox')).toHaveLength(0);
+    expect(screen.queryAllByRole('button', { name: /^Add / })).toHaveLength(0);
+    expect(screen.queryByRole('button', { name: 'Duplicate' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Open lesson editor' })).toBeNull();
+  });
+
+  it('still selects a row, but never renames or deletes it', async () => {
+    const { onSelect } = await renderReadOnly(true, 'item-1');
+    fireEvent.click(screen.getByText('En vanlig arbeidsdag'));
+    expect(onSelect).toHaveBeenCalled();
+
+    fireEvent.doubleClick(screen.getByText('En vanlig arbeidsdag'));
+    fireEvent.keyDown(document.body, { key: 'F2' });
+    expect(screen.queryByRole('textbox')).toBeNull();
+
+    fireEvent.keyDown(document.body, { key: 'Delete' });
+    fireEvent.keyDown(document.body, { key: 'd', ctrlKey: true });
+    expect(removeContainerItemAction).not.toHaveBeenCalled();
+    expect(duplicateContainerItemAction).not.toHaveBeenCalled();
+    expect(screen.queryByRole('alertdialog')).toBeNull();
+  });
+
+  it('still opens the selected lesson with Enter', async () => {
+    await renderReadOnly(true, 'item-1');
+    fireEvent.keyDown(document.body, { key: 'Enter' });
+    expect(routerPush).toHaveBeenCalledWith('/w/my-school/content/module-1/lessons/item-1');
+  });
+});

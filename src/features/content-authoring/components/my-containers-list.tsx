@@ -1,6 +1,6 @@
 'use client';
 
-import { WritableOnly } from '@/features/school-lifecycle';
+import { useSchoolWritable, WritableOnly } from '@/features/school-lifecycle';
 import { useDeferredValue } from 'react';
 import {
   Plus,
@@ -175,10 +175,23 @@ interface ContainerOverflowMenuProps {
   state: ContainerState;
 }
 
+/**
+ * A course of this school while the school is suspended or closed (plan 90, Q17 (a)): its
+ * edit actions are drawn inactive and the course itself opens for viewing. A course owned
+ * elsewhere (a personal one, another school's) is not this workspace's status to judge.
+ */
+function useCourseLocked(container: Container): boolean {
+  const writable = useSchoolWritable();
+  const workspaceId = useWorkspaceRef();
+  return !writable && !!container.ownerSchoolId && container.ownerSchoolId === workspaceId;
+}
+
 function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps) {
   const t = useTranslations('Authoring.list');
+  const tReadOnly = useTranslations('Authoring.readOnly');
   const workspaceId = useWorkspaceRef();
   const containerHref = wsHref(workspaceId, `content/${container.id}`);
+  const locked = useCourseLocked(container);
 
   const stub = (action: string) => () => toast.info(t('itemActionStub', { action }));
 
@@ -196,33 +209,40 @@ function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps)
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem asChild>
-          <Link href={containerHref}>
+        {locked ? (
+          <DropdownMenuItem disabled title={tReadOnly('school')}>
             <Pencil className="h-3.5 w-3.5" />
             {t('menuEditStructure')}
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link href={containerHref}>
+              <Pencil className="h-3.5 w-3.5" />
+              {t('menuEditStructure')}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onSelect={stub(t('menuPreview'))}>
           <Eye className="h-3.5 w-3.5" />
           {t('menuPreview')}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={stub(t('menuDuplicate'))}>
+        <DropdownMenuItem disabled={locked} onSelect={stub(t('menuDuplicate'))}>
           <Copy className="h-3.5 w-3.5" />
           {t('menuDuplicate')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {state === 'archived' ? (
-          <DropdownMenuItem onSelect={stub(t('menuRestore'))}>
+          <DropdownMenuItem disabled={locked} onSelect={stub(t('menuRestore'))}>
             <ArchiveRestore className="h-3.5 w-3.5" />
             {t('menuRestore')}
           </DropdownMenuItem>
         ) : (
-          <DropdownMenuItem onSelect={stub(t('menuArchive'))}>
+          <DropdownMenuItem disabled={locked} onSelect={stub(t('menuArchive'))}>
             <Archive className="h-3.5 w-3.5" />
             {t('menuArchive')}
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem variant="destructive" onSelect={stub(t('menuDelete'))}>
+        <DropdownMenuItem disabled={locked} variant="destructive" onSelect={stub(t('menuDelete'))}>
           <Trash2 className="h-3.5 w-3.5" />
           {t('menuDelete')}
         </DropdownMenuItem>

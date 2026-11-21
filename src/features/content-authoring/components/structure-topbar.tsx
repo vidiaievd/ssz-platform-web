@@ -33,7 +33,8 @@ interface StructureTopbarProps {
   /** Which half is on screen. Lives in the URL, so the report can be linked to. */
   view: EditorView;
   onViewChange: (view: EditorView) => void;
-  onReview: () => void;
+  /** Absent when the course is open for viewing only: no publish button. */
+  onReview?: () => void;
   /** The settings drawer owns its own trigger, so it comes in as a slot. */
   settingsTrigger: React.ReactNode;
   /** The metric strip; a slot because it needs the tree, which the shell already holds. */
@@ -144,11 +145,13 @@ export function StructureTopbar({
               </Button>
             )}
             {settingsTrigger}
-            <Button size="sm" onClick={onReview}>
-              <Upload className="size-4" />
-              {t('reviewPublish.trigger')}
-              {pendingCount > 0 && <CountPill>{pendingCount}</CountPill>}
-            </Button>
+            {onReview && (
+              <Button size="sm" onClick={onReview}>
+                <Upload className="size-4" />
+                {t('reviewPublish.trigger')}
+                {pendingCount > 0 && <CountPill>{pendingCount}</CountPill>}
+              </Button>
+            )}
           </div>
         </div>
       </header>

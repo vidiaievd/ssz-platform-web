@@ -526,3 +526,29 @@ describe('CurriculumInspector', () => {
     });
   });
 });
+
+// Plan 90, Q17 (a): the course is open for viewing — the fields are there to read, not to change.
+describe('CurriculumInspector — open for viewing', () => {
+  it('switches the fields off and draws no delete button', async () => {
+    const { CourseReadOnlyProvider } = await import('./course-read-only');
+    const onDelete = vi.fn();
+    render(
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CourseReadOnlyProvider readOnly>
+          <CurriculumInspector
+            selection={{ kind: 'module', module: moduleNode() }}
+            courseContainerId="course-1"
+            workspaceId="my-school"
+            onChanged={vi.fn()}
+            onDelete={onDelete}
+          />
+        </CourseReadOnlyProvider>
+      </NextIntlClientProvider>,
+    );
+
+    expect(screen.getByLabelText('Learning goals')).toBeDisabled();
+    expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
+    // The module's own page still opens — it is read only as well.
+    expect(screen.getByRole('link', { name: /open/i })).toBeInTheDocument();
+  });
+});

@@ -30,6 +30,7 @@ import {
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
 import { formatLearningGoals } from '../lib/learning-goals';
 import { SaveRefusedError, useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { useCourseReadOnly } from './course-read-only';
 import { LearningGoalsField } from './learning-goals-field';
 import { useStructureUndo } from '../hooks/use-structure-undo';
 import {
@@ -240,8 +241,10 @@ function InspectorHead({
  * so the wording about what a level, a module or a block actually loses is
  * written once (`useNodeDeletion`).
  */
-function InspectorFooter({ editorHref, onDelete }: { editorHref?: string; onDelete?: () => void }) {
+function InspectorFooter({ editorHref, onDelete: requestDelete }: { editorHref?: string; onDelete?: () => void }) {
   const t = useTranslations('Authoring');
+  // Open for viewing: the lesson still opens (read only too), nothing is deleted.
+  const onDelete = useCourseReadOnly() ? undefined : requestDelete;
 
   if (!editorHref && !onDelete) return null;
 
@@ -659,6 +662,7 @@ type InspectorTab = 'fields' | 'coverage';
  */
 export function CurriculumInspector(props: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
+  const readOnly = useCourseReadOnly();
   const [tab, setTab] = useState<InspectorTab>('fields');
 
   return (
@@ -677,7 +681,11 @@ export function CurriculumInspector(props: CurriculumInspectorProps) {
       </TabsList>
 
       <TabsContent value="fields" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4.5">
-        <InspectorFields {...props} />
+        {/* A disabled fieldset switches off every field and button inside at once; links
+            (the lesson's own page) stay live. */}
+        <fieldset disabled={readOnly} className="contents">
+          <InspectorFields {...props} />
+        </fieldset>
       </TabsContent>
 
       <TabsContent value="coverage" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4.5">

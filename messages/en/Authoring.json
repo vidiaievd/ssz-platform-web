@@ -1,4 +1,9 @@
 {
+  "readOnly": {
+    "title": "Course open for viewing",
+    "noRight": "Only the author, a co-author or the school's content editor can change this course. You can see its structure and materials, but not edit them.",
+    "school": "The school is read only right now — the course can be viewed, not changed. Why and until when is in the banner above."
+  },
   "page": {
     "title": "Content",
     "subtitle": "Create and manage your learning materials."

@@ -4,6 +4,7 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { useCourseReadOnly } from './course-read-only';
 import type { CurriculumTree } from '@/features/content/types';
 
 import { collectPublishRows } from '../lib/publish-rows';
@@ -24,11 +25,15 @@ interface UnpublishedBannerProps {
  */
 export function UnpublishedBanner({ tree, onReview }: UnpublishedBannerProps) {
   const t = useTranslations('Authoring.structure');
+  // What waits to be published is the author's business, not a viewer's.
+  const readOnly = useCourseReadOnly();
 
   const count = collectPublishRows(tree, '').length;
   const modules = tree.levels.flatMap((level) => level.modules);
   const pendingModules = modules.filter((m) => m.publishState === 'pending_changes').length;
   const draftModules = modules.filter((m) => m.publishState === 'draft').length;
+
+  if (readOnly) return null;
 
   if (count === 0) {
     return (
