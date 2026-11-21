@@ -50,8 +50,9 @@ type EnrollInput = {
 export async function enrollStudent(
   schoolId: string,
   input: EnrollInput,
-): Promise<MutationResult & { invited?: boolean }> {
+): Promise<MutationResult & { invited?: boolean; alreadyMember?: boolean }> {
   try {
+    let alreadyMember = false;
     if (input.branch === 'attach-direct' && input.userId) {
       // Ensure user is a STUDENT member of the school
       await serverFetch({
@@ -60,9 +61,12 @@ export async function enrollStudent(
         method: 'POST',
         body: { userId: input.userId, role: 'STUDENT' },
       }).catch((e) => {
-        // May already be a member — ignore a plain 409, but not a refusal for lack of seats:
-        // the learner never joined, so adding them to a group would be wrong.
+        // May already be a member — a plain 409 is not a failure, but it is not an addition
+        // either; a refusal for lack of seats is: the learner never joined, so adding them to a
+        // group would be wrong.
         if (isSeatsExhausted(e)) throw e;
+        if (e instanceof AppError && e.code === 'conflict') alreadyMember = true;
+        else throw e;
       });
 
       // Add to group if specified
@@ -77,8 +81,8 @@ export async function enrollStudent(
         invalidate(groupCacheTags.groups(schoolId));
       }
     } else {
-      const kind =
-        input.branch === 'onboard-existing' ? 'onboard-existing' : 'register';
+      // The dialog's branch name is kebab-case; organization's invitation `kind` is snake_case.
+      const kind = input.branch === 'onboard-existing' ? 'onboard_existing' : 'register';
       await serverFetch({
         service: 'organization',
         path: `/schools/${schoolId}/invitations`,
@@ -88,6 +92,8 @@ export async function enrollStudent(
           role: 'STUDENT',
           targetGroupId: input.targetGroupId,
           kind,
+          // An existing account also gets the invitation in the app, not only by e-mail.
+          ...(kind === 'onboard_existing' && input.userId ? { recipientUserId: input.userId } : {}),
         },
       });
     }
@@ -95,7 +101,7 @@ export async function enrollStudent(
     invalidate(studentCacheTags.students(schoolId));
     if (input.userId) invalidate(studentCacheTags.student(input.userId));
 
-    return { ok: true, invited: input.branch !== 'attach-direct' };
+    return { ok: true, invited: input.branch !== 'attach-direct', alreadyMember };
   } catch (e) {
     return mapError(e);
   }
@@ -108,12 +114,15 @@ export async function enrollStudents(
   ok: boolean;
   invited: number;
   attached: number;
+  /** Addresses that were already students of the school: nothing changed for them. */
+  alreadyMembers: number;
   failed: number;
   /** How many of the failures were refusals for lack of student seats. */
   seatsExhausted: number;
 }> {
   let invited = 0;
   let attached = 0;
+  let alreadyMembers = 0;
   let failed = 0;
   let seatsExhausted = 0;
 
@@ -121,7 +130,8 @@ export async function enrollStudents(
     inputs.map(async (input) => {
       const result = await enrollStudent(schoolId, input);
       if (result.ok) {
-        if ((result as { invited?: boolean }).invited) invited++;
+        if (result.invited) invited++;
+        else if (result.alreadyMember) alreadyMembers++;
         else attached++;
       } else {
         failed++;
@@ -130,7 +140,7 @@ export async function enrollStudents(
     }),
   );
 
-  return { ok: failed === 0, invited, attached, failed, seatsExhausted };
+  return { ok: failed === 0, invited, attached, alreadyMembers, failed, seatsExhausted };
 }
 
 // ── Add to group ──────────────────────────────────────────────────────────────

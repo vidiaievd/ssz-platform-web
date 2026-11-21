@@ -20,7 +20,8 @@ export async function GET(req: NextRequest, { params }: Params) {
       displayName?: string;
       roles?: string[];
     }>({
-      service: 'organization',
+      // user-profile owns `users/lookup`; the gateway routes it with an exact location.
+      service: 'profile',
       path: `/users/lookup`,
       query: { email, schoolId: id },
     });
