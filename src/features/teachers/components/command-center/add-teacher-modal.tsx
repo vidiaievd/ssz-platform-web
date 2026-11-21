@@ -54,6 +54,7 @@ type AddTeacherModalProps = {
 
 export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeacherModalProps) {
   const t = useTranslations("Teachers.roster.addModal");
+  const tErrors = useTranslations("Errors");
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<InviteBranch | null>(null);
 
@@ -108,6 +109,8 @@ export function AddTeacherModal({ schoolId, open, onClose, onSuccess }: AddTeach
       } else {
         if (outcome.error === "conflict") {
           setError("email", { message: t("noLangs") });
+        } else if (outcome.error === "rate_limited") {
+          setError("root" as "email", { message: tErrors("rate_limited") });
         } else {
           setError("root" as "email", { message: t("notFound") });
         }

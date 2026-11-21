@@ -58,9 +58,9 @@ describe('POST /api/schools/[id]/teachers (invite)', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('returns 201 with branch:added for valid email', async () => {
-    // lookup → user found with TEACHER role; add member → ok
+    // school lookup → a teacher; add member → ok
     mockFetch
-      .mockResolvedValueOnce({ userId: 'u1', displayName: 'Anna', roles: ['TEACHER'] })
+      .mockResolvedValueOnce({ found: true, userId: 'u1', displayName: 'Anna', isStudent: false, isTeacher: true })
       .mockResolvedValueOnce({});
 
     const req = new NextRequest('http://localhost/api/schools/school-1/teachers', {
@@ -88,9 +88,9 @@ describe('POST /api/schools/[id]/teachers (invite)', () => {
   });
 
   it('derives teacher name from email local part when displayName is absent', async () => {
-    // lookup → user found with TEACHER role but no displayName; add member → ok
+    // school lookup → a teacher without a profile name; add member → ok
     mockFetch
-      .mockResolvedValueOnce({ userId: 'u2', displayName: null, roles: ['TEACHER'] })
+      .mockResolvedValueOnce({ found: true, userId: 'u2', displayName: null, isStudent: false, isTeacher: true })
       .mockResolvedValueOnce({});
 
     const req = new NextRequest('http://localhost/api/schools/school-1/teachers', {

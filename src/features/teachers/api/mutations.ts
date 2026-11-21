@@ -3,6 +3,7 @@
 import { revalidateTag } from 'next/cache';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { lookupSchoolUser } from '@/lib/api/school-user-lookup';
 import { AppError } from '@/lib/errors/app-error';
 
 function invalidate(tag: string) {
@@ -27,7 +28,7 @@ export type InviteBranch =
 
 export type AddTeacherResult =
   | { success: true; data: InviteBranch }
-  | { success: false; error: 'conflict' | 'generic' };
+  | { success: false; error: 'conflict' | 'rate_limited' | 'generic' };
 
 export async function addTeacher(
   schoolId: string,
@@ -42,18 +43,9 @@ export async function addTeacher(
 ): Promise<AddTeacherResult> {
   try {
     // 1. Look up user by email
-    let user: { userId?: string; displayName?: string; roles?: string[] } | null = null;
-    try {
-      user = await serverFetch<{ userId?: string; displayName?: string; roles?: string[] }>({
-        service: 'organization',
-        path: '/users/lookup',
-        query: { email: input.email, schoolId },
-      });
-    } catch (e) {
-      if (!(e instanceof AppError && e.code === 'not_found')) throw e;
-    }
-
-    const hasTeacherRole = user?.roles?.some((r) => r === 'TEACHER' || r === 'teacher');
+    const lookup = await lookupSchoolUser(schoolId, input.email);
+    const user = lookup.found ? lookup : null;
+    const hasTeacherRole = user?.isTeacher ?? false;
 
     if (user?.userId && hasTeacherRole) {
       // Branch 2: already a teacher — add directly as school member
@@ -92,6 +84,9 @@ export async function addTeacher(
   } catch (e) {
     if (e instanceof AppError && e.code === 'conflict') {
       return { success: false, error: 'conflict' };
+    }
+    if (e instanceof AppError && e.code === 'rate_limited') {
+      return { success: false, error: 'rate_limited' };
     }
     return { success: false, error: 'generic' };
   }

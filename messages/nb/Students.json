@@ -216,7 +216,9 @@
       "register": "Ny bruker",
       "attachDirect": "Allerede elev",
       "onboardExisting": "Trenger elevrolle",
-      "invalid": "Ugyldig"
+      "invalid": "Ugyldig",
+      "checkFailed": "Kunne ikke sjekkes",
+      "rateLimited": "For mange sjekker – prøv igjen om noen minutter"
     },
     "result": {
       "invited": "{count, plural, one {# invitasjon sendt} other {# invitasjoner sendt}}",

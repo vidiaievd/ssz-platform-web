@@ -216,7 +216,9 @@
       "register": "New user",
       "attachDirect": "Existing student",
       "onboardExisting": "Needs student role",
-      "invalid": "Invalid"
+      "invalid": "Invalid",
+      "checkFailed": "Could not check",
+      "rateLimited": "Too many checks — try again in a few minutes"
     },
     "result": {
       "invited": "{count, plural, one {# invited} other {# invited}}",

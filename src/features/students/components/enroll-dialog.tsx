@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { resolveEmail } from '../api/resolve-email';
+import { ResolveEmailError, resolveEmail } from '../api/resolve-email';
 import { enrollStudents } from '../api/mutations';
 import { studentKeys } from '../api/keys';
 import type { EmailResolveResult } from '@/features/students/types';
@@ -39,6 +39,8 @@ type ResolvedEmail = {
   result: EmailResolveResult | null;
   loading: boolean;
   invalid: boolean;
+  /** The address could not be checked; it is not enrolled. */
+  error?: 'rate_limited' | 'failed';
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -119,7 +121,8 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
         if (outcome.status === 'fulfilled') {
           return { ...item, loading: false, result: outcome.value.r };
         }
-        return { ...item, loading: false };
+        const reason = outcome.reason instanceof ResolveEmailError ? outcome.reason.reason : 'failed';
+        return { ...item, loading: false, error: reason };
       }),
     );
     setIsResolving(false);
@@ -230,6 +233,10 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
                   ) : item.invalid ? (
                     <Badge variant="muted" className="text-xs text-destructive border-destructive/30 shrink-0">
                       {t('enroll.branch.invalid')}
+                    </Badge>
+                  ) : item.error ? (
+                    <Badge variant="muted" className="text-xs text-destructive border-destructive/30 shrink-0">
+                      {t(item.error === 'rate_limited' ? 'enroll.branch.rateLimited' : 'enroll.branch.checkFailed')}
                     </Badge>
                   ) : (
                     <BranchBadge branch={item.result?.branch} />

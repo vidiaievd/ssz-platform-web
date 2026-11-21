@@ -2,6 +2,7 @@ import { seatsExhaustedResponseBody } from '@/features/school-seats/lib/seats-er
 import { NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { lookupSchoolUser } from '@/lib/api/school-user-lookup';
 import { AppError } from '@/lib/errors';
 import { getInvitationsProvider } from '@/lib/invitations/provider';
 import type { InvitationRole, InvitationStatus } from '@/features/invitations/types';
@@ -51,7 +52,6 @@ type InvitationBody = {
   [key: string]: unknown;
 };
 
-type UserLookupResult = { userId: string };
 
 export async function POST(request: NextRequest, { params }: Params) {
   const { id } = await params;
@@ -66,12 +66,8 @@ export async function POST(request: NextRequest, { params }: Params) {
   // can deliver an IN_APP notification in addition to the email.
   if (body.kind === 'onboard_existing' && body.email && !body.recipientUserId) {
     try {
-      const lookup = await serverFetch<UserLookupResult>({
-        service: 'profile',
-        path: '/users/lookup',
-        query: { email: body.email },
-      });
-      body = { ...body, recipientUserId: lookup.userId };
+      const lookup = await lookupSchoolUser(id, body.email);
+      if (lookup.found) body = { ...body, recipientUserId: lookup.userId };
     } catch {
       // Non-fatal: proceed without recipientUserId; email will still be sent.
     }

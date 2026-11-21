@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
-import { serverFetch } from '@/lib/api/server-fetcher';
+import { lookupSchoolUser } from '@/lib/api/school-user-lookup';
 import { AppError } from '@/lib/errors/app-error';
 import type { EmailResolveResult } from '@/features/students/types';
 
@@ -15,40 +15,31 @@ export async function GET(req: NextRequest, { params }: Params) {
   }
 
   try {
-    const user = await serverFetch<{
-      userId?: string;
-      displayName?: string;
-      roles?: string[];
-    }>({
-      // user-profile owns `users/lookup`; the gateway routes it with an exact location.
-      service: 'profile',
-      path: `/users/lookup`,
-      query: { email, schoolId: id },
-    });
-
-    const hasStudentRole = user.roles?.some((r) =>
-      r === 'student' || r === 'STUDENT',
-    );
+    const user = await lookupSchoolUser(id, email);
 
     let branch: EmailResolveResult['branch'];
-    if (!user.userId) {
+    if (!user.found) {
       branch = 'register';
-    } else if (hasStudentRole) {
+    } else if (user.isStudent) {
       branch = 'attach-direct';
     } else {
       branch = 'onboard-existing';
     }
 
-    const result: EmailResolveResult = {
-      branch,
-      userId: user.userId,
-      displayName: user.displayName,
-    };
+    const result: EmailResolveResult = user.found
+      ? { branch, userId: user.userId, displayName: user.displayName ?? undefined }
+      : { branch };
     return NextResponse.json(result);
   } catch (e) {
+    // Never "register" on a failure: the address may well have an account.
+    if (e instanceof AppError && e.code === 'rate_limited') {
+      return NextResponse.json({ error: 'rate_limited' }, { status: 429 });
+    }
     if (e instanceof AppError && e.code === 'not_found') {
-      const result: EmailResolveResult = { branch: 'register' };
-      return NextResponse.json(result);
+      return NextResponse.json({ error: 'School not found' }, { status: 404 });
+    }
+    if (e instanceof AppError && e.code === 'conflict') {
+      return NextResponse.json({ error: 'school_not_active' }, { status: 409 });
     }
     if (e instanceof AppError && e.code === 'unauthenticated') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
