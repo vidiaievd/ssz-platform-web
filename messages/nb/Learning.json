@@ -192,7 +192,11 @@
       "caughtLabel": "ALT ER GJORT",
       "caughtTitle": "Du er à jour!",
       "caughtMeta": "Godt jobbet! Kom tilbake senere eller forhåndsvis neste enhet.",
-      "caughtCta": "Forhåndsvis neste enhet"
+      "caughtCta": "Forhåndsvis neste enhet",
+      "historyLabel": "KUN LESING",
+      "historyTitle": "Kurset er bevart for lesing",
+      "historyMeta": "Du kan lese leksjonene igjen, men nye øvelser kan ikke startes.",
+      "historyCta": "Les leksjonene"
     },
     "viewToggle": {
       "units": "Enhetsflyt",

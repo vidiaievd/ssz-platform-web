@@ -110,10 +110,17 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
     overdueAssignmentCount,
   } = data;
 
+  // Read only: an obsolete course kept from a purge, or any course of a closed / purged school.
+  const historyOnly =
+    courseInfo.schoolStatus === 'closed' ||
+    courseInfo.schoolStatus === 'purged' ||
+    (courseInfo.maintenanceStatus === 'obsolete' && isObsoleteHistoryOnly(courseInfo));
+
   const scenario = deriveContinueScenario({
     overdueAssignmentCount,
     srsDueCount,
     modules: progress.modules,
+    historyOnly,
   });
 
   const ctaHref = buildCtaHref({ scenario, courseId, locale, modules: progress.modules });
@@ -224,6 +231,10 @@ function buildCtaHref(opts: {
   if (scenario === 'overdue') return `${base}/assignments`;
   if (scenario === 'review') return `${base}/srs`;
 
+  if (scenario === 'history') {
+    const open = modules.find((m) => m.status === 'in_progress') ?? modules[0];
+    return open ? `${base}/courses/${courseId}/${open.moduleId}` : `${base}/courses/${courseId}`;
+  }
   if (scenario === 'resume') {
     const active = modules.find((m) => m.status === 'in_progress');
     if (active) return `${base}/courses/${courseId}/${active.moduleId}`;

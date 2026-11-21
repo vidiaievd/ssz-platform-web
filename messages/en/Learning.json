@@ -192,7 +192,11 @@
       "caughtLabel": "ALL CAUGHT UP",
       "caughtTitle": "You're all caught up!",
       "caughtMeta": "Great work! Come back later or preview the next unit.",
-      "caughtCta": "Preview next unit"
+      "caughtCta": "Preview next unit",
+      "historyLabel": "READ ONLY",
+      "historyTitle": "This course is kept for reading",
+      "historyMeta": "You can read the lessons again, but new exercises can’t be started.",
+      "historyCta": "Read the lessons"
     },
     "viewToggle": {
       "units": "Unit flow",

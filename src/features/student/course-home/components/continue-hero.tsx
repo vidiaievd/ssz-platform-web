@@ -2,7 +2,11 @@ import { useTranslations } from 'next-intl';
 
 import type { CourseProgress } from '@/features/learning';
 
-export type ContinueScenario = 'overdue' | 'review' | 'resume' | 'start' | 'caught-up';
+/**
+ * `history` — a course the learner can only look back on (a closed or purged school, plan 90 Q11):
+ * lessons open to read, no new exercises, so no call to "continue".
+ */
+export type ContinueScenario = 'overdue' | 'review' | 'resume' | 'start' | 'caught-up' | 'history';
 
 /* ── Scenario derivation (pure, testable) ───────────────────────── */
 
@@ -10,8 +14,11 @@ export function deriveContinueScenario(opts: {
   overdueAssignmentCount: number;
   srsDueCount: number;
   modules: CourseProgress['modules'];
+  /** The course is kept for reading only (see `isObsoleteHistoryOnly`). */
+  historyOnly?: boolean;
 }): ContinueScenario {
-  const { overdueAssignmentCount, srsDueCount, modules } = opts;
+  const { overdueAssignmentCount, srsDueCount, modules, historyOnly } = opts;
+  if (historyOnly) return 'history';
   if (overdueAssignmentCount > 0) return 'overdue';
   if (srsDueCount >= 20) return 'review';
   if (modules.some((m) => m.status === 'in_progress')) return 'resume';
@@ -27,6 +34,7 @@ const SCENARIO_BG: Record<ContinueScenario, string> = {
   resume:    'oklch(0.62 0.105 168)',
   start:     'oklch(0.62 0.105 168)',
   'caught-up': 'oklch(0.55 0.10 145)',
+  history:   'oklch(0.52 0.02 250)',
 };
 
 /* ── Props ───────────────────────────────────────────────────────── */
@@ -48,7 +56,8 @@ export function ContinueHero({ scenario, ctaHref, srsDueCount = 0 }: ContinueHer
     | 'reviewLabel' | 'reviewTitle' | 'reviewMeta' | 'reviewCta'
     | 'resumeLabel' | 'resumeTitle' | 'resumeMeta' | 'resumeCta'
     | 'startLabel' | 'startTitle' | 'startMeta' | 'startCta'
-    | 'caughtLabel' | 'caughtTitle' | 'caughtMeta' | 'caughtCta';
+    | 'caughtLabel' | 'caughtTitle' | 'caughtMeta' | 'caughtCta'
+    | 'historyLabel' | 'historyTitle' | 'historyMeta' | 'historyCta';
 
   const prefix = scenario === 'caught-up' ? 'caught' : scenario;
 

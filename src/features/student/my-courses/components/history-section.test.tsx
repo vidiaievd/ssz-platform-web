@@ -35,4 +35,12 @@ describe('HistorySection', () => {
     expect(screen.getByTestId('history-unavailable')).toHaveTextContent('Course unavailable');
     expect(screen.getAllByRole('link')).toHaveLength(1);
   });
+
+  it('folds every course that is gone into one counted row', () => {
+    history.data = [item('a', null), item('b', { title: 'Norsk B1', level: 'B1', targetLanguage: 'no' }), item('c', null), item('d', null)];
+    renderWithProviders(<HistorySection shownIds={new Set()} />);
+    expect(screen.getAllByTestId('history-unavailable')).toHaveLength(1);
+    expect(screen.getByTestId('history-unavailable')).toHaveTextContent('3 courses unavailable');
+    expect(screen.getAllByRole('listitem')).toHaveLength(2);
+  });
 });

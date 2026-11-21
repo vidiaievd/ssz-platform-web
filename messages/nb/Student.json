@@ -229,8 +229,8 @@
       "title": "Historikk",
       "subtitle": "Fullførte kurs, kun lesing.",
       "finished": "Fullført {date}",
-      "unavailable": "Kurset er ikke tilgjengelig",
-      "unavailableNote": "Skolen som drev kurset er borte, og kurset kan ikke lenger leses."
+      "unavailable": "{count, plural, one {Kurset er ikke tilgjengelig} other {# kurs er ikke tilgjengelige}}",
+      "unavailableNote": "{count, plural, one {Skolen som drev kurset er borte, og kurset kan ikke lenger leses.} other {Skolene som drev disse kursene er borte, og kursene kan ikke lenger leses.}}"
     }
   },
   "reviewsPage": {
