@@ -7,6 +7,7 @@ import { attemptRefresh } from '@/lib/auth/refresh';
 import { env } from '@/lib/env';
 import { AppError, type AppErrorCode } from '@/lib/errors';
 
+import { acceptCorrelationId, CORRELATION_HEADER, logUpstreamCall, type UpstreamOutcome } from './bff-log';
 import { resolveServiceUrl, type ServiceName } from './services';
 
 const SENSITIVE_KEYS = /password|token|secret|code|credential|authorization/i;
@@ -94,8 +95,20 @@ export async function serverFetch<TData = unknown, TBody = unknown>(
     ...opts.headers,
   };
 
-  if (opts.forwardClientHeaders !== false) {
-    const incoming = await headers();
+  // Outside a request (a build step, a background job) there are no headers to read.
+  let incoming: Headers | null = null;
+  try {
+    incoming = await headers();
+  } catch {
+    incoming = null;
+  }
+
+  // The page load's id (set by proxy.ts) goes with every call, so the gateway's and the
+  // services' lines for it can be found next to ours. Not a client header: always sent.
+  const correlationId = acceptCorrelationId(incoming?.get(CORRELATION_HEADER));
+  if (correlationId) baseHeaders['X-Correlation-ID'] = correlationId;
+
+  if (opts.forwardClientHeaders !== false && incoming) {
     const acceptLanguage = incoming.get('accept-language');
     if (acceptLanguage) baseHeaders['Accept-Language'] = acceptLanguage;
     const clientAddress = nearestForwardedFor(incoming.get('x-forwarded-for'));
@@ -126,6 +139,20 @@ async function doRequest<TData, TBody>(
 
   const method = opts.method ?? 'GET';
   const startMs = Date.now();
+  const record = (status: number | null, outcome: UpstreamOutcome) =>
+    logUpstreamCall(
+      {
+        correlationId: baseHeaders['X-Correlation-ID'] ?? null,
+        service: opts.service,
+        method,
+        path: url.pathname,
+        status,
+        durationMs: Date.now() - startMs,
+        outcome,
+        retry: retrying,
+      },
+      env.NODE_ENV,
+    );
 
   logUpstream('→', method, url, { body: opts.body });
 
@@ -144,15 +171,17 @@ async function doRequest<TData, TBody>(
       // Refresh-on-401: one transparent retry with a fresh access token.
       if (response.status === 401 && !opts.anonymous && !retrying) {
         logUpstream('←', method, url, { status: 401, durationMs });
+        record(401, 'expected');
         const refreshed = await attemptRefresh();
         if (refreshed) return doRequest(url, baseHeaders, opts, true);
         throw new AppError('unauthenticated', 'Session expired — refresh failed');
       }
 
       const code = mapStatusToCode(response.status);
-      if (!opts.expectedErrorStatuses?.includes(response.status)) {
-        console.warn(`[BFF] Upstream error on ${opts.service}${opts.path}: ${response.status}`);
-      }
+      record(
+        response.status,
+        opts.expectedErrorStatuses?.includes(response.status) ? 'expected' : 'error',
+      );
       let details: unknown;
       try {
         details = await response.json();
@@ -170,6 +199,8 @@ async function doRequest<TData, TBody>(
         details,
       );
     }
+
+    record(response.status, 'ok');
 
     if (response.status === 204) {
       logUpstream('←', method, url, { status: 204, durationMs });
@@ -192,6 +223,7 @@ async function doRequest<TData, TBody>(
     if (err instanceof AppError) throw err;
     if (err instanceof DOMException && err.name === 'AbortError') {
       logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
+      record(null, 'timeout');
       throw new AppError('timeout', `Timeout calling ${opts.service}${opts.path}`, null, err);
     }
 
@@ -200,11 +232,13 @@ async function doRequest<TData, TBody>(
     // POST/PATCH/DELETE are not retried — they may have side effects.
     if (!retrying && method === 'GET' && isRetriableNetworkError(err)) {
       logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
+      record(null, 'network');
       await new Promise((r) => setTimeout(r, 100));
       return doRequest(url, baseHeaders, opts, true);
     }
 
     logUpstream('✗', method, url, { durationMs: Date.now() - startMs });
+    record(null, 'network');
     throw new AppError(
       'upstream_unavailable',
       `Upstream call failed: ${opts.service}${opts.path}`,

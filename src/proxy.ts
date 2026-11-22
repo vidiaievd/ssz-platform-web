@@ -1,6 +1,7 @@
 import createMiddleware from 'next-intl/middleware';
 import { type NextRequest, NextResponse } from 'next/server';
 
+import { acceptCorrelationId, CORRELATION_HEADER } from '@/lib/api/bff-log';
 import { LOCALES } from '@/lib/i18n/config';
 import { routing } from '@/lib/i18n/routing';
 
@@ -9,8 +10,28 @@ const intlMiddleware = createMiddleware(routing);
 const localePattern = LOCALES.join('|');
 const PROTECTED_RE = new RegExp(`^/(${localePattern})/(school|student)(/.*)?$`);
 
+/**
+ * One id per incoming request, for the BFF's log and every upstream call it makes (OQ-43).
+ * An id that came in (a proxy in front of us) is kept when it is well-formed; otherwise a
+ * new one is made. It is written into the request's own headers — next-intl copies those
+ * into the request it passes on — and echoed on the response.
+ */
+function stampCorrelationId(request: NextRequest): string {
+  const id = acceptCorrelationId(request.headers.get(CORRELATION_HEADER)) ?? crypto.randomUUID();
+  request.headers.set(CORRELATION_HEADER, id);
+  return id;
+}
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const correlationId = stampCorrelationId(request);
+
+  // The BFF's route handlers: no locale and no login redirect, only the id passed on.
+  if (pathname.startsWith('/api/')) {
+    const response = NextResponse.next({ request: { headers: request.headers } });
+    response.headers.set(CORRELATION_HEADER, correlationId);
+    return response;
+  }
 
   if (PROTECTED_RE.test(pathname)) {
     const hasToken = request.cookies.has('ssz_at');
@@ -43,10 +64,13 @@ export function proxy(request: NextRequest) {
     }
   }
 
-  return intlMiddleware(request);
+  const response = intlMiddleware(request);
+  response.headers.set(CORRELATION_HEADER, correlationId);
+  return response;
 }
 
 export const config = {
   // robots.txt and sitemap.xml live at the root — the locale middleware would redirect them to /en/….
-  matcher: ['/((?!api|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml).*)'],
+  // /api is matched only to stamp the correlation id (see the early return above).
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml).*)'],
 };
