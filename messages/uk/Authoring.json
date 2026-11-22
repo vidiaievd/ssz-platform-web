@@ -575,6 +575,7 @@
     "unpublishedBannerHint": "Студенти досі бачать останню опубліковану версію.",
     "unpublishedBannerAction": "Переглянути",
     "moduleCount": "{count, plural, one {# модуль} few {# модулі} many {# модулів} other {# модуля}}",
+    "levelFallback": "Рівень {number}",
     "minutes": "{count} хв",
     "noModulesYet": "Модулів ще немає — додайте перший.",
     "addLessonToSection": "Додати до «{section}»",

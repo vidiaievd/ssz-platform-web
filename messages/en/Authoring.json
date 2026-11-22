@@ -575,6 +575,7 @@
     "unpublishedBannerHint": "Students still see the last published version.",
     "unpublishedBannerAction": "Review",
     "moduleCount": "{count, plural, one {# module} other {# modules}}",
+    "levelFallback": "Level {number}",
     "minutes": "{count} min",
     "noModulesYet": "No modules yet — add the first one.",
     "addLessonToSection": "Add to {section}",

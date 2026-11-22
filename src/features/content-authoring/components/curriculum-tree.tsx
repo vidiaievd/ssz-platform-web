@@ -1802,7 +1802,9 @@ export function CurriculumTree({
       return;
     }
 
-    if (readOnly && event.key !== 'Enter') return;
+    // Open for viewing: no shortcut at all — Enter would open the editor, which a course open for
+    // viewing does not offer (owner's call, live check s26).
+    if (readOnly) return;
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
       event.preventDefault();
@@ -2073,7 +2075,9 @@ export function CurriculumTree({
                 <Glyph className="bg-primary-100 text-primary-700">{levelIndex + 1}</Glyph>
                 <InlineRename
                   value={level.title ?? ''}
-                  editing={rename.activeId === level.id}
+                  // The level of modules outside any section has no id; with no
+                  // rename running `activeId` is null too, so compare only real ids.
+                  editing={level.id !== null && rename.activeId === level.id}
                   onCommit={(title) => level.id && rename.commit(level.id, title)}
                   onCancel={rename.cancel}
                 >
@@ -2085,7 +2089,7 @@ export function CurriculumTree({
                       rename.begin(level.id);
                     }}
                   >
-                    {level.title}
+                    {level.title || t('structure.levelFallback', { number: levelIndex + 1 })}
                   </span>
                 </InlineRename>
                 {rolledUp && <PublishStateBadge state={rolledUp} />}

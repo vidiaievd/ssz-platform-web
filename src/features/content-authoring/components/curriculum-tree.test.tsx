@@ -962,6 +962,16 @@ describe('CurriculumTree', () => {
   });
 
   describe('inline rename', () => {
+    // Live check s26: the level of modules outside any section has no id, and with no rename
+    // running `activeId` is null too — the tree opened an empty title field on it at rest.
+    it('opens no title field on the level without an id and names it by its number', () => {
+      const [level] = TREE.levels;
+      renderTree(vi.fn(), vi.fn(), { ...TREE, levels: [{ ...level!, id: null, title: null }] });
+
+      expect(screen.queryByRole('textbox')).toBeNull();
+      expect(screen.getAllByText('Level 1').length).toBeGreaterThan(0);
+    });
+
     it('renames a module through its container endpoint', async () => {
       vi.mocked(renameContainerAction).mockResolvedValue({ ok: true, value: undefined } as never);
       const { onChanged } = renderTree();
@@ -1419,9 +1429,9 @@ describe('CurriculumTree — open for viewing', () => {
     expect(screen.queryByRole('alertdialog')).toBeNull();
   });
 
-  it('still opens the selected lesson with Enter', async () => {
+  it('does not open the selected lesson’s editor with Enter', async () => {
     await renderReadOnly(true, 'item-1');
     fireEvent.keyDown(document.body, { key: 'Enter' });
-    expect(routerPush).toHaveBeenCalledWith('/w/my-school/content/module-1/lessons/item-1');
+    expect(routerPush).not.toHaveBeenCalled();
   });
 });

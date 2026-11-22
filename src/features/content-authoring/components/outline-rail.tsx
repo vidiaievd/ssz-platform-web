@@ -97,7 +97,8 @@ export function OutlineRail({
                     {index + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
-                    {stripLevelPrefix(level.title)}
+                    {stripLevelPrefix(level.title) ||
+                      t('structure.levelFallback', { number: index + 1 })}
                   </span>
                   {hasUnpublished && (
                     <span

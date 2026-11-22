@@ -575,6 +575,7 @@
     "unpublishedBannerHint": "Elevene ser fortsatt den sist publiserte versjonen.",
     "unpublishedBannerAction": "Se gjennom",
     "moduleCount": "{count, plural, one {# modul} other {# moduler}}",
+    "levelFallback": "Nivå {number}",
     "minutes": "{count} min",
     "noModulesYet": "Ingen moduler ennå — legg til den første.",
     "addLessonToSection": "Legg til i {section}",

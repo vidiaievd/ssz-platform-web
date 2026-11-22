@@ -243,18 +243,31 @@ function InspectorHead({
  */
 function InspectorFooter({ editorHref, onDelete: requestDelete }: { editorHref?: string; onDelete?: () => void }) {
   const t = useTranslations('Authoring');
-  // Open for viewing: the lesson still opens (read only too), nothing is deleted.
-  const onDelete = useCourseReadOnly() ? undefined : requestDelete;
+  // Open for viewing: the editor is not offered (owner's call, live check s26) and nothing is
+  // deleted. A typed-in editor address still opens read only (`LessonEditorPage`).
+  const readOnly = useCourseReadOnly();
+  const onDelete = readOnly ? undefined : requestDelete;
 
   if (!editorHref && !onDelete) return null;
 
   return (
     <div className="flex gap-2 border-t border-border pt-3">
-      {editorHref && (
-        <Button asChild variant="outline" size="sm" className="flex-1">
-          <Link href={editorHref}>{t('structure.openEditor')}</Link>
-        </Button>
-      )}
+      {editorHref &&
+        (readOnly ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            disabled
+            title={t('readOnly.title')}
+          >
+            {t('structure.openEditor')}
+          </Button>
+        ) : (
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <Link href={editorHref}>{t('structure.openEditor')}</Link>
+          </Button>
+        ))}
       {onDelete && (
         <Button
           variant="outline"

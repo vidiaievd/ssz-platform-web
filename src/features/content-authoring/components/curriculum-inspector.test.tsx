@@ -548,7 +548,8 @@ describe('CurriculumInspector — open for viewing', () => {
 
     expect(screen.getByLabelText('Learning goals')).toBeDisabled();
     expect(screen.queryByRole('button', { name: 'Delete' })).toBeNull();
-    // The module's own page still opens — it is read only as well.
-    expect(screen.getByRole('link', { name: /open/i })).toBeInTheDocument();
+    // The editor is not offered at all (live check s26): a disabled button, no link.
+    expect(screen.queryByRole('link', { name: /open/i })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Open editor' })).toBeDisabled();
   });
 });
