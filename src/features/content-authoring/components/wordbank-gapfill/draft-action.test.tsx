@@ -12,6 +12,7 @@ const { DraftAction } = await import('./draft-panel');
 function rights(authoring: boolean): Entitlements {
   return {
     account: { type: 'workspace', externalId: 'w1' },
+    subscription: null,
     features: { 'ai.authoring': { enabled: authoring, monthlyCredits: '500', limits: {} } },
     validUntil: '2026-11-21T00:00:00.000Z',
     version: 1,

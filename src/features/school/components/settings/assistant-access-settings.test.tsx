@@ -32,6 +32,7 @@ const CHOICES: AssistantAccessChoices = {
 function entitlements(keys: string[]): Entitlements {
   return {
     account: { type: 'workspace', externalId: 'school-1' },
+    subscription: null,
     features: Object.fromEntries(
       keys.map((key) => [key, { enabled: true, monthlyCredits: null, limits: {} }]),
     ),

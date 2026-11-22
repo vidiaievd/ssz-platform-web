@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext } from 'react';
 
 import { can } from '../lib/can';
+import { trialDaysLeft } from '../lib/trial';
 import type { Entitlements, FeatureKey } from '../types';
 
 const EntitlementsContext = createContext<Entitlements | null>(null);
@@ -29,4 +30,10 @@ export function EntitlementsProvider({
 export function useCan(): (key: FeatureKey) => boolean {
   const entitlements = useContext(EntitlementsContext);
   return useCallback((key: FeatureKey) => can(entitlements, key), [entitlements]);
+}
+
+/** Days left on the context's trial, or null when it is not on one (see `trialDaysLeft`). */
+export function useTrialDaysLeft(): number | null {
+  const entitlements = useContext(EntitlementsContext);
+  return trialDaysLeft(entitlements, new Date());
 }

@@ -22,11 +22,16 @@ export interface FeatureEntitlement {
  * What the current context — a workspace, or the learner on their own — may use.
  *
  * Only the parts the UI reads are typed here; the answer of `/subscriptions/me` carries
- * more (plan, subscription, period), and those stay with the service until a screen
+ * more (plan, period, grants), and those stay with the service until a screen
  * needs them.
  */
 export interface Entitlements {
   account: { type: 'workspace' | 'user'; externalId: string };
+  /**
+   * The open subscription, or null on the free plan. Read only for the trial notice in the
+   * top bar: rights themselves come from `features`, never from the status.
+   */
+  subscription: { status: 'trial' | 'active'; periodEnd: string | null } | null;
   /** A key absent here is not available. */
   features: Partial<Record<string, FeatureEntitlement>>;
   /** When time alone changes this answer. ISO 8601. */
