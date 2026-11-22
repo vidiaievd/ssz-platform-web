@@ -9,6 +9,7 @@ import type {
   GroupsHealthPayload,
   GroupGapsPayload,
   TeacherLoadPayload,
+  SchoolSessionItem,
   Unavailable,
 } from './types';
 
@@ -102,6 +103,25 @@ export async function fetchTeacherLoad(
     serverFetch<TeacherLoadPayload>({
       service: 'analytics',
       path: `/analytics/schools/${schoolId}/dashboard/teacher-load`,
+    }),
+  );
+}
+
+/**
+ * The school's sessions on one day (`YYYY-MM-DD`) — «today's classes».
+ *
+ * scheduling-service already narrows a teacher to their own sessions, so the one call serves
+ * the owner's view and the teacher's alike.
+ */
+export async function fetchSchoolSessionsOn(
+  schoolId: string,
+  day: string,
+): Promise<WidgetResult<SchoolSessionItem[]>> {
+  return safeWidgetFetch(() =>
+    serverFetch<SchoolSessionItem[]>({
+      service: 'scheduling',
+      path: `/scheduling/schools/${schoolId}/sessions`,
+      query: { from: day, to: day },
     }),
   );
 }

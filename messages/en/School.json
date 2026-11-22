@@ -164,7 +164,8 @@
       "online": "Online",
       "now": "now",
       "low": "low",
-      "underEnrolled": "under-enrolled"
+      "underEnrolled": "under-enrolled",
+      "unknownGroup": "Group"
     },
     "quick": {
       "title": "Quick actions",

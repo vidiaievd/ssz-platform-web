@@ -133,24 +133,19 @@ export type GroupGapsPayload = {
 
 export type Unavailable = { status: 'unavailable' };
 
-export type DashboardCompositeResponse = {
-  schoolId: string;
-  role: string;
-  kpis: KpisPayload | Unavailable;
-  atRisk: AtRiskPayload | Unavailable;
-  courseHealth: CourseHealthPayload | Unavailable;
-  activity: ActivityPayload | Unavailable;
-  /** Out of scope — scheduling service not yet built. */
-  todaysClasses: Unavailable;
-  /** Out of scope — billing service not yet built. */
-  trial: Unavailable;
-  onboarding: {
-    /** `labelKey` under `School.dashboard.onboarding.items`; `href` workspace-relative or null. */
-    items: Array<{ key: string; done: boolean; labelKey: string; estMinutes: number; href: string | null }>;
-    completed: number;
-    total: number;
-    minutesLeft: number;
-  };
-  dataState: 'empty' | 'partial' | 'full';
-  schoolType: 'online' | 'hybrid';
+// ─── School sessions (scheduling-service, API response shape) ──────────────────
+
+/** One dated session of `GET scheduling/schools/:id/sessions` — only the fields the dashboard reads. */
+export type SchoolSessionItem = {
+  id: string;
+  groupId: string;
+  /** `YYYY-MM-DD`. */
+  date: string;
+  /** Wall-clock `HH:MM`, as the school set it. */
+  startTime: string;
+  endTime: string;
+  teacherId: string | null;
+  room: string | null;
+  status: 'scheduled' | 'moved' | 'cancelled' | 'held';
 };
+

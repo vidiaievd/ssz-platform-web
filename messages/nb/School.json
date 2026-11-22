@@ -164,7 +164,8 @@
       "online": "Nett",
       "now": "nå",
       "low": "få",
-      "underEnrolled": "få påmeldte"
+      "underEnrolled": "få påmeldte",
+      "unknownGroup": "Gruppe"
     },
     "quick": {
       "title": "Snarveier",

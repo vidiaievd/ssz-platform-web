@@ -128,13 +128,16 @@ export interface ReviewQueueItem {
 
 export interface TodaysClass {
   id: string;
+  /** Wall-clock start, `HH:MM`. */
   time: string;
-  name: string;
+  /** The group's name; null when the dashboard's group list does not hold that group. */
+  name: string | null;
   teacher?: string;
   room: string;
   mode: 'online' | 'in-person';
   students: number;
-  cap: number;
+  /** The group's capacity; null when unknown or not set. */
+  cap: number | null;
   status: 'now' | 'upcoming' | 'low';
 }
 

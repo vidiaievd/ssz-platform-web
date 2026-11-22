@@ -14,7 +14,9 @@ import {
   fetchGroupsHealth,
   fetchTeacherLoad,
   fetchGroupGaps,
+  fetchSchoolSessionsOn,
 } from '@/lib/dashboard/queries';
+import { buildTodaysClasses, utcDay } from '@/features/dashboard/lib/todays-classes';
 
 import type {
   WidgetData,
@@ -236,7 +238,8 @@ export async function SchoolDashboard({ params }: Props) {
   const schoolType = deriveSchoolType(school);
 
   // ── 2. Parallel widget data fetch ──────────────────────────────────────────
-  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps] =
+  // «Today's classes» is drawn for hybrid schools only — an online one is not asked.
+  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps, todaysSessions] =
     await Promise.all([
       fetchDashboardKpis(school.id),
       fetchAtRisk(school.id, 3),
@@ -245,6 +248,9 @@ export async function SchoolDashboard({ params }: Props) {
       fetchGroupsHealth(school.id, role),
       fetchTeacherLoad(school.id),
       fetchGroupGaps(school.id),
+      schoolType === 'hybrid'
+        ? fetchSchoolSessionsOn(school.id, utcDay(new Date()))
+        : Promise.resolve({ status: 'unavailable' } as const),
     ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
@@ -255,6 +261,10 @@ export async function SchoolDashboard({ params }: Props) {
   const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
   const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
   const groupGapsWidget = adaptGroupGaps(groupGaps);
+  const todaysClassesWidget = buildTodaysClasses(
+    todaysSessions,
+    groupsHealthWidget.status === 'ok' ? groupsHealthWidget.data.groups : [],
+  );
 
   const hasActivity = activityWidget.status === 'ok' && activityWidget.data.length > 0;
   const coursesCount = courseHealthWidget.status === 'ok' ? courseHealthWidget.data.length : 0;
@@ -386,7 +396,7 @@ export async function SchoolDashboard({ params }: Props) {
           {canSeeWidget('todaysClasses', ctx) && (
             <Suspense fallback={<WidgetCard title={tLoading('todaysClasses')} loading />}>
               <TodaysClassesCard
-                todaysClasses={{ status: 'unavailable' }}
+                todaysClasses={todaysClassesWidget}
                 teacherView={role === 'teacher'}
               />
             </Suspense>

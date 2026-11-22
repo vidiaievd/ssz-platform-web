@@ -164,7 +164,8 @@
       "online": "Онлайн",
       "now": "сейчас",
       "low": "мало",
-      "underEnrolled": "мало учеников"
+      "underEnrolled": "мало учеников",
+      "unknownGroup": "Группа"
     },
     "quick": {
       "title": "Быстрые действия",
