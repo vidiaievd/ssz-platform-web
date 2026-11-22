@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { isWorkspaceWritable } from '@/features/school-lifecycle/api/get-workspace-lifecycle';
 
 import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 import { AiPrecheckSettingsForm } from '@/features/school/components/settings/ai-precheck-settings';
@@ -24,6 +25,8 @@ export default async function SchoolPrecheckSettingsPage({ params }: Props) {
   const { workspaceId } = await params;
 
   const workspace = await requireSettingsPage(workspaceId, 'precheck');
+  // A suspended or closed workspace shows its settings but takes no changes (plan 90, block 9).
+  const writable = await isWorkspaceWritable(workspaceId);
   const t = await getTranslations('Settings.precheck');
 
   return (
@@ -38,7 +41,7 @@ export default async function SchoolPrecheckSettingsPage({ params }: Props) {
 
       <AiPrecheckSettingsForm
         school={workspace.id}
-        canEdit={workspace.myRole === 'OWNER' || workspace.myRole === 'ADMIN'}
+        canEdit={(workspace.myRole === 'OWNER' || workspace.myRole === 'ADMIN') && writable}
       />
     </div>
   );

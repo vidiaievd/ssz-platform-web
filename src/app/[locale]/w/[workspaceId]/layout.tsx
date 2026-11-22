@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 import { requireAnyRole } from '@/lib/auth/protect';
@@ -12,7 +12,9 @@ import { resolveWorkspace } from '@/features/workspaces/api/resolve-workspace';
 import { WorkspaceActivator } from '@/features/workspaces/components/workspace-activator';
 import { getEntitlements } from '@/features/entitlements/api/get-entitlements';
 import { EntitlementsProvider } from '@/features/entitlements';
-import { SchoolStatusBanner } from '@/features/school-lifecycle';
+import { SchoolStatusBanner, SchoolWritableProvider } from '@/features/school-lifecycle';
+import { getWorkspaceLifecycle } from '@/features/school-lifecycle/api/get-workspace-lifecycle';
+import { SchoolUnavailable } from '@/features/school-lifecycle/components/school-unavailable';
 import { AppShell } from '@/components/shared/app-shell';
 import type { SchoolContext } from '@/components/shared/app-shell';
 import type { DashboardRole } from '@/features/dashboard/types';
@@ -20,7 +22,7 @@ import type { SchoolRole } from '@/features/school/types';
 
 type Props = {
   children: React.ReactNode;
-  params: Promise<{ workspaceId: string }>;
+  params: Promise<{ locale: string; workspaceId: string }>;
 };
 
 const SCHOOL_ROLE_TO_DASHBOARD: Record<SchoolRole, DashboardRole> = {
@@ -42,13 +44,20 @@ const SCHOOL_ROLE_TO_DASHBOARD: Record<SchoolRole, DashboardRole> = {
  * which is why the address no longer says "school" (plan 61).
  */
 export default async function WorkspaceLayout({ children, params }: Props) {
-  const { workspaceId } = await params;
+  const { locale, workspaceId } = await params;
   const user = await requireAnyRole(['tutor', 'school_admin', 'teacher', 'student']);
 
   const workspace = await resolveWorkspace(workspaceId);
 
-  // Not yours and no such workspace are the same answer, here as on the server.
-  if (!workspace) notFound();
+  // Not yours, closed and no such workspace are the same answer, here as on the server
+  // (plan 90, Q13): say "school unavailable" rather than a bare 404.
+  if (!workspace) return <SchoolUnavailable />;
+
+  // A learner of this school has no business in its staff shell (plan 90, live check, block 9):
+  // the old `/school/<slug>` links land here too. Their own screen of the school is elsewhere.
+  // It is the role in this school that decides, not the platform role — a platform student may
+  // teach in another school.
+  if (workspace.myRole === 'STUDENT') redirect(`/${locale}/student/schools/${workspace.id}`);
 
   // A school's slug still opens its workspace — it is an alias, and every link the app
   // builds already carries the id. Canonicalising it here would mean redirecting from a
@@ -59,14 +68,15 @@ export default async function WorkspaceLayout({ children, params }: Props) {
   const queryClient = getQueryClient();
   // What the workspace's plan lets its screens offer. Only which controls are drawn
   // follows from it — the services behind them check again (plan 78 §7).
-  const [entitlements] = await Promise.all([
+  // A tutor's SOLO workspace has a lifecycle too: suspended or closed, it is read only and says so.
+  const [entitlements, lifecycle] = await Promise.all([
     getEntitlements(workspace.id),
+    getWorkspaceLifecycle(workspace.id),
     queryClient.prefetchQuery({ queryKey: profileKeys.me(), queryFn: getMyProfile }),
   ]);
 
   const isSolo = workspace.kind === 'SOLO';
   let schoolContext: SchoolContext | undefined;
-  let lifecycle: Pick<NonNullable<Awaited<ReturnType<typeof getSchool>>>, 'status' | 'closesAt' | 'purgeAt'> | null = null;
 
   if (!isSolo) {
     // The school shell shows more of the school than the workspace answer carries — its
@@ -75,8 +85,6 @@ export default async function WorkspaceLayout({ children, params }: Props) {
       queryKey: schoolKeys.detail(workspace.id),
       queryFn: () => getSchool(workspace.id),
     });
-
-    lifecycle = school ? { status: school.status, closesAt: school.closesAt, purgeAt: school.purgeAt } : null;
 
     schoolContext = {
       role: SCHOOL_ROLE_TO_DASHBOARD[workspace.myRole] ?? 'teacher',
@@ -106,7 +114,7 @@ export default async function WorkspaceLayout({ children, params }: Props) {
               className="mx-4 mt-4 md:mx-6"
             />
           )}
-          {children}
+          <SchoolWritableProvider status={lifecycle?.status}>{children}</SchoolWritableProvider>
         </AppShell>
       </EntitlementsProvider>
     </HydrationBoundary>

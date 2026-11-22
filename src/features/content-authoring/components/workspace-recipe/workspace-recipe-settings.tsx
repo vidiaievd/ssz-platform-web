@@ -34,6 +34,7 @@ import { RecipeCard } from './recipe-card';
 import { RecipeCourses } from './recipe-courses';
 import { RecipePresets } from './recipe-presets';
 import { RecipeRuleCard, ruleAxisId, ruleDeleteId } from './recipe-rule-card';
+import { ReadOnlyReason } from '@/features/school-lifecycle';
 
 export type RecipeWorkspaceKind = 'school' | 'solo';
 
@@ -232,7 +233,9 @@ function RecipeEditor({
           <Info className="mt-0.5 size-4 shrink-0 text-info-700 dark:text-info-300" aria-hidden />
           <div>
             <p className="font-semibold">{t('readonly.title')}</p>
-            <p className="text-(--ssz-text-secondary)">{t('readonly.who')}</p>
+            <p className="text-(--ssz-text-secondary)">
+              <ReadOnlyReason>{t('readonly.who')}</ReadOnlyReason>
+            </p>
           </div>
         </div>
       )}

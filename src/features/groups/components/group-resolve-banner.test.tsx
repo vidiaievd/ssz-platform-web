@@ -5,6 +5,16 @@ import { createTranslator } from 'next-intl';
 import { enMessages as en } from '@/lib/i18n/messages';
 import { GroupResolveBanner } from './group-resolve-banner';
 import type { Alert } from '@/features/dashboard/types';
+import { NextIntlClientProvider } from 'next-intl';
+import type { ReactNode } from 'react';
+
+
+const renderIntl = (ui: ReactNode) =>
+  render(
+    <NextIntlClientProvider locale="en" messages={en}>
+      {ui}
+    </NextIntlClientProvider>,
+  );
 
 // next-intl/server's `getTranslations` requires a Next.js request context that
 // isn't present under jsdom; substitute the same messages via `createTranslator`.
@@ -23,7 +33,7 @@ async function renderBanner(props: Omit<Parameters<typeof GroupResolveBanner>[0]
     workspaceId: 'my-school',
     ...props,
   });
-  return render(element);
+  return renderIntl(element);
 }
 
 describe('GroupResolveBanner', () => {

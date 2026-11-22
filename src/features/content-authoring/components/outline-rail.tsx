@@ -10,6 +10,8 @@ import type { CurriculumTree } from '@/features/content/types';
 
 import { createSectionAction } from '../actions/section';
 import { levelCollapseKey, levelDomId, stripLevelPrefix } from '../lib/structure-nodes';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
+import { useCourseReadOnly } from './course-read-only';
 
 interface OutlineRailProps {
   tree: CurriculumTree;
@@ -41,15 +43,16 @@ export function OutlineRail({
   onChanged,
 }: OutlineRailProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
+  const readOnly = useCourseReadOnly();
 
   function handleAddLevel() {
     if (isPending) return;
     startTransition(async () => {
       const result = await createSectionAction(courseContainerId, t('structure.newLevelTitle'));
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       onChanged(result.value.sectionId, 'level');
@@ -94,7 +97,8 @@ export function OutlineRail({
                     {index + 1}
                   </span>
                   <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
-                    {stripLevelPrefix(level.title)}
+                    {stripLevelPrefix(level.title) ||
+                      t('structure.levelFallback', { number: index + 1 })}
                   </span>
                   {hasUnpublished && (
                     <span
@@ -109,15 +113,17 @@ export function OutlineRail({
         </ul>
       )}
 
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={handleAddLevel}
-        className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-(--ssz-border-strong) px-2 py-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
-      >
-        <Plus size={13} />
-        {t('structure.addLevel')}
-      </button>
+      {!readOnly && (
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={handleAddLevel}
+          className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-(--ssz-border-strong) px-2 py-1.5 text-[13px] font-semibold text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+        >
+          <Plus size={13} />
+          {t('structure.addLevel')}
+        </button>
+      )}
     </nav>
   );
 }

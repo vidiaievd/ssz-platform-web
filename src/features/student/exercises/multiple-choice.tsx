@@ -16,6 +16,7 @@ import { primaryInstructionText } from '@/features/content/lib/instruction-text'
 import { submitAttemptAction } from '../actions/submit-attempt';
 import type { AttemptResult } from '../types/exercise';
 import { FeedbackPanel } from './feedback-panel';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface MultipleChoiceExerciseProps {
   exercise: ExerciseDisplay;
@@ -25,7 +26,7 @@ interface MultipleChoiceExerciseProps {
 
 export function MultipleChoiceExercise({ exercise, onAnswered }: MultipleChoiceExerciseProps) {
   const t = useTranslations('Exercise');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const content = exercise.content;
 
   const question = typeof content.question === 'string' ? content.question : '';
@@ -51,7 +52,7 @@ export function MultipleChoiceExercise({ exercise, onAnswered }: MultipleChoiceE
         timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
-        toast.error(tErrors(res.error.code));
+        toast.error(tErrors(res.error));
         return;
       }
       setResult(res.value);

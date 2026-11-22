@@ -20,7 +20,7 @@ import {
   type CollisionDetection,
   type DragStartEvent,
 } from '@dnd-kit/core';
-import type { DraggableAttributes } from '@dnd-kit/core';
+import type { DraggableAttributes, SensorDescriptor, SensorOptions } from '@dnd-kit/core';
 import type { SyntheticListenerMap } from '@dnd-kit/core/dist/hooks/utilities';
 import {
   SortableContext,
@@ -84,6 +84,7 @@ import { ItemChangeBadge } from './item-change-badge';
 import { MoveSection } from './curriculum-item-reorder';
 import { AddLessonPicker } from './add-lesson-picker';
 import { InlineRename } from './inline-rename';
+import { useCourseReadOnly } from './course-read-only';
 import { NodeMenu, type PlaceAgainTarget } from './node-menu';
 import { DeleteNodeDialog, type DeleteNodeTarget } from './delete-node-dialog';
 import { useNodeDeletion } from '../hooks/use-node-deletion';
@@ -111,6 +112,7 @@ import {
   type LevelDropData,
   type StructureDragData,
 } from '../lib/structure-dnd';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type ChangeKind = 'level' | 'module' | 'item';
 
@@ -258,6 +260,8 @@ function SectionLabel({ title, right }: { title: string; right?: React.ReactNode
  * made the old screen unreadable.
  */
 function RowTools({ visible, children }: { visible: boolean; children: React.ReactNode }) {
+  // A course open for viewing has nothing to do on a row (plan 90, Q17 (a)).
+  if (useCourseReadOnly()) return null;
   return (
     <span
       className={cn(
@@ -272,6 +276,7 @@ function RowTools({ visible, children }: { visible: boolean; children: React.Rea
 
 /** Bare ＋ on a section label, where a dashed pill would outweigh the label itself. */
 function AddIconButton({ label, onClick }: { label: string; onClick: () => void }) {
+  if (useCourseReadOnly()) return null;
   return (
     <button
       type="button"
@@ -286,6 +291,9 @@ function AddIconButton({ label, onClick }: { label: string; onClick: () => void 
     </button>
   );
 }
+
+/** A course open for viewing drags nothing: `DndContext` without sensors never starts a drag. */
+const NO_SENSORS: SensorDescriptor<SensorOptions>[] = [];
 
 const TOOL_BUTTON =
   'flex size-6 shrink-0 items-center justify-center rounded-xs text-muted-foreground transition-colors hover:bg-subtle hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
@@ -332,6 +340,7 @@ function AddButton({
   onClick: () => void;
   disabled?: boolean;
 }) {
+  if (useCourseReadOnly()) return null;
   return (
     <button
       type="button"
@@ -418,10 +427,11 @@ function LevelCard({
     listeners?: SyntheticListenerMap;
   }) => React.ReactNode;
 }) {
+  const readOnly = useCourseReadOnly();
   const { attributes, isDragging, listeners, setNodeRef, transform, transition } = useSortable({
     id: sortId,
     data: { type: 'level', levelId } satisfies LevelDropData,
-    disabled: levelId === null,
+    disabled: levelId === null || readOnly,
   });
 
   return (
@@ -544,13 +554,14 @@ function BlockRow({
 }) {
   const t = useTranslations('Authoring');
   const materialLabel = useMaterialLabel();
+  const readOnly = useCourseReadOnly();
   const selected = selectedId === item.id;
   const checked = check.isChecked(item.id);
 
   const { attributes, isDragging, listeners, setNodeRef, transform, transition } = useSortable({
     id: item.id,
     data: drag ?? undefined,
-    disabled: drag === null,
+    disabled: drag === null || readOnly,
   });
 
   /**
@@ -597,7 +608,7 @@ function BlockRow({
         isDragging && 'opacity-30',
       )}
     >
-      {drag && (
+      {drag && !readOnly && (
         <button
           type="button"
           aria-label={t('structure.dragBlock', { name: item.title ?? '' })}
@@ -617,13 +628,15 @@ function BlockRow({
       )}
       {/* Ticking a row must not also select it: the two answer different
           questions — "act on these" versus "show me this one". */}
-      <Checkbox
-        checked={checked}
-        onCheckedChange={() => check.toggle(item.id)}
-        onClick={(e) => e.stopPropagation()}
-        aria-label={t('bulk.selectBlock', { name: item.title ?? '' })}
-        className="size-3.75 rounded-xs"
-      />
+      {!readOnly && (
+        <Checkbox
+          checked={checked}
+          onCheckedChange={() => check.toggle(item.id)}
+          onClick={(e) => e.stopPropagation()}
+          aria-label={t('bulk.selectBlock', { name: item.title ?? '' })}
+          className="size-3.75 rounded-xs"
+        />
+      )}
       <BlockTypeIcon kind={getMaterialKind(item)} templateCode={item.templateCode} />
       <InlineRename
         value={item.title ?? ''}
@@ -738,15 +751,17 @@ function ModuleCard({
   ownerSchoolId?: string | null;
 }) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const { record: recordUndo } = useStructureUndo();
   const [addLessonIn, setAddLessonIn] = useState<string | null | undefined>(undefined);
+  const readOnly = useCourseReadOnly();
   const selected = selectedId === mod.id;
   // A module is a row of the course's own item list, which is what makes it
   // draggable between levels — same list, different group.
   const { attributes, isDragging, listeners, setNodeRef, transform, transition } = useSortable({
     id: mod.id,
     data: { type: 'courseEntry', itemId: mod.id } satisfies CourseEntryDragData,
+    disabled: readOnly,
   });
   const filtering = isFiltering(filters);
   const visible = (items: CurriculumTreeItemNode[]) => items.filter(matches);
@@ -760,7 +775,7 @@ function ModuleCard({
     const moved = moduleItems(mod).find((item) => item.id === itemId);
     assignItemSectionAction(mod.containerId, itemId, sectionId).then((result) => {
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       recordUndo(
@@ -793,7 +808,7 @@ function ModuleCard({
     const targetTitle = courseModules.find((m) => m.containerId === containerId)?.title ?? '';
     placeItemAgainAction(containerId, item.itemType, item.refId, sectionId).then((result) => {
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       const rowId = result.value.id;
@@ -912,22 +927,24 @@ function ModuleCard({
             : 'bg-surface hover:bg-subtle',
         )}
       >
-        <button
-          type="button"
-          aria-label={t('structure.dragModule', { name: mod.title ?? '' })}
-          onClick={(e) => e.stopPropagation()}
-          className={cn(
-            'shrink-0 cursor-grab touch-none text-muted-foreground transition-opacity',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            selected
-              ? 'opacity-100'
-              : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
-          )}
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical size={13} />
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            aria-label={t('structure.dragModule', { name: mod.title ?? '' })}
+            onClick={(e) => e.stopPropagation()}
+            className={cn(
+              'shrink-0 cursor-grab touch-none text-muted-foreground transition-opacity',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              selected
+                ? 'opacity-100'
+                : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100',
+            )}
+            {...attributes}
+            {...listeners}
+          >
+            <GripVertical size={13} />
+          </button>
+        )}
         <Caret
           expanded={expanded}
           onToggle={onToggleExpanded}
@@ -1091,7 +1108,7 @@ export function CurriculumTree({
   recipeIssues,
 }: CurriculumTreeProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const { record: recordUndo } = useStructureUndo();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -1120,9 +1137,14 @@ export function CurriculumTree({
    * is a container, and a block renames the entity it points at.
    */
   const [renamingId, setRenamingId] = useState<string | null>(null);
+  // Open for viewing (plan 90, Q17 (a)): no renaming, no shortcuts that change the course, no
+  // dragging — only moving around it and opening a lesson (Enter).
+  const readOnly = useCourseReadOnly();
   const rename: RenameControls = {
     activeId: renamingId,
-    begin: setRenamingId,
+    begin: (id) => {
+      if (!readOnly) setRenamingId(id);
+    },
     cancel: () => setRenamingId(null),
     commit: (id, title) => {
       setRenamingId(null);
@@ -1131,7 +1153,7 @@ export function CurriculumTree({
       const previousTitle = savedTitleOf(id);
       save.then((result) => {
         if (!result.ok) {
-          toast.error(tErrors(result.error.code));
+          toast.error(tErrors(result.error));
           return;
         }
         recordUndo({
@@ -1228,7 +1250,7 @@ export function CurriculumTree({
       targetOrder,
     });
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       return;
     }
     const movedId = result.value.id;
@@ -1274,7 +1296,7 @@ export function CurriculumTree({
   async function duplicateOne(target: DuplicateTarget): Promise<DuplicateToDiscard | null> {
     const result = await duplicateContainerItemAction(target.containerId, target.rowId);
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       return null;
     }
     return {
@@ -1599,14 +1621,14 @@ export function CurriculumTree({
     if (plan.kind === 'move') {
       const filed = await assignItemSectionAction(containerId, itemId, plan.sectionId);
       if (!filed.ok) {
-        toast.error(tErrors(filed.error.code));
+        toast.error(tErrors(filed.error));
         setPreview(null);
         return;
       }
     }
     const ordered = await reorderContainerItemsAction(containerId, plan.orderedItemIds);
     if (!ordered.ok) {
-      toast.error(tErrors(ordered.error.code));
+      toast.error(tErrors(ordered.error));
       setPreview(null);
       return;
     }
@@ -1628,7 +1650,7 @@ export function CurriculumTree({
     const before = tree.levels.map((level) => level.id).filter((id): id is string => id !== null);
     const result = await reorderSectionsAction(courseContainerId, orderedSectionIds);
     if (!result.ok) {
-      toast.error(tErrors(result.error.code));
+      toast.error(tErrors(result.error));
       setPreview(null);
       return;
     }
@@ -1779,6 +1801,10 @@ export function CurriculumTree({
     ) {
       return;
     }
+
+    // Open for viewing: no shortcut at all — Enter would open the editor, which a course open for
+    // viewing does not offer (owner's call, live check s26).
+    if (readOnly) return;
 
     if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'd') {
       event.preventDefault();
@@ -1948,7 +1974,7 @@ export function CurriculumTree({
       );
       setPendingLevelId(null);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       onChanged(result.value.itemId, 'module');
@@ -1957,7 +1983,7 @@ export function CurriculumTree({
 
   return (
     <DndContext
-      sensors={sensors}
+      sensors={readOnly ? NO_SENSORS : sensors}
       collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
@@ -2023,7 +2049,7 @@ export function CurriculumTree({
                     : 'bg-subtle hover:bg-muted',
                 )}
               >
-                {level.id && (
+                {level.id && !readOnly && (
                   <button
                     type="button"
                     aria-label={t('structure.dragLevel', { name: level.title ?? '' })}
@@ -2049,7 +2075,9 @@ export function CurriculumTree({
                 <Glyph className="bg-primary-100 text-primary-700">{levelIndex + 1}</Glyph>
                 <InlineRename
                   value={level.title ?? ''}
-                  editing={rename.activeId === level.id}
+                  // The level of modules outside any section has no id; with no
+                  // rename running `activeId` is null too, so compare only real ids.
+                  editing={level.id !== null && rename.activeId === level.id}
                   onCommit={(title) => level.id && rename.commit(level.id, title)}
                   onCancel={rename.cancel}
                 >
@@ -2061,7 +2089,7 @@ export function CurriculumTree({
                       rename.begin(level.id);
                     }}
                   >
-                    {level.title}
+                    {level.title || t('structure.levelFallback', { number: levelIndex + 1 })}
                   </span>
                 </InlineRename>
                 {rolledUp && <PublishStateBadge state={rolledUp} />}

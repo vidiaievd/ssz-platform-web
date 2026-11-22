@@ -22,63 +22,77 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 import { useEntityTags, useTagSuggestions } from '../api/use-authoring-tags';
 import { authoringKeys } from '../api/keys';
-import { addTagAction, removeTagAction } from '../actions/tag';
+import { assignTagAction, createAndAssignTagAction, removeTagAction } from '../actions/tag';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
+import type { Result } from '@/lib/result';
 
 interface TagInputProps {
   entityType: string;
   entityId: string;
+  /** The material's school: its own tags are offered and a new tag becomes the school's. */
+  ownerSchoolId: string | null;
   disabled?: boolean;
 }
 
-export function TagInput({ entityType, entityId, disabled }: TagInputProps) {
+export function TagInput({ entityType, entityId, ownerSchoolId, disabled }: TagInputProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
   const { data: tags, isLoading } = useEntityTags(entityType, entityId);
-  const { data: suggestions } = useTagSuggestions(entityType, inputValue);
+  const { data: suggestions } = useTagSuggestions(ownerSchoolId, inputValue, open);
 
   const trimmedInput = inputValue.trim();
-  const appliedNames = new Set((tags ?? []).map((tag) => tag.name));
+  const appliedIds = new Set((tags ?? []).map((tag) => tag.id));
+  const sameName = (a: string, b: string) => a.toLocaleLowerCase() === b.toLocaleLowerCase();
 
-  const filteredSuggestions = (suggestions ?? []).filter(
-    (s) =>
-      !appliedNames.has(s) &&
-      (trimmedInput === '' || s.toLowerCase().includes(trimmedInput.toLowerCase())),
-  );
+  const filteredSuggestions = (suggestions ?? []).filter((s) => !appliedIds.has(s.id));
 
-  const canCreate = trimmedInput.length > 0 && !appliedNames.has(trimmedInput);
+  // A name already on offer (or on the material) is picked, not created twice. Only a school's
+  // material gets new tags: global ones are the platform's.
+  const canCreate =
+    ownerSchoolId !== null &&
+    trimmedInput.length > 0 &&
+    !(suggestions ?? []).some((s) => sameName(s.name, trimmedInput)) &&
+    !(tags ?? []).some((tag) => sameName(tag.name, trimmedInput));
 
-  function handleAdd(name: string) {
-    const trimmed = name.trim();
-    if (!trimmed) return;
+  function finish(result: Result<unknown>, creating = false) {
+    if (!result.ok) {
+      toast.error(
+        creating && result.error.code === 'forbidden' ? t('tags.createForbidden') : tErrors(result.error),
+      );
+      return;
+    }
+    void queryClient.invalidateQueries({ queryKey: authoringKeys.tags(entityType, entityId) });
+    void queryClient.invalidateQueries({ queryKey: ['tag-suggestions'] });
+  }
+
+  function close() {
     setOpen(false);
     setInputValue('');
+  }
+
+  function handlePick(tagId: string) {
+    close();
     startTransition(async () => {
-      const result = await addTagAction(entityType, entityId, trimmed);
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      await queryClient.invalidateQueries({
-        queryKey: authoringKeys.tags(entityType, entityId),
-      });
+      finish(await assignTagAction(entityType, entityId, tagId));
+    });
+  }
+
+  function handleCreate(name: string) {
+    if (!name.trim()) return;
+    close();
+    startTransition(async () => {
+      finish(await createAndAssignTagAction(entityType, entityId, name, ownerSchoolId), true);
     });
   }
 
   function handleRemove(tagId: string) {
     startTransition(async () => {
-      const result = await removeTagAction(tagId, entityType, entityId);
-      if (!result.ok) {
-        toast.error(tErrors(result.error.code));
-        return;
-      }
-      await queryClient.invalidateQueries({
-        queryKey: authoringKeys.tags(entityType, entityId),
-      });
+      finish(await removeTagAction(entityType, entityId, tagId));
     });
   }
 
@@ -134,9 +148,9 @@ export function TagInput({ entityType, entityId, disabled }: TagInputProps) {
 
                 {filteredSuggestions.length > 0 && (
                   <CommandGroup>
-                    {filteredSuggestions.map((name) => (
-                      <CommandItem key={name} value={name} onSelect={() => handleAdd(name)}>
-                        {name}
+                    {filteredSuggestions.map((tag) => (
+                      <CommandItem key={tag.id} value={tag.id} onSelect={() => handlePick(tag.id)}>
+                        {tag.name}
                       </CommandItem>
                     ))}
                   </CommandGroup>
@@ -148,7 +162,7 @@ export function TagInput({ entityType, entityId, disabled }: TagInputProps) {
                     <CommandGroup>
                       <CommandItem
                         value={`__create__:${trimmedInput}`}
-                        onSelect={() => handleAdd(trimmedInput)}
+                        onSelect={() => handleCreate(trimmedInput)}
                       >
                         <Plus className="mr-1.5 h-4 w-4" />
                         {t('tags.create', { name: trimmedInput })}

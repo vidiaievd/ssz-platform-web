@@ -7,6 +7,7 @@ import { decodeJwtPayload } from '@/lib/auth/decode-jwt';
 import { tryAction } from '@/lib/result';
 import type { AuthTokensResponse } from '@/lib/api/generated/schemas';
 import { loginSchema, mfaChallengeSchema } from '../schemas';
+import { authRefusalOf } from '../utils/auth-refusal';
 import type { LoginInput, MfaChallengeInput } from '../schemas';
 
 export type LoginActionResult =
@@ -20,6 +21,17 @@ export type LoginActionResult =
   | { stage: 'mfa'; mfaChallengeToken: string }
   | { stage: 'email_not_verified' };
 
+/** What `POST auth/login` answers: tokens, or a challenge when two-factor is on. */
+type LoginResponse =
+  | AuthTokensResponse
+  | { mfaRequired: true; challenge: { mfaChallengeToken: string; expiresAt?: string } };
+
+function isMfaChallenge(
+  response: LoginResponse,
+): response is Extract<LoginResponse, { mfaRequired: true }> {
+  return (response as { mfaRequired?: unknown }).mfaRequired === true;
+}
+
 export async function loginAction(input: LoginInput) {
   return tryAction(async (): Promise<LoginActionResult> => {
     const parsed = loginSchema.safeParse(input);
@@ -27,9 +39,9 @@ export async function loginAction(input: LoginInput) {
       throw new AppError('validation', 'Invalid input', parsed.error.flatten((i) => i.message));
     }
 
-    let tokens: AuthTokensResponse;
+    let response: LoginResponse;
     try {
-      tokens = await serverFetch<AuthTokensResponse>({
+      response = await serverFetch<LoginResponse>({
         service: 'auth',
         path: '/auth/login',
         method: 'POST',
@@ -37,19 +49,20 @@ export async function loginAction(input: LoginInput) {
         anonymous: true,
       });
     } catch (e) {
-      if (isAppError(e) && e.code === 'mfa_required') {
-        const mfaChallengeToken = (e.details as Record<string, unknown> | null)?.mfaChallengeToken;
-        if (typeof mfaChallengeToken === 'string') {
-          return { stage: 'mfa', mfaChallengeToken };
-        }
-      }
-      if (isAppError(e) && e.code === 'forbidden') {
+      // Only this 403 means "confirm your email"; a blocked account (403 ACCOUNT_BLOCKED) and a
+      // lockout (423 ACCOUNT_LOCKED) go back to the form as errors it names itself.
+      if (isAppError(e) && authRefusalOf(e)?.kind === 'email_not_verified') {
         return { stage: 'email_not_verified' };
       }
       throw e;
     }
 
-    return finishLogin(tokens);
+    // With two-factor on, auth answers 200 with a challenge instead of tokens.
+    if (isMfaChallenge(response)) {
+      return { stage: 'mfa', mfaChallengeToken: response.challenge.mfaChallengeToken };
+    }
+
+    return finishLogin(response);
   });
 }
 

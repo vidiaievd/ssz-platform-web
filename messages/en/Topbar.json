@@ -5,6 +5,6 @@
     "comingSoon": "Search is coming soon"
   },
   "trial": {
-    "daysLeft": "Trial · {days} days left"
+    "daysLeft": "Trial · {days, plural, one {# day} other {# days}} left"
   }
 }

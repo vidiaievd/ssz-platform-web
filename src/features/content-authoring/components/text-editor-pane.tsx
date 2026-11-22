@@ -42,6 +42,7 @@ import { HeroImageSlot } from './hero-image-slot';
 import { InsertImageButton } from './insert-image-button';
 import { AudioNarrationRow } from './audio-narration-row';
 import { ListeningStageListEditor } from './listening-stage-list-editor';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface TextEditorPaneProps {
   kind: MaterialKind;
@@ -68,7 +69,7 @@ export function TextEditorPane({
 }: TextEditorPaneProps) {
   const t = useTranslations('Authoring');
   const saveScope = useSaveScopeText(isLive);
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
 
   const { data: variants, isLoading: variantsLoading } = useLessonVariants(lessonId);
@@ -279,7 +280,7 @@ export function TextEditorPane({
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
+                  toast.error(tErrors(result.error));
                   return;
                 }
                 unsaved.markSaved();

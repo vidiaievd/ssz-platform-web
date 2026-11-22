@@ -19,22 +19,27 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { onboardingSteps } from '@/lib/enrollment/status';
-import { onboardingSettingsSchema, type OnboardingSettingsInput } from '@/features/enrollment/schemas/onboarding-settings';
+import {
+  onboardingSettingsSchema,
+  type OnboardingSettingsFormValues,
+  type OnboardingSettingsInput,
+} from '@/features/enrollment/schemas/onboarding-settings';
 import type { SchoolOnboardingSettings } from '@/features/enrollment/types';
+import { lifecycleErrorKey } from '@/features/school-lifecycle/lib/lifecycle-errors';
 
 type Props = {
   workspaceId: string;
   initialSettings: SchoolOnboardingSettings;
 };
 
-const STEP_LABELS: Record<string, string> = {
-  placement: 'Placement test',
-  availability: 'Availability',
-  interview: 'Interview',
-};
-
 export function OnboardingSettingsForm({ workspaceId, initialSettings }: Props) {
   const t = useTranslations('Enrollment.Settings');
+  const tLifecycle = useTranslations('SchoolLifecycle.errors');
+  const stepLabels: Record<string, string> = {
+    placement: t('stepPlacement'),
+    availability: t('stepAvailability'),
+    interview: t('stepInterview'),
+  };
 
   const {
     register,
@@ -43,7 +48,7 @@ export function OnboardingSettingsForm({ workspaceId, initialSettings }: Props) 
     setValue,
     formState: { isSubmitting, isDirty, errors },
     reset,
-  } = useForm<OnboardingSettingsInput>({
+  } = useForm<OnboardingSettingsFormValues, unknown, OnboardingSettingsInput>({
     resolver: zodResolver(onboardingSettingsSchema),
     defaultValues: initialSettings,
   });
@@ -65,7 +70,9 @@ export function OnboardingSettingsForm({ workspaceId, initialSettings }: Props) 
       body: JSON.stringify(data),
     });
     if (!res.ok) {
-      toast.error(t('saveFailed'));
+      // A read-only school says why; anything else is a plain failure to retry.
+      const key = lifecycleErrorKey(await res.json().catch(() => null));
+      toast.error(key ? tLifecycle(key) : t('saveFailed'));
       return;
     }
     toast.success(t('saved'));
@@ -267,7 +274,7 @@ export function OnboardingSettingsForm({ workspaceId, initialSettings }: Props) 
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-(--ssz-primary)/15 text-xs font-semibold text-(--ssz-primary)">
                   {i + 1}
                 </span>
-                {STEP_LABELS[step] ?? step}
+                {stepLabels[step] ?? step}
               </li>
             ))}
           </ol>

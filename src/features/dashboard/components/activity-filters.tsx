@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -9,14 +10,10 @@ type ActivityFiltersProps = {
   onFilterChange: (tag: ActivityTag) => void;
 };
 
-const FILTERS: { id: ActivityTag; label: string }[] = [
-  { id: 'all', label: 'All' },
-  { id: 'people', label: 'People' },
-  { id: 'content', label: 'Content' },
-  { id: 'review', label: 'Review' },
-];
+const FILTERS: ActivityTag[] = ['all', 'people', 'content', 'review'];
 
 export function ActivityFilters({ onFilterChange }: ActivityFiltersProps) {
+  const t = useTranslations('School.dashboard.activity');
   const [active, setActive] = useState<ActivityTag>('all');
 
   function handleSelect(tag: ActivityTag) {
@@ -25,22 +22,22 @@ export function ActivityFilters({ onFilterChange }: ActivityFiltersProps) {
   }
 
   return (
-    <div role="radiogroup" aria-label="Filter activity" className="flex items-center gap-1.5">
-      {FILTERS.map((f) => (
+    <div role="radiogroup" aria-label={t('filtersLabel')} className="flex items-center gap-1.5">
+      {FILTERS.map((id) => (
         <button
-          key={f.id}
+          key={id}
           role="radio"
-          aria-checked={active === f.id}
-          onClick={() => handleSelect(f.id)}
+          aria-checked={active === id}
+          onClick={() => handleSelect(id)}
           className={cn(
             'rounded-full px-3 py-1 text-xs font-medium transition-colors',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-            active === f.id
+            active === id
               ? 'bg-primary/10 text-primary'
               : 'text-(--ssz-text-muted) hover:bg-accent',
           )}
         >
-          {f.label}
+          {t(`filters.${id}`)}
         </button>
       ))}
     </div>

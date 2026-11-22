@@ -224,6 +224,13 @@
       "free": "Ingen gratis kurs ennå",
       "description": "Bla i katalogen for å legge til et kurs.",
       "cta": "Se katalogen"
+    },
+    "history": {
+      "title": "Historikk",
+      "subtitle": "Fullførte kurs, kun lesing.",
+      "finished": "Fullført {date}",
+      "unavailable": "{count, plural, one {Kurset er ikke tilgjengelig} other {# kurs er ikke tilgjengelige}}",
+      "unavailableNote": "{count, plural, one {Skolen som drev kurset er borte, og kurset kan ikke lenger leses.} other {Skolene som drev disse kursene er borte, og kursene kan ikke lenger leses.}}"
     }
   },
   "reviewsPage": {

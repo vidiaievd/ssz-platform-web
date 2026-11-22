@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { isWorkspaceWritable } from '@/features/school-lifecycle/api/get-workspace-lifecycle';
 
 import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
 import { AiPolicySettings } from '@/features/review/components/settings/ai-policy-settings';
@@ -30,7 +31,8 @@ export default async function SchoolReviewSettingsPage({ params }: Props) {
   const { myRole: role } = await requireSettingsPage(workspaceId, 'review');
 
   const t = await getTranslations('Review.settings');
-  const canEdit = role === 'OWNER' || role === 'ADMIN';
+  // A suspended or closed workspace shows its settings but takes no changes (plan 90, block 9).
+  const canEdit = (role === 'OWNER' || role === 'ADMIN') && (await isWorkspaceWritable(workspaceId));
 
   return (
     <div className="mx-auto flex w-full max-w-[780px] flex-col gap-4 p-6 md:p-8">

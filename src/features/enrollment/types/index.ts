@@ -55,6 +55,10 @@ export interface AvailabilityPref {
 
 export interface Membership {
   id: string;
+  /** The applicant; staff screens show their name, never the request id. */
+  studentId?: string;
+  /** Display name from the profile directory; absent when the lookup failed or there is no profile. */
+  studentName?: string;
   /** Backend UUID — present after membership is created via the real backend. */
   schoolId?: string;
   schoolSlug: string;

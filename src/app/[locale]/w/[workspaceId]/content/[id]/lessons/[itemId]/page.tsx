@@ -20,6 +20,11 @@ import { collectLevelGrammarRules } from '@/features/content-authoring/lib/level
 import { getMaterialKind } from '@/features/content-authoring/lib/material-kind';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { NoAccess } from '@/features/content-authoring/components/no-access';
+import {
+  CourseReadOnlyNotice,
+  CourseReadOnlyProvider,
+} from '@/features/content-authoring/components/course-read-only';
+import { canEditContainer } from '@/features/content-authoring/lib/get-container-edit-access';
 
 export default async function LessonEditorPage({
   params,
@@ -41,16 +46,22 @@ export default async function LessonEditorPage({
     throw e;
   }
 
+  // Not allowed to edit the course — the lesson opens for viewing (plan 90, Q17 (a)).
+  const readOnly = !(await canEditContainer(id));
+
   const versionsResp = await serverFetch<{ items: ContainerVersion[] }>({
     service: 'content',
     path: `/containers/${id}/versions`,
   });
-  const draftVersion = versionsResp.items.find((v) => v.status === 'draft');
-  if (!draftVersion) notFound();
+  // A viewer of a course without a draft reads the published version, as on the course page.
+  const treeVersionId =
+    versionsResp.items.find((v) => v.status === 'draft')?.id ??
+    (readOnly ? container.currentPublishedVersionId : null);
+  if (!treeVersionId) notFound();
 
   const tree = await serverFetch<CurriculumTree>({
     service: 'content',
-    path: `/containers/${id}/versions/${draftVersion.id}/tree`,
+    path: `/containers/${id}/versions/${treeVersionId}/tree`,
   });
   const found = findItemWithModule(tree, itemId);
   if (!found) notFound();
@@ -76,7 +87,7 @@ export default async function LessonEditorPage({
   // Deliberately not a publish button: students read the *module's* published
   // version, so publishing the course from here changed nothing for this
   // lesson. Releasing happens in one place, against the whole course.
-  const publishSlot = (
+  const publishSlot = readOnly ? null : (
     <Button asChild variant="outline" size="sm">
       <Link href={`${backHref}?publish=1`}>{t('reviewPublish.trigger')}</Link>
     </Button>
@@ -99,6 +110,10 @@ export default async function LessonEditorPage({
     <div className="flex h-full min-h-0 flex-col">
       {/* Into the app's top bar, where the specs put it. */}
       <TopbarBreadcrumb items={breadcrumbItems} />
+      <CourseReadOnlyProvider readOnly={readOnly}>
+      <CourseReadOnlyNotice className="mx-4 mt-4 md:mx-6" />
+      {/* A disabled fieldset switches off every field and save button of the editor at once. */}
+      <fieldset disabled={readOnly} className="contents">
       {kind === 'text' ? (
         <TextEditorPane
           kind={kind}
@@ -172,6 +187,8 @@ export default async function LessonEditorPage({
           publishSlot={publishSlot}
         />
       )}
+      </fieldset>
+      </CourseReadOnlyProvider>
     </div>
   );
 }

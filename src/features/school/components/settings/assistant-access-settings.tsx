@@ -16,6 +16,7 @@ import type {
   AssistantAccessChoices,
   AssistantMode,
 } from '../../types/assistant-access';
+import { ReadOnlyReason } from '@/features/school-lifecycle';
 
 const MODES: AssistantMode[] = ['all_students', 'selected_groups', 'selected_students', 'off'];
 
@@ -210,7 +211,7 @@ export function AssistantAccessSettings({
         ) : null}
 
         {!canEdit ? (
-          <p className="mt-3 text-[12.5px] text-muted-foreground">{t('readOnly')}</p>
+          <p className="mt-3 text-[12.5px] text-muted-foreground"><ReadOnlyReason>{t('readOnly')}</ReadOnlyReason></p>
         ) : null}
       </Panel>
 

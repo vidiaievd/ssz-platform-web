@@ -1,4 +1,9 @@
 {
+  "readOnly": {
+    "title": "Kurset er åpnet for visning",
+    "noRight": "Bare forfatteren, en medforfatter eller skolens innholdsansvarlige kan endre dette kurset. Du ser strukturen og materialet, men kan ikke gjøre endringer.",
+    "school": "Skolen er skrivebeskyttet nå — kurset kan vises, men ikke endres. Hvorfor og hvor lenge står i feltet over."
+  },
   "page": {
     "title": "Innhold",
     "subtitle": "Opprett og administrer læringsmateriell."
@@ -410,7 +415,8 @@
     "searchPlaceholder": "Søk eller opprett tagg…",
     "create": "Opprett «{name}»",
     "noResults": "Ingen treff.",
-    "removeAriaLabel": "Fjern tagg {name}"
+    "removeAriaLabel": "Fjern tagg {name}",
+    "createForbidden": "Bare skolens eier eller innholdsadministrator kan lage nye tagger. Velg en som finnes."
   },
   "empty": {
     "containers": "Ingen innhold ennå. Opprett din første beholder."
@@ -569,6 +575,7 @@
     "unpublishedBannerHint": "Elevene ser fortsatt den sist publiserte versjonen.",
     "unpublishedBannerAction": "Se gjennom",
     "moduleCount": "{count, plural, one {# modul} other {# moduler}}",
+    "levelFallback": "Nivå {number}",
     "minutes": "{count} min",
     "noModulesYet": "Ingen moduler ennå — legg til den første.",
     "addLessonToSection": "Legg til i {section}",

@@ -196,6 +196,7 @@ import { ExerciseTargetsPanel } from './exercise-targets-panel';
 import { ExerciseCoverageCard } from './exercise-coverage-card';
 import { ExerciseLessonPreview } from './exercise-lesson-preview';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface ExerciseEditorPaneProps {
   kind: MaterialKind;
@@ -1443,7 +1444,7 @@ interface ExerciseFormProps {
 
 function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: ExerciseFormProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   // Not `useSaveScopeDescription`: that answers the placement question, and an
   // exercise document is held for publish either way.
   const queryClient = useQueryClient();
@@ -1468,7 +1469,7 @@ function ExerciseForm({ exerciseId, initialValues, container, onValuesChange }: 
     startTransition(async () => {
       const result = await updateExerciseAction(exerciseId, container.id, data);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.exercise(exerciseId) });

@@ -78,6 +78,8 @@ export interface Kpi {
   delta?: string;
   trend?: Trend;
   hint?: string;
+  /** The numbers inside `hint` (analytics), to word it in the reader's language. */
+  hintValues?: Record<string, number>;
   spark?: number[];
   sub?: string;
   locked?: boolean;
@@ -85,8 +87,11 @@ export interface Kpi {
 
 export interface ActivityItem {
   id: string;
-  who: string;
+  /** null = the actor's name is not known; the feed says "someone" in the reader's language. */
+  who: string | null;
+  /** The stored English verb; worded anew from `eventType` when that is known. */
   what: string;
+  eventType?: string;
   target: string;
   time: string; // ISO — formatted client-side
   iconKey: 'check' | 'user' | 'flag' | 'star' | 'book';
@@ -133,12 +138,23 @@ export interface TodaysClass {
   status: 'now' | 'upcoming' | 'low';
 }
 
+export type OnboardingItemLabel =
+  | 'fillBranding'
+  | 'createCourse'
+  | 'createGroupSchedule'
+  | 'inviteTeacher'
+  | 'assignTeacherGroup'
+  | 'inviteStudents';
+
 export interface OnboardingItem {
   key: string;
   done: boolean;
-  labelKey: string;
-  est: string;
-  href: string;
+  /** Key under `School.dashboard.onboarding.items`. */
+  labelKey: OnboardingItemLabel;
+  /** Estimated minutes to do it. */
+  estMinutes: number;
+  /** Workspace-relative path (`wsHref`), or null when no screen does it yet. */
+  href: string | null;
 }
 
 export interface OnboardingState {

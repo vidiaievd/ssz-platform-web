@@ -1,6 +1,7 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
-import { Skeleton } from '@/components/ui/skeleton';
+import { Link } from '@/lib/i18n/navigation';
+
 import { wsHref } from '@/features/workspaces/lib/href';
 import { WidgetCard } from './widget-card';
 import { WidgetEmptyState } from './widget-empty-state';
@@ -12,35 +13,18 @@ type TeacherWorkloadWidgetProps = {
   workspaceId: string;
 };
 
-function TeacherWorkloadSkeleton() {
-  return (
-    <WidgetCard title="Teacher workload">
-      <ul className="divide-y divide-border">
-        {[0, 1, 2, 3, 4].map((i) => (
-          <li key={i} className="flex items-center gap-3 py-2.5">
-            <Skeleton className="size-8 rounded-full" />
-            <div className="flex-1 space-y-1.5">
-              <Skeleton className="h-3.5 w-1/2" />
-              <Skeleton className="h-2 w-full" />
-            </div>
-          </li>
-        ))}
-      </ul>
-    </WidgetCard>
-  );
-}
-
 export function TeacherWorkloadWidget({ teacherWorkload, workspaceId }: TeacherWorkloadWidgetProps) {
+  const t = useTranslations('School.dashboard.workload');
   const timetableHref = wsHref(workspaceId, 'groups/timetable');
 
   if (teacherWorkload.status === 'unavailable') {
-    return <TeacherWorkloadSkeleton />;
+    return <WidgetCard title={t('title')} unavailable />;
   }
 
   if (teacherWorkload.status === 'empty') {
     return (
-      <WidgetCard title="Teacher workload">
-        <WidgetEmptyState title="No assignments yet" />
+      <WidgetCard title={t('title')}>
+        <WidgetEmptyState title={t('empty')} />
       </WidgetCard>
     );
   }
@@ -52,19 +36,19 @@ export function TeacherWorkloadWidget({ teacherWorkload, workspaceId }: TeacherW
 
   const subtitle =
     overloadedCount > 0
-      ? `${overloadedCount} over capacity · avg ${avgLoadPct}%`
-      : `avg ${avgLoadPct}%`;
+      ? t('over', { count: overloadedCount, pct: avgLoadPct })
+      : t('avg', { pct: avgLoadPct });
 
   return (
     <WidgetCard
-      title="Teacher workload"
+      title={t('title')}
       subtitle={subtitle}
       headerRight={
         <Link
           href={timetableHref}
           className="text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
         >
-          Timetable
+          {t('timetable')}
         </Link>
       }
     >
@@ -76,12 +60,12 @@ export function TeacherWorkloadWidget({ teacherWorkload, workspaceId }: TeacherW
 
       {conflictCount > 0 && (
         <div className="mt-3 flex items-center justify-between text-xs text-(--ssz-text-muted)">
-          <span>{conflictCount} time {conflictCount === 1 ? 'conflict' : 'conflicts'} this week</span>
+          <span>{t('conflicts', { count: conflictCount })}</span>
           <Link
             href={timetableHref}
             className="font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
           >
-            Open timetable →
+            {t('open')}
           </Link>
         </div>
       )}

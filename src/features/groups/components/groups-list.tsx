@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Users, CalendarRange, Plus } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
+import { WritableOnly } from '@/features/school-lifecycle';
 
 import { Button } from '@/components/ui/button';
 import { Table, TableHeader, TableBody, TableRow, TableHead } from '@/components/ui/table';
@@ -27,13 +28,17 @@ async function EmptyState({ filtered, newGroupHref }: { filtered: boolean; newGr
           {filtered ? t('list.filteredEmpty') : t('list.empty.title')}
         </p>
         {!filtered && (
-          <p className="mt-1 text-xs text-(--ssz-text-muted)">{t('list.empty.description')}</p>
+          <WritableOnly>
+            <p className="mt-1 text-xs text-(--ssz-text-muted)">{t('list.empty.description')}</p>
+          </WritableOnly>
         )}
       </div>
       {!filtered && (
-        <Button asChild size="sm">
-          <Link href={newGroupHref}>{t('list.empty.action')}</Link>
-        </Button>
+        <WritableOnly>
+          <Button asChild size="sm">
+            <Link href={newGroupHref}>{t('list.empty.action')}</Link>
+          </Button>
+        </WritableOnly>
       )}
     </div>
   );
@@ -147,12 +152,14 @@ export async function GroupsList({ groups, schoolId, workspaceId, filter }: Prop
               {t('list.timetable')}
             </Link>
           </Button>
-          <Button size="sm" asChild>
-            <Link href={newGroupHref}>
-              <Plus className="size-4 mr-1.5" aria-hidden="true" />
-              {t('list.newGroup')}
-            </Link>
-          </Button>
+          <WritableOnly>
+            <Button size="sm" asChild>
+              <Link href={newGroupHref}>
+                <Plus className="size-4 mr-1.5" aria-hidden="true" />
+                {t('list.newGroup')}
+              </Link>
+            </Button>
+          </WritableOnly>
         </div>
       </div>
 

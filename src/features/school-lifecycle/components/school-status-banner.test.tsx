@@ -39,7 +39,7 @@ describe('SchoolStatusBanner', () => {
     renderWithProviders(<SchoolStatusBanner audience="student" status="suspended" />);
     expect(screen.getByTestId('school-status-banner')).toHaveTextContent('starting and handing in work is paused');
     renderWithProviders(<SchoolStatusBanner audience="student" status="closed" />);
-    expect(screen.getAllByTestId('school-status-banner')[1]).toHaveTextContent('Your own history stays with you');
+    expect(screen.getAllByTestId('school-status-banner')[1]).toHaveTextContent('The courses stay open to read, and your history stays with you');
   });
 });
 

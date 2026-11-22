@@ -1,5 +1,6 @@
 'use client';
 
+import { useSchoolWritable, WritableOnly } from '@/features/school-lifecycle';
 import { useDeferredValue } from 'react';
 import {
   Plus,
@@ -174,10 +175,23 @@ interface ContainerOverflowMenuProps {
   state: ContainerState;
 }
 
+/**
+ * A course of this school while the school is suspended or closed (plan 90, Q17 (a)): its
+ * edit actions are drawn inactive and the course itself opens for viewing. A course owned
+ * elsewhere (a personal one, another school's) is not this workspace's status to judge.
+ */
+function useCourseLocked(container: Container): boolean {
+  const writable = useSchoolWritable();
+  const workspaceId = useWorkspaceRef();
+  return !writable && !!container.ownerSchoolId && container.ownerSchoolId === workspaceId;
+}
+
 function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps) {
   const t = useTranslations('Authoring.list');
+  const tReadOnly = useTranslations('Authoring.readOnly');
   const workspaceId = useWorkspaceRef();
   const containerHref = wsHref(workspaceId, `content/${container.id}`);
+  const locked = useCourseLocked(container);
 
   const stub = (action: string) => () => toast.info(t('itemActionStub', { action }));
 
@@ -195,33 +209,40 @@ function ContainerOverflowMenu({ container, state }: ContainerOverflowMenuProps)
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenuItem asChild>
-          <Link href={containerHref}>
+        {locked ? (
+          <DropdownMenuItem disabled title={tReadOnly('school')}>
             <Pencil className="h-3.5 w-3.5" />
             {t('menuEditStructure')}
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem asChild>
+            <Link href={containerHref}>
+              <Pencil className="h-3.5 w-3.5" />
+              {t('menuEditStructure')}
+            </Link>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onSelect={stub(t('menuPreview'))}>
           <Eye className="h-3.5 w-3.5" />
           {t('menuPreview')}
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={stub(t('menuDuplicate'))}>
+        <DropdownMenuItem disabled={locked} onSelect={stub(t('menuDuplicate'))}>
           <Copy className="h-3.5 w-3.5" />
           {t('menuDuplicate')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         {state === 'archived' ? (
-          <DropdownMenuItem onSelect={stub(t('menuRestore'))}>
+          <DropdownMenuItem disabled={locked} onSelect={stub(t('menuRestore'))}>
             <ArchiveRestore className="h-3.5 w-3.5" />
             {t('menuRestore')}
           </DropdownMenuItem>
         ) : (
-          <DropdownMenuItem onSelect={stub(t('menuArchive'))}>
+          <DropdownMenuItem disabled={locked} onSelect={stub(t('menuArchive'))}>
             <Archive className="h-3.5 w-3.5" />
             {t('menuArchive')}
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem variant="destructive" onSelect={stub(t('menuDelete'))}>
+        <DropdownMenuItem disabled={locked} variant="destructive" onSelect={stub(t('menuDelete'))}>
           <Trash2 className="h-3.5 w-3.5" />
           {t('menuDelete')}
         </DropdownMenuItem>
@@ -275,17 +296,19 @@ function ListEmptyState() {
         <p className="text-base font-semibold">{t('emptyTitle')}</p>
         <p className="text-sm text-muted-foreground max-w-sm">{t('emptyBody')}</p>
       </div>
-      <div className="flex flex-wrap gap-3 justify-center">
-        <Button asChild>
-          <Link href={newHref}>
-            <Plus className="mr-1 h-4 w-4" />
-            {t('emptyCreate')}
-          </Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href={`${newHref}?flow=quick`}>{t('emptyTemplate')}</Link>
-        </Button>
-      </div>
+      <WritableOnly>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <Button asChild>
+            <Link href={newHref}>
+              <Plus className="mr-1 h-4 w-4" />
+              {t('emptyCreate')}
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href={`${newHref}?flow=quick`}>{t('emptyTemplate')}</Link>
+          </Button>
+        </div>
+      </WritableOnly>
     </div>
   );
 }
@@ -393,14 +416,16 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
             </p>
           )}
         </div>
-        <div className="flex gap-2">
-          <Button size="sm" asChild>
-            <Link href={newContainerHref}>
-              <Plus className="mr-1 h-4 w-4" />
-              {t('newCourse')}
-            </Link>
-          </Button>
-        </div>
+        <WritableOnly>
+          <div className="flex gap-2">
+            <Button size="sm" asChild>
+              <Link href={newContainerHref}>
+                <Plus className="mr-1 h-4 w-4" />
+                {t('newCourse')}
+              </Link>
+            </Button>
+          </div>
+        </WritableOnly>
       </div>
 
       {/* Toolbar */}
@@ -468,13 +493,15 @@ export function MyContainersList({ schoolRole = 'owner' }: MyContainersListProps
               <ContainerGridCard key={c.id} container={c} />
             ))}
             {/* "+ New" tile */}
-            <Link
-              href={newContainerHref}
-              className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border min-h-30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
-            >
-              <Plus className="h-6 w-6 mb-1" />
-              <span className="text-xs font-medium">{t('newCourseTile')}</span>
-            </Link>
+            <WritableOnly>
+              <Link
+                href={newContainerHref}
+                className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-border min-h-30 text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+              >
+                <Plus className="h-6 w-6 mb-1" />
+                <span className="text-xs font-medium">{t('newCourseTile')}</span>
+              </Link>
+            </WritableOnly>
           </div>
         ) : (
           <Table role="table">

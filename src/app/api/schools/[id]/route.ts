@@ -80,6 +80,10 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     if (e instanceof AppError && e.code === 'forbidden') {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
+    // A refusal with a code (409 SOLO_WORKSPACE_NOT_DELETABLE / SCHOOL_NOT_ACTIVE) goes through as is.
+    if (e instanceof AppError && e.code === 'conflict') {
+      return NextResponse.json(e.details ?? { error: 'Conflict' }, { status: 409 });
+    }
     return NextResponse.json({ error: 'Failed to delete school' }, { status: 502 });
   }
 }

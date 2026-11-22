@@ -47,5 +47,12 @@
     "schools": "Schools"
   },
   "myWords": "My words",
-  "pronunciation": "Pronunciation"
+  "pronunciation": "Pronunciation",
+  "schoolType": {
+    "online": "Online only",
+    "hybrid": "Hybrid"
+  },
+  "collapse": "Collapse",
+  "collapseSidebar": "Collapse sidebar",
+  "expandSidebar": "Expand sidebar"
 }

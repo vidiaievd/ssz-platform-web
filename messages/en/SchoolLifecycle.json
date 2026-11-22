@@ -13,8 +13,8 @@
       "suspended": "You can still read your courses and see your history, but starting and handing in work is paused.",
       "suspendedUntil": "You can still read your courses and see your history, but starting and handing in work is paused.",
       "closedTitle": "This school is closed",
-      "closed": "The school's courses are no longer available. Your own history stays with you.",
-      "closedUntil": "The school's courses are no longer available. Your own history stays with you."
+      "closed": "You can no longer start or hand in work. The courses stay open to read, and your history stays with you.",
+      "closedUntil": "You can no longer start or hand in work. The courses stay open to read, and your history stays with you."
     }
   },
   "maintenance": {
@@ -28,11 +28,31 @@
     "saved": "Maintenance status saved.",
     "saveFailed": "Could not save the status.",
     "learnerNote": "This course is no longer maintained: it may be out of date.",
-    "learnerObsoleteNote": "This course is outdated and takes no new learners. You can carry on with it."
+    "learnerObsoleteNote": "This course is outdated and takes no new learners. You can carry on with it.",
+    "learnerObsoleteHistoryNote": "The school that ran this course is gone: it stays only as your history, and new exercises cannot be started."
   },
   "errors": {
+    "schoolNotActiveTitle": "The school is not accepting new work",
     "schoolSuspended": "The school is temporarily blocked: new work cannot be started or handed in, and nothing in it can be changed.",
-    "schoolClosed": "The school is closed. Its materials are no longer available.",
+    "schoolClosed": "The school is closed: nothing in it can be started, handed in or changed.",
     "courseObsolete": "This course is outdated and takes no new enrolments."
+  },
+  "unavailable": {
+    "title": "School unavailable",
+    "body": "The school is closed, does not exist, or you have no access to it. Your learning history stays with you.",
+    "home": "Go to the home page",
+    "courseForbiddenTitle": "Course unavailable",
+    "courseForbiddenBody": "This course belongs to a school that has been closed, or you have not been given access to it. If you studied in that school, your history stays with you.",
+    "courseGoneTitle": "Course deleted",
+    "courseGoneBody": "The course no longer exists — it was deleted together with its school. Your progress is kept.",
+    "myCourses": "To my courses"
+  },
+  "readOnly": {
+    "title": "Nothing can be changed right now",
+    "body": "The school is read only. The notice above says why and until when.",
+    "learnerTask": "This task can't be started or handed in right now. The notice above says why; your earlier work is under My work.",
+    "draftHeading": "Your draft",
+    "draftSuspended": "Your draft is saved. You can hand it in once the school is unblocked.",
+    "draftClosed": "The school is closed: the draft can no longer be handed in; it stays here to read."
   }
 }

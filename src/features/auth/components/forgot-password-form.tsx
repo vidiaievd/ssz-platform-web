@@ -11,10 +11,11 @@ import { Field, Input } from "@/components/ui/input";
 
 import { forgotPasswordAction } from "../actions/forgot-password";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "../schemas";
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 export function ForgotPasswordForm() {
   const t = useTranslations("Auth.ForgotPassword");
-  const tErrors = useTranslations("Errors");
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
@@ -33,7 +34,7 @@ export function ForgotPasswordForm() {
     startTransition(async () => {
       const result = await forgotPasswordAction(data);
       if (!result.ok) {
-        setServerError(tErrors(result.error.code));
+        setServerError(tErrors(result.error));
         return;
       }
       setSent(true);

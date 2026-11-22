@@ -5,6 +5,6 @@
     "comingSoon": "Поиск скоро появится"
   },
   "trial": {
-    "daysLeft": "Пробный · {days} дней"
+    "daysLeft": "Пробный · {days, plural, one {# день} few {# дня} many {# дней} other {# дня}}"
   }
 }

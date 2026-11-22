@@ -1,7 +1,211 @@
 {
   "dashboard": {
     "notFound": "Skolen ble ikke funnet.",
-    "placeholder": "Fullstendige dashbord-statistikker kommer snart."
+    "placeholder": "Fullstendige dashbord-statistikker kommer snart.",
+    "onboarding": {
+      "title": "Kom i gang med skolen",
+      "progress": "{completed} av {total} fullført · ~{minutes} min igjen",
+      "minutes": "~{minutes} min",
+      "go": "Gå →",
+      "hide": "Skjul sjekklisten for oppstart",
+      "progressLabel": "Fremdrift i oppstarten",
+      "items": {
+        "fillBranding": "Last opp skolens logo",
+        "createCourse": "Lag ditt første kurs",
+        "createGroupSchedule": "Opprett en gruppe og sett timeplanen",
+        "inviteTeacher": "Inviter en lærer",
+        "assignTeacherGroup": "Tildel en lærer til gruppen",
+        "inviteStudents": "Legg til de første elevene"
+      }
+    },
+    "unavailable": "Dataene er midlertidig utilgjengelige.",
+    "loadingTitle": {
+      "groups": "Grupper",
+      "groupGaps": "Undervist mot lært",
+      "activity": "Siste aktivitet",
+      "courseHealth": "Kurshelse",
+      "atRisk": "Elever i faresonen",
+      "todaysClasses": "Dagens timer",
+      "teacherWorkload": "Lærernes arbeidsmengde",
+      "reviewQueue": "Trenger din gjennomgang"
+    },
+    "kpis": {
+      "label": "Nøkkeltall",
+      "ownerOnly": "Nøkkeltall bare for eieren",
+      "ownerBadge": "Eier",
+      "trend": "Trend: {delta}",
+      "spark": "Trend siste 7 dager",
+      "labels": {
+        "active_groups": "Aktive grupper",
+        "active_students_7d": "Aktive elever · 7 d",
+        "avg_teacher_load": "Snitt lærerbelastning",
+        "scheduling_conflicts": "Timeplankonflikter",
+        "my_groups": "Mine grupper",
+        "my_students": "Mine elever",
+        "lessons_per_week": "Timer · uke",
+        "my_load": "Min belastning",
+        "lessons_completed_7d": "Fullførte leksjoner · 7 d",
+        "pending_reviews": "Venter på retting",
+        "at_risk": "Elever i faresonen"
+      },
+      "hints": {
+        "active_students_7d": "av {enrolled} påmeldte",
+        "lessons_completed_7d": "i {courses, plural, one {# kurs} other {# kurs}}",
+        "at_risk": "ikke logget inn på {days}+ dager"
+      }
+    },
+    "operations": {
+      "conflicts": "{count, plural, one {# timeplankonflikt} other {# timeplankonflikter}}",
+      "noTeacher": "{count, plural, one {# gruppe} other {# grupper}} uten lærer",
+      "both": "{first} og {second}",
+      "body": "<b>{problems}</b> hindrer timene i å gå trygt.",
+      "timetable": "Lærernes timeplan",
+      "reviewGroups": "Se gruppene"
+    },
+    "groups": {
+      "title": "Grupper",
+      "myTitle": "Mine grupper",
+      "titleCounts": "Grupper · {active} aktive · {attention} trenger oppmerksomhet",
+      "empty": "Ingen grupper ennå",
+      "newGroup": "Ny gruppe",
+      "all": "Alle grupper →",
+      "allHealthy": "Alle {count} grupper har lærer, timeplan og ledige plasser.",
+      "summary": "{healthy} i orden · {attention} trenger oppmerksomhet",
+      "resolve": "Løs det i Grupper →",
+      "students": "{count}/{max} elever",
+      "teacherStudents": "{teacher} · {count}/{max} elever"
+    },
+    "workload": {
+      "title": "Lærernes arbeidsmengde",
+      "empty": "Ingen tildelinger ennå",
+      "over": "{count} over kapasitet · snitt {pct}%",
+      "avg": "snitt {pct}%",
+      "timetable": "Timeplan",
+      "conflicts": "{count, plural, one {# tidskonflikt} other {# tidskonflikter}} denne uken",
+      "open": "Åpne timeplanen →"
+    },
+    "activity": {
+      "title": "Siste aktivitet",
+      "emptyTitle": "Ingenting har skjedd ennå",
+      "emptyBody": "Aktivitet vises her etter hvert som skolen vokser.",
+      "filtersLabel": "Filtrer aktivitet",
+      "feedLabel": "Aktivitetsstrøm",
+      "noneFiltered": "Ingen aktivitet av denne typen ennå.",
+      "someone": "Noen",
+      "filters": {
+        "all": "Alt",
+        "people": "Personer",
+        "content": "Innhold",
+        "review": "Retting"
+      },
+      "time": {
+        "justNow": "akkurat nå",
+        "minutes": "for {count} min siden",
+        "hours": "for {count} t siden",
+        "days": "for {count} d siden"
+      },
+      "what": {
+        "joined": "ble med som {role}",
+        "published": "publiserte",
+        "enrolled": "meldte seg på",
+        "submitted": "leverte til retting",
+        "reviewed": "rettet en besvarelse — {outcome}"
+      },
+      "roles": {
+        "owner": "eier",
+        "admin": "administrator",
+        "teacher": "lærer",
+        "student": "elev",
+        "content_admin": "innholdsadministrator",
+        "observer": "observatør",
+        "trial": "prøveelev"
+      },
+      "outcomes": {
+        "passed": "bestått",
+        "failed": "ikke bestått",
+        "returned": "sendt tilbake",
+        "accepted": "godtatt",
+        "rejected": "avvist",
+        "approved": "godkjent"
+      }
+    },
+    "courseHealth": {
+      "title": "Kurshelse",
+      "subtitle": "Sortert etter påmeldte",
+      "emptyTitle": "Ingen kurs ennå",
+      "emptyBody": "Lag ditt første kurs for å følge med på det.",
+      "completion": "{name}: {pct}% fullført",
+      "up": "stigende",
+      "down": "synkende",
+      "flat": "uendret",
+      "dropoff": "elever faller fra",
+      "line": "{pct}% · {count, plural, one {# elev} other {# elever}}"
+    },
+    "atRisk": {
+      "title": "Elever i faresonen",
+      "subtitle": "Inaktive i 7+ dager",
+      "subtitleTotal": "Inaktive i 7+ dager · {total} totalt",
+      "emptyTitle": "Ingen elever i faresonen",
+      "emptyBody": "Alle elevene er aktive — godt jobbet!",
+      "today": "i dag",
+      "daysAgo": "{count, plural, one {for # dag siden} other {for # dager siden}}",
+      "never": "aldri aktiv",
+      "language": "språk: {lang}",
+      "nudgeAll": "Påminn alle ({count})",
+      "sent": "Sendt ✓",
+      "nudged": "{count, plural, one {Påminnet # elev} other {Påminnet # elever}}",
+      "nudgeFailed": "Kunne ikke sende påminnelser. Prøv igjen."
+    },
+    "classes": {
+      "title": "Dagens timer",
+      "mine": "Mine timer",
+      "emptyTitle": "Ingen timer i dag",
+      "emptyBody": "Timeplanen er tom i dag.",
+      "online": "Nett",
+      "now": "nå",
+      "low": "få",
+      "underEnrolled": "få påmeldte"
+    },
+    "quick": {
+      "title": "Snarveier",
+      "actions": {
+        "new-course": "Nytt kurs",
+        "new-group": "Ny gruppe",
+        "invite-teacher": "Inviter lærer",
+        "enroll-student": "Meld på elev",
+        "import-csv": "Importer CSV",
+        "edit-branding": "Skoleprofil",
+        "teacher-timetable": "Lærernes timeplan",
+        "monthly-report": "Månedsrapport",
+        "new-lesson": "Ny leksjon",
+        "my-groups": "Mine grupper",
+        "my-timetable": "Min timeplan",
+        "schedule-class": "Planlegg time",
+        "grade-queue": "Rettekø",
+        "message-class": "Skriv til gruppen"
+      }
+    },
+    "review": {
+      "title": "Trenger din gjennomgang",
+      "subtitle": "Eieren må godkjenne før publisering",
+      "emptyTitle": "Alt er gjennomgått!",
+      "emptyBody": "Ingen innhold venter på din gjennomgang.",
+      "by": "{author} · {age}"
+    },
+    "teacherQueue": {
+      "title": "Rettekø",
+      "subtitle": "Besvarelser som venter på deg",
+      "emptyTitle": "Ingenting å rette ennå",
+      "emptyBody": "Nye besvarelser fra elevene vises her.",
+      "writing": "skriftlig besvarelse",
+      "speaking": "muntlig besvarelse"
+    },
+    "tips": {
+      "ownerFull": "Fest de mest brukte snarveiene i sidepanelet for raskere navigasjon.",
+      "ownerPartial": "Noen lærere har ikke godtatt invitasjonen ennå. Send dem en påminnelse.",
+      "admin": "Sett opp automatisk godkjenning av rutineinnhold for å korte ned gjennomgangskøen.",
+      "teacher": "Rett flere besvarelser samtidig for å spare tid."
+    }
   },
   "common": {
     "close": "Lukk",

@@ -269,7 +269,8 @@ function mapStatusToCode(status: number): AppErrorCode {
   if (status === 404) return 'not_found';
   if (status === 409) return 'conflict';
   if (status === 422 || status === 400) return 'validation';
-  if (status === 423) return 'mfa_required';
+  // 423 is auth's lockout after too many failed passwords or codes (ACCOUNT_LOCKED).
+  if (status === 423) return 'rate_limited';
   if (status === 410) return 'gone';
   if (status === 429) return 'rate_limited';
   if (status >= 500) return 'upstream_unavailable';

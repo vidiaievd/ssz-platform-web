@@ -1,24 +1,12 @@
+import { useTranslations } from 'next-intl';
+
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { DashboardRole, WidgetData, Kpi } from '../types';
 import { kpiSetFor } from '../lib/roles';
 import { KpiCard } from './kpi-card';
 
-const KPI_LABELS: Record<Kpi['key'], string> = {
-  // owner / admin — operations-weighted (v3)
-  active_groups:        'Active Groups',
-  active_students_7d:   'Active Students · 7d',
-  avg_teacher_load:     'Avg. Teacher Load',
-  scheduling_conflicts: 'Scheduling Conflicts',
-  // teacher — personal view
-  my_groups:            'My Groups',
-  my_students:          'My Students',
-  lessons_per_week:     'Lessons · wk',
-  my_load:              'My Load',
-  // legacy (analytics service)
-  lessons_completed_7d: 'Lessons Completed · 7d',
-  pending_reviews:      'Pending Reviews',
-  at_risk:              'At-Risk Students',
-};
+/** Keys whose analytics hint carries numbers (`hintValues`) we can word in the reader's language. */
+const HINT_KEYS = new Set<Kpi['key']>(['active_students_7d', 'lessons_completed_7d', 'at_risk']);
 
 type KpiStripProps = {
   kpis: WidgetData<Kpi[]>;
@@ -26,13 +14,21 @@ type KpiStripProps = {
 };
 
 export function KpiStrip({ kpis, role }: KpiStripProps) {
+  const t = useTranslations('School.dashboard.kpis');
   const allowedKeys = kpiSetFor(role);
+  const label = (key: Kpi['key']) => t(`labels.${key}`);
+  // The service writes its hint in English; with the numbers beside it we say it ourselves.
+  const hintOf = (kpi: Kpi | undefined) =>
+    kpi?.hintValues && HINT_KEYS.has(kpi.key)
+      ? t(`hints.${kpi.key as 'active_students_7d'}`, kpi.hintValues as never)
+      : kpi?.hint;
 
   if (kpis.status === 'unavailable') {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {/* No data, not "still loading": a skeleton here never ended. */}
         {allowedKeys.map((key) => (
-          <KpiCard key={key} label={KPI_LABELS[key]} value="—" loading />
+          <KpiCard key={key} label={label(key)} value="—" />
         ))}
       </div>
     );
@@ -50,7 +46,7 @@ export function KpiStrip({ kpis, role }: KpiStripProps) {
     <TooltipProvider>
       <div
         role="list"
-        aria-label="Key performance indicators"
+        aria-label={t('label')}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
       >
         {allowedKeys.map((key) => {
@@ -61,11 +57,11 @@ export function KpiStrip({ kpis, role }: KpiStripProps) {
           return (
             <div key={key} role="listitem">
               <KpiCard
-                label={KPI_LABELS[key]}
+                label={label(key)}
                 value={kpi?.value ?? '—'}
                 delta={kpi?.delta ?? undefined}
                 trend={kpi?.trend ?? undefined}
-                hint={kpi?.hint}
+                hint={hintOf(kpi)}
                 spark={kpi?.spark}
                 sub={kpi?.sub}
                 locked={locked}

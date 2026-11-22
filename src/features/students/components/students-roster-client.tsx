@@ -11,6 +11,7 @@ import { useStudents } from '../api/use-students';
 import { StudentsFilters } from './students-filters';
 import { StudentsList } from './students-list';
 import type { StudentsListResult, SegmentKey } from '@/features/students/types';
+import { WritableOnly } from '@/features/school-lifecycle';
 
 type Props = {
   schoolId: string;
@@ -75,10 +76,12 @@ export function StudentsRosterClient({ schoolId, workspaceId, initial }: Props) 
             </Link>
           </Button>
           <Button size="sm" asChild>
-            <Link href={enrollHref}>
-              <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
-              {t('list.enroll')}
-            </Link>
+            <WritableOnly>
+              <Link href={enrollHref}>
+                <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
+                {t('list.enroll')}
+              </Link>
+            </WritableOnly>
           </Button>
         </div>
       </div>
@@ -102,10 +105,12 @@ export function StudentsRosterClient({ schoolId, workspaceId, initial }: Props) 
               </Link>
             </Button>
             <Button size="sm" asChild>
-              <Link href={enrollHref}>
-                <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
-                {t('list.enroll')}
-              </Link>
+              <WritableOnly>
+                <Link href={enrollHref}>
+                  <UserPlus className="mr-1.5 h-4 w-4" aria-hidden />
+                  {t('list.enroll')}
+                </Link>
+              </WritableOnly>
             </Button>
           </div>
         </div>

@@ -576,12 +576,22 @@ export interface ContainerShare {
   createdAt: string;
 }
 
+/** A tag as content-service answers it (`TagResponseDto`). */
 export interface ContentTag {
   id: string;
+  slug: string;
   name: string;
-  entityType: string;
-  entityId: string;
+  category: string;
+  /** `global` — the platform's; `school` — one school's own. */
+  scope: 'global' | 'school';
+  ownerSchoolId: string | null;
   createdAt: string;
+}
+
+/** A tag offered in the picker. */
+export interface TagSuggestion {
+  id: string;
+  name: string;
 }
 
 export interface ContainerVersion {

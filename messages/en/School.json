@@ -1,7 +1,211 @@
 {
   "dashboard": {
     "notFound": "School not found.",
-    "placeholder": "Full dashboard metrics coming soon."
+    "placeholder": "Full dashboard metrics coming soon.",
+    "onboarding": {
+      "title": "Get your school running",
+      "progress": "{completed} of {total} complete · ~{minutes} min left",
+      "minutes": "~{minutes} min",
+      "go": "Go →",
+      "hide": "Hide onboarding checklist",
+      "progressLabel": "Onboarding progress",
+      "items": {
+        "fillBranding": "Upload your school logo",
+        "createCourse": "Create your first course",
+        "createGroupSchedule": "Create a group & set its schedule",
+        "inviteTeacher": "Invite a teacher",
+        "assignTeacherGroup": "Assign a teacher to the group",
+        "inviteStudents": "Add your first students"
+      }
+    },
+    "unavailable": "Data is temporarily unavailable.",
+    "loadingTitle": {
+      "groups": "Groups",
+      "groupGaps": "Taught against taken away",
+      "activity": "Recent activity",
+      "courseHealth": "Course health",
+      "atRisk": "At-risk students",
+      "todaysClasses": "Today's classes",
+      "teacherWorkload": "Teacher workload",
+      "reviewQueue": "Needs your review"
+    },
+    "kpis": {
+      "label": "Key indicators",
+      "ownerOnly": "Owner-only metric",
+      "ownerBadge": "Owner",
+      "trend": "Trend: {delta}",
+      "spark": "Trend over 7 days",
+      "labels": {
+        "active_groups": "Active groups",
+        "active_students_7d": "Active students · 7d",
+        "avg_teacher_load": "Avg. teacher load",
+        "scheduling_conflicts": "Scheduling conflicts",
+        "my_groups": "My groups",
+        "my_students": "My students",
+        "lessons_per_week": "Lessons · wk",
+        "my_load": "My load",
+        "lessons_completed_7d": "Lessons completed · 7d",
+        "pending_reviews": "Pending reviews",
+        "at_risk": "At-risk students"
+      },
+      "hints": {
+        "active_students_7d": "of {enrolled} enrolled",
+        "lessons_completed_7d": "across {courses, plural, one {# course} other {# courses}}",
+        "at_risk": "haven't logged in {days}+ days"
+      }
+    },
+    "operations": {
+      "conflicts": "{count, plural, one {# scheduling conflict} other {# scheduling conflicts}}",
+      "noTeacher": "{count, plural, one {# group} other {# groups}} with no teacher",
+      "both": "{first} and {second}",
+      "body": "<b>{problems}</b> block lessons from running safely.",
+      "timetable": "Teacher timetable",
+      "reviewGroups": "Review groups"
+    },
+    "groups": {
+      "title": "Groups",
+      "myTitle": "My groups",
+      "titleCounts": "Groups · {active} active · {attention} need attention",
+      "empty": "No groups yet",
+      "newGroup": "New group",
+      "all": "All groups →",
+      "allHealthy": "All {count} groups are staffed, scheduled and within capacity.",
+      "summary": "{healthy} healthy · {attention} need attention",
+      "resolve": "Resolve in Groups →",
+      "students": "{count}/{max} students",
+      "teacherStudents": "{teacher} · {count}/{max} students"
+    },
+    "workload": {
+      "title": "Teacher workload",
+      "empty": "No assignments yet",
+      "over": "{count} over capacity · avg {pct}%",
+      "avg": "avg {pct}%",
+      "timetable": "Timetable",
+      "conflicts": "{count, plural, one {# time conflict} other {# time conflicts}} this week",
+      "open": "Open timetable →"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "emptyTitle": "Nothing has happened yet",
+      "emptyBody": "Activity will appear here as your school grows.",
+      "filtersLabel": "Filter activity",
+      "feedLabel": "Activity feed",
+      "noneFiltered": "No activity of this kind yet.",
+      "someone": "Someone",
+      "filters": {
+        "all": "All",
+        "people": "People",
+        "content": "Content",
+        "review": "Review"
+      },
+      "time": {
+        "justNow": "just now",
+        "minutes": "{count} min ago",
+        "hours": "{count} h ago",
+        "days": "{count} d ago"
+      },
+      "what": {
+        "joined": "joined as {role}",
+        "published": "published",
+        "enrolled": "enrolled in",
+        "submitted": "submitted for review",
+        "reviewed": "reviewed submission — {outcome}"
+      },
+      "roles": {
+        "owner": "owner",
+        "admin": "administrator",
+        "teacher": "teacher",
+        "student": "student",
+        "content_admin": "content admin",
+        "observer": "observer",
+        "trial": "trial student"
+      },
+      "outcomes": {
+        "passed": "passed",
+        "failed": "failed",
+        "returned": "returned",
+        "accepted": "accepted",
+        "rejected": "rejected",
+        "approved": "approved"
+      }
+    },
+    "courseHealth": {
+      "title": "Course health",
+      "subtitle": "Sorted by enrollment",
+      "emptyTitle": "No courses yet",
+      "emptyBody": "Create your first course to track health metrics.",
+      "completion": "{name} completion: {pct}%",
+      "up": "trending up",
+      "down": "trending down",
+      "flat": "flat trend",
+      "dropoff": "drop-off warning",
+      "line": "{pct}% · {count, plural, one {# student} other {# students}}"
+    },
+    "atRisk": {
+      "title": "At-risk students",
+      "subtitle": "Inactive 7+ days",
+      "subtitleTotal": "Inactive 7+ days · {total} total",
+      "emptyTitle": "No at-risk students",
+      "emptyBody": "All students are active — great work!",
+      "today": "today",
+      "daysAgo": "{count, plural, one {# day ago} other {# days ago}}",
+      "never": "never active",
+      "language": "language: {lang}",
+      "nudgeAll": "Nudge all {count}",
+      "sent": "Sent ✓",
+      "nudged": "{count, plural, one {Nudged # student} other {Nudged # students}}",
+      "nudgeFailed": "Failed to send reminders. Please try again."
+    },
+    "classes": {
+      "title": "Today's classes",
+      "mine": "My classes",
+      "emptyTitle": "No classes today",
+      "emptyBody": "Your schedule is clear for today.",
+      "online": "Online",
+      "now": "now",
+      "low": "low",
+      "underEnrolled": "under-enrolled"
+    },
+    "quick": {
+      "title": "Quick actions",
+      "actions": {
+        "new-course": "New course",
+        "new-group": "New group",
+        "invite-teacher": "Invite teacher",
+        "enroll-student": "Enroll student",
+        "import-csv": "Import CSV",
+        "edit-branding": "Edit branding",
+        "teacher-timetable": "Teacher timetable",
+        "monthly-report": "Monthly report",
+        "new-lesson": "New lesson",
+        "my-groups": "My groups",
+        "my-timetable": "My timetable",
+        "schedule-class": "Schedule class",
+        "grade-queue": "Grade queue",
+        "message-class": "Message class"
+      }
+    },
+    "review": {
+      "title": "Needs your review",
+      "subtitle": "Owner approval required to publish",
+      "emptyTitle": "All caught up!",
+      "emptyBody": "No content is waiting for your review.",
+      "by": "by {author} · {age}"
+    },
+    "teacherQueue": {
+      "title": "Grade queue",
+      "subtitle": "Submissions awaiting your review",
+      "emptyTitle": "Nothing to grade yet",
+      "emptyBody": "New student submissions will appear here.",
+      "writing": "writing submission",
+      "speaking": "speaking submission"
+    },
+    "tips": {
+      "ownerFull": "Pin your most-used shortcuts to the sidebar for faster navigation.",
+      "ownerPartial": "Some teachers haven't accepted their invitations yet. Send them a reminder.",
+      "admin": "Set up auto-approval for routine content submissions to speed up your review queue.",
+      "teacher": "Use bulk grading to score multiple submissions at once and save time."
+    }
   },
   "common": {
     "close": "Close",

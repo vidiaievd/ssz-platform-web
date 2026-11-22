@@ -11,6 +11,7 @@ import { Note, Panel } from '@/features/review/components/primitives';
 
 import { useAiPrecheck, useSaveAiPrecheck } from '../../api/use-ai-precheck';
 import type { AiPrecheckSettings } from '../../types/ai-precheck';
+import { ReadOnlyReason } from '@/features/school-lifecycle';
 
 /** The ranges organization-service accepts; a field outside them is flagged before the save. */
 const MAX_PER_EXERCISE = 1000;
@@ -156,7 +157,7 @@ export function AiPrecheckSettingsForm({ school, canEdit }: AiPrecheckSettingsFo
         ) : null}
 
         {!canEdit ? (
-          <p className="mt-3 text-[12.5px] text-muted-foreground">{t('readOnly')}</p>
+          <p className="mt-3 text-[12.5px] text-muted-foreground"><ReadOnlyReason>{t('readOnly')}</ReadOnlyReason></p>
         ) : null}
       </Panel>
 

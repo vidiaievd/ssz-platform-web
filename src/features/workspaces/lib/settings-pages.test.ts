@@ -4,21 +4,23 @@ import { canEditRecipe, settingsPagesFor } from './settings-pages';
 
 describe('settingsPagesFor', () => {
   it('gives an owner and an administrator every page of a school', () => {
-    for (const role of ['OWNER', 'ADMIN'] as const)
-      expect(settingsPagesFor(role, 'SCHOOL')).toEqual([
-        'profile',
-        'account',
-        'notifications',
-        'review',
-        'progress',
-        'recipe',
-      ]);
+    const pages = ['school', 'profile', 'account', 'notifications', 'review', 'progress', 'recipe'];
+    expect(settingsPagesFor('ADMIN', 'SCHOOL')).toEqual(pages);
+    expect(settingsPagesFor('OWNER', 'SCHOOL')).toEqual([...pages, 'danger']);
+  });
+
+  // Plan 90, block 9, step 5: only an owner deletes a school, and never a solo workspace.
+  it('keeps the danger zone for the owner of a school', () => {
+    expect(settingsPagesFor('OWNER', 'SOLO')).not.toContain('danger');
+    expect(settingsPagesFor('ADMIN', 'SCHOOL')).not.toContain('danger');
+    expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL')).not.toContain('danger');
   });
 
   // Plan 83, step 3c: without the key the school pays for nobody, so there is nothing to set.
   it('adds the assistant after the review only when the plan carries ai.student_assist', () => {
     expect(settingsPagesFor('OWNER', 'SCHOOL')).not.toContain('assistant');
     expect(settingsPagesFor('ADMIN', 'SCHOOL', { studentAssist: true })).toEqual([
+      'school',
       'profile',
       'account',
       'notifications',
@@ -37,6 +39,7 @@ describe('settingsPagesFor', () => {
   it('adds the check before hand-in after the review only when the plan carries ai.practice', () => {
     expect(settingsPagesFor('OWNER', 'SCHOOL')).not.toContain('precheck');
     expect(settingsPagesFor('ADMIN', 'SCHOOL', { studentAssist: true, aiPractice: true })).toEqual([
+      'school',
       'profile',
       'account',
       'notifications',
@@ -48,6 +51,13 @@ describe('settingsPagesFor', () => {
     ]);
     expect(settingsPagesFor('OWNER', 'SOLO', { aiPractice: true })).toContain('precheck');
     expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL', { aiPractice: true })).toEqual(['recipe']);
+  });
+
+  // Plan 90 §8, step 11: a school's logo and description; a SOLO workspace has no such page.
+  it("puts the school's own page first for a school only", () => {
+    expect(settingsPagesFor('OWNER', 'SCHOOL')[0]).toBe('school');
+    expect(settingsPagesFor('OWNER', 'SOLO')).not.toContain('school');
+    expect(settingsPagesFor('CONTENT_ADMIN', 'SCHOOL')).not.toContain('school');
   });
 
   it('gives a content admin the lesson recipe and nothing else', () => {

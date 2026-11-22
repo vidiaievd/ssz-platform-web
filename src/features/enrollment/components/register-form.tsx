@@ -16,6 +16,7 @@ import { Link } from '@/lib/i18n/navigation';
 import { studentRegisterSchema, type StudentRegisterInput } from '../schemas/register';
 import { studentRegisterAction } from '../actions/register';
 import type { EntryIntent } from '@/lib/enrollment/intent';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type Props = {
   intent: EntryIntent;
@@ -26,7 +27,7 @@ type Props = {
 
 export function EnrollmentRegisterForm({ intent, prefillEmail, schoolName }: Props) {
   const t = useTranslations('Auth.Register');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);

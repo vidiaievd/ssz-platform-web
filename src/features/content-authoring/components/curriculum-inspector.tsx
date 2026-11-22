@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { ClipboardList, Layers, BookOpen, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { toast } from 'sonner';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -30,7 +29,8 @@ import {
 } from '../lib/renamable-item';
 import { rollUpLevelPublishState } from '../lib/structure-nodes';
 import { formatLearningGoals } from '../lib/learning-goals';
-import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { SaveRefusedError, useUnsavedChanges } from '../hooks/use-unsaved-changes';
+import { useCourseReadOnly } from './course-read-only';
 import { LearningGoalsField } from './learning-goals-field';
 import { useStructureUndo } from '../hooks/use-structure-undo';
 import {
@@ -241,18 +241,33 @@ function InspectorHead({
  * so the wording about what a level, a module or a block actually loses is
  * written once (`useNodeDeletion`).
  */
-function InspectorFooter({ editorHref, onDelete }: { editorHref?: string; onDelete?: () => void }) {
+function InspectorFooter({ editorHref, onDelete: requestDelete }: { editorHref?: string; onDelete?: () => void }) {
   const t = useTranslations('Authoring');
+  // Open for viewing: the editor is not offered (owner's call, live check s26) and nothing is
+  // deleted. A typed-in editor address still opens read only (`LessonEditorPage`).
+  const readOnly = useCourseReadOnly();
+  const onDelete = readOnly ? undefined : requestDelete;
 
   if (!editorHref && !onDelete) return null;
 
   return (
     <div className="flex gap-2 border-t border-border pt-3">
-      {editorHref && (
-        <Button asChild variant="outline" size="sm" className="flex-1">
-          <Link href={editorHref}>{t('structure.openEditor')}</Link>
-        </Button>
-      )}
+      {editorHref &&
+        (readOnly ? (
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex-1"
+            disabled
+            title={t('readOnly.title')}
+          >
+            {t('structure.openEditor')}
+          </Button>
+        ) : (
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <Link href={editorHref}>{t('structure.openEditor')}</Link>
+          </Button>
+        ))}
       {onDelete && (
         <Button
           variant="outline"
@@ -300,7 +315,6 @@ function InspectorFields({
 }: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
   const tContent = useTranslations('Content');
-  const tErrors = useTranslations('Errors');
   const undo = useStructureUndo();
 
   const publishOptions = [
@@ -336,10 +350,7 @@ function InspectorFields({
               onSave={async (title) => {
                 const previous = level.title ?? '';
                 const result = await renameSectionAction(courseContainerId, level.id!, title);
-                if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
-                  throw new Error(result.error.code);
-                }
+                if (!result.ok) throw new SaveRefusedError(result.error);
                 undo.record({
                   label: t('undo.renamed', { name: title }),
                   revert: async () =>
@@ -406,10 +417,7 @@ function InspectorFields({
             onSave={async (title) => {
               const previous = mod.title ?? '';
               const result = await renameContainerAction(mod.containerId, title);
-              if (!result.ok) {
-                toast.error(tErrors(result.error.code));
-                throw new Error(result.error.code);
-              }
+              if (!result.ok) throw new SaveRefusedError(result.error);
               undo.record({
                 label: t('undo.renamed', { name: title }),
                 revert: async () => (await renameContainerAction(mod.containerId, previous)).ok,
@@ -444,10 +452,7 @@ function InspectorFields({
                 next,
                 previous !== null,
               );
-              if (!result.ok) {
-                toast.error(tErrors(result.error.code));
-                throw new Error(result.error.code);
-              }
+              if (!result.ok) throw new SaveRefusedError(result.error);
               undo.record({
                 label: t('undo.renamed', { name: next }),
                 // Whether the localization row exists now is what the save just
@@ -479,10 +484,7 @@ function InspectorFields({
             onSave={async (next) => {
               const previous = mod.learningGoals;
               const result = await setContainerLearningGoalsAction(mod.containerId, next);
-              if (!result.ok) {
-                toast.error(tErrors(result.error.code));
-                throw new Error(result.error.code);
-              }
+              if (!result.ok) throw new SaveRefusedError(result.error);
               undo.record({
                 label: t('undo.learningGoalsChanged', { name: mod.title ?? '' }),
                 revert: async () =>
@@ -556,10 +558,7 @@ function InspectorFields({
             const previous = ownTitleOf(item);
             const itemType = item.itemType as RenamableItemType;
             const result = await renameItemAction(itemType, item.refId, containerId, next);
-            if (!result.ok) {
-              toast.error(tErrors(result.error.code));
-              throw new Error(result.error.code);
-            }
+            if (!result.ok) throw new SaveRefusedError(result.error);
             undo.record({
               label: next.trim()
                 ? t('undo.renamed', { name: next.trim() })
@@ -676,6 +675,7 @@ type InspectorTab = 'fields' | 'coverage';
  */
 export function CurriculumInspector(props: CurriculumInspectorProps) {
   const t = useTranslations('Authoring');
+  const readOnly = useCourseReadOnly();
   const [tab, setTab] = useState<InspectorTab>('fields');
 
   return (
@@ -694,7 +694,11 @@ export function CurriculumInspector(props: CurriculumInspectorProps) {
       </TabsList>
 
       <TabsContent value="fields" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4.5">
-        <InspectorFields {...props} />
+        {/* A disabled fieldset switches off every field and button inside at once; links
+            (the lesson's own page) stay live. */}
+        <fieldset disabled={readOnly} className="contents">
+          <InspectorFields {...props} />
+        </fieldset>
       </TabsContent>
 
       <TabsContent value="coverage" className="mt-0 min-h-0 flex-1 overflow-y-auto p-4.5">

@@ -24,7 +24,7 @@ import type {
   SubmitAnswerRequest,
   SubmitAnswerResponse,
 } from '../types/attempts';
-import { SCHOOL_NOT_ACTIVE_EVENT } from '@/features/school-lifecycle/types';
+import { SCHOOL_NOT_ACTIVE_EVENT, rememberSchoolRefusal } from '@/features/school-lifecycle/types';
 
 /**
  * The exercise-engine attempt flow: start, check, and — only if asked — reveal.
@@ -84,6 +84,7 @@ async function send<TResponse>(
     } | null;
     if (res.status === 409 && problem?.code === 'SCHOOL_NOT_ACTIVE' && typeof window !== 'undefined') {
       // The school is read only (plan 90, phase 5): one listener words it for every runner.
+      rememberSchoolRefusal((problem as { schoolStatus?: unknown }).schoolStatus);
       window.dispatchEvent(
         new CustomEvent(SCHOOL_NOT_ACTIVE_EVENT, {
           detail: { status: (problem as { schoolStatus?: unknown }).schoolStatus },
@@ -136,6 +137,23 @@ export async function fetchResumable(exerciseId: string): Promise<boolean> {
     return data.resumable === true;
   } catch {
     return false;
+  }
+}
+
+/**
+ * The draft saved on this learner's open attempt, or `null` (none, or the lookup failed).
+ *
+ * Read without starting anything (plan 90, live check block 12): the reader uses it where a
+ * school that stopped refuses new attempts, to show a draft begun before that read only.
+ */
+export async function fetchOpenDraft(exerciseId: string): Promise<unknown | null> {
+  try {
+    const res = await fetch(`/api/exercises/${exerciseId}/attempts`);
+    if (!res.ok) return null;
+    const data = (await res.json()) as LastAttemptResponse;
+    return data.openDraft ?? null;
+  } catch {
+    return null;
   }
 }
 

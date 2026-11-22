@@ -13,6 +13,7 @@ import { learningKeys } from '@/features/learning';
 import type { VocabularyItem } from '@/features/content/types';
 
 import { WordAudioButton, posMeta } from './vocab-flip-card';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 export interface VocabTriageStageProps {
   vocabularyListId: string;
@@ -37,7 +38,7 @@ export function VocabTriageStage({
 }: VocabTriageStageProps) {
   const t = useTranslations('Learning.reader.vocab.flow.triage');
   const tVocab = useTranslations('Learning.reader.vocab');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
 
   const [index, setIndex] = useState(0);

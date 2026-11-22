@@ -12,7 +12,9 @@ import {
   UserPlus,
   type LucideIcon,
 } from 'lucide-react';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import { Link } from '@/lib/i18n/navigation';
 
 import { cn } from '@/lib/utils';
 import { wsHref } from '@/features/workspaces/lib/href';
@@ -34,26 +36,11 @@ const ICON_MAP: Record<string, LucideIcon> = {
   UserPlus,
 };
 
-const ACTION_LABELS: Record<string, string> = {
-  'new-course':        'New course',
-  'new-group':         'New group',
-  'invite-teacher':    'Invite teacher',
-  'enroll-student':    'Enroll student',
-  'import-csv':        'Import CSV',
-  'edit-branding':     'Edit branding',
-  'teacher-timetable': 'Teacher timetable',
-  'monthly-report':    'Monthly report',
-  'new-lesson':        'New lesson',
-  'my-groups':         'My groups',
-  'my-timetable':      'My timetable',
-  'schedule-class':    'Schedule class',
-  'grade-queue':       'Grade queue',
-  'message-class':     'Message class',
-};
-
 type QuickActionsProps = {
   role: DashboardRole;
   workspaceId: string;
+  /** Suspended or closed school: only the shortcuts that look. */
+  readOnly?: boolean;
 };
 
 function resolveHref(action: QuickAction, workspaceId: string): string {
@@ -63,7 +50,7 @@ function resolveHref(action: QuickAction, workspaceId: string): string {
     'invite-teacher':    wsHref(workspaceId, 'students'),
     'enroll-student':    wsHref(workspaceId, 'students'),
     'import-csv':        wsHref(workspaceId, 'students'),
-    'edit-branding':     wsHref(workspaceId, 'settings'),
+    'edit-branding':     wsHref(workspaceId, 'settings/school'),
     'teacher-timetable': wsHref(workspaceId, 'groups/timetable'),
     'monthly-report':    wsHref(workspaceId, 'dashboard'),
     'new-lesson':        wsHref(workspaceId, 'content'),
@@ -76,17 +63,23 @@ function resolveHref(action: QuickAction, workspaceId: string): string {
   return routes[action.id] ?? wsHref(workspaceId, 'dashboard');
 }
 
-export function QuickActions({ role, workspaceId }: QuickActionsProps) {
-  const actions = quickActionsFor(role);
+/** Shortcuts that only open a screen to look at; the rest create or change something. */
+const VIEW_ONLY_ACTIONS = new Set(['teacher-timetable', 'monthly-report', 'my-groups', 'my-timetable']);
+
+export function QuickActions({ role, workspaceId, readOnly = false }: QuickActionsProps) {
+  const t = useTranslations('School.dashboard.quick');
+  // A suspended or closed school keeps only the shortcuts that look (plan 90, live check, block 9).
+  const actions = quickActionsFor(role).filter((a) => !readOnly || VIEW_ONLY_ACTIONS.has(a.id));
 
   if (actions.length === 0) return null;
 
   return (
-    <WidgetCard title="Quick actions">
+    <WidgetCard title={t('title')}>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-2">
         {actions.map((action) => {
           const Icon = ICON_MAP[action.icon];
-          const label = ACTION_LABELS[action.id] ?? action.id;
+          const key = `actions.${action.id}` as Parameters<typeof t>[0];
+          const label = t.has(key) ? t(key) : action.id;
           const href = resolveHref(action, workspaceId);
 
           return (

@@ -42,6 +42,15 @@ vi.mock('../actions/inflection-table', () => ({ saveInflectionTableAction: vi.fn
 vi.mock('../actions/read-aloud', () => ({ saveReadAloudAction: vi.fn() }));
 vi.mock('../actions/minimal-pairs', () => ({ saveMinimalPairsAction: vi.fn() }));
 vi.mock('../actions/information-transfer', () => ({ saveInformationTransferAction: vi.fn() }));
+// The read-aloud builder loads prosody through a server action, which reads server config at import.
+vi.mock('../actions/prosody', () => ({
+  loadPromptProsodyAction: vi.fn(),
+  loadLessonProsodyAction: vi.fn(),
+  savePromptProsodyAction: vi.fn(),
+  saveLessonProsodyAction: vi.fn(),
+  suggestPromptProsodyAction: vi.fn(),
+  suggestLessonProsodyAction: vi.fn(),
+}));
 // The set's clips go through the media client, which reads server config at import.
 vi.mock('@/features/media', () => ({
   uploadAsset: vi.fn(),

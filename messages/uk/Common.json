@@ -1,4 +1,16 @@
 {
   "appName": "SSZ Learn",
-  "loading": "Завантаження…"
+  "loading": "Завантаження…",
+  "operations": {
+    "alerts": {
+      "no-primary": "Без викладача",
+      "conflict": "Накладка",
+      "overload": "Перевантаження",
+      "over": "Понад ліміт",
+      "under": "Замало"
+    },
+    "groups": "{count, plural, one {# група} few {# групи} many {# груп} other {# групи}}",
+    "hours": "{name}: {hours} з {max} годин за договором",
+    "hoursOver": "{name}: {hours} з {max} годин за договором, перевантаження"
+  }
 }

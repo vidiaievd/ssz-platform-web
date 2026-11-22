@@ -1,4 +1,5 @@
 import { Lock, TrendingDown, TrendingUp, Minus } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,6 +42,7 @@ export function KpiCard({
   locked,
   loading,
 }: KpiCardProps) {
+  const t = useTranslations('School.dashboard.kpis');
   if (loading) {
     return (
       <div className="relative min-h-[108px] rounded-md border border-border bg-card p-4 space-y-2">
@@ -66,13 +68,13 @@ export function KpiCard({
           <TooltipTrigger asChild>
             <span
               className="absolute top-3 right-3 inline-flex items-center gap-1 rounded-full bg-warning-100 px-1.5 py-0.5 text-[10px] font-semibold text-warning-700"
-              aria-label="Owner-only metric"
+              aria-label={t('ownerOnly')}
             >
               <Lock className="size-2.5" aria-hidden="true" />
-              Owner
+              {t('ownerBadge')}
             </span>
           </TooltipTrigger>
-          <TooltipContent>Owner-only metric</TooltipContent>
+          <TooltipContent>{t('ownerOnly')}</TooltipContent>
         </Tooltip>
       )}
 
@@ -96,7 +98,7 @@ export function KpiCard({
           {delta && trend && !locked && (
             <span
               className={cn('flex items-center gap-0.5 text-sm font-medium', trendColor(trend))}
-              aria-label={`trend: ${trend} ${delta}`}
+              aria-label={t('trend', { delta })}
             >
               <TrendIcon trend={trend} />
               {delta}
@@ -107,7 +109,7 @@ export function KpiCard({
         {spark && spark.length > 0 && !locked && (
           <Sparkline
             data={spark}
-            ariaLabel={`trend sparkline: ${trend ?? 'flat'} over 7 days`}
+            ariaLabel={t('spark')}
             emphasizeLast
           />
         )}

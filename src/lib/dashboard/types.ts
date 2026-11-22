@@ -9,6 +9,8 @@ export type Kpi = {
   delta?: string | null;
   trend?: KpiTrend | null;
   hint?: string;
+  /** The numbers inside `hint` (analytics, live check of plan 90): enrolled / courses / days. */
+  hintValues?: Record<string, number>;
   spark?: number[];
   sub?: string;
 };
@@ -53,6 +55,8 @@ export type ActivityItem = {
   target?: string | null;
   occurredAt: string;
   tag: 'people' | 'content' | 'review' | 'milestone';
+  /** The event behind the row; absent from an older analytics image. */
+  eventType?: string;
 };
 
 export type ActivityPayload = {
@@ -141,7 +145,8 @@ export type DashboardCompositeResponse = {
   /** Out of scope — billing service not yet built. */
   trial: Unavailable;
   onboarding: {
-    items: Array<{ key: string; done: boolean; labelKey: string; est: string; href: string }>;
+    /** `labelKey` under `School.dashboard.onboarding.items`; `href` workspace-relative or null. */
+    items: Array<{ key: string; done: boolean; labelKey: string; estMinutes: number; href: string | null }>;
     completed: number;
     total: number;
     minutesLeft: number;

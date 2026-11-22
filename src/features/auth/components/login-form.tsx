@@ -11,9 +11,11 @@ import { Field, Input } from "@/components/ui/input";
 import type { AppErrorCode } from "@/lib/errors";
 
 import { loginAction } from "../actions/login";
+import { useAuthRefusalMessage } from "../hooks/use-auth-refusal-message";
 import { loginSchema, type LoginInput } from "../schemas";
 import { resolvePostLoginPath } from "../utils/resolve-post-login-path";
 import { TotpStep } from "./totp-step";
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type LoginFormProps = {
   redirect?: string;
@@ -21,7 +23,8 @@ type LoginFormProps = {
 
 export function LoginForm({ redirect }: LoginFormProps) {
   const t = useTranslations("Auth.Login");
-  const tErrors = useTranslations("Errors");
+  const tErrors = useErrorMessage();
+  const refusalMessage = useAuthRefusalMessage();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -40,7 +43,8 @@ export function LoginForm({ redirect }: LoginFormProps) {
       if (!result.ok) {
         const code = result.error.code as AppErrorCode;
         setServerError(
-          code === "unauthenticated" ? t("invalidCredentials") : tErrors(code),
+          refusalMessage(result.error) ??
+            (code === "unauthenticated" ? t("invalidCredentials") : tErrors(code)),
         );
         return;
       }

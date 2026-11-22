@@ -1,3 +1,4 @@
+import { useTranslations } from 'next-intl';
 import { TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
 
 import { WidgetCard } from './widget-card';
@@ -11,9 +12,10 @@ function completionColor(pct: number): string {
 }
 
 function TrendIndicator({ trend }: { trend: Trend }) {
-  if (trend === 'up') return <TrendingUp className="size-4 text-success-600" aria-label="trending up" />;
-  if (trend === 'down') return <TrendingDown className="size-4 text-error-600" aria-label="trending down" />;
-  return <Minus className="size-4 text-(--ssz-text-muted)" aria-label="flat trend" />;
+  const t = useTranslations('School.dashboard.courseHealth');
+  if (trend === 'up') return <TrendingUp className="size-4 text-success-600" aria-label={t('up')} />;
+  if (trend === 'down') return <TrendingDown className="size-4 text-error-600" aria-label={t('down')} />;
+  return <Minus className="size-4 text-(--ssz-text-muted)" aria-label={t('flat')} />;
 }
 
 type CourseHealthProps = {
@@ -21,19 +23,20 @@ type CourseHealthProps = {
 };
 
 export function CourseHealth({ courseHealth }: CourseHealthProps) {
+  const t = useTranslations('School.dashboard.courseHealth');
   if (courseHealth.status === 'unavailable') {
-    return <WidgetCard title="Course health" loading />;
+    return <WidgetCard title={t('title')} unavailable />;
   }
 
   const courses = courseHealth.status === 'ok' ? courseHealth.data : [];
 
   return (
     <WidgetCard
-      title="Course health"
-      subtitle="Sorted by enrollment"
+      title={t('title')}
+      subtitle={t('subtitle')}
       empty={
         courses.length === 0 ? (
-          <WidgetEmptyState title="No courses yet" body="Create your first course to track health metrics." />
+          <WidgetEmptyState title={t('emptyTitle')} body={t('emptyBody')} />
         ) : undefined
       }
     >
@@ -63,7 +66,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                       aria-valuenow={pct}
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      aria-label={`${course.name} completion: ${pct}%`}
+                      aria-label={t('completion', { name: course.name, pct })}
                       className="h-2 rounded-full bg-neutral-100 overflow-hidden"
                     >
                       <div
@@ -76,7 +79,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                   <div className="flex items-center justify-end gap-1">
                     <TrendIndicator trend={course.trend} />
                     {course.flag === 'dropoff' && (
-                      <AlertTriangle className="size-3.5 text-warning-600" aria-label="dropoff warning" />
+                      <AlertTriangle className="size-3.5 text-warning-600" aria-label={t('dropoff')} />
                     )}
                   </div>
                 </div>
@@ -93,7 +96,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                     <div className="flex items-center gap-1">
                       <TrendIndicator trend={course.trend} />
                       {course.flag === 'dropoff' && (
-                        <AlertTriangle className="size-3.5 text-warning-600" aria-label="dropoff warning" />
+                        <AlertTriangle className="size-3.5 text-warning-600" aria-label={t('dropoff')} />
                       )}
                     </div>
                   </div>
@@ -102,7 +105,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                     aria-valuenow={pct}
                     aria-valuemin={0}
                     aria-valuemax={100}
-                    aria-label={`${course.name} completion: ${pct}%`}
+                    aria-label={t('completion', { name: course.name, pct })}
                     className="h-1.5 rounded-full bg-neutral-100 overflow-hidden"
                   >
                     <div
@@ -110,7 +113,9 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                       style={{ width: `${pct}%` }}
                     />
                   </div>
-                  <p className="mt-1 font-mono text-[11px] text-(--ssz-text-muted)">{pct}% · {course.students} students</p>
+                  <p className="mt-1 font-mono text-[11px] text-(--ssz-text-muted)">
+                    {t('line', { pct, count: course.students })}
+                  </p>
                 </div>
               </div>
             );

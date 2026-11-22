@@ -20,6 +20,7 @@ import {
   type EffortRow,
 } from '../../lib/review-effort-form';
 import { REVIEWABLE_EXERCISE_TYPES, type ReviewableExerciseType } from '../../types';
+import { ReadOnlyReason } from '@/features/school-lifecycle';
 
 export interface ReviewEffortSettingsProps {
   school: string;
@@ -210,7 +211,7 @@ export function ReviewEffortSettings({ school, canEdit }: ReviewEffortSettingsPr
           </Button>
         </div>
       ) : (
-        <p className="text-[12.5px] text-muted-foreground">{t('readOnly')}</p>
+        <p className="text-[12.5px] text-muted-foreground"><ReadOnlyReason>{t('readOnly')}</ReadOnlyReason></p>
       )}
     </div>
   );

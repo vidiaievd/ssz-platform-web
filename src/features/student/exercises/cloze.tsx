@@ -16,6 +16,7 @@ import { primaryInstructionText } from '@/features/content/lib/instruction-text'
 import { submitAttemptAction } from '../actions/submit-attempt';
 import type { AttemptResult } from '../types/exercise';
 import { FeedbackPanel } from './feedback-panel';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface ClozeExerciseProps {
   exercise: ExerciseDisplay;
@@ -29,7 +30,7 @@ function parseTemplate(template: string): string[] {
 
 export function ClozeExercise({ exercise }: ClozeExerciseProps) {
   const t = useTranslations('Exercise');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const content = exercise.content;
 
   const template = typeof content.template === 'string' ? content.template : '';
@@ -60,7 +61,7 @@ export function ClozeExercise({ exercise }: ClozeExerciseProps) {
         timeSpentSeconds: (Date.now() - startedAtRef.current) / 1000,
       });
       if (!res.ok) {
-        toast.error(tErrors(res.error.code));
+        toast.error(tErrors(res.error));
         return;
       }
       setResult(res.value);

@@ -18,6 +18,7 @@ import { wsHref } from '@/features/workspaces/lib/href';
 import { GroupEditDialog } from './group-edit-dialog';
 import { archiveGroup, deleteGroup, duplicateGroup, publishGroup } from '../api/mutations';
 import type { Group } from '../types';
+import { useSchoolWritable } from '@/features/school-lifecycle';
 
 type Props = {
   group: Group;
@@ -30,6 +31,7 @@ type Props = {
 type Dialog = 'archive' | 'delete' | null;
 
 export function GroupDetailActions({ group, schoolId, workspaceId, listHref }: Props) {
+  const writable = useSchoolWritable();
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -90,6 +92,9 @@ export function GroupDetailActions({ group, schoolId, workspaceId, listHref }: P
       setDialog(null);
     });
   }
+
+  // Archive, duplicate, delete: nothing to offer in a suspended or closed school (plan 90, block 9).
+  if (!writable) return null;
 
   return (
     <>

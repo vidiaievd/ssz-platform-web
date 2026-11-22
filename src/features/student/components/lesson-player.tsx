@@ -11,6 +11,7 @@ import { useRouter } from '@/lib/i18n/navigation';
 import { markLessonStartedAction, markLessonCompletedAction } from '../actions/lesson-progress';
 import { LessonNavigation } from './lesson-navigation';
 import { LessonProgress } from './lesson-progress';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface LessonPlayerProps {
   lesson: Lesson;
@@ -39,7 +40,7 @@ export function LessonPlayer({
   containerId,
 }: LessonPlayerProps) {
   const t = useTranslations('Student');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isCompleted, setIsCompleted] = useState(false);
@@ -88,7 +89,7 @@ export function LessonPlayer({
       const timeSpentSeconds = (Date.now() - startedAtRef.current) / 1000;
       const result = await markLessonCompletedAction(lesson.id, timeSpentSeconds);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       setIsCompleted(true);

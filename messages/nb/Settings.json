@@ -1,5 +1,6 @@
 {
   "nav": {
+    "school": "Skole",
     "profile": "Profil",
     "account": "Konto",
     "notifications": "Varsler",
@@ -8,7 +9,8 @@
     "precheck": "Sjekk før innlevering",
     "progress": "Hva elevene ser",
     "recipe": "Timeoppskrift",
-    "new": "Ny"
+    "new": "Ny",
+    "danger": "Faresone"
   },
   "progress": {
     "eyebrow": "Skole",
@@ -231,6 +233,51 @@
       "never": "{n, plural, one {Det ene kurset arver arbeidsområdets oppskrift. Til en er lagret, sjekkes ingenting.} other {Alle # kurs arver arbeidsområdets oppskrift. Til en er lagret, sjekkes ingenting.}}",
       "modeOwn": "{count, plural, one {Egen oppskrift · # regel} other {Egen oppskrift · # regler}}",
       "modeNone": "Ingen oppskrift"
+    }
+  },
+  "danger": {
+    "eyebrow": "Skole",
+    "title": "Faresone",
+    "heading": "Slett skolen",
+    "body": "Skolen havner i arkivet: elever og lærere mister tilgangen med en gang, og om {days, plural, one {# dag} other {# dager}} ({date}) slettes dataene. Frem til da kan bare plattformstøtten hente den tilbake.",
+    "open": "Slett skolen",
+    "dialogTitle": "Slette «{name}»?",
+    "dialogBody": "Skolen havner i arkivet, og elever og lærere mister tilgangen med en gang. Om {days, plural, one {# dag} other {# dager}} ({date}) slettes dataene. Frem til da kan bare plattformstøtten hente den tilbake.",
+    "typeName": "Skriv inn skolens navn for å bekrefte: {name}",
+    "typeNameLabel": "Skolens navn",
+    "cancel": "Avbryt",
+    "confirm": "Slett for godt",
+    "done": "Skolen er lagt i arkivet.",
+    "failed": "Skolen kunne ikke slettes.",
+    "alreadyArchived": "Skolen er ikke aktiv – ingen endringer er mulig.",
+    "notActive": "Skolen er allerede arkivert eller sperret."
+  },
+  "school": {
+    "eyebrow": "Skole",
+    "title": "Skoleprofil",
+    "lede": "Det elever og foreldre ser på skolesiden og i katalogen.",
+    "logo": "Logo",
+    "noLogo": "Ingen logo.",
+    "name": "Skolens navn",
+    "description": "Beskrivelse",
+    "descriptionPlaceholder": "Hvem dere underviser, hvordan, og hva som gjør skolen deres annerledes.",
+    "write": "Skriv",
+    "preview": "Forhåndsvis",
+    "previewEmpty": "Ingenting å forhåndsvise ennå.",
+    "counter": "{count} / {max}",
+    "website": "Nettsted",
+    "contactEmail": "Kontakt-e-post",
+    "city": "By",
+    "save": "Lagre",
+    "saved": "Skoleprofilen er lagret",
+    "failed": "Kunne ikke laste skolen.",
+    "readOnly": "Bare eieren og administratorer kan endre skoleprofilen.",
+    "errors": {
+      "nameRequired": "Skriv inn skolens navn.",
+      "nameTooLong": "Høyst 100 tegn.",
+      "descriptionTooLong": "Høyst 500 tegn.",
+      "website": "Skriv inn en full adresse som begynner med https://",
+      "email": "Skriv inn en gyldig e-postadresse."
     }
   }
 }

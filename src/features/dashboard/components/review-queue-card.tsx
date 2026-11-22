@@ -1,4 +1,5 @@
-import { BookOpen, FileText, ExternalLink } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { BookOpen, FileText } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 import { WidgetCard } from './widget-card';
@@ -15,24 +16,25 @@ type ReviewQueueCardProps = {
 };
 
 export function ReviewQueueCard({ reviewQueue }: ReviewQueueCardProps) {
+  const t = useTranslations('School.dashboard.review');
   if (reviewQueue.status === 'unavailable') {
-    return <WidgetCard title="Needs your review" loading />;
+    return <WidgetCard title={t('title')} unavailable />;
   }
 
   const items = reviewQueue.status === 'ok' ? reviewQueue.data : [];
 
   if (items.length === 0) {
     return (
-      <WidgetCard title="Needs your review" subtitle="Owner approval required to publish">
-        <WidgetEmptyState title="All caught up!" body="No content is waiting for your review." />
+      <WidgetCard title={t('title')} subtitle={t('subtitle')}>
+        <WidgetEmptyState title={t('emptyTitle')} body={t('emptyBody')} />
       </WidgetCard>
     );
   }
 
   return (
     <WidgetCard
-      title="Needs your review"
-      subtitle="Owner approval required to publish"
+      title={t('title')}
+      subtitle={t('subtitle')}
       headerRight={
         <span className="inline-flex items-center justify-center size-5 rounded-full bg-error-100 text-[11px] font-bold text-error-700">
           {items.length}
@@ -41,7 +43,7 @@ export function ReviewQueueCard({ reviewQueue }: ReviewQueueCardProps) {
     >
       <ul
         role="list"
-        aria-label="Review queue"
+        aria-label={t('title')}
         className="divide-y divide-border -mx-4 -mb-4"
       >
         {items.map((item) => {
@@ -52,16 +54,9 @@ export function ReviewQueueCard({ reviewQueue }: ReviewQueueCardProps) {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-(--ssz-text-primary) truncate">{item.title}</p>
                 <p className="font-mono text-[11px] text-(--ssz-text-muted) truncate">
-                  by {item.author} · {item.age}
+                  {t('by', { author: item.author, age: item.age })}
                 </p>
               </div>
-              <a
-                href="#" // plan-28: deferred — content review page not built yet
-                className="shrink-0 flex items-center gap-1 text-xs font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded"
-                aria-label={`Open ${item.title} for review`}
-              >
-                Open <ExternalLink className="size-3" aria-hidden="true" />
-              </a>
             </li>
           );
         })}

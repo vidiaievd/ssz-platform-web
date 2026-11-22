@@ -211,7 +211,21 @@
     "noGroup": "Ingen gruppe",
     "submit": "Registrer {count}",
     "submitDefault": "Registrer",
-    "failed": "Registrering mislyktes. Prøv igjen."
+    "failed": "Registrering mislyktes. Prøv igjen.",
+    "branch": {
+      "register": "Ny bruker",
+      "attachDirect": "Allerede elev",
+      "onboardExisting": "Trenger elevrolle",
+      "invalid": "Ugyldig",
+      "checkFailed": "Kunne ikke sjekkes",
+      "rateLimited": "For mange sjekker – prøv igjen om noen minutter"
+    },
+    "result": {
+      "invited": "{count, plural, one {# invitasjon sendt} other {# invitasjoner sendt}}",
+      "attached": "{count, plural, one {# elev lagt til direkte} other {# elever lagt til direkte}}",
+      "alreadyMembers": "{count, plural, one {# er allerede på skolen} other {# er allerede på skolen}}",
+      "failed": "{count, plural, one {# adresse kunne ikke registreres. Prøv igjen.} other {# adresser kunne ikke registreres. Prøv igjen.}}"
+    }
   },
   "addToGroup": {
     "title": "Legg {name} til gruppe",

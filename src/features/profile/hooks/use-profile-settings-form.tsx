@@ -14,6 +14,7 @@ import { useMyTutorProfile, useUpdateTutorProfile } from '../api/use-my-tutor-pr
 import { updateProfileAction } from '../api/update-profile';
 import { profileKeys } from '../api/keys';
 import { createProfileSettingsSchema, type ProfileSettingsInput } from '../schemas';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 function getBrowserTimezone(): string {
   try {
@@ -38,7 +39,7 @@ type Props = {
 
 export function ProfileSettingsFormProvider({ children, isPrivateTutor }: Props) {
   const t = useTranslations('Profile');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const { data: profile, isLoading: profileLoading } = useMyProfile();
   const { data: tutor, isLoading: tutorLoading } = useMyTutorProfile();
   const queryClient = useQueryClient();
@@ -129,7 +130,7 @@ export function ProfileSettingsFormProvider({ children, isPrivateTutor }: Props)
             currency: tutor?.currency ?? null,
           });
         }
-        toast.error(tErrors(profileResult.error.code));
+        toast.error(tErrors(profileResult.error));
         return;
       }
 

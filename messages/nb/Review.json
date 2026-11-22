@@ -269,7 +269,7 @@
     "subtitle": "Hvor arbeidet har hopet seg opp, og hvem som trenger en hånd. Forsinkelse er et tegn på arbeidsmengde.",
     "period": {
       "label": "Perioden svarene telles over",
-      "days": "{n} dager"
+      "days": "{n, plural, one {# dag} other {# dager}}"
     },
     "summary": {
       "title": "Skolen",
@@ -283,7 +283,7 @@
       "oldest": "Eldste",
       "oldestSub": "har ventet lengst",
       "median": "Median svartid",
-      "medianSub": "siste {n} dager",
+      "medianSub": "siste {n, plural, one {# dag} other {# dager}}",
       "medianNone": "ingenting ble besvart i denne perioden",
       "truncated": "Skolen har mer som venter enn denne skjermen teller. Formen stemmer; totalene stopper ved taket.",
       "terms": "Godkjent ved fristen",
@@ -351,7 +351,7 @@
     },
     "journal": {
       "title": "Beslutningslogg",
-      "sub": "Siste {n} dager · hvem, når og hva det ble til",
+      "sub": "Siste {n, plural, one {# dag} other {# dager}} · hvem, når og hva det ble til",
       "empty": "Ingen har besvart noe i denne perioden.",
       "export": "Eksporter CSV",
       "more": "Vis mer",
@@ -457,7 +457,7 @@
       "hours": "timer",
       "autoAccept": {
         "label": "Teller av seg selv etter",
-        "hint": "≈ {days} dager. Et kurs kan sette sin egen frist.",
+        "hint": "≈ {days, plural, one {# dag} other {# dager}}. Et kurs kan sette sin egen frist.",
         "bounds": "Mellom {min} og {max} timer.",
         "beforeEscalation": "Kan ikke komme før eskaleringen ({n} t)."
       },
@@ -513,7 +513,7 @@
     },
     "effort": {
       "title": "Minutter per innlevering",
-      "sub": "Hvor lenge en lærer bruker på ett arbeid av hver type. Retteprognosen ganger køen med disse; skolens median tar over når {min} vurderinger på {days} dager står bak den.",
+      "sub": "Hvor lenge en lærer bruker på ett arbeid av hver type. Retteprognosen ganger køen med disse; skolens median tar over når {min} vurderinger på {days, plural, one {# dag} other {# dager}} står bak den.",
       "type": "Type",
       "minutes": "Startverdi",
       "min": "min",

@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 
 import { mfaChallengeAction } from '../actions/login';
+import { useAuthRefusalMessage } from '../hooks/use-auth-refusal-message';
 import { mfaChallengeSchema, type MfaChallengeInput } from '../schemas';
 import { resolvePostLoginPath } from '../utils/resolve-post-login-path';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type TotpStepProps = {
   mfaChallengeToken: string;
@@ -21,7 +23,8 @@ type TotpStepProps = {
 
 export function TotpStep({ mfaChallengeToken, redirect, onCancel }: TotpStepProps) {
   const t = useTranslations('Auth.Mfa');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
+  const refusalMessage = useAuthRefusalMessage();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -39,7 +42,9 @@ export function TotpStep({ mfaChallengeToken, redirect, onCancel }: TotpStepProp
     startTransition(async () => {
       const result = await mfaChallengeAction(data);
       if (!result.ok) {
-        setError('code', { message: tErrors(result.error.code) });
+        setError('code', {
+          message: refusalMessage(result.error) ?? tErrors(result.error),
+        });
         return;
       }
       if (result.value.emailVerified === false) {

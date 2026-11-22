@@ -1,4 +1,6 @@
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
+import { Link } from '@/lib/i18n/navigation';
 
 import { AlertChip } from './alert-chip';
 import type { GroupHealth } from '../types';
@@ -10,6 +12,7 @@ type GroupHealthRowProps = {
 };
 
 export function GroupHealthRow({ group, workspaceId }: GroupHealthRowProps) {
+  const t = useTranslations('School.dashboard.groups');
   return (
     <li className="flex items-center gap-3 py-2.5 min-w-0">
       {/* Lang badge */}
@@ -27,8 +30,12 @@ export function GroupHealthRow({ group, workspaceId }: GroupHealthRowProps) {
         </Link>
         <p className="text-xs text-(--ssz-text-muted) truncate">
           {group.primaryTeacherName
-            ? `${group.primaryTeacherName} · ${group.studentCount}/${group.max} students`
-            : `${group.studentCount}/${group.max} students`}
+            ? t('teacherStudents', {
+                teacher: group.primaryTeacherName,
+                count: group.studentCount,
+                max: group.max,
+              })
+            : t('students', { count: group.studentCount, max: group.max })}
         </p>
       </div>
 

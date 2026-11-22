@@ -220,9 +220,13 @@ export async function getStudentSchools(myUserId: string): Promise<StudentSchool
   return results.filter((s): s is StudentSchool => s !== null);
 }
 
+/**
+ * One school of the learner, by its slug or by its id — the staff shell sends a learner here by
+ * id (plan 90, live check, block 9), and a tutor's SOLO workspace has no slug to give.
+ */
 export async function getStudentSchool(myUserId: string, schoolSlug: string): Promise<StudentSchool | null> {
   const schools = await getStudentRoleSchools();
-  const school = schools.find((s) => s.slug === schoolSlug);
+  const school = schools.find((s) => s.slug === schoolSlug || s.id === schoolSlug);
   if (!school) return null;
   return buildStudentSchool(school, myUserId);
 }

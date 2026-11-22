@@ -9,6 +9,7 @@ import type { Group } from '../types';
 import type { GroupMaterialsView } from '../api/queries';
 import type { CurriculumUnit } from '@/features/teachers/types';
 import { wsHref } from '@/features/workspaces/lib/href';
+import { canEditContainer } from '@/features/content-authoring/lib/get-container-edit-access';
 
 /** Ring showing how much of the teaching plan the group has been given. */
 function ProgressRing({ pct, label }: { pct: number; label: string }) {
@@ -98,6 +99,9 @@ export async function GroupMaterialsTab({
   }
 
   const extraMaterials = group.materials.filter((m) => m.courseId !== course.id);
+  // A teacher without the edit right, or any reader of a suspended / closed school, opens the
+  // course for viewing (plan 90, Q17 (a)) — the button says so instead of promising the editor.
+  const courseEditable = await canEditContainer(course.id);
 
   return (
     <div className="space-y-6">
@@ -129,7 +133,7 @@ export async function GroupMaterialsTab({
                 className="inline-flex items-center gap-1 text-xs font-semibold text-primary-600 dark:text-primary-400 hover:underline"
               >
                 <ExternalLink className="size-3.5" aria-hidden="true" />
-                {t('materials.openCourse')}
+                {courseEditable ? t('materials.openCourse') : t('materials.viewCourse')}
               </Link>
               {canManage && (
                 <CourseChangeButton group={group} schoolId={schoolId} label={t('materials.change')} />

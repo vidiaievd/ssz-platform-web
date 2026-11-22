@@ -18,6 +18,7 @@ import {
   useSaveSchoolReviewSettings,
 } from '../../api/use-review-settings';
 import type { SchoolReviewSettings } from '../../types/oversight';
+import { ReadOnlyReason } from '@/features/school-lifecycle';
 
 /** The ages the preview is drawn from — a plausible week, so the scale has something to say. */
 const PREVIEW_AGES = [2, 6, 12, 20, 30, 44, 50, 60, 72, 90, 110];
@@ -185,7 +186,7 @@ export function SlaSettings({ school, canEdit }: SlaSettingsProps) {
           </Button>
         </div>
       ) : (
-        <p className="text-[12.5px] text-muted-foreground">{t('readOnly')}</p>
+        <p className="text-[12.5px] text-muted-foreground"><ReadOnlyReason>{t('readOnly')}</ReadOnlyReason></p>
       )}
     </div>
   );

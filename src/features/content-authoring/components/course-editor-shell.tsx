@@ -15,6 +15,7 @@ import { useCurriculumTree } from '../api/use-curriculum-tree';
 import { allCollapseKeys } from '../lib/structure-nodes';
 import { CourseSettingsDrawer } from './course-settings-drawer';
 import { CourseStructurePanel } from './course-structure-panel';
+import { CourseReadOnlyNotice, CourseReadOnlyProvider } from './course-read-only';
 import { CoverageView } from './coverage-view';
 import { collectPublishRows } from '../lib/publish-rows';
 import { filtersFromParams } from '../lib/structure-filters';
@@ -34,6 +35,8 @@ interface CourseEditorShellProps {
   draftVersionId: string | null;
   /** Version number students currently see; null while the container has never been published. */
   publishedVersionNumber: number | null;
+  /** Open for viewing only (plan 90, Q17 (a)): no publishing, no settings, no structure edits. */
+  readOnly?: boolean;
 }
 
 /**
@@ -58,16 +61,17 @@ export function CourseEditorShell({
   preflightResult,
   draftVersionId,
   publishedVersionNumber,
+  readOnly = false,
 }: CourseEditorShellProps) {
   const t = useTranslations('Authoring');
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
   // Opened from the workspace recipe page's list of courses that differ (plan 65).
-  const [settingsOpen, setSettingsOpen] = useState(searchParams.get('settings') === '1');
+  const [settingsOpen, setSettingsOpen] = useState(!readOnly && searchParams.get('settings') === '1');
   // Opened straight from a lesson editor, which has no tree of its own to
   // review against and so links back here instead of publishing on its own.
-  const [publishOpen, setPublishOpen] = useState(searchParams.get('publish') === '1');
+  const [publishOpen, setPublishOpen] = useState(!readOnly && searchParams.get('publish') === '1');
   const [collapsed, setCollapsed] = useState<ReadonlySet<string>>(new Set());
   // Which coverage card a health signal asked for, while the view is still
   // switching: the card is not mounted until it has. A ref rather than state —
@@ -157,6 +161,7 @@ export function CourseEditorShell({
   }, []);
 
   return (
+    <CourseReadOnlyProvider readOnly={readOnly}>
     <div
       className="space-y-4"
       style={{ '--structure-sticky-top': `${topbarHeight + 16}px` } as React.CSSProperties}
@@ -175,12 +180,14 @@ export function CourseEditorShell({
         reviewInboxHref={wsHref(workspaceId, `review?course=${container.id}`)}
         view={view}
         onViewChange={handleViewChange}
-        onReview={() => setPublishOpen(true)}
+        onReview={readOnly ? undefined : () => setPublishOpen(true)}
         settingsTrigger={
-          <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
-            <Settings className="size-4" />
-            {t('settings.trigger')}
-          </Button>
+          readOnly ? null : (
+            <Button variant="outline" size="sm" onClick={() => setSettingsOpen(true)}>
+              <Settings className="size-4" />
+              {t('settings.trigger')}
+            </Button>
+          )
         }
         metrics={<StructureMetrics tree={tree} unpublished={pendingCount} />}
         healthStrip={
@@ -190,20 +197,26 @@ export function CourseEditorShell({
         }
       />
 
-      <ReviewPublishDialog
-        container={container}
-        draftVersionId={draftVersionId}
-        open={publishOpen}
-        onOpenChange={setPublishOpen}
-      />
-      <CourseSettingsDrawer
-        container={container}
-        schoolRole={schoolRole}
-        preflightResult={preflightResult}
-        draftVersionId={draftVersionId}
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-      />
+      <CourseReadOnlyNotice />
+
+      {!readOnly && (
+        <>
+          <ReviewPublishDialog
+            container={container}
+            draftVersionId={draftVersionId}
+            open={publishOpen}
+            onOpenChange={setPublishOpen}
+          />
+          <CourseSettingsDrawer
+            container={container}
+            schoolRole={schoolRole}
+            preflightResult={preflightResult}
+            draftVersionId={draftVersionId}
+            open={settingsOpen}
+            onOpenChange={setSettingsOpen}
+          />
+        </>
+      )}
 
       {view === 'coverage' ? (
         <CoverageView
@@ -235,5 +248,6 @@ export function CourseEditorShell({
         </p>
       )}
     </div>
+    </CourseReadOnlyProvider>
   );
 }

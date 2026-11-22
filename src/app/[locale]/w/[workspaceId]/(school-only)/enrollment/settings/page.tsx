@@ -1,6 +1,6 @@
 import { getTranslations } from 'next-intl/server';
 
-import { getPublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { AppError } from '@/lib/errors';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
@@ -28,7 +28,7 @@ export default async function EnrollmentSettingsPage({ params }: Props) {
   const { workspaceId } = await params;
   const t = await getTranslations('Enrollment.Settings');
 
-  const school = await getPublicSchool(workspaceId);
+  const school = await resolveSchoolWorkspace(workspaceId);
   let settings: SchoolOnboardingSettings = resolveOnboardingSettings();
 
   if (school) {
@@ -36,7 +36,7 @@ export default async function EnrollmentSettingsPage({ params }: Props) {
     try {
       dto = await serverFetch<BackendSettings>({
         service: 'organization',
-        path: `/schools/${school.schoolId}/enrollment/settings`,
+        path: `/schools/${school.id}/enrollment/settings`,
       });
     } catch (err) {
       if (err instanceof AppError && err.code === 'not_found') {

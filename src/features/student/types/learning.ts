@@ -104,6 +104,13 @@ export interface StudentCourse {
   nextItemTitle: string | null;
 }
 
+/** A finished course for the «History» section; `course` is `null` when it is gone for the learner. */
+export interface StudentHistoryItem {
+  containerId: string;
+  completedAt: string | null;
+  course: { title: string; level: string | null; targetLanguage: string } | null;
+}
+
 /** One material attached to a group — the main course (`isMain`) or an additional one. */
 export interface SchoolMaterial {
   id: string;

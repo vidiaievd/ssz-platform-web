@@ -27,6 +27,7 @@ import { PendingInvitesBadge } from "@/features/invitations/components/pending-i
 import { removeTeacher } from "../../api/mutations";
 import { AddTeacherModal } from "../command-center/add-teacher-modal";
 import type { TeacherRosterRow, RosterStatus } from "../../types";
+import { WritableOnly } from '@/features/school-lifecycle';
 
 type Props = {
   schoolId: string;
@@ -82,10 +83,12 @@ export function TeacherRosterClient({ schoolId, workspaceId, teachers }: Props) 
       {/* Header */}
       <div className="flex items-center justify-between gap-3">
         <h1 className="text-xl font-semibold text-(--ssz-text-primary)">{t("title")}</h1>
-        <Button size="sm" onClick={() => setAddOpen(true)} aria-label={t("addTeacher")}>
-          <Plus className="mr-1.5 size-4" aria-hidden="true" />
-          {t("addTeacher")}
-        </Button>
+        <WritableOnly>
+          <Button size="sm" onClick={() => setAddOpen(true)} aria-label={t("addTeacher")}>
+            <Plus className="mr-1.5 size-4" aria-hidden="true" />
+            {t("addTeacher")}
+          </Button>
+        </WritableOnly>
       </div>
 
       {teachers.length === 0 ? (
@@ -95,9 +98,11 @@ export function TeacherRosterClient({ schoolId, workspaceId, teachers }: Props) 
           aria-live="polite"
         >
           <p className="text-(--ssz-text-muted)">{t("empty")}</p>
-          <Button onClick={() => setAddOpen(true)} variant="outline">
-            {t("emptyCta")}
-          </Button>
+          <WritableOnly>
+            <Button onClick={() => setAddOpen(true)} variant="outline">
+              {t("emptyCta")}
+            </Button>
+          </WritableOnly>
         </div>
       ) : (
         <Table role="table" aria-label={t("tableLabel")}>

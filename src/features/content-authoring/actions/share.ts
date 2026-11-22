@@ -9,12 +9,6 @@ import type { ShareRole } from '@/features/content/types';
 
 import { shareRoleToPermission } from '../lib/share-mapping';
 
-interface UserLookupResult {
-  userId: string;
-  roles: string[];
-  displayName?: string;
-}
-
 interface ContentShareResponse {
   id: string;
   entityType: string;
@@ -33,30 +27,17 @@ export async function addShareAction(
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) throw new AppError('validation', 'Email is required');
 
-    // The content-share endpoint only accepts a userId — resolve the invitee's
-    // email to a userId via profile-service first.
-    let lookup: UserLookupResult;
-    try {
-      lookup = await serverFetch<UserLookupResult>({
-        service: 'profile',
-        path: '/users/lookup',
-        query: { email: trimmed },
-      });
-    } catch (e) {
-      if (e instanceof AppError && e.code === 'not_found') {
-        throw new AppError('not_found', 'No user found with that email');
-      }
-      throw e;
-    }
-
+    // content-service resolves the address itself, after checking that the caller may share this
+    // material, and counts the lookup against the caller (plan 90, session 16 remark 4) — there is
+    // no public address lookup. No account → 404 (`not_found`), over the limit → 429 (`rate_limited`).
     const share = await serverFetch<ContentShareResponse>({
       service: 'content',
-      path: '/content-shares',
+      path: '/content-shares/by-email',
       method: 'POST',
       body: {
         entityType,
         entityId,
-        sharedWithUserId: lookup.userId,
+        email: trimmed,
         permission: shareRoleToPermission(role),
       },
     });

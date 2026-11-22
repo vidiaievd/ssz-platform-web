@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { ChevronsUpDown, Check, UserCircle, GraduationCap } from 'lucide-react';
@@ -39,7 +38,10 @@ function ContextAvatar({ ctx }: { ctx: WorkspaceContext }) {
   if (ctx.type === 'school') {
     if (ctx.schoolAvatarUrl) {
       return (
-        <Image
+        // A plain img: the logo lives on the media host of the deployment (MinIO / CDN), which
+        // next/image would have to list in remotePatterns — without it the whole shell crashed.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={ctx.schoolAvatarUrl}
           alt=""
           width={32}
@@ -64,7 +66,10 @@ function TriggerAvatar({ ctx }: { ctx: WorkspaceContext }) {
   if (ctx.type === 'school') {
     if (ctx.schoolAvatarUrl) {
       return (
-        <Image
+        // A plain img: the logo lives on the media host of the deployment (MinIO / CDN), which
+        // next/image would have to list in remotePatterns — without it the whole shell crashed.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
           src={ctx.schoolAvatarUrl}
           alt=""
           width={24}

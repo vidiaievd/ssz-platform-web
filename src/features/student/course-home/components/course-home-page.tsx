@@ -3,8 +3,16 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { useCourseHome, COURSE_SCHOOL_CLOSED, ErrorState, LearningSkeleton } from '@/features/learning';
-import { MaintenanceBadge, SchoolStatusBanner } from '@/features/school-lifecycle';
+import {
+  useCourseHome,
+  COURSE_SCHOOL_CLOSED,
+  COURSE_FORBIDDEN,
+  COURSE_GONE,
+  ErrorState,
+  LearningSkeleton,
+} from '@/features/learning';
+import { CourseUnavailable } from '@/features/school-lifecycle/components/course-unavailable';
+import { MaintenanceBadge, SchoolStatusBanner, isObsoleteHistoryOnly } from '@/features/school-lifecycle';
 
 import { CourseHeader } from './course-header';
 import { ContinueHero, deriveContinueScenario } from './continue-hero';
@@ -70,6 +78,11 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
     );
   }
 
+  /* ── Not open to this learner / deleted with its school (plan 90, Q11) ── */
+  if (isError && (error?.message === COURSE_FORBIDDEN || error?.message === COURSE_GONE)) {
+    return <CourseUnavailable kind={error.message === COURSE_GONE ? 'gone' : 'forbidden'} />;
+  }
+
   /* ── Error state ─────────────────────────────────────────────────── */
   if (isError || !data) {
     return (
@@ -97,10 +110,17 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
     overdueAssignmentCount,
   } = data;
 
+  // Read only: an obsolete course kept from a purge, or any course of a closed / purged school.
+  const historyOnly =
+    courseInfo.schoolStatus === 'closed' ||
+    courseInfo.schoolStatus === 'purged' ||
+    (courseInfo.maintenanceStatus === 'obsolete' && isObsoleteHistoryOnly(courseInfo));
+
   const scenario = deriveContinueScenario({
     overdueAssignmentCount,
     srsDueCount,
     modules: progress.modules,
+    historyOnly,
   });
 
   const ctaHref = buildCtaHref({ scenario, courseId, locale, modules: progress.modules });
@@ -121,9 +141,11 @@ export function CourseHomePage({ courseId, locale }: CourseHomePageProps) {
           data-testid="maintenance-note"
         >
           <MaintenanceBadge status={courseInfo.maintenanceStatus} />
-          {courseInfo.maintenanceStatus === 'obsolete'
-            ? tLifecycle('learnerObsoleteNote')
-            : tLifecycle('learnerNote')}
+          {courseInfo.maintenanceStatus !== 'obsolete'
+            ? tLifecycle('learnerNote')
+            : isObsoleteHistoryOnly(courseInfo)
+              ? tLifecycle('learnerObsoleteHistoryNote')
+              : tLifecycle('learnerObsoleteNote')}
         </p>
       )}
 
@@ -209,6 +231,10 @@ function buildCtaHref(opts: {
   if (scenario === 'overdue') return `${base}/assignments`;
   if (scenario === 'review') return `${base}/srs`;
 
+  if (scenario === 'history') {
+    const open = modules.find((m) => m.status === 'in_progress') ?? modules[0];
+    return open ? `${base}/courses/${courseId}/${open.moduleId}` : `${base}/courses/${courseId}`;
+  }
   if (scenario === 'resume') {
     const active = modules.find((m) => m.status === 'in_progress');
     if (active) return `${base}/courses/${courseId}/${active.moduleId}`;

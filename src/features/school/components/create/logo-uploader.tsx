@@ -6,6 +6,7 @@ import { ImagePlus, Loader2, Trash2 } from 'lucide-react';
 
 import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { uploadAsset } from '@/features/media/lib/upload';
 import { cn } from '@/lib/utils';
 
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/svg+xml', 'image/webp'];
@@ -65,37 +66,11 @@ export function LogoUploader({ schoolName, value, onChange }: LogoUploaderProps)
     setUploadState({ status: 'uploading', preview: localPreview });
 
     try {
-      // Step 1 — request presigned upload URL
-      const requestRes = await fetch('/api/media/uploads/request', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          filename: file.name,
-          mimeType: file.type,
-          size: file.size,
-          purpose: 'school_logo',
-        }),
-      });
-      if (!requestRes.ok) throw new Error('upload_request_failed');
-      const { uploadUrl, assetId } = (await requestRes.json()) as {
-        uploadUrl: string;
-        assetId: string;
-      };
-
-      // Step 2 — PUT file directly to storage
-      const putRes = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file,
-      });
-      if (!putRes.ok) throw new Error('upload_put_failed');
-
-      // Step 3 — finalize
-      const finalizeRes = await fetch(`/api/media/uploads/${assetId}/finalize`, {
-        method: 'POST',
-      });
-      if (!finalizeRes.ok) throw new Error('upload_finalize_failed');
-      const { url } = (await finalizeRes.json()) as { url: string };
+      // The shared media pipeline (request → PUT to storage → finalize → asset). This one used
+      // to post its own field names (`filename`, `size`, `purpose`), which media-service refuses
+      // with 422 — no logo was ever uploaded (plan 90 §8, step 11).
+      const { asset } = await uploadAsset({ file, purpose: 'avatar' });
+      const url = asset.url;
 
       setUploadState({ status: 'done', preview: url });
       onChange(url);

@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
 import { resolveOnboardingSettings } from '@/lib/enrollment/settings-defaults';
-import type { PublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
+import { schoolNotActiveResponseBody } from '@/features/school-lifecycle/lib/lifecycle-errors';
 import type { SchoolOnboardingSettings, PlacementMode } from '@/features/enrollment/types';
 
 type Params = { params: Promise<{ schoolSlug: string }> };
@@ -54,19 +55,18 @@ function toBackend(s: SchoolOnboardingSettings): BackendSettings {
   };
 }
 
-async function resolveSchoolId(schoolSlug: string): Promise<string> {
-  const school = await serverFetch<PublicSchool>({
-    service: 'organization',
-    path: `/schools/public/${schoolSlug}`,
-    anonymous: true,
-  });
-  return school.schoolId;
+/** The school behind a workspace id or slug; null when it is not the caller's school. */
+async function resolveSchoolId(idOrSlug: string): Promise<string | null> {
+  return (await resolveSchoolWorkspace(idOrSlug))?.id ?? null;
 }
+
+const notFound = () => NextResponse.json({ error: 'School not found' }, { status: 404 });
 
 export async function GET(_req: NextRequest, { params }: Params) {
   const { schoolSlug } = await params;
   try {
     const schoolId = await resolveSchoolId(schoolSlug);
+    if (!schoolId) return notFound();
     const dto = await serverFetch<BackendSettings>({
       service: 'organization',
       path: `/schools/${schoolId}/enrollment/settings`,
@@ -92,6 +92,7 @@ export async function PUT(req: NextRequest, { params }: Params) {
 
   try {
     const schoolId = await resolveSchoolId(schoolSlug);
+    if (!schoolId) return notFound();
     const merged = resolveOnboardingSettings(
       body as Partial<SchoolOnboardingSettings>,
     );
@@ -103,6 +104,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
     });
     return NextResponse.json(toFrontend(dto));
   } catch (e) {
+    // A suspended or closed school is read only: pass the reason on, it is not an upstream failure.
+    const notActive = schoolNotActiveResponseBody(e);
+    if (notActive) return NextResponse.json(notActive, { status: 409 });
     if (isAppError(e)) return NextResponse.json({ error: e.message }, { status: 502 });
     return NextResponse.json({ error: 'Failed to save settings' }, { status: 502 });
   }

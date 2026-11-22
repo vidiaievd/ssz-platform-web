@@ -24,6 +24,7 @@ import { EditorCard } from './editor-card';
 import { AudioSourceSlot } from './audio-source-slot';
 import { AudioLessonPreview } from './audio-lesson-preview';
 import { ListeningStageListEditor } from './listening-stage-list-editor';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface AudioEditorPaneProps {
   kind: MaterialKind;
@@ -47,7 +48,7 @@ export function AudioEditorPane({
 }: AudioEditorPaneProps) {
   const t = useTranslations('Authoring');
   const saveScope = useSaveScopeText(isLive);
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
 
   const { data: variants, isLoading: variantsLoading } = useLessonVariants(lessonId);
@@ -153,7 +154,7 @@ export function AudioEditorPane({
               void (async () => {
                 const result = await saveLesson(getValues());
                 if (!result.ok) {
-                  toast.error(tErrors(result.error.code));
+                  toast.error(tErrors(result.error));
                   return;
                 }
                 unsaved.markSaved();

@@ -17,6 +17,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { suggestGroups, type GroupSuggestion } from '@/features/enrollment/lib/suggest-groups';
 import type { Membership } from '@/features/enrollment/types';
+import { lifecycleErrorKey } from '@/features/school-lifecycle/lib/lifecycle-errors';
 import type { Group } from '@/features/groups/types';
 
 type Props = {
@@ -26,6 +27,7 @@ type Props = {
 
 export function PlacementQueue({ memberships, groups }: Props) {
   const t = useTranslations('Enrollment.PlacementQueue');
+  const tLifecycle = useTranslations('SchoolLifecycle.errors');
   const router = useRouter();
   const [assigning, setAssigning] = useState<string | null>(null);
   const [selectedGroup, setSelectedGroup] = useState<Record<string, string>>({});
@@ -50,7 +52,11 @@ export function PlacementQueue({ memberships, groups }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ schoolId: m.schoolId, groupId }),
       });
-      if (!res.ok) throw new Error('Assign failed');
+      if (!res.ok) {
+        const key = lifecycleErrorKey(await res.json().catch(() => null));
+        toast.error(key ? tLifecycle(key) : t('assignFailed'));
+        return;
+      }
       toast.success(t('assigned'));
       router.refresh();
     } catch {

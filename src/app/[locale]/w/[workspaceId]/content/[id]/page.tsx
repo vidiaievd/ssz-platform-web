@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { Container, ContainerVersion } from '@/features/content/types';
 import { CourseEditorShell } from '@/features/content-authoring/components/course-editor-shell';
 import { getContainerPreflight } from '@/features/content-authoring/lib/get-container-preflight';
+import { canEditContainer } from '@/features/content-authoring/lib/get-container-edit-access';
 import type { PreflightResult, SchoolRole } from '@/features/content-authoring/types';
 import { getMySchoolRole } from '@/features/school/api/get-my-school-role';
 import { NoAccess } from '@/features/content-authoring/components/no-access';
@@ -52,6 +53,10 @@ export default async function ContainerDetailPage({
     throw e;
   }
 
+  // Not allowed to edit — a suspended or closed school, or a teacher without the right — opens
+  // the same screen for viewing (plan 90, Q17 (a)): nothing that changes the course is drawn.
+  const readOnly = !(await canEditContainer(id));
+
   // Every container keeps exactly one draft version — resolve it once for both
   // the preflight banner (draft state only) and the curriculum structure tab.
   let draftVersionId: string | null = null;
@@ -71,7 +76,7 @@ export default async function ContainerDetailPage({
     // «could not load» for a perfectly healthy module. The endpoint is idempotent — it copies the
     // published version only when there is no draft — and refuses a viewer, who keeps the old
     // empty state instead of an error.
-    if (draftVersionId === null && container.currentPublishedVersionId) {
+    if (draftVersionId === null && container.currentPublishedVersionId && !readOnly) {
       try {
         const created = await serverFetch<{ versionId: string }>({
           service: 'content',
@@ -89,9 +94,11 @@ export default async function ContainerDetailPage({
 
     // Also for an already-published container: editing it opens a new draft
     // version, and re-publishing needs the same pre-flight as the first release.
-    if (draftVersionId) {
+    if (draftVersionId && !readOnly) {
       preflight = await getContainerPreflight(workspaceId, id);
     }
+    // A viewer opens no draft: without one they read what students read.
+    if (readOnly && draftVersionId === null) draftVersionId = container.currentPublishedVersionId ?? null;
   } catch (err) {
     console.error('[content/id] versions fetch failed:', err);
     preflightError = true;
@@ -107,6 +114,7 @@ export default async function ContainerDetailPage({
           preflightResult={preflight}
           draftVersionId={draftVersionId}
           publishedVersionNumber={publishedVersionNumber}
+          readOnly={readOnly}
         />
       </Suspense>
       {preflightError && (

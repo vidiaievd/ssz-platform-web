@@ -211,7 +211,21 @@
     "noGroup": "No group",
     "submit": "Enroll {count}",
     "submitDefault": "Enroll",
-    "failed": "Enrollment failed. Please try again."
+    "failed": "Enrollment failed. Please try again.",
+    "branch": {
+      "register": "New user",
+      "attachDirect": "Existing student",
+      "onboardExisting": "Needs student role",
+      "invalid": "Invalid",
+      "checkFailed": "Could not check",
+      "rateLimited": "Too many checks — try again in a few minutes"
+    },
+    "result": {
+      "invited": "{count, plural, one {# invited} other {# invited}}",
+      "attached": "{count, plural, one {# added directly} other {# added directly}}",
+      "alreadyMembers": "{count, plural, one {# already in the school} other {# already in the school}}",
+      "failed": "{count, plural, one {# address could not be enrolled. Try again.} other {# addresses could not be enrolled. Try again.}}"
+    }
   },
   "addToGroup": {
     "title": "Add {name} to group",

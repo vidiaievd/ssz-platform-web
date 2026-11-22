@@ -5,6 +5,6 @@
     "comingSoon": "Пошук незабаром"
   },
   "trial": {
-    "daysLeft": "Пробний · {days} днів"
+    "daysLeft": "Пробний · {days, plural, one {# день} few {# дні} many {# днів} other {# дня}}"
   }
 }

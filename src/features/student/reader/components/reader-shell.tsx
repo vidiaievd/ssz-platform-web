@@ -13,6 +13,7 @@ import {
   useRefreshProgress,
 } from '@/features/learning';
 import { LANG_EMOJI } from '@/features/student/course-home';
+import { SchoolStatusBanner, SchoolWritableProvider } from '@/features/school-lifecycle';
 
 import { cn } from '@/lib/utils';
 
@@ -374,7 +375,16 @@ export function ReaderShell({
             <div className="flex min-w-0 flex-1 flex-col">
               <div className="flex-1 overflow-auto">
                 <div className="mx-auto w-full px-8 py-8" style={{ maxWidth: effectiveMaxWidth }}>
-                  {content}
+                  {/* Tasks of a school that takes no new work are locked below; this says why. */}
+                  {(practiceSection || activeKind === 'exercise') && (
+                    <SchoolStatusBanner
+                      audience="student"
+                      status={courseInfo.schoolStatus}
+                      closesAt={courseInfo.schoolClosesAt}
+                      className="mb-6"
+                    />
+                  )}
+                  <SchoolWritableProvider status={courseInfo.schoolStatus}>{content}</SchoolWritableProvider>
                 </div>
               </div>
               {footer && (

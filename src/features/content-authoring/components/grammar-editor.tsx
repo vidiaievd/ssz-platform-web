@@ -25,6 +25,7 @@ import { useAuthoringGrammarExplanations } from '../api/use-authoring-grammar';
 import { authoringKeys } from '../api/keys';
 import { useUnsavedChanges } from '../hooks/use-unsaved-changes';
 import { SaveStatusIndicator } from './save-status-indicator';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 interface GrammarEditorProps {
   ruleId: string;
@@ -35,7 +36,7 @@ interface GrammarEditorProps {
 
 export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: GrammarEditorProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [editorTab, setEditorTab] = useState<'write' | 'preview'>('write');
@@ -110,7 +111,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
     startTransition(async () => {
       const r1 = await updateGrammarRuleAction(ruleId, container.id, { title: data.ruleTitle });
       if (!r1.ok) {
-        toast.error(tErrors(r1.error.code));
+        toast.error(tErrors(r1.error));
         return;
       }
       const r2 = await saveGrammarExplanationAction(
@@ -126,7 +127,7 @@ export function GrammarEditor({ ruleId, ruleTitle, container, onClose }: Grammar
         },
       );
       if (!r2.ok) {
-        toast.error(tErrors(r2.error.code));
+        toast.error(tErrors(r2.error));
         return;
       }
       if (r2.value?.explanationId) setLocalExplanationId(r2.value.explanationId);

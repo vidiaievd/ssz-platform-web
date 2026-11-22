@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { isAppError } from '@/lib/errors';
-import type { PublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import type { MembershipStatus, MembershipSource, Membership } from '@/features/enrollment/types';
 import type { LangCode, ISODate } from '@/features/groups/types';
 
@@ -24,15 +24,12 @@ export async function GET(
   const { schoolSlug } = await params;
 
   try {
-    const school = await serverFetch<PublicSchool>({
-      service: 'organization',
-      path: `/schools/public/${schoolSlug}`,
-      anonymous: true,
-    });
+    const school = await resolveSchoolWorkspace(schoolSlug);
+    if (!school) return NextResponse.json({ error: 'School not found' }, { status: 404 });
 
     const result = await serverFetch<BackendList>({
       service: 'organization',
-      path: `/schools/${school.schoolId}/memberships`,
+      path: `/schools/${school.id}/memberships`,
       query: { status: 'placement-review' },
     });
 
@@ -40,7 +37,7 @@ export async function GET(
       id: m.id,
       schoolId: m.schoolId,
       schoolSlug,
-      schoolName: school.schoolName,
+      schoolName: school.name,
       status: m.status,
       source: m.source,
       language: (m.language ?? 'nb') as LangCode,

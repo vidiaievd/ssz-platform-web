@@ -30,6 +30,7 @@ import {
 } from '../api/use-authoring-vocabulary';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { authoringKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 const KINDS: LessonSpanKind[] = ['vocab', 'grammar', 'chunk'];
 
@@ -112,7 +113,7 @@ export function TextSpanMenu({
   textareaRef,
 }: TextSpanMenuProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
@@ -175,7 +176,7 @@ export function TextSpanMenu({
         // An overlap is the one rejection the author can act on directly, and
         // the generic "conflict" wording would not tell them what to do.
         toast.error(
-          result.error.code === 'conflict' ? t('spans.overlapError') : tErrors(result.error.code),
+          result.error.code === 'conflict' ? t('spans.overlapError') : tErrors(result.error),
         );
         return;
       }

@@ -14,6 +14,7 @@ import {
 
 import { useAuthoringSections } from '../api/use-authoring-sections';
 import { assignItemSectionAction } from '../actions/container-item';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 const NO_SECTION = '__none__';
 
@@ -40,7 +41,7 @@ export function SectionAssignSelect({
   onChanged,
 }: SectionAssignSelectProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const [isPending, startTransition] = useTransition();
   const { data: sections } = useAuthoringSections(containerId);
 
@@ -49,7 +50,7 @@ export function SectionAssignSelect({
     startTransition(async () => {
       const result = await assignItemSectionAction(containerId, containerItemId, nextSectionId);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       onChanged();

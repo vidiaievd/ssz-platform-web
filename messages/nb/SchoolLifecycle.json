@@ -13,8 +13,8 @@
       "suspended": "Du kan fortsatt lese kursene dine og se historikken din, men det er stanset å starte og levere arbeid.",
       "suspendedUntil": "Du kan fortsatt lese kursene dine og se historikken din, men det er stanset å starte og levere arbeid.",
       "closedTitle": "Skolen er stengt",
-      "closed": "Skolens kurs er ikke lenger tilgjengelige. Din egen historikk beholder du.",
-      "closedUntil": "Skolens kurs er ikke lenger tilgjengelige. Din egen historikk beholder du."
+      "closed": "Du kan ikke lenger starte eller levere arbeid. Kursene kan fortsatt leses, og historikken din beholder du.",
+      "closedUntil": "Du kan ikke lenger starte eller levere arbeid. Kursene kan fortsatt leses, og historikken din beholder du."
     }
   },
   "maintenance": {
@@ -28,11 +28,31 @@
     "saved": "Vedlikeholdsstatus lagret.",
     "saveFailed": "Kunne ikke lagre statusen.",
     "learnerNote": "Dette kurset vedlikeholdes ikke lenger: det kan være utdatert.",
-    "learnerObsoleteNote": "Dette kurset er utdatert og tar ikke imot nye elever. Du kan fortsette med det."
+    "learnerObsoleteNote": "Dette kurset er utdatert og tar ikke imot nye elever. Du kan fortsette med det.",
+    "learnerObsoleteHistoryNote": "Skolen som drev dette kurset, finnes ikke lenger: kurset står igjen bare for historikken din, og nye øvinger kan ikke startes."
   },
   "errors": {
+    "schoolNotActiveTitle": "Skolen tar ikke imot nytt arbeid",
     "schoolSuspended": "Skolen er midlertidig blokkert: nytt arbeid kan ikke startes eller leveres, og ingenting kan endres.",
-    "schoolClosed": "Skolen er stengt. Materialet er ikke lenger tilgjengelig.",
+    "schoolClosed": "Skolen er stengt: ingenting i den kan startes, leveres eller endres.",
     "courseObsolete": "Dette kurset er utdatert og tar ikke imot nye påmeldinger."
+  },
+  "unavailable": {
+    "title": "Skolen er utilgjengelig",
+    "body": "Skolen er stengt, finnes ikke, eller du har ikke tilgang til den. Læringshistorikken din blir hos deg.",
+    "home": "Til forsiden",
+    "courseForbiddenTitle": "Kurset er utilgjengelig",
+    "courseForbiddenBody": "Kurset tilhører en skole som er stengt, eller du har ikke fått tilgang til det. Hvis du studerte ved skolen, blir historikken din hos deg.",
+    "courseGoneTitle": "Kurset er slettet",
+    "courseGoneBody": "Kurset finnes ikke lenger – det ble slettet sammen med skolen. Fremgangen din er bevart.",
+    "myCourses": "Til mine kurs"
+  },
+  "readOnly": {
+    "title": "Ingenting kan endres nå",
+    "body": "Skolen er skrivebeskyttet. Meldingen over forteller hvorfor og hvor lenge.",
+    "learnerTask": "Denne oppgaven kan ikke startes eller leveres nå. Meldingen over forteller hvorfor; tidligere arbeid finner du under Mitt arbeid.",
+    "draftHeading": "Utkastet ditt",
+    "draftSuspended": "Utkastet er lagret. Du kan levere det når skolen er åpnet igjen.",
+    "draftClosed": "Skolen er stengt: utkastet kan ikke lenger leveres, men du kan fortsatt lese det her."
   }
 }

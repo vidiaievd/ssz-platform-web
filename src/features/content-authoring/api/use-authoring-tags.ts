@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { ContentTag } from '@/features/content/types';
+import type { ContentTag, TagSuggestion } from '@/features/content/types';
 
 import { authoringKeys } from './keys';
 
@@ -20,17 +20,19 @@ export function useEntityTags(entityType: string, entityId: string, enabled = tr
   });
 }
 
-export function useTagSuggestions(entityType: string, query: string, enabled = true) {
-  return useQuery<string[]>({
-    queryKey: ['tag-suggestions', entityType, query],
+/** Global tags plus, for a school's material, the school's own. */
+export function useTagSuggestions(ownerSchoolId: string | null, query: string, enabled = true) {
+  return useQuery<TagSuggestion[]>({
+    queryKey: ['tag-suggestions', ownerSchoolId, query],
     queryFn: async () => {
-      const params = new URLSearchParams({ entityType });
+      const params = new URLSearchParams();
+      if (ownerSchoolId) params.set('schoolId', ownerSchoolId);
       if (query) params.set('q', query);
       const res = await fetch(`/api/content/tags/suggestions?${params}`);
       if (!res.ok) return [];
-      return res.json() as Promise<string[]>;
+      return res.json() as Promise<TagSuggestion[]>;
     },
-    enabled: enabled && !!entityType,
+    enabled,
     staleTime: 30_000,
   });
 }

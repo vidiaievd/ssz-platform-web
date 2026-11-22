@@ -2,7 +2,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { ErrorLike } from '@/lib/errors/use-error-message';
+
 export type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
+
+/**
+ * Thrown by an `onSave` the server refused. The save button reads the refusal back and shows its
+ * reason (a read-only school, a conflict…) in its one failure toast, so `onSave` must not toast it too.
+ */
+export class SaveRefusedError extends Error {
+  constructor(readonly error: ErrorLike) {
+    super(error.code);
+    this.name = 'SaveRefusedError';
+  }
+}
 
 interface UseUnsavedChangesOptions {
   /**
@@ -23,6 +36,8 @@ export interface UseUnsavedChangesReturn {
   markDirty: () => void;
   /** Run `onSave` and move the status along. Resolves to whether it succeeded. */
   save: () => Promise<boolean>;
+  /** What the last failed `save` threw (a `SaveRefusedError` carries the server's refusal). */
+  lastError: () => unknown;
   /** Mark clean after an explicit submit the caller performed itself. */
   markSaved: () => void;
   /** Drop the dirty flag without saving (e.g. the form was reset). */
@@ -47,6 +62,7 @@ export function useUnsavedChanges({
 
   // Always call the latest onSave without re-registering anything.
   const onSaveRef = useRef(onSave);
+  const lastErrorRef = useRef<unknown>(null);
   useEffect(() => {
     onSaveRef.current = onSave;
   });
@@ -76,16 +92,20 @@ export function useUnsavedChanges({
   const save = useCallback(async () => {
     if (!onSaveRef.current) return false;
     setStatus('saving');
+    lastErrorRef.current = null;
     try {
       await onSaveRef.current();
       setSavedAt(new Date());
       setStatus('saved');
       return true;
-    } catch {
+    } catch (error) {
+      lastErrorRef.current = error;
       setStatus('error');
       return false;
     }
   }, []);
 
-  return { status, savedAt, isDirty, markDirty, save, markSaved, reset };
+  const lastError = useCallback(() => lastErrorRef.current, []);
+
+  return { status, savedAt, isDirty, markDirty, save, lastError, markSaved, reset };
 }

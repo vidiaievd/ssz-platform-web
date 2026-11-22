@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { isWorkspaceWritable } from '@/features/school-lifecycle/api/get-workspace-lifecycle';
 
 import { WorkspaceRecipeSettings } from '@/features/content-authoring/components/workspace-recipe/workspace-recipe-settings';
 import { requireSettingsPage } from '@/features/workspaces/api/require-settings-page';
@@ -23,6 +24,8 @@ export async function generateMetadata() {
 export default async function WorkspaceRecipeSettingsPage({ params }: Props) {
   const { workspaceId } = await params;
   const workspace = await requireSettingsPage(workspaceId, 'recipe');
+  // A suspended or closed workspace shows its settings but takes no changes (plan 90, block 9).
+  const writable = await isWorkspaceWritable(workspaceId);
   const kind = workspace.kind === 'SOLO' ? 'solo' : 'school';
 
   const t = await getTranslations('Settings.recipe');
@@ -53,7 +56,7 @@ export default async function WorkspaceRecipeSettingsPage({ params }: Props) {
 
       <WorkspaceRecipeSettings
         schoolId={workspace.id}
-        canEdit={canEditRecipe(workspace.myRole)}
+        canEdit={canEditRecipe(workspace.myRole) && writable}
         kind={kind}
       />
     </div>

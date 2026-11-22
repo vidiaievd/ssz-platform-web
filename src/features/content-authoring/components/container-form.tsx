@@ -35,12 +35,13 @@ import { createContainerAction, updateContainerAction } from '../actions/contain
 import { MaintenanceStatusField } from './maintenance-status-field';
 import { useLanguageOptions } from '../hooks/use-language-options';
 import { authoringKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 type ContainerFormProps = { mode: 'create' } | { mode: 'edit'; container: Container };
 
 export function ContainerForm(props: ContainerFormProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const router = useRouter();
   const queryClient = useQueryClient();
   const workspaceId = useWorkspaceRef();
@@ -93,7 +94,7 @@ export function ContainerForm(props: ContainerFormProps) {
       if (props.mode === 'create') {
         const result = await createContainerAction(data);
         if (!result.ok) {
-          toast.error(tErrors(result.error.code));
+          toast.error(tErrors(result.error));
           return;
         }
         await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });
@@ -104,7 +105,7 @@ export function ContainerForm(props: ContainerFormProps) {
 
       const result = await updateContainerAction(container!.id, data);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await queryClient.invalidateQueries({ queryKey: authoringKeys.containers() });

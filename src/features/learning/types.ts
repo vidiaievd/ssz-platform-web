@@ -506,6 +506,8 @@ export interface CourseInfo {
   groupName?: string;
   /** Whether the author still looks after the course (plan 90, phase 5, Q5). */
   maintenanceStatus?: 'maintained' | 'unmaintained' | 'obsolete';
+  /** Who set the status: `school` is the school's lifecycle (a purge makes kept courses obsolete). */
+  maintenanceSource?: 'author' | 'school' | null;
   /** Lifecycle of the school that owns the course; absent for a course without one. */
   schoolStatus?: 'active' | 'suspended' | 'closed' | 'purged';
   schoolClosesAt?: string | null;

@@ -23,6 +23,7 @@ import { authoringKeys } from '../api/keys';
 import { setVideoQuestionAction, clearVideoQuestionAction } from '../actions/lesson-video-question';
 import { EditorCard } from './editor-card';
 import { ExerciseEditor } from './exercise-editor';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 const NO_QUESTION = '__none__';
 
@@ -39,7 +40,7 @@ export function ComprehensionQuestionRow({
   container,
 }: ComprehensionQuestionRowProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [isCreating, setIsCreating] = useState(false);
@@ -64,7 +65,7 @@ export function ComprehensionQuestionRow({
           ? await clearVideoQuestionAction(lessonId, variantId)
           : await setVideoQuestionAction(lessonId, variantId, value);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await invalidate();
@@ -77,7 +78,7 @@ export function ComprehensionQuestionRow({
     startTransition(async () => {
       const result = await setVideoQuestionAction(lessonId, variantId, exerciseId);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       await Promise.all([

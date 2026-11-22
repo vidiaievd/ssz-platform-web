@@ -269,7 +269,7 @@
     "subtitle": "Where work has piled up, and who could use a hand. A delay here is a sign of load.",
     "period": {
       "label": "Period the replies are counted over",
-      "days": "{n} days"
+      "days": "{n, plural, one {# day} other {# days}}"
     },
     "summary": {
       "title": "The school",
@@ -283,7 +283,7 @@
       "oldest": "Oldest",
       "oldestSub": "the longest anyone has waited",
       "median": "Median reply",
-      "medianSub": "over the last {n} days",
+      "medianSub": "over the last {n, plural, one {# day} other {# days}}",
       "medianNone": "nothing was answered in this period",
       "truncated": "The school has more waiting than this screen counts. The shape is right; the totals stop at the ceiling.",
       "terms": "Closed at the term",
@@ -351,7 +351,7 @@
     },
     "journal": {
       "title": "Decision journal",
-      "sub": "Over {n} days · who, when, and what came of it",
+      "sub": "Over {n, plural, one {# day} other {# days}} · who, when, and what came of it",
       "empty": "Nobody has answered anything in this period.",
       "export": "Export CSV",
       "more": "Show more",
@@ -457,7 +457,7 @@
       "hours": "hours",
       "autoAccept": {
         "label": "Counts by itself after",
-        "hint": "≈ {days} days. Courses can set their own term.",
+        "hint": "≈ {days, plural, one {# day} other {# days}}. Courses can set their own term.",
         "bounds": "Between {min} and {max} hours.",
         "beforeEscalation": "Cannot come before the escalation ({n} h)."
       },
@@ -513,7 +513,7 @@
     },
     "effort": {
       "title": "Minutes per submission",
-      "sub": "How long a teacher takes over one piece of work of each type. The marking forecast multiplies the queue by these; the school's median takes over once {min} verdicts in {days} days back it.",
+      "sub": "How long a teacher takes over one piece of work of each type. The marking forecast multiplies the queue by these; the school's median takes over once {min} verdicts in {days, plural, one {# day} other {# days}} back it.",
       "type": "Type",
       "minutes": "Starting figure",
       "min": "min",

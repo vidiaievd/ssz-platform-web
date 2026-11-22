@@ -9,6 +9,7 @@ import { useBulkIntroduceFromList } from '@/features/content';
 import { Link } from '@/lib/i18n/navigation';
 
 import type { ReaderSidebarItem } from '../types';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 export interface VocabDoneStageProps {
   knownCount: number;
@@ -40,7 +41,7 @@ export function VocabDoneStage({
   const t = useTranslations('Learning.reader.vocab.flow.done');
   const tPage = useTranslations('Learning.reader.vocab.page');
   const tContent = useTranslations('Content');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
 
   const bulkIntroduce = useBulkIntroduceFromList();
 

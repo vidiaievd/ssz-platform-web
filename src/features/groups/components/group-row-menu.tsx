@@ -27,6 +27,7 @@ import {
 import { wsHref } from '@/features/workspaces/lib/href';
 import { archiveGroup, deleteGroup, duplicateGroup } from '../api/mutations';
 import type { GroupHealthRowVM } from '../types';
+import { useSchoolWritable } from '@/features/school-lifecycle';
 
 type Props = {
   schoolId: string;
@@ -45,6 +46,7 @@ type Dialog = 'archive' | 'delete' | null;
  * edit form here would just be a worse copy of it.
  */
 export function GroupRowMenu({ schoolId, workspaceId, group }: Props) {
+  const writable = useSchoolWritable();
   const t = useTranslations('Groups');
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -91,6 +93,9 @@ export function GroupRowMenu({ schoolId, workspaceId, group }: Props) {
       setDialog(null);
     });
   }
+
+  // Archive, duplicate, delete: nothing to offer in a suspended or closed school (plan 90, block 9).
+  if (!writable) return null;
 
   return (
     // Stops the click from reaching the row's own <Link> — the row navigates on

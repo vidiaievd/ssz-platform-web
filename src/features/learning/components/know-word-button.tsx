@@ -8,6 +8,7 @@ import { useIntroduceCard } from '@/features/content';
 import { cn } from '@/lib/utils';
 
 import { learningKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 /**
  * Seeds an SRS card for a word the reader says they already know. The underline
@@ -22,7 +23,7 @@ export function KnowWordButton({
   className?: string;
 }) {
   const t = useTranslations('Learning.glossary');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const introduceCard = useIntroduceCard();
 

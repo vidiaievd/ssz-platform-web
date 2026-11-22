@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
-import { getPublicSchool } from '@/features/school/api/get-public-school';
+import { resolveSchoolWorkspace } from '@/features/workspaces/api/resolve-school-workspace';
 import { serverFetch } from '@/lib/api/server-fetcher';
 import { getGroups } from '@/features/groups/api/queries';
 import { PlacementQueue } from '@/features/enrollment/components/placement-queue';
@@ -25,23 +25,23 @@ export default async function PlacementQueuePage({ params }: Props) {
   const { workspaceId } = await params;
   const t = await getTranslations('Enrollment.PlacementQueue');
 
-  const school = await getPublicSchool(workspaceId);
+  const school = await resolveSchoolWorkspace(workspaceId);
   if (!school) notFound();
 
   const [result, { groups: rawGroups }] = await Promise.all([
     serverFetch<{ items: BackendMembership[] }>({
       service: 'organization',
-      path: `/schools/${school.schoolId}/memberships`,
+      path: `/schools/${school.id}/memberships`,
       query: { status: 'placement-review' },
     }),
-    getGroups(school.schoolId),
+    getGroups(school.id),
   ]);
 
   const memberships: Membership[] = result.items.map((m) => ({
     id: m.id,
     schoolId: m.schoolId,
-    schoolSlug: workspaceId,
-    schoolName: school.schoolName,
+    schoolSlug: school.slug ?? workspaceId,
+    schoolName: school.name,
     status: m.status,
     source: m.source,
     language: (m.language ?? 'nb') as LangCode,

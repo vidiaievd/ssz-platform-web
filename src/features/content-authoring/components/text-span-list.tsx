@@ -23,6 +23,7 @@ import { useLessonTextSpans } from '../api/use-authoring-lessons';
 import { useAuthoringVocabularyLists, useAuthoringVocabularyItems } from '../api/use-authoring-vocabulary';
 import type { LevelGrammarRule } from '../lib/level-grammar-rules';
 import { authoringKeys } from '../api/keys';
+import { useErrorMessage } from '@/lib/errors/use-error-message';
 
 const KIND_LABEL = {
   vocab: 'spans.kindVocab',
@@ -54,7 +55,7 @@ export function TextSpanList({
   grammarRules = [],
 }: TextSpanListProps) {
   const t = useTranslations('Authoring');
-  const tErrors = useTranslations('Errors');
+  const tErrors = useErrorMessage();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
@@ -94,7 +95,7 @@ export function TextSpanList({
       const result = await deleteTextSpanAction(lessonId, variantId, span.id);
       setBusyId(null);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       toast.success(t('spans.deleted'));
@@ -116,7 +117,7 @@ export function TextSpanList({
       const result = await updateTextSpanAction(lessonId, variantId, span.id, candidate);
       setBusyId(null);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       toast.success(t('spans.reanchored'));
@@ -142,7 +143,7 @@ export function TextSpanList({
       });
       setBusyId(null);
       if (!result.ok) {
-        toast.error(tErrors(result.error.code));
+        toast.error(tErrors(result.error));
         return;
       }
       setEditing(null);

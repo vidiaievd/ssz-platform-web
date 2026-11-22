@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { serverFetch } from '@/lib/api/server-fetcher';
-import { AppError } from '@/lib/errors/app-error';
+import { lookupSchoolUser } from '@/lib/api/school-user-lookup';
 import { buildCommandCenter } from '@/lib/scheduling/command-center';
 import { handleBffError } from '../_bff-helpers';
 
@@ -34,18 +34,9 @@ export async function POST(req: NextRequest, { params }: Params) {
     //   2. User found, has TEACHER role → add directly as school member → branch: "added"
     //   3. User found, no TEACHER role → send onboarding invite → branch: "onboard"
 
-    let user: { userId?: string; displayName?: string; roles?: string[] } | null = null;
-    try {
-      user = await serverFetch<{ userId?: string; displayName?: string; roles?: string[] }>({
-        service: 'organization',
-        path: '/users/lookup',
-        query: { email: body.email, schoolId: id },
-      });
-    } catch (e) {
-      if (!(e instanceof AppError && e.code === 'not_found')) throw e;
-    }
-
-    const hasTeacherRole = user?.roles?.some((r) => r === 'TEACHER' || r === 'teacher');
+    const lookup = await lookupSchoolUser(id, body.email);
+    const user = lookup.found ? lookup : null;
+    const hasTeacherRole = user?.isTeacher ?? false;
 
     if (user?.userId && hasTeacherRole) {
       // Branch 2: add directly

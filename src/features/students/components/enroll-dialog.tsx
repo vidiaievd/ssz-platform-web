@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { resolveEmail } from '../api/resolve-email';
+import { ResolveEmailError, resolveEmail } from '../api/resolve-email';
 import { enrollStudents } from '../api/mutations';
 import { studentKeys } from '../api/keys';
 import type { EmailResolveResult } from '@/features/students/types';
@@ -39,6 +39,8 @@ type ResolvedEmail = {
   result: EmailResolveResult | null;
   loading: boolean;
   invalid: boolean;
+  /** The address could not be checked; it is not enrolled. */
+  error?: 'rate_limited' | 'failed';
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -51,24 +53,25 @@ function parseLine(raw: string): string[] {
 }
 
 function BranchBadge({ branch }: { branch: EmailResolveResult['branch'] | undefined }) {
+  const t = useTranslations('Students.enroll.branch');
   if (!branch) return null;
   if (branch === 'register') {
     return (
       <Badge variant="muted" className="text-xs bg-sky-100 text-sky-800 border-transparent dark:bg-sky-900/40 dark:text-sky-300">
-        <UserPlus className="mr-1 h-3 w-3" aria-hidden /> New user
+        <UserPlus className="mr-1 h-3 w-3" aria-hidden /> {t('register')}
       </Badge>
     );
   }
   if (branch === 'attach-direct') {
     return (
       <Badge variant="muted" className="text-xs bg-emerald-100 text-emerald-800 border-transparent dark:bg-emerald-900/40 dark:text-emerald-300">
-        <UserCheck className="mr-1 h-3 w-3" aria-hidden /> Existing student
+        <UserCheck className="mr-1 h-3 w-3" aria-hidden /> {t('attachDirect')}
       </Badge>
     );
   }
   return (
     <Badge variant="muted" className="text-xs bg-amber-100 text-amber-800 border-transparent dark:bg-amber-900/40 dark:text-amber-300">
-      <AlertCircle className="mr-1 h-3 w-3" aria-hidden /> Needs student role
+      <AlertCircle className="mr-1 h-3 w-3" aria-hidden /> {t('onboardExisting')}
     </Badge>
   );
 }
@@ -118,7 +121,8 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
         if (outcome.status === 'fulfilled') {
           return { ...item, loading: false, result: outcome.value.r };
         }
-        return { ...item, loading: false };
+        const reason = outcome.reason instanceof ResolveEmailError ? outcome.reason.reason : 'failed';
+        return { ...item, loading: false, error: reason };
       }),
     );
     setIsResolving(false);
@@ -144,12 +148,18 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
       }));
 
       const result = await enrollStudents(schoolId, inputs);
-      if (result.ok || result.invited > 0 || result.attached > 0) {
+      if (result.ok || result.invited > 0 || result.attached > 0 || result.alreadyMembers > 0) {
         const parts: string[] = [];
-        if (result.invited > 0) parts.push(`${result.invited} invited`);
-        if (result.attached > 0) parts.push(`${result.attached} added directly`);
+        if (result.invited > 0) parts.push(t('enroll.result.invited', { count: result.invited }));
+        if (result.attached > 0) parts.push(t('enroll.result.attached', { count: result.attached }));
+        if (result.alreadyMembers > 0) {
+          parts.push(t('enroll.result.alreadyMembers', { count: result.alreadyMembers }));
+        }
         toast.success(parts.join(', '));
         if (result.seatsExhausted > 0) toast.warning(t('seats.someRefused', { count: result.seatsExhausted }));
+        // Failures other than seats were silent while some addresses went through.
+        const otherFailures = result.failed - result.seatsExhausted;
+        if (otherFailures > 0) toast.error(t('enroll.result.failed', { count: otherFailures }));
         queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
         router.refresh();
         handleClose();
@@ -222,7 +232,11 @@ export function EnrollDialog({ open, onOpenChangeAction, schoolId, groups }: Pro
                     <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground shrink-0" />
                   ) : item.invalid ? (
                     <Badge variant="muted" className="text-xs text-destructive border-destructive/30 shrink-0">
-                      Invalid
+                      {t('enroll.branch.invalid')}
+                    </Badge>
+                  ) : item.error ? (
+                    <Badge variant="muted" className="text-xs text-destructive border-destructive/30 shrink-0">
+                      {t(item.error === 'rate_limited' ? 'enroll.branch.rateLimited' : 'enroll.branch.checkFailed')}
                     </Badge>
                   ) : (
                     <BranchBadge branch={item.result?.branch} />
