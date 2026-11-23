@@ -994,6 +994,10 @@
       "title": "Module has no lessons",
       "fix": "Add at least one lesson to this module"
     },
+    "ITEM_OUTSIDE_MODULE": {
+      "title": "Material is outside any module",
+      "fix": "Learners only see what is inside modules. Remove it from the course and add it to a module"
+    },
     "SECTION_EMPTY": {
       "title": "Section has no items",
       "fix": "Add a lesson to this section, or remove it"

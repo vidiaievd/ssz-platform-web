@@ -994,6 +994,10 @@
       "title": "Modulen har ingen leksjoner",
       "fix": "Legg til minst én leksjon i denne modulen"
     },
+    "ITEM_OUTSIDE_MODULE": {
+      "title": "Materialet ligger utenfor alle moduler",
+      "fix": "Elevene ser bare det som ligger i moduler. Fjern det fra kurset og legg det til i en modul"
+    },
     "SECTION_EMPTY": {
       "title": "Seksjonen har ingen elementer",
       "fix": "Legg til en leksjon i seksjonen, eller fjern den"
