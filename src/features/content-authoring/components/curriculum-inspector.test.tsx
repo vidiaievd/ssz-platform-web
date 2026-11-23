@@ -528,6 +528,53 @@ describe('CurriculumInspector', () => {
 });
 
 // Plan 90, Q17 (a): the course is open for viewing — the fields are there to read, not to change.
+describe('CurriculumInspector — a rename made elsewhere', () => {
+  function view(selection: CurriculumTreeSelection) {
+    return (
+      <NextIntlClientProvider locale="en" messages={enMessages}>
+        <CurriculumInspector
+          selection={selection}
+          courseContainerId="course-1"
+          workspaceId="my-school"
+          onChanged={vi.fn()}
+          onDelete={vi.fn()}
+        />
+      </NextIntlClientProvider>
+    );
+  }
+  const exercise = (ownTitle: string | null) =>
+    itemSelection(
+      itemNode({ itemType: 'exercise', refId: 'exercise-1', title: ownTitle ?? 'Gap fill', ownTitle }),
+    );
+
+  it('shows a block renamed inline in the tree without reselecting it', () => {
+    const { rerender } = render(view(exercise('Kjønn')));
+    expect(screen.getByLabelText('Title')).toHaveValue('Kjønn');
+
+    rerender(view(exercise('Kjønn på substantiv')));
+    expect(screen.getByLabelText('Title')).toHaveValue('Kjønn på substantiv');
+
+    // An undo of the first naming clears the title; the fallback is the placeholder again.
+    rerender(view(exercise(null)));
+    expect(screen.getByLabelText('Title')).toHaveValue('');
+    expect(screen.getByLabelText('Title')).toHaveAttribute('placeholder', 'Gap fill');
+  });
+
+  it('shows a module renamed inline in the tree without reselecting it', () => {
+    const { rerender } = render(view({ kind: 'module', module: moduleNode() }));
+    rerender(view({ kind: 'module', module: moduleNode({ title: 'Samfunn' }) }));
+    expect(screen.getByDisplayValue('Samfunn')).toBeInTheDocument();
+  });
+
+  it('keeps an edit in progress when the server value changes under it', () => {
+    const { rerender } = render(view(exercise('Kjønn')));
+    fireEvent.change(screen.getByLabelText('Title'), { target: { value: 'Mitt utkast' } });
+
+    rerender(view(exercise('Kjønn på substantiv')));
+    expect(screen.getByLabelText('Title')).toHaveValue('Mitt utkast');
+  });
+});
+
 describe('CurriculumInspector — open for viewing', () => {
   it('switches the fields off and draws no delete button', async () => {
     const { CourseReadOnlyProvider } = await import('./course-read-only');

@@ -81,16 +81,14 @@ function introduce(vocabularyItemId: string) {
 }
 
 /**
- * Puts a translated word into review. Idempotent server-side; past the day's new-card
- * budget it is refused (429), which is not an error here — the word joins on a later day.
- * A word deleted earlier had its card suspended; added again, it comes back with its history.
+ * Puts a translated word into review. Idempotent server-side, and never refused over the
+ * day's new-card budget (plan 76, C.1): past it, the card's first review lands on the next
+ * day with room. A word deleted earlier had its card suspended; added again, it comes back
+ * with its history.
  */
 export async function introduceWord(vocabularyItemId: string): Promise<void> {
   const result = await introduce(vocabularyItemId);
-  if (!result.ok) {
-    if (result.status !== 429) throw new MyWordsError(result.status, null);
-    return;
-  }
+  if (!result.ok) throw new MyWordsError(result.status, null);
   if (result.data?.state?.toUpperCase() === 'SUSPENDED') {
     await postSrs(`/api/srs/cards/${result.data.id}/unsuspend`);
   }

@@ -134,6 +134,21 @@ function CountRow({ label, value }: { label: string; value: number }) {
   );
 }
 
+/**
+ * Takes in a new value from the server while the field holds no edit of its own.
+ *
+ * A field seeds its draft once, on mount; without this, a rename made elsewhere — inline
+ * in the tree, or by an undo — left the field showing the text it replaced until the row
+ * was selected again (plan 76, B8 follow-up). An edit in progress is never overwritten.
+ */
+function useAdoptServerValue(value: string, isDirty: boolean, setDraft: (next: string) => void) {
+  const [seen, setSeen] = useState(value);
+  if (value !== seen) {
+    setSeen(value);
+    if (!isDirty) setDraft(value);
+  }
+}
+
 function TitleField({
   value,
   onSave,
@@ -145,6 +160,7 @@ function TitleField({
 }) {
   const [title, setTitle] = useState(value);
   const unsaved = useUnsavedChanges({ onSave: () => onSave(title) });
+  useAdoptServerValue(value, unsaved.isDirty, setTitle);
 
   return (
     <div className="flex flex-1 flex-col gap-1">
@@ -185,6 +201,7 @@ function EditableField({
 }) {
   const [draft, setDraft] = useState(value);
   const unsaved = useUnsavedChanges({ onSave: () => onSave(draft) });
+  useAdoptServerValue(value, unsaved.isDirty, setDraft);
 
   return (
     <div className="flex flex-col gap-1.5">
