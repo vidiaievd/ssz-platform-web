@@ -37,6 +37,8 @@ export interface AssignTeacherFormLabels {
   submit: string;
   submitting: string;
   failed: string;
+  /** The server's refusal of a second role for someone already in the group (OQ-17). */
+  alreadyInGroup: string;
 }
 
 export interface AssignTeacherFormProps {
@@ -45,6 +47,12 @@ export interface AssignTeacherFormProps {
   /** Preselected when the form was opened from a submission that belongs to a group. */
   initialGroupId?: string | null;
   teachers: AssignTeacherOption[];
+  /**
+   * Who teaches each group today, in any role, keyed by group id. They are not offered
+   * for that group: one person holds one role in a group, and the server refuses a
+   * second one (OQ-17). A group missing from the map hides nobody.
+   */
+  staffByGroup?: Readonly<Record<string, readonly string[]>>;
   labels: AssignTeacherFormLabels;
   onCancel: () => void;
   onAssigned: (assignment: { groupId: string; teacherId: string; role: TeacherRole }) => void;
@@ -72,6 +80,7 @@ export function AssignTeacherForm({
   groups,
   initialGroupId,
   teachers,
+  staffByGroup,
   labels,
   onCancel,
   onAssigned,
@@ -82,15 +91,22 @@ export function AssignTeacherForm({
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [reason, setReason] = useState('');
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<false | 'generic' | 'already-in-group'>(false);
   const [isPending, startTransition] = useTransition();
 
+  // The list depends on the group: someone already teaching it is left out, and a choice
+  // made for another group falls back to "choose" rather than surviving as a hidden value.
+  const staff = staffByGroup?.[groupId];
+  const offered = staff ? teachers.filter((t) => !staff.includes(t.userId)) : teachers;
+  const chosenId = offered.some((t) => t.userId === teacherId) ? teacherId : '';
+
   const needsReason = role === 'substitute' && reason.trim() === '';
-  const canSubmit = groupId !== '' && teacherId !== '' && !needsReason && !isPending;
+  const canSubmit = groupId !== '' && chosenId !== '' && !needsReason && !isPending;
 
   const submit = () => {
     if (!canSubmit) return;
     setFailed(false);
+    const teacherId = chosenId;
 
     startTransition(async () => {
       const result = await assignTeacher(
@@ -110,7 +126,7 @@ export function AssignTeacherForm({
       );
 
       if (result.ok) onAssigned({ groupId, teacherId, role });
-      else setFailed(true);
+      else setFailed(result.blocked === 'already-in-group' ? 'already-in-group' : 'generic');
     });
   };
 
@@ -136,12 +152,12 @@ export function AssignTeacherForm({
         <Label htmlFor="assign-teacher">{labels.teacher}</Label>
         <select
           id="assign-teacher"
-          value={teacherId}
+          value={chosenId}
           onChange={(event) => setTeacherId(event.target.value)}
           className="h-9 rounded-md border border-input bg-background px-2.5 text-sm"
         >
           <option value="">{labels.chooseTeacher}</option>
-          {teachers.map((teacher) => (
+          {offered.map((teacher) => (
             <option key={teacher.userId} value={teacher.userId}>
               {teacher.name}
             </option>
@@ -217,7 +233,7 @@ export function AssignTeacherForm({
 
       {failed ? (
         <p role="alert" className="text-sm text-error-600 dark:text-error-400">
-          {labels.failed}
+          {failed === 'already-in-group' ? labels.alreadyInGroup : labels.failed}
         </p>
       ) : null}
 

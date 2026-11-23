@@ -401,6 +401,7 @@
       "submit": "Add",
       "submitting": "Adding…",
       "failed": "The reviewer could not be added.",
+      "alreadyInGroup": "This teacher already works in this group in another role.",
       "assigned": "Added — the group's queue is now theirs as well.",
       "helperTitle": "A helper for {name}",
       "helperFor": "A second teacher in {name}'s groups: the queue is shared, and work stops reaching the term with nobody reading it."

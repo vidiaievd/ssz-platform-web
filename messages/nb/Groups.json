@@ -397,6 +397,7 @@
     "validationOverload": "Dette vil gi {name} {projected}/{max}t per uke.",
     "errorNoPrimary": "Tildel en primærlærer først før du legger til en medlærer.",
     "errorBlocked": "Denne tildelingen er ikke tillatt.",
+    "errorAlreadyInGroup": "Denne læreren er allerede i gruppen med en annen rolle. Fjern den tildelingen først.",
     "errorGeneric": "Tildeling mislyktes. Prøv igjen.",
     "assign": "Tildel lærer",
     "assignAnyway": "Tildel uansett",

@@ -348,7 +348,9 @@ export function TeacherAssignModal({
           setServerError(
             result.blocked === 'no-primary'
               ? t('assignTeacher.errorNoPrimary')
-              : t('assignTeacher.errorBlocked'),
+              : result.blocked === 'already-in-group'
+                ? t('assignTeacher.errorAlreadyInGroup')
+                : t('assignTeacher.errorBlocked'),
           );
         } else {
           setServerError(t('assignTeacher.errorGeneric'));

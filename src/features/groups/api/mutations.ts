@@ -48,11 +48,13 @@ async function requireSchoolId(idOrSlug: string): Promise<string> {
 function mapError(e: unknown): MutationResult {
   if (e instanceof AppError && e.code === 'conflict') {
     const details = e.details as
-      | { conflicts?: FailResult['conflicts']; blocked?: FailResult['blocked'] }
+      | { conflicts?: FailResult['conflicts']; blocked?: FailResult['blocked']; error?: string }
       | undefined;
     const result: FailResult = { ok: false };
     if (details?.conflicts) result.conflicts = details.conflicts;
     if (details?.blocked) result.blocked = details.blocked;
+    // organization refuses a second role for someone already in the group (OQ-17).
+    if (details?.error === 'already-in-group') result.blocked = 'already-in-group';
     return result;
   }
   if (e instanceof AppError && e.code === 'validation') {

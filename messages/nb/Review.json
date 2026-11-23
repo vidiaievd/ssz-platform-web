@@ -401,6 +401,7 @@
       "submit": "Legg til",
       "submitting": "Legger til…",
       "failed": "Retteren kunne ikke legges til.",
+      "alreadyInGroup": "Denne læreren har allerede en annen rolle i denne gruppen.",
       "assigned": "Lagt til — gruppens kø er nå deres også.",
       "helperTitle": "En hjelper for {name}",
       "helperFor": "En lærer til i gruppene til {name}: køen deles, og arbeid slutter å nå fristen uten at noen har lest det."

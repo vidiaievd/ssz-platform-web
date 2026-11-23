@@ -397,6 +397,7 @@
     "validationOverload": "This would bring {name} to {projected}/{max}h per week.",
     "errorNoPrimary": "Assign a primary teacher first before adding a co-primary.",
     "errorBlocked": "This assignment is not allowed.",
+    "errorAlreadyInGroup": "This teacher is already in the group in another role. Remove that assignment first.",
     "errorGeneric": "Assignment failed. Please try again.",
     "assign": "Assign teacher",
     "assignAnyway": "Assign anyway",
