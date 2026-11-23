@@ -8,6 +8,7 @@ import { Bell, UserPlus } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSchoolWritable } from '@/features/school-lifecycle';
 import { wsHref } from '@/features/workspaces/lib/href';
 
 import { useOversight } from '../../api/use-oversight';
@@ -65,6 +66,9 @@ export function OversightScreen({ school }: OversightScreenProps) {
   const period = parsePeriod(searchParams.get('period'));
   const { data, isPending, isError, refetch } = useOversight(school, period);
   const remind = useRemindReviewer(school);
+  // A suspended or closed school takes no reminders and no assignments (organization answers
+  // 409 SCHOOL_NOT_ACTIVE), so the screen only reads there, as the other school screens do.
+  const writable = useSchoolWritable();
 
   // What the assignment dialog is about: a late submission, or a colleague whose row
   // prompted it. Either way the record it writes is the same one.
@@ -159,35 +163,37 @@ export function OversightScreen({ school }: OversightScreenProps) {
                   showTerms={showTerms(data)}
                   heldWeeks={data.heldWeeks}
                   actions={
-                    <>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={remind.isPending}
-                        onClick={() => sendReminder(teacher.id, teacher.name)}
-                      >
-                        <Bell aria-hidden className="size-3.5" />
-                        {t('teachers.remind')}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setAssigning({
-                            kind: 'teacher',
-                            teacherId: teacher.id,
-                            teacherName: teacher.name,
-                            groups: teacher.groupIds.map((id, index) => ({
-                              id,
-                              name: teacher.groups[index] ?? id,
-                            })),
-                          })
-                        }
-                      >
-                        <UserPlus aria-hidden className="size-3.5" />
-                        {t('teachers.addHelper')}
-                      </Button>
-                    </>
+                    !writable ? undefined : (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          disabled={remind.isPending}
+                          onClick={() => sendReminder(teacher.id, teacher.name)}
+                        >
+                          <Bell aria-hidden className="size-3.5" />
+                          {t('teachers.remind')}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setAssigning({
+                              kind: 'teacher',
+                              teacherId: teacher.id,
+                              teacherName: teacher.name,
+                              groups: teacher.groupIds.map((id, index) => ({
+                                id,
+                                name: teacher.groups[index] ?? id,
+                              })),
+                            })
+                          }
+                        >
+                          <UserPlus aria-hidden className="size-3.5" />
+                          {t('teachers.addHelper')}
+                        </Button>
+                      </>
+                    )
                   }
                 />
               ))
@@ -202,14 +208,17 @@ export function OversightScreen({ school }: OversightScreenProps) {
           <StuckList
             items={data.stuck}
             reviewHref={(id) => wsHref(school, `review?submission=${encodeURIComponent(id)}`)}
-            onAssign={(item) =>
-              setAssigning({
-                kind: 'submission',
-                groupId: item.groupId,
-                studentName: item.studentName,
-                exerciseTitle: item.exerciseTitle,
-                unassigned: item.unassigned,
-              })
+            onAssign={
+              !writable
+                ? undefined
+                : (item) =>
+                    setAssigning({
+                      kind: 'submission',
+                      groupId: item.groupId,
+                      studentName: item.studentName,
+                      exerciseTitle: item.exerciseTitle,
+                      unassigned: item.unassigned,
+                    })
             }
           />
 

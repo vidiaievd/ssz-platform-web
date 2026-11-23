@@ -14,8 +14,12 @@ export interface StuckListProps {
   items: OversightStuck[];
   /** Opens the submission in the reviewing screen, on the administrator's own name. */
   reviewHref: (submissionId: string) => string;
-  /** Offers the assignment form for this submission's group, or for a learner with none. */
-  onAssign: (item: OversightStuck) => void;
+  /**
+   * Offers the assignment form for this submission's group, or for a learner with none.
+   * Left out while the school takes no changes (suspended or closed): the row keeps only
+   * "review it yourself", which reads.
+   */
+  onAssign?: (item: OversightStuck) => void;
 }
 
 /**
@@ -86,10 +90,12 @@ export function StuckList({ items, reviewHref, onAssign }: StuckListProps) {
               )}
 
               <div className="flex shrink-0 gap-[7px]">
-                <Button variant="ghost" size="sm" onClick={() => onAssign(item)}>
-                  <UserPlus aria-hidden className="size-3.5" />
-                  {t('assign')}
-                </Button>
+                {onAssign === undefined ? null : (
+                  <Button variant="ghost" size="sm" onClick={() => onAssign(item)}>
+                    <UserPlus aria-hidden className="size-3.5" />
+                    {t('assign')}
+                  </Button>
+                )}
                 {/* A link, not a handler: "review it yourself" is a place, and it should
                     open in a new tab as readily as any other row of a list. */}
                 <Button variant="outline" size="sm" asChild>
