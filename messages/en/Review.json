@@ -428,7 +428,8 @@
       "hint": "Receives a summary of what is stuck, not a letter per submission.",
       "school_admins": "School administrators",
       "owner": "Owner",
-      "primary_teacher": "The group's lead teacher"
+      "primary_teacher": "The group's lead teacher",
+      "primaryTeacherHint": "A summary, not a letter per submission. A group with no lead teacher goes to the school administrators."
     },
     "preview": "This is how the age scale reads at {n} h.",
     "save": "Save",

@@ -428,7 +428,8 @@
       "hint": "Får en oversikt over det som står stille, ikke ett brev per innlevering.",
       "school_admins": "Skoleadministratorer",
       "owner": "Eier",
-      "primary_teacher": "Gruppens hovedlærer"
+      "primary_teacher": "Gruppens hovedlærer",
+      "primaryTeacherHint": "En oversikt, ikke ett brev per innlevering. En gruppe uten hovedlærer går til skoleadministratorene."
     },
     "preview": "Slik leses aldersskalaen ved {n} t.",
     "save": "Lagre",
