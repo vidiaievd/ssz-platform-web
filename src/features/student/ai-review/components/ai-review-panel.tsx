@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -217,6 +217,7 @@ function Sounds({
   prompt: AiReadingPrompt;
   remarks: AiReviewRemark[];
 }) {
+  const locale = useLocale();
   if (remarks.length === 0) return null;
   return (
     <div className="flex flex-col gap-1.5">
@@ -230,6 +231,19 @@ function Sounds({
             <SoundWord word={remark.fragment} transcription={transcriptionOf(prompt, remark)} />
           )}
           <p className="text-[13px] leading-relaxed text-(--ssz-text-primary)">{remark.comment}</p>
+          {/* The sound's card (OQ-10): how it is made, and a session to train it. A new tab,
+              so the result stays where it was. A plain <a> with the locale put in by hand:
+              every solver imports this panel, and the i18n router breaks their tests. */}
+          {remark.soundAtomId && (
+            <a
+              href={`/${locale}/student/pronunciation/sound/${encodeURIComponent(remark.soundAtomId)}`}
+              target="_blank"
+              rel="noopener"
+              className="self-start text-[12.5px] text-(--ssz-text-accent) underline"
+            >
+              {t('reading.pronunciation.howTo')}
+            </a>
+          )}
         </div>
       ))}
     </div>

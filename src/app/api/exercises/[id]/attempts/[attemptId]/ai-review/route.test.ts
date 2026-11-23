@@ -72,6 +72,46 @@ describe('GET /api/exercises/[id]/attempts/[attemptId]/ai-review', () => {
     expect(serverFetch).toHaveBeenCalledTimes(1);
   });
 
+  it('passes a sound remark’s atom on as soundAtomId, and no grammar rule’s (OQ-10)', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      ...REVIEW,
+      items: [
+        {
+          itemId: 'p1',
+          sentenceIndex: 0,
+          aspect: 'pronunciation',
+          fragment: 'kjøre',
+          comment: 'Keep the tongue flat.',
+          suggestion: null,
+          wordIndex: 2,
+          atomRef: { atomType: 'sound', atomId: 'nb:kj' },
+        },
+        {
+          ...REVIEW.items[0],
+          atomRef: { atomType: 'grammar_rule_atom', atomId: '6f1c2c5e-0000-4000-8000-000000000001' },
+        },
+        // Not the engine's shape of a sound id — dropped rather than built into a link.
+        { ...REVIEW.items[0], atomRef: { atomType: 'sound', atomId: '../admin' } },
+      ],
+    });
+
+    const body = await (await GET(makeRequest(), { params })).json();
+
+    expect(body.items[0]).toEqual({
+      itemId: 'p1',
+      sentenceIndex: 0,
+      aspect: 'pronunciation',
+      fragment: 'kjøre',
+      comment: 'Keep the tongue flat.',
+      suggestion: null,
+      wordIndex: 2,
+      soundAtomId: 'nb:kj',
+    });
+    expect(body.items[1]).not.toHaveProperty('soundAtomId');
+    expect(body.items[1]).not.toHaveProperty('atomRef');
+    expect(body.items[2]).not.toHaveProperty('soundAtomId');
+  });
+
   it('passes a reading on without the timings, the audio length or the ledger ids (plan 82)', async () => {
     vi.mocked(serverFetch).mockResolvedValue({
       ...REVIEW,

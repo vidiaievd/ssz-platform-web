@@ -338,5 +338,32 @@ describe('AiReviewPanel — reading aloud (plan 82, step 11)', () => {
     expect(await screen.findByText('Sounds to work on:')).toBeInTheDocument();
     expect(screen.getByText('/buːɾ/')).toBeInTheDocument();
     expect(screen.getByText('Tap the r once with the tongue tip.')).toBeInTheDocument();
+    // No sound atom on the remark — no card to send the learner to.
+    expect(screen.queryByRole('link', { name: 'How to say it' })).not.toBeInTheDocument();
+  });
+
+  it('links a sound remark to the sound card (OQ-10)', async () => {
+    fetchMock.mockImplementation(() =>
+      respond(200, {
+        ...READING_REVIEW,
+        items: [
+          {
+            itemId: 'p1',
+            sentenceIndex: 1,
+            aspect: 'pronunciation',
+            fragment: 'kjøre',
+            comment: 'Keep the tongue flat for «kj».',
+            suggestion: null,
+            wordIndex: 0,
+            soundAtomId: 'nb:kj',
+          },
+        ],
+      }),
+    );
+    renderPanel('read_aloud');
+
+    const link = await screen.findByRole('link', { name: 'How to say it' });
+    expect(link).toHaveAttribute('href', '/en/student/pronunciation/sound/nb%3Akj');
+    expect(link).toHaveAttribute('target', '_blank');
   });
 });

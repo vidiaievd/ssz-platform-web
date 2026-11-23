@@ -28,6 +28,11 @@ export interface AiReviewRemark {
    * prompt's `pronunciation.words`. Absent on every other remark.
    */
   wordIndex?: number | null;
+  /**
+   * The sound the remark is about (`nb:kj`), for the link to its card (OQ-10, П-5). Only a
+   * sound travels here: a grammar rule's atom id is the catalogue's business, not the screen's.
+   */
+  soundAtomId?: string | null;
 }
 
 /** A mark the model gave out of the essay's rubric, with why. */

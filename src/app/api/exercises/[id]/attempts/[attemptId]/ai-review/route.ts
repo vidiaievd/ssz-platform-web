@@ -51,9 +51,10 @@ export async function GET(
       fragment: item.fragment ?? null,
       comment: item.comment,
       suggestion: item.suggestion ?? null,
-      // A reading's sound remark points at its word (plan 88, step 5c); the sound's atom
-      // stays upstream — the screen names the word, not the catalogue.
+      // A reading's sound remark points at its word (plan 88, step 5c) and at its sound, for
+      // the link to the sound's card (OQ-10). A grammar rule's atom stays upstream.
       ...(typeof item.wordIndex === 'number' ? { wordIndex: item.wordIndex } : {}),
+      ...soundOf((item as { atomRef?: unknown }).atomRef),
     })),
     summary: review.summary ?? null,
     marks:
@@ -77,6 +78,16 @@ export async function GET(
     disputedAt: review.disputedAt ?? null,
   };
   return NextResponse.json(body);
+}
+
+/** The engine's own rule for a sound atom id: `<language>:<family>`. */
+const SOUND_ATOM_ID = /^[a-z]{2,3}:[a-z_]{1,32}$/;
+
+/** `{ soundAtomId }` for a remark filed under a sound, nothing for any other. */
+function soundOf(atomRef: unknown): { soundAtomId?: string } {
+  const { atomType, atomId } = (atomRef ?? {}) as { atomType?: unknown; atomId?: unknown };
+  if (atomType !== 'sound' || typeof atomId !== 'string' || !SOUND_ATOM_ID.test(atomId)) return {};
+  return { soundAtomId: atomId };
 }
 
 /**

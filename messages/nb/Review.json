@@ -732,7 +732,8 @@
         "prosody": "intonasjon {prosody}",
         "unclear": "Uklart:",
         "note": "Bare et hint – det endrer ikke resultatet.",
-        "sounds": "Lyder å øve på:"
+        "sounds": "Lyder å øve på:",
+        "howTo": "Slik uttaler du den"
       }
     }
   }
