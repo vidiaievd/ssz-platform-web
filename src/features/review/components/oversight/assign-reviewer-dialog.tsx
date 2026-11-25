@@ -170,6 +170,7 @@ export function AssignReviewerDialog({
                   submitting: t('submitting'),
                   failed: t('failed'),
                   alreadyInGroup: t('alreadyInGroup'),
+                  coPrimaryTaken: t('coPrimaryTaken'),
                 }}
                 onCancel={onClose}
                 onAssigned={() => {

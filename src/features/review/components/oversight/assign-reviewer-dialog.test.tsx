@@ -94,7 +94,7 @@ describe('AssignReviewerDialog', () => {
         SCHOOL_ID,
         'group-2',
         expect.objectContaining({ userId: 'teacher-1', role: 'co-primary' }),
-        true,
+        false,
       );
     });
     expect(onClose).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('AssignReviewerDialog', () => {
           to: '2026-08-29',
           reason: 'Sick leave',
         }),
-        true,
+        false,
       );
     });
   });
@@ -148,7 +148,7 @@ describe('AssignReviewerDialog', () => {
         SCHOOL_ID,
         'group-3',
         expect.objectContaining({ userId: 'teacher-1', role: 'co-primary' }),
-        true,
+        false,
       );
     });
   });
@@ -195,6 +195,19 @@ describe('AssignReviewerDialog', () => {
 
     expect(
       await screen.findByText('This teacher already works in this group in another role.'),
+    ).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('never replaces a co-teacher: a taken role is named, not overridden (П7-3)', async () => {
+    vi.mocked(assignTeacher).mockResolvedValue({ ok: false, blocked: 'role-taken' });
+    const { onClose } = renderDialog(submission());
+
+    await userEvent.selectOptions(await screen.findByLabelText('Teacher'), 'teacher-1');
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    expect(
+      await screen.findByText('The group already has a co-teacher. Add the helper as a substitute.'),
     ).toBeInTheDocument();
     expect(onClose).not.toHaveBeenCalled();
   });

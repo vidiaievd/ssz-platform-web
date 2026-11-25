@@ -259,6 +259,9 @@ export function TeacherAssignModal({
   const [subTo, setSubTo] = useState('');
   const [subReason, setSubReason] = useState('');
   const [serverError, setServerError] = useState<string | null>(null);
+  // The server refused because the role is taken; set for that exact (teacher, role)
+  // pair, so the next click replaces the current holder. Another choice drops it.
+  const [replaceFor, setReplaceFor] = useState<string | null>(null);
 
   const groupWeeklyHours = useMemo(() => slotWeeklyHours(groupSlots), [groupSlots]);
 
@@ -304,6 +307,8 @@ export function TeacherAssignModal({
   }, [selected, groupLang, groupWeeklyHours, wouldOverload, t]);
 
   const needsOverride = validationState.status === 'error' || validationState.status === 'warn';
+  const choiceKey = selectedId ? `${selectedId}:${role}` : null;
+  const replacing = choiceKey !== null && replaceFor === choiceKey;
   const canAssign =
     selectedId !== null &&
     (role !== 'substitute' || subReason.trim().length > 0);
@@ -314,7 +319,9 @@ export function TeacherAssignModal({
 
   function handleAssign() {
     if (!selectedId) return;
-    const override = needsOverride;
+    // The server's `override` only replaces the current primary / co-primary; the
+    // warnings above are the client's own and need nothing from the server.
+    const override = replacing;
     setServerError(null);
     startTransition(async () => {
       const result = await assignTeacher(
@@ -342,6 +349,13 @@ export function TeacherAssignModal({
           setServerError(
             t('assignTeacher.serverRejected', {
               reasons: result.conflicts.map((c) => c.type).join(', '),
+            }),
+          );
+        } else if (result.blocked === 'role-taken') {
+          setReplaceFor(choiceKey);
+          setServerError(
+            t(role === 'co-primary' ? 'assignTeacher.errorCoPrimaryTaken' : 'assignTeacher.errorPrimaryTaken', {
+              name: selected?.name ?? '',
             }),
           );
         } else if (result.blocked) {
@@ -495,15 +509,17 @@ export function TeacherAssignModal({
             {t('assignTeacher.cancel')}
           </Button>
           <Button
-            variant={needsOverride ? 'secondary' : 'primary'}
+            variant={needsOverride || replacing ? 'secondary' : 'primary'}
             onClick={handleAssign}
             disabled={!canAssign || isPending}
           >
             {isPending
               ? t('assignTeacher.assigning')
-              : needsOverride
-                ? t('assignTeacher.assignAnyway')
-                : t('assignTeacher.assign')}
+              : replacing
+                ? t('assignTeacher.replace')
+                : needsOverride
+                  ? t('assignTeacher.assignAnyway')
+                  : t('assignTeacher.assign')}
           </Button>
         </div>
       </DialogContent>

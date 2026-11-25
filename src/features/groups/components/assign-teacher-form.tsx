@@ -39,6 +39,8 @@ export interface AssignTeacherFormLabels {
   failed: string;
   /** The server's refusal of a second role for someone already in the group (OQ-17). */
   alreadyInGroup: string;
+  /** The group already has a co-primary; a helper is then added as a substitute. */
+  coPrimaryTaken: string;
 }
 
 export interface AssignTeacherFormProps {
@@ -91,7 +93,7 @@ export function AssignTeacherForm({
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [reason, setReason] = useState('');
-  const [failed, setFailed] = useState<false | 'generic' | 'already-in-group'>(false);
+  const [failed, setFailed] = useState<false | 'generic' | 'already-in-group' | 'role-taken'>(false);
   const [isPending, startTransition] = useTransition();
 
   // The list depends on the group: someone already teaching it is left out, and a choice
@@ -119,14 +121,16 @@ export function AssignTeacherForm({
           to: to || undefined,
           reason: reason || undefined,
         },
-        // Overridden on purpose: this is a review decision, and a timetable clash is not a
-        // reason to refuse someone the right to read work that is already late. The
-        // scheduling screens keep their own stricter path.
-        true,
+        // Never `override`: on the server it replaces the group's current co-primary,
+        // and a helper for overdue work must not quietly push a colleague out.
+        false,
       );
 
       if (result.ok) onAssigned({ groupId, teacherId, role });
-      else setFailed(result.blocked === 'already-in-group' ? 'already-in-group' : 'generic');
+      else
+        setFailed(
+          result.blocked === 'already-in-group' || result.blocked === 'role-taken' ? result.blocked : 'generic',
+        );
     });
   };
 
@@ -233,7 +237,11 @@ export function AssignTeacherForm({
 
       {failed ? (
         <p role="alert" className="text-sm text-error-600 dark:text-error-400">
-          {failed === 'already-in-group' ? labels.alreadyInGroup : labels.failed}
+          {failed === 'already-in-group'
+            ? labels.alreadyInGroup
+            : failed === 'role-taken'
+              ? labels.coPrimaryTaken
+              : labels.failed}
         </p>
       ) : null}
 
