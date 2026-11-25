@@ -388,6 +388,8 @@
     "search": "Поиск учителей…",
     "noTeachers": "Все учителя уже назначены.",
     "langMismatch": "несоответствие языка",
+    "candidateLoad": "{hours}/{max} ч · {groups, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
+    "candidateLoadAria": "{name}: {hours} из {max} ч в неделю",
     "timeClash": "конфликт времени",
     "availabilityAbsent": "в отпуске",
     "validationOk": "Готово к назначению",

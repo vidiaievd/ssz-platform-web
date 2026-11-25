@@ -3,15 +3,17 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderWithProviders } from '@/test/render';
+import { useNavHistoryStore } from '@/stores/nav-history-store';
 import type { TeacherAssignCandidate } from '../api/queries';
 import { TeacherAssignModal } from './teacher-assign-modal';
 
 const back = vi.fn();
 const refresh = vi.fn();
+const replace = vi.fn();
 const searchParamsStore = new URLSearchParams();
 
 vi.mock('next/navigation', () => ({
-  useRouter: () => ({ back, refresh, push: vi.fn() }),
+  useRouter: () => ({ back, refresh, replace, push: vi.fn() }),
   usePathname: () => '/w/nordick/groups/g1/assign-teacher',
   useSearchParams: () => searchParamsStore,
 }));
@@ -60,6 +62,8 @@ describe('TeacherAssignModal — replacing the holder of a role (П7-3)', () => 
   beforeEach(() => {
     vi.clearAllMocks();
     searchParamsStore.delete('role');
+    // Opened from the group page by a client-side navigation.
+    useNavHistoryStore.setState({ previousPath: '/w/nordick/groups/g1' });
   });
 
   it('asks before replacing, then sends override only on "Replace"', async () => {
@@ -112,5 +116,38 @@ describe('TeacherAssignModal — replacing the holder of a role (П7-3)', () => 
     await userEvent.click(screen.getByRole('option', { name: /Marius Holt/ }));
 
     expect(screen.queryByRole('button', { name: 'Replace' })).not.toBeInTheDocument();
+  });
+});
+
+describe('TeacherAssignModal — closing (П7-4)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    searchParamsStore.delete('role');
+  });
+
+  it('opened from inside the app, "Cancel" goes back', async () => {
+    useNavHistoryStore.setState({ previousPath: '/w/nordick/groups/g1' });
+    renderModal();
+    await userEvent.click(screen.getAllByRole('button', { name: 'Cancel' }).at(-1)!);
+    expect(back).toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it('opened by a direct link, "Cancel" replaces the URL with the group page', async () => {
+    useNavHistoryStore.setState({ previousPath: null });
+    renderModal();
+    await userEvent.click(screen.getAllByRole('button', { name: 'Cancel' }).at(-1)!);
+    expect(replace).toHaveBeenCalledWith('/w/nordick/groups/g1');
+    expect(back).not.toHaveBeenCalled();
+  });
+
+  it('opened by a direct link, a successful assignment lands on the group page', async () => {
+    useNavHistoryStore.setState({ previousPath: null });
+    vi.mocked(assignTeacher).mockResolvedValueOnce({ ok: true });
+    renderModal();
+    await chooseAndAssign(/^Assign teacher$/);
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/w/nordick/groups/g1'));
+    expect(back).not.toHaveBeenCalled();
+    expect(refresh).toHaveBeenCalled();
   });
 });

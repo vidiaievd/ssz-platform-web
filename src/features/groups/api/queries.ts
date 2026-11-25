@@ -20,6 +20,8 @@ import type {
   CourseOutlineView,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
+import { teachesGroupToday } from '@/features/groups/lib/teaches-group-today';
+import { fitsGroupLanguage } from '@/features/groups/lib/language-fit';
 import type { CurriculumTree, ContainerPublishState } from '@/features/content/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
 
@@ -691,7 +693,11 @@ export async function getTeacherAssignCandidates(
     });
   const availabilityByTeacher = new Map(availability.map((a) => [a.teacherId, a]));
 
-  const existingIds = new Set(groupData.teachers.map((t) => t.userId));
+  // Whoever teaches the group today, in any role; an assignment that already ended
+  // (a finished substitution) no longer keeps its teacher out — the server accepts them.
+  const existingIds = new Set(
+    groupData.teachers.filter((t) => teachesGroupToday(t)).map((t) => t.userId),
+  );
 
   const candidates: TeacherAssignCandidate[] = teachers.map((t) => {
     const tt = timetable.find((x: TimetableTeacher) => x.userId === t.userId);
@@ -704,7 +710,7 @@ export async function getTeacherAssignCandidates(
       currentHours: tt?.hours ?? 0,
       currentGroups: tt?.groups ?? 0,
       currentConflicts: tt?.conflicts ?? 0,
-      langFit: t.langs.some((l) => l.toLowerCase() === groupData.lang.toLowerCase()),
+      langFit: fitsGroupLanguage(t.langs, groupData.lang),
       availabilityStatus: availabilityByTeacher.get(t.userId)?.status ?? 'free',
     };
   });
@@ -713,7 +719,7 @@ export async function getTeacherAssignCandidates(
     groupName: groupData.name,
     groupLang: groupData.lang,
     groupSlots: groupData.slots,
-    // Exclude teachers already assigned to the group
+    // Exclude teachers who already teach the group
     candidates: candidates.filter((c) => !existingIds.has(c.userId)),
   };
 }

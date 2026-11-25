@@ -388,6 +388,8 @@
     "search": "Søk etter lærere…",
     "noTeachers": "Alle lærere er allerede tildelt.",
     "langMismatch": "språkavvik",
+    "candidateLoad": "{hours}/{max} t · {groups, plural, one {# gruppe} other {# grupper}}",
+    "candidateLoadAria": "{name}: {hours} av {max} t i uken",
     "timeClash": "tidskollisjon",
     "availabilityAbsent": "i permisjon",
     "validationOk": "Klar til tildeling",

@@ -388,6 +388,8 @@
     "search": "Search teachers…",
     "noTeachers": "All teachers are already assigned.",
     "langMismatch": "lang mismatch",
+    "candidateLoad": "{hours}/{max} h · {groups, plural, one {# group} other {# groups}}",
+    "candidateLoadAria": "{name}: {hours} of {max} h a week",
     "timeClash": "time clash",
     "availabilityAbsent": "on leave",
     "validationOk": "Good to assign",

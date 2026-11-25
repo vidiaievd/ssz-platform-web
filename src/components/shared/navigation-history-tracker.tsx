@@ -8,7 +8,8 @@ import { useNavHistoryStore } from '@/stores/nav-history-store';
 const ACCOUNT_PREFIX = '/account';
 
 /**
- * Records the path the user was on right before entering `/account/*`.
+ * Records the path the user was on right before entering `/account/*`, and the
+ * previous path of any client-side navigation (`previousPath`, in memory).
  *
  * Uses next-intl `usePathname` (locale-agnostic) so the captured path has no
  * `/en` prefix and can be pushed back through the locale-aware router cleanly.
@@ -19,6 +20,7 @@ const ACCOUNT_PREFIX = '/account';
 export function NavigationHistoryTracker() {
   const pathname = usePathname();
   const setReturnPath = useNavHistoryStore((s) => s.setReturnPath);
+  const setPreviousPath = useNavHistoryStore((s) => s.setPreviousPath);
   const prevRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -36,8 +38,11 @@ export function NavigationHistoryTracker() {
     // Entering account on first load (prev === null) leaves the persisted
     // value untouched, so a refresh inside /account keeps the return target.
 
+    // Null until the first client-side navigation of this document.
+    if (prev !== null && prev !== pathname) setPreviousPath(prev);
+
     prevRef.current = pathname;
-  }, [pathname, setReturnPath]);
+  }, [pathname, setReturnPath, setPreviousPath]);
 
   return null;
 }

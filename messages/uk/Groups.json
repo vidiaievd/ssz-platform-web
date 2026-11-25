@@ -388,6 +388,8 @@
     "search": "Пошук учителів…",
     "noTeachers": "Усі вчителі вже призначені.",
     "langMismatch": "невідповідність мови",
+    "candidateLoad": "{hours}/{max} год · {groups, plural, one {# група} few {# групи} many {# груп} other {# групи}}",
+    "candidateLoadAria": "{name}: {hours} з {max} год на тиждень",
     "timeClash": "конфлікт часу",
     "availabilityAbsent": "у відпустці",
     "validationOk": "Готово до призначення",

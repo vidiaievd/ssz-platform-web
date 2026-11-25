@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Search, Check, AlertCircle, AlertTriangle, X } from 'lucide-react';
 
@@ -15,6 +15,7 @@ import {
   Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose,
 } from '@/components/ui/dialog';
 import { assignTeacher } from '../api/mutations';
+import { useCloseGroupModal } from '../lib/use-close-group-modal';
 import type { TeacherAssignCandidate } from '../api/queries';
 import type { TeacherRole, Slot } from '../types';
 
@@ -34,10 +35,21 @@ const DAY_ORDER: Record<Slot['day'], number> = {
 
 /** "Mon/Fri 18:00–19:30" — mirrors buildScheduleSummary in api/queries.ts,
  *  which is server-only and can't be imported into this client component. */
-function scheduleSummaryOf(slots: Slot[]): string {
+/** Short weekday names, per locale (`Mon` → `пн`). */
+const DAY_LABEL_KEYS = {
+  Mon: 'timetable.weekdayShort.mon',
+  Tue: 'timetable.weekdayShort.tue',
+  Wed: 'timetable.weekdayShort.wed',
+  Thu: 'timetable.weekdayShort.thu',
+  Fri: 'timetable.weekdayShort.fri',
+  Sat: 'timetable.weekdayShort.sat',
+  Sun: 'timetable.weekdayShort.sun',
+} as const satisfies Record<Slot['day'], string>;
+
+function scheduleSummaryOf(slots: Slot[], dayLabel: (day: Slot['day']) => string): string {
   if (slots.length === 0) return '—';
   const sorted = [...slots].sort((a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day]);
-  const days = [...new Set(sorted.map((s) => s.day))].join('/');
+  const days = [...new Set(sorted.map((s) => s.day))].map(dayLabel).join('/');
   const first = sorted[0];
   return first ? `${days} ${first.start}–${first.end}` : days;
 }
@@ -109,6 +121,11 @@ function TeacherOption({
   onSelect: () => void;
 }) {
   const t = useTranslations('Groups');
+  const format = useFormatter();
+  const hours = format.number(candidate.currentHours, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
   const projectedHours = candidate.currentHours + groupWeeklyHours;
   const wouldOverload = projectedHours > candidate.maxWeeklyHours;
   const dimmed = !candidate.langFit;
@@ -152,14 +169,21 @@ function TeacherOption({
           )}
         </div>
         <div className="mt-0.5 text-[11px] text-(--ssz-text-muted)">
-          {candidate.currentHours.toFixed(1)}/{candidate.maxWeeklyHours}h
-          {' · '}{candidate.currentGroups} {candidate.currentGroups === 1 ? 'group' : 'groups'}
+          {t('assignTeacher.candidateLoad', {
+            hours,
+            max: candidate.maxWeeklyHours,
+            groups: candidate.currentGroups,
+          })}
         </div>
       </div>
 
       <div
         role="progressbar"
-        aria-label={`${candidate.name}: ${candidate.currentHours.toFixed(1)} of ${candidate.maxWeeklyHours}h`}
+        aria-label={t('assignTeacher.candidateLoadAria', {
+          name: candidate.name,
+          hours,
+          max: candidate.maxWeeklyHours,
+        })}
         aria-valuenow={Math.round(fillPct)}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -248,6 +272,7 @@ export function TeacherAssignModal({
 }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
+  const closeModal = useCloseGroupModal();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
@@ -314,7 +339,7 @@ export function TeacherAssignModal({
     (role !== 'substitute' || subReason.trim().length > 0);
 
   function handleClose() {
-    router.back();
+    closeModal();
   }
 
   function handleAssign() {
@@ -342,7 +367,7 @@ export function TeacherAssignModal({
           ? `Assigned ${selected?.name} as ${role} — ${warnings.length} warning${warnings.length > 1 ? 's' : ''}`
           : `Assigned ${selected?.name} as ${role}`;
         toast.success(label);
-        router.back();
+        closeModal();
         router.refresh();
       } else {
         if (result.conflicts && result.conflicts.length > 0) {
@@ -388,7 +413,7 @@ export function TeacherAssignModal({
             <DialogDescription className="mt-0.75 text-[13px] text-(--ssz-text-muted)">
               {t('assignTeacher.description', {
                 groupName,
-                schedule: scheduleSummaryOf(groupSlots),
+                schedule: scheduleSummaryOf(groupSlots, (day) => t(DAY_LABEL_KEYS[day])),
               })}
             </DialogDescription>
           </div>
