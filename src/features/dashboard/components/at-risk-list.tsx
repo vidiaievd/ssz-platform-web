@@ -71,7 +71,7 @@ export function AtRiskList({ atRisk, workspaceId, schoolId }: AtRiskListProps) {
                 <div className="flex items-center gap-2 shrink-0">
                   <span className="font-mono text-sm text-(--ssz-text-muted)">{pct}%</span>
                   <span
-                    className="inline-flex items-center justify-center rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-bold text-neutral-600 uppercase"
+                    className="inline-flex items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-(--ssz-text-secondary) uppercase"
                     aria-label={t('language', { lang: student.lang })}
                   >
                     {student.lang}

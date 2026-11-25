@@ -48,8 +48,10 @@ export function WidgetCard({
       )}
     >
       {/* Header */}
-      <div className="flex items-start justify-between gap-3 p-4 pb-3 border-b border-border">
-        <div className="min-w-0">
+      {/* Wraps rather than squeezes: on a phone the controls on the right (filters, "remind all")
+          left the title a letter or two («О…»), so they drop under it when both do not fit. */}
+      <div className="flex flex-wrap items-start justify-between gap-x-3 gap-y-2 p-4 pb-3 border-b border-border">
+        <div className="min-w-40 flex-1">
           <h2 className="text-base font-semibold text-(--ssz-text-primary) leading-snug truncate">
             {title}
           </h2>

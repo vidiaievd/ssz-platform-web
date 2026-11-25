@@ -38,7 +38,7 @@ const TONE_ICON_BG: Record<ActivityItem['tone'], string> = {
   success: 'bg-success-100 text-success-700',
   primary: 'bg-primary/10 text-primary',
   warning: 'bg-warning-100 text-warning-700',
-  neutral: 'bg-neutral-100 text-neutral-600',
+  neutral: 'bg-muted text-(--ssz-text-secondary)',
 };
 
 type ActivityFeedProps = {
@@ -153,7 +153,7 @@ export function ActivityFeed({ activity }: ActivityFeedProps) {
                   </time>
                 </div>
                 {item.tag && item.tag !== 'milestone' && (
-                  <span className="shrink-0 rounded-full bg-neutral-100 px-1.5 py-0.5 text-[10px] font-medium text-neutral-600">
+                  <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-(--ssz-text-secondary)">
                     {t(`filters.${item.tag}`)}
                   </span>
                 )}
