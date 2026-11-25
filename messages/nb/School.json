@@ -27,7 +27,7 @@
       "atRisk": "Elever i faresonen",
       "todaysClasses": "Dagens timer",
       "teacherWorkload": "Lærernes arbeidsmengde",
-      "reviewQueue": "Trenger din gjennomgang"
+      "reviewQueue": "Rettekø"
     },
     "kpis": {
       "label": "Nøkkeltall",
@@ -187,20 +187,17 @@
         "message-class": "Skriv til gruppen"
       }
     },
-    "review": {
-      "title": "Trenger din gjennomgang",
-      "subtitle": "Eieren må godkjenne før publisering",
-      "emptyTitle": "Alt er gjennomgått!",
-      "emptyBody": "Ingen innhold venter på din gjennomgang.",
-      "by": "{author} · {age}"
-    },
     "teacherQueue": {
       "title": "Rettekø",
       "subtitle": "Besvarelser som venter på deg",
+      "subtitleSchool": "Besvarelser i skolen som venter på retting",
       "emptyTitle": "Ingenting å rette ennå",
       "emptyBody": "Nye besvarelser fra elevene vises her.",
       "writing": "skriftlig besvarelse",
-      "speaking": "muntlig besvarelse"
+      "speaking": "muntlig besvarelse",
+      "open": "Åpne",
+      "more": "Og {count, plural, one {# besvarelse} other {# besvarelser}} til",
+      "someone": "Elev"
     },
     "tips": {
       "ownerFull": "Fest de mest brukte snarveiene i sidepanelet for raskere navigasjon.",

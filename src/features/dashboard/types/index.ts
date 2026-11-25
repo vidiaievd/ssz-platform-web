@@ -118,14 +118,6 @@ export interface AtRiskStudent {
   lang: string;
 }
 
-export interface ReviewQueueItem {
-  id: string;
-  kind: 'lesson' | 'rubric';
-  title: string;
-  author: string;
-  age: string;
-}
-
 export interface TodaysClass {
   id: string;
   /** Wall-clock start, `HH:MM`. */
@@ -179,7 +171,6 @@ export interface DashboardData {
   activity: WidgetData<ActivityItem[]>;
   courseHealth: WidgetData<CourseHealthRow[]>;
   atRisk: WidgetData<{ students: AtRiskStudent[]; total: number }>;
-  reviewQueue: WidgetData<ReviewQueueItem[]>;
   todaysClasses: WidgetData<TodaysClass[]>;
   onboarding: OnboardingState;
 }

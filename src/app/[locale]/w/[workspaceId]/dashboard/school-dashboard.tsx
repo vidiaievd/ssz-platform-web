@@ -22,7 +22,10 @@ import {
   fetchTeacherLoad,
   fetchGroupGaps,
   fetchSchoolSessionsOn,
+  fetchWaitingWork,
+  type WaitingWorkPayload,
 } from '@/lib/dashboard/queries';
+import { wsHref } from '@/features/workspaces/lib/href';
 import { buildTodaysClasses, utcDay } from '@/features/dashboard/lib/todays-classes';
 
 import type {
@@ -57,7 +60,6 @@ import { isWorkspaceWritable } from '@/features/school-lifecycle/api/get-workspa
 import { TipCard } from '@/features/dashboard/components/tip-card';
 import { CourseHealth } from '@/features/dashboard/components/course-health';
 import { AtRiskList } from '@/features/dashboard/components/at-risk-list';
-import { ReviewQueueCard } from '@/features/dashboard/components/review-queue-card';
 import { TodaysClassesCard } from '@/features/dashboard/components/todays-classes-card';
 import { TeacherQueueCard } from '@/features/dashboard/components/teacher-queue-card';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
@@ -247,7 +249,9 @@ export async function SchoolDashboard({ params }: Props) {
   // ── 2. Parallel widget data fetch ──────────────────────────────────────────
   // «Today's classes» is drawn for hybrid schools only — an online one is not asked.
   const hybrid = schoolType === 'hybrid';
-  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps, todaysSessions, groupFacts] =
+  // The work waiting for review: the owner's card and the teacher's read the same queue.
+  const seesQueue = role === 'owner' || role === 'teacher';
+  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps, todaysSessions, groupFacts, waitingWork] =
     await Promise.all([
       fetchDashboardKpis(school.id),
       fetchAtRisk(school.id, 3),
@@ -260,6 +264,9 @@ export async function SchoolDashboard({ params }: Props) {
         ? fetchSchoolSessionsOn(school.id, utcDay(new Date()))
         : Promise.resolve({ status: 'unavailable' } as const),
       hybrid ? fetchSchoolGroupFacts(school.id) : Promise.resolve({ status: 'unavailable' } as const),
+      seesQueue
+        ? fetchWaitingWork(school.id, role === 'owner' ? 'school' : 'mine')
+        : Promise.resolve({ status: 'unavailable' } as const),
     ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
@@ -270,6 +277,8 @@ export async function SchoolDashboard({ params }: Props) {
   const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
   const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
   const groupGapsWidget = adaptGroupGaps(groupGaps);
+  const waitingWorkWidget: WidgetData<WaitingWorkPayload> =
+    'status' in waitingWork ? { status: 'unavailable' } : { status: 'ok', data: waitingWork };
   // Names and head counts from organization: a row of an unreadable group still shows, unnamed.
   const todaysClassesWidget = buildTodaysClasses(todaysSessions, Array.isArray(groupFacts) ? groupFacts : []);
 
@@ -429,16 +438,16 @@ export async function SchoolDashboard({ params }: Props) {
           {/* Quick actions */}
           <QuickActions role={role} workspaceId={schoolSlugDisplay} readOnly={!writable} />
 
-          {/* Review queue — owner, full state */}
+          {/* Work waiting for review — the owner's whole school (to oversight), full state */}
           {canSeeWidget('reviewQueue', ctx) && (
             <Suspense fallback={<WidgetCard title={tLoading('reviewQueue')} loading />}>
-              <ReviewQueueCard reviewQueue={{ status: 'unavailable' }} />
+              <TeacherQueueCard work={waitingWorkWidget} href={wsHref(schoolSlugDisplay, 'review/oversight')} whose="school" />
             </Suspense>
           )}
 
-          {/* Teacher grading queue */}
+          {/* Work waiting for review — the teacher's own groups (to their inbox) */}
           {canSeeWidget('teacherQueue', ctx) && (
-            <TeacherQueueCard items={[]} loading={false} />
+            <TeacherQueueCard work={waitingWorkWidget} href={wsHref(schoolSlugDisplay, 'review')} />
           )}
 
           {/* Contextual tip */}

@@ -27,7 +27,7 @@
       "atRisk": "At-risk students",
       "todaysClasses": "Today's classes",
       "teacherWorkload": "Teacher workload",
-      "reviewQueue": "Needs your review"
+      "reviewQueue": "Grade queue"
     },
     "kpis": {
       "label": "Key indicators",
@@ -187,20 +187,17 @@
         "message-class": "Message class"
       }
     },
-    "review": {
-      "title": "Needs your review",
-      "subtitle": "Owner approval required to publish",
-      "emptyTitle": "All caught up!",
-      "emptyBody": "No content is waiting for your review.",
-      "by": "by {author} · {age}"
-    },
     "teacherQueue": {
       "title": "Grade queue",
       "subtitle": "Submissions awaiting your review",
+      "subtitleSchool": "Student submissions across the school awaiting review",
       "emptyTitle": "Nothing to grade yet",
       "emptyBody": "New student submissions will appear here.",
       "writing": "writing submission",
-      "speaking": "speaking submission"
+      "speaking": "speaking submission",
+      "open": "Open",
+      "more": "And {count, plural, one {# more submission} other {# more submissions}}",
+      "someone": "Student"
     },
     "tips": {
       "ownerFull": "Pin your most-used shortcuts to the sidebar for faster navigation.",

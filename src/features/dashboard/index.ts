@@ -11,7 +11,6 @@ export type {
   ActivityItem,
   CourseHealthRow,
   AtRiskStudent,
-  ReviewQueueItem,
   TodaysClass,
   OnboardingItem,
   OnboardingState,

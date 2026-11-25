@@ -1,6 +1,12 @@
 import 'server-only';
 
+import { NextResponse } from 'next/server';
+
+import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { serverFetch } from '@/lib/api/server-fetcher';
+import { env } from '@/lib/env';
+import { queueScopeFor, resolveOversightAccess, resolveReviewScope } from '@/features/review/lib/review-scope';
+import { engineQueueView } from '@/features/review/lib/term-window';
 import type {
   KpisPayload,
   AtRiskPayload,
@@ -155,5 +161,113 @@ export async function fetchSchoolGroupFacts(
       studentCount: g.studentCount ?? 0,
       max: g.capacityMax ?? 0,
     }));
+  });
+}
+
+/** One submission waiting for a teacher, as the dashboard's queue card lists it. */
+export type WaitingWork = {
+  id: string;
+  /** Null when the directory does not know the learner yet. */
+  who: string | null;
+  /** The exercise as it read when it was handed in. */
+  what: string | null;
+  submittedAt: string;
+  /** `read_aloud` is heard; everything else on the queue is read. */
+  kind: 'pen' | 'mic';
+};
+
+export type WaitingWorkPayload = { pending: number; items: WaitingWork[] };
+
+/** The engine's queue, only the fields the card reads (the full shape is in `app/api/review/queue`). */
+interface EngineQueueForCard {
+  summary: { pending: number };
+  groups: {
+    items: {
+      attemptId: string;
+      userId: string;
+      templateCode: string;
+      submittedAt: string;
+      path: { exercise?: string | null } | null;
+    }[];
+  }[];
+}
+
+/**
+ * The work waiting for review, as the dashboard's queue card shows it: the oldest few
+ * submissions and how many wait in all.
+ *
+ * - `mine` — a teacher's own inbox, the scope «Перевірка» uses (`resolveReviewScope`: the
+ *   groups they teach today). No groups is an empty queue, not an error.
+ * - `school` — everything the school is waiting on, as «Нагляд перевірки» counts it
+ *   (`resolveOversightAccess` + the engine's aggregate). The owner teaches no group, so their
+ *   own inbox is empty by design and was the wrong source for their card.
+ */
+export async function fetchWaitingWork(
+  school: string,
+  whose: 'mine' | 'school',
+  limit = 5,
+): Promise<WidgetResult<WaitingWorkPayload>> {
+  return safeWidgetFetch(async () => {
+    let schoolId: string;
+    let groupIds: string[];
+    let pending: number | null = null;
+
+    if (whose === 'mine') {
+      const scope = await resolveReviewScope(school);
+      if (scope instanceof NextResponse) throw new Error(`review scope refused: ${scope.status}`);
+      const engineScope = queueScopeFor(scope, {});
+      if (engineScope === null) return { pending: 0, items: [] };
+      ({ schoolId, groupIds } = engineScope);
+    } else {
+      const access = await resolveOversightAccess(school);
+      if (access instanceof NextResponse) throw new Error(`oversight refused: ${access.status}`);
+      const aggregate = await serverFetch<{
+        pending: { groupId: string | null; submittedAt: string[] }[];
+      }>({
+        service: 'exercises',
+        path: '/internal/attempts/review/aggregate',
+        method: 'POST',
+        directBaseUrl: env.EXERCISE_SERVICE_INTERNAL_URL,
+        headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
+        anonymous: true,
+        body: { schoolId: access.schoolId, periodDays: 1 },
+      });
+      schoolId = access.schoolId;
+      // Work handed in outside any group is counted; the queue lists by group, so it has no row.
+      pending = aggregate.pending.reduce((n, bucket) => n + bucket.submittedAt.length, 0);
+      groupIds = [
+        ...new Set(aggregate.pending.map((b) => b.groupId).filter((id): id is string => id !== null)),
+      ];
+      if (groupIds.length === 0) return { pending, items: [] };
+    }
+
+    const queue = await serverFetch<EngineQueueForCard>({
+      service: 'exercises',
+      path: '/internal/attempts/review/queue',
+      method: 'POST',
+      directBaseUrl: env.EXERCISE_SERVICE_INTERNAL_URL,
+      headers: { 'x-internal-token': env.INTERNAL_SERVICE_TOKEN ?? '' },
+      anonymous: true,
+      body: { schoolId, groupIds, ...engineQueueView('pending', new Date()), groupBy: 'student', limit },
+    });
+
+    const rows = queue.groups
+      .flatMap((group) => group.items)
+      .sort((a, b) => a.submittedAt.localeCompare(b.submittedAt))
+      .slice(0, limit);
+    const people = await fetchProfileSummaries(rows.map((row) => row.userId)).catch(
+      () => ({}) as Awaited<ReturnType<typeof fetchProfileSummaries>>,
+    );
+
+    return {
+      pending: pending ?? queue.summary.pending,
+      items: rows.map((row) => ({
+        id: row.attemptId,
+        who: people[row.userId]?.displayName ?? null,
+        what: row.path?.exercise ?? null,
+        submittedAt: row.submittedAt,
+        kind: row.templateCode === 'read_aloud' ? 'mic' : 'pen',
+      })),
+    };
   });
 }
