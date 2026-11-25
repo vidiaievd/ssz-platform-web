@@ -83,6 +83,9 @@ export type GroupHealthItem = {
   alerts: GroupAlert[];
 };
 
+/** A school group as «today's classes» reads it: name and head count (organization-service). */
+export type SchoolGroupFacts = Pick<GroupHealthItem, 'id' | 'name' | 'studentCount' | 'max'>;
+
 export type GroupsHealthPayload = {
   activeCount: number;
   groups: GroupHealthItem[];

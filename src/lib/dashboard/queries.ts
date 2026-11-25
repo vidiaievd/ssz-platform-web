@@ -9,6 +9,7 @@ import type {
   GroupsHealthPayload,
   GroupGapsPayload,
   TeacherLoadPayload,
+  SchoolGroupFacts,
   SchoolSessionItem,
   Unavailable,
 } from './types';
@@ -124,4 +125,35 @@ export async function fetchSchoolSessionsOn(
       query: { from: day, to: day },
     }),
   );
+}
+
+/** organization-service's group summary — only the fields «today's classes» reads. */
+type OrgGroupSummary = {
+  id: string;
+  name: string;
+  studentCount?: number | null;
+  capacityMax?: number | null;
+};
+
+/**
+ * The school's groups as «today's classes» names them — from organization-service, the owner
+ * of groups. (The analytics `dashboard/groups-health` aggregate the dashboard also asks for
+ * does not exist yet, so the card cannot lean on it: its rows came out unnamed, "0 students".)
+ * `max` 0 = no capacity set.
+ */
+export async function fetchSchoolGroupFacts(
+  schoolId: string,
+): Promise<WidgetResult<SchoolGroupFacts[]>> {
+  return safeWidgetFetch(async () => {
+    const groups = await serverFetch<OrgGroupSummary[]>({
+      service: 'organization',
+      path: `/schools/${schoolId}/groups`,
+    });
+    return groups.map((g) => ({
+      id: g.id,
+      name: g.name,
+      studentCount: g.studentCount ?? 0,
+      max: g.capacityMax ?? 0,
+    }));
+  });
 }

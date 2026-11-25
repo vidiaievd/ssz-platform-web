@@ -3,7 +3,13 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 
 import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
-import { deriveViewerRole, deriveSchoolType, deriveDataState, computeOnboarding } from '@/features/dashboard/lib/derive';
+import {
+  deriveViewerRole,
+  deriveSchoolType,
+  deriveDataState,
+  computeOnboarding,
+  schoolMembersCount,
+} from '@/features/dashboard/lib/derive';
 import { canSeeWidget } from '@/features/dashboard/lib/roles';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import {
@@ -12,6 +18,7 @@ import {
   fetchCourseHealth,
   fetchActivity,
   fetchGroupsHealth,
+  fetchSchoolGroupFacts,
   fetchTeacherLoad,
   fetchGroupGaps,
   fetchSchoolSessionsOn,
@@ -239,7 +246,8 @@ export async function SchoolDashboard({ params }: Props) {
 
   // ── 2. Parallel widget data fetch ──────────────────────────────────────────
   // «Today's classes» is drawn for hybrid schools only — an online one is not asked.
-  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps, todaysSessions] =
+  const hybrid = schoolType === 'hybrid';
+  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps, todaysSessions, groupFacts] =
     await Promise.all([
       fetchDashboardKpis(school.id),
       fetchAtRisk(school.id, 3),
@@ -248,9 +256,10 @@ export async function SchoolDashboard({ params }: Props) {
       fetchGroupsHealth(school.id, role),
       fetchTeacherLoad(school.id),
       fetchGroupGaps(school.id),
-      schoolType === 'hybrid'
+      hybrid
         ? fetchSchoolSessionsOn(school.id, utcDay(new Date()))
         : Promise.resolve({ status: 'unavailable' } as const),
+      hybrid ? fetchSchoolGroupFacts(school.id) : Promise.resolve({ status: 'unavailable' } as const),
     ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
@@ -261,15 +270,16 @@ export async function SchoolDashboard({ params }: Props) {
   const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
   const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
   const groupGapsWidget = adaptGroupGaps(groupGaps);
-  const todaysClassesWidget = buildTodaysClasses(
-    todaysSessions,
-    groupsHealthWidget.status === 'ok' ? groupsHealthWidget.data.groups : [],
-  );
+  // Names and head counts from organization: a row of an unreadable group still shows, unnamed.
+  const todaysClassesWidget = buildTodaysClasses(todaysSessions, Array.isArray(groupFacts) ? groupFacts : []);
 
   const hasActivity = activityWidget.status === 'ok' && activityWidget.data.length > 0;
   const coursesCount = courseHealthWidget.status === 'ok' ? courseHealthWidget.data.length : 0;
   const groupsCount = groupsHealthWidget.status === 'ok' ? groupsHealthWidget.data.activeCount : 0;
-  const membersCount = 1; // conservative — full count not fetched here
+  // The owner is not on the roster (schools.ownerId), so they count on top of it. A fixed 1 here
+  // kept every school out of the "full" state: course health, the review queue and the
+  // operations banner never showed.
+  const membersCount = schoolMembersCount(school);
 
   const dataState = deriveDataState({ membersCount, coursesCount, hasActivity });
 

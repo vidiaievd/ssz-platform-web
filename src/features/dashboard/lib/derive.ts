@@ -41,6 +41,16 @@ const BACKEND_ROLE_MAP: Record<string, DashboardRole> = {
   STUDENT: 'teacher',
 };
 
+/**
+ * People in the school: the roster plus the owner, who is never a roster row
+ * (`schools.ownerId`). A school without an owner on record counts its roster only.
+ */
+export function schoolMembersCount(school: SchoolForRole): number {
+  const roster = school.members?.length ?? 0;
+  const ownerOnRoster = school.ownerId ? school.members?.some((m) => m.userId === school.ownerId) : true;
+  return roster + (ownerOnRoster ? 0 : 1);
+}
+
 export function deriveViewerRole(
   school: SchoolForRole,
   viewerUserId: string,

@@ -1,13 +1,11 @@
-import type { GroupHealthItem, SchoolSessionItem, Unavailable } from '@/lib/dashboard/types';
+import type { SchoolGroupFacts, SchoolSessionItem, Unavailable } from '@/lib/dashboard/types';
 
 import type { TodaysClass, WidgetData } from '../types';
 
-/** What a row reads of a group — the API item and the dashboard's view model both carry it. */
-type GroupFacts = Pick<GroupHealthItem, 'id' | 'name' | 'studentCount' | 'max'>;
 
 /**
- * «Today's classes» from the school's sessions of the day and the groups the dashboard
- * already holds.
+ * «Today's classes» from the school's sessions of the day and the school's groups
+ * (organization-service).
  *
  * A cancelled session is left out — the card lists what is on, and the group's log is where
  * a called-off lesson is shown. Names and head counts come from the groups list rather than
@@ -19,7 +17,7 @@ type GroupFacts = Pick<GroupHealthItem, 'id' | 'name' | 'studentCount' | 'max'>;
  */
 export function buildTodaysClasses(
   sessions: SchoolSessionItem[] | Unavailable,
-  groups: GroupFacts[],
+  groups: SchoolGroupFacts[],
 ): WidgetData<TodaysClass[]> {
   if (!Array.isArray(sessions)) return { status: 'unavailable' };
 
