@@ -108,6 +108,7 @@
         "joined": "joined as {role}",
         "published": "published",
         "enrolled": "enrolled in",
+        "enrolledCourse": "enrolled in a course",
         "submitted": "submitted for review",
         "reviewed": "reviewed submission — {outcome}"
       },

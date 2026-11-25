@@ -108,6 +108,7 @@
         "joined": "приєднався як {role}",
         "published": "опублікував",
         "enrolled": "записався на",
+        "enrolledCourse": "записався на курс",
         "submitted": "здав на перевірку",
         "reviewed": "перевірив роботу — {outcome}"
       },

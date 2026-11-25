@@ -73,6 +73,10 @@ function describe(item: ActivityItem, t: Translate): string {
       return t('what.reviewed', { outcome: known(t, 'outcomes', wording.outcome) });
     case null:
       return wording.raw;
+    case 'enrolled':
+      // A course content no longer describes comes without a title: name it as "a course"
+      // instead of leaving the sentence hanging.
+      return t(item.target ? 'what.enrolled' : 'what.enrolledCourse');
     default:
       return t(`what.${wording.key}`);
   }

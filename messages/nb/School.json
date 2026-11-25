@@ -108,6 +108,7 @@
         "joined": "ble med som {role}",
         "published": "publiserte",
         "enrolled": "meldte seg på",
+        "enrolledCourse": "meldte seg på et kurs",
         "submitted": "leverte til retting",
         "reviewed": "rettet en besvarelse — {outcome}"
       },
