@@ -48,11 +48,13 @@ function card(contentType: string, contentId: string, dueAt: string) {
  */
 function mockUpstream(routes: {
   due?: unknown;
+  stats?: unknown;
   leafItems?: Record<string, unknown>;
   vocabItems?: Record<string, unknown>;
 }) {
   vi.mocked(serverFetch).mockImplementation(async (opts: { path: string }) => {
     if (opts.path === '/srs/due') return routes.due ?? { cards: [] };
+    if (opts.path === '/srs/stats/me') return routes.stats ?? null;
 
     const leaf = /^\/internal\/containers\/(.+)\/leaf-items$/.exec(opts.path);
     if (leaf?.[1]) return routes.leafItems?.[leaf[1]] ?? [];
@@ -81,7 +83,8 @@ describe('getReviewsSummary', () => {
     expect(summary.totalDue).toBe(0);
     expect(summary.breakdown).toEqual([]);
     // No backlog means no reason to walk the course structure at all.
-    expect(serverFetch).toHaveBeenCalledTimes(1);
+    const paths = vi.mocked(serverFetch).mock.calls.map(([opts]) => (opts as { path: string }).path);
+    expect(paths.sort()).toEqual(['/srs/due', '/srs/stats/me']);
   });
 
   it('attributes exercise and vocabulary cards to their course as separate rows', async () => {
@@ -148,6 +151,47 @@ describe('getReviewsSummary', () => {
     expect(summary.totalDue).toBe(3);
     expect(summary.unattributedDue).toBe(2);
     expect(summary.breakdown.reduce((n, r) => n + r.dueCount, 0) + summary.unattributedDue).toBe(3);
+  });
+
+  // learning-service refuses `limit` above 100 with a 400, which emptied the screen.
+  it('asks the due queue for no more than its ceiling of 100 cards', async () => {
+    vi.mocked(getMyCourses).mockResolvedValue([course()]);
+    mockUpstream({ due: { cards: [] } });
+
+    await getReviewsSummary(USER_ID);
+
+    const due = vi.mocked(serverFetch).mock.calls
+      .map(([opts]) => opts as { path: string; query?: { limit?: string } })
+      .find((opts) => opts.path === '/srs/due');
+    expect(Number(due?.query?.limit)).toBeLessThanOrEqual(100);
+  });
+
+  it('takes the backlog from the stats and counts what lies beyond the sample as unattributed', async () => {
+    vi.mocked(getMyCourses).mockResolvedValue([course()]);
+    mockUpstream({
+      due: { cards: [card('EXERCISE', 'ex-1', '2026-07-20T08:00:00.000Z')] },
+      stats: { dueNowCount: 140 },
+      leafItems: { 'course-nb': [{ type: 'EXERCISE', id: 'ex-1' }] },
+    });
+
+    const summary = await getReviewsSummary(USER_ID);
+
+    expect(summary.totalDue).toBe(140);
+    expect(summary.unattributedDue).toBe(139);
+    expect(summary.breakdown.reduce((n, r) => n + r.dueCount, 0) + summary.unattributedDue).toBe(140);
+  });
+
+  it('keeps the sample size when the stats are unreachable', async () => {
+    vi.mocked(getMyCourses).mockResolvedValue([course()]);
+    mockUpstream({
+      due: { cards: [card('EXERCISE', 'ex-1', '2026-07-20T08:00:00.000Z')] },
+      leafItems: { 'course-nb': [{ type: 'EXERCISE', id: 'ex-1' }] },
+    });
+
+    const summary = await getReviewsSummary(USER_ID);
+
+    expect(summary.totalDue).toBe(1);
+    expect(summary.unattributedDue).toBe(0);
   });
 
   it('counts only cards that came due before today as overdue', async () => {
