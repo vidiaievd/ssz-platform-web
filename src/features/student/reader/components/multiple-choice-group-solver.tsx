@@ -22,6 +22,7 @@ import type {
 import type { StudentProjection } from '@/lib/shared-kernel/multiple-choice-group';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { submitPassed } from '@/features/student/exercises/lib/submit-passed';
 
 export interface MultipleChoiceGroupSolverProps {
   exerciseId: string;
@@ -201,7 +202,7 @@ export function MultipleChoiceGroupSolver({
           // first check alone (plan 54 §3.3).
           if (!reported.current) {
             reported.current = true;
-            onChecked?.(data.requiresReview ? null : data.correct);
+            onChecked?.(data.requiresReview ? null : submitPassed(data));
           }
         },
         onError: async (e) => {

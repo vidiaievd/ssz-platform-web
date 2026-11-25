@@ -20,6 +20,7 @@ import type { MultipleChoiceResult, ResumedPick } from '@/features/student/exerc
 import type { StudentProjection } from '@/lib/shared-kernel/multiple-choice';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { submitPassed } from '@/features/student/exercises/lib/submit-passed';
 
 export interface MultipleChoiceSolverProps {
   exerciseId: string;
@@ -206,7 +207,7 @@ export function MultipleChoiceSolver({
         timeSpentSeconds: Math.max(0, Math.round((Date.now() - openedAt.current) / 1000)),
       },
       {
-        onSuccess: (data) => onChecked?.(data.requiresReview ? null : data.correct),
+        onSuccess: (data) => onChecked?.(data.requiresReview ? null : submitPassed(data)),
         onError: async () => {
           // The work may well have landed: the engine accepts a submission before it
           // scores it, so a lost response is not a lost set. Asking is the only way to

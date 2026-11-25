@@ -43,6 +43,7 @@ import {
   usePrecheckAvailability,
   usePrecheckRun,
 } from '@/features/student/precheck';
+import { submitPassed } from '@/features/student/exercises/lib/submit-passed';
 
 export interface ShortAnswerSolverProps {
   exerciseId: string;
@@ -285,7 +286,7 @@ export function ShortAnswerSolver({
           const reader = handedInFromSubmit(data);
           setHandedIn(reader);
           if (reader === 'ai') setAwaited(openAttemptId);
-          onChecked?.(data.requiresReview ? null : data.correct);
+          onChecked?.(data.requiresReview ? null : submitPassed(data));
         },
         onError: async () => {
           // The work may well have landed: the engine accepts a submission before it

@@ -23,6 +23,7 @@ import type {
 import type { StudentProjection } from '@/lib/shared-kernel/sort-into-buckets';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { submitPassed } from '@/features/student/exercises/lib/submit-passed';
 
 export interface SortIntoBucketsSolverProps {
   exerciseId: string;
@@ -203,7 +204,7 @@ export function SortIntoBucketsSolver({
           // on the first check alone.
           if (!reported.current) {
             reported.current = true;
-            onChecked?.(data.requiresReview ? null : data.correct);
+            onChecked?.(data.requiresReview ? null : submitPassed(data));
           }
         },
         onError: async (e) => {

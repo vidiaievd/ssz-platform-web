@@ -23,6 +23,7 @@ import {
 } from '@/features/student/exercises/runner';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
+import { submitPassed } from '@/features/student/exercises/lib/submit-passed';
 
 export interface MatchPairsSolverProps {
   exerciseId: string;
@@ -206,7 +207,7 @@ export function MatchPairsSolver({
           setSolved(data.correct);
           setReading(true);
           // Progress follows the first attempt; later ones are practice.
-          if (attempts === 0) onChecked?.(data.correct);
+          if (attempts === 0) onChecked?.(submitPassed(data));
           setAttempts((n) => n + 1);
         },
       },

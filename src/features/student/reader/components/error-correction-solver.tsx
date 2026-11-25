@@ -39,6 +39,7 @@ import {
   usePrecheckAvailability,
   usePrecheckRun,
 } from '@/features/student/precheck';
+import { submitPassed } from '@/features/student/exercises/lib/submit-passed';
 
 export interface ErrorCorrectionSolverProps {
   exerciseId: string;
@@ -281,7 +282,7 @@ export function ErrorCorrectionSolver({
           if (handedIn === 'ai') setAwaited(data.attemptId);
           // `null` on a routed answer: it has been done, and whether it was right is
           // the teacher's to say. The reader counts it as attempted either way.
-          if (submissions === 0) onChecked?.(data.requiresReview ? null : data.correct);
+          if (submissions === 0) onChecked?.(data.requiresReview ? null : submitPassed(data));
           setSubmissions((n) => n + 1);
         },
         onError: async () => {
