@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { lessonTimeProblem } from '@/lib/groups/operations';
+import { useLessonTimeMessage } from '@/lib/groups/use-lesson-time-message';
 import { toast } from 'sonner';
 import { CalendarClock, Check, Loader2, MoreHorizontal, X } from 'lucide-react';
 
@@ -62,6 +64,9 @@ export function SessionActions({
   const [newDate, setNewDate] = useState(date);
   const [newStart, setNewStart] = useState(start);
   const [newEnd, setNewEnd] = useState(end);
+  const timeMessage = useLessonTimeMessage();
+  const timeError = timeMessage(lessonTimeProblem(newStart, newEnd));
+  const invalidTime = !newStart || !newEnd || timeError !== null;
 
   function apply(changes: Parameters<typeof patchSession>[3], done: string) {
     startTransition(async () => {
@@ -150,9 +155,11 @@ export function SessionActions({
                   type="time"
                   value={newEnd}
                   onChange={(e) => setNewEnd(e.target.value)}
+                  aria-invalid={invalidTime}
                 />
               </div>
             </div>
+            {timeError && <p className="text-xs text-destructive">{timeError}</p>}
           </div>
 
           <DialogFooter>
@@ -166,7 +173,7 @@ export function SessionActions({
                   t('movedDone'),
                 )
               }
-              disabled={isPending || newEnd <= newStart}
+              disabled={isPending || invalidTime}
             >
               {isPending && <Loader2 className="mr-1.5 size-4 animate-spin" aria-hidden />}
               {t('moveSubmit')}

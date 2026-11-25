@@ -62,7 +62,6 @@
       "start": "З",
       "end": "До",
       "from": "Починаючи з",
-      "endBeforeStart": "Кінець має бути пізніше за початок.",
       "courseLabel": "Курс",
       "coursePick": "Обрати курс",
       "courseClear": "Прибрати курс",

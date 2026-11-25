@@ -152,5 +152,9 @@
       "shared": "Work from groups you mark together with a colleague counts for each of you.",
       "failed": "The marking queue could not be read, so there is no forecast."
     }
+  },
+  "lessonTime": {
+    "endBeforeStart": "The end must be after the start.",
+    "tooLong": "A lesson lasts at most {hours} hours."
   }
 }

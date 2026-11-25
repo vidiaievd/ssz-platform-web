@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { lessonTimeProblem } from '@/lib/groups/operations';
+import { useLessonTimeMessage } from '@/lib/groups/use-lesson-time-message';
 import { toast } from 'sonner';
 import { CalendarPlus, Loader2, X } from 'lucide-react';
 
@@ -53,7 +55,9 @@ export function ScheduleLessonsDialog({ workspaceId, userId, learnerName }: Prop
   const [pickingCourse, setPickingCourse] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const endsBeforeStart = end <= start;
+  const timeMessage = useLessonTimeMessage();
+  const timeError = timeMessage(lessonTimeProblem(start, end));
+  const endsBeforeStart = !start || !end || timeError !== null;
 
   function submit() {
     if (endsBeforeStart) return;
@@ -134,7 +138,7 @@ export function ScheduleLessonsDialog({ workspaceId, userId, learnerName }: Prop
               />
             </div>
           </div>
-          {endsBeforeStart && <p className="text-xs text-destructive">{t('endBeforeStart')}</p>}
+          {timeError && <p className="text-xs text-destructive">{timeError}</p>}
 
           <div className="space-y-1.5">
             <Label htmlFor="lesson-from">{t('from')}</Label>

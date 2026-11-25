@@ -152,5 +152,9 @@
       "shared": "Arbeid fra grupper du retter sammen med en kollega, telles hos hver av dere.",
       "failed": "Rettekøen kunne ikke leses, så det vises ingen prognose."
     }
+  },
+  "lessonTime": {
+    "endBeforeStart": "Slutt må være etter start.",
+    "tooLong": "En time varer høyst {hours} timer."
   }
 }

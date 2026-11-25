@@ -66,6 +66,24 @@ export function timeToMinutes(hhmm: string): number {
   return (h ?? 0) * 60 + (m ?? 0);
 }
 
+/** The longest lesson the timetable takes — mirrors scheduling-service's `MAX_LESSON_MINUTES`. */
+export const MAX_LESSON_MINUTES = 4 * 60;
+
+export type LessonTimeProblem = 'end-before-start' | 'too-long';
+
+/**
+ * Why a weekly slot or a session cannot have this time, or `null` when it can.
+ * The same rule the server applies (422 `END_TIME_NOT_AFTER_START` / `LESSON_TOO_LONG`).
+ * An unfilled field is no problem yet — the form is still being typed.
+ */
+export function lessonTimeProblem(start: HHMM, end: HHMM): LessonTimeProblem | null {
+  if (!start || !end) return null;
+  const length = timeToMinutes(end) - timeToMinutes(start);
+  if (length <= 0) return 'end-before-start';
+  if (length > MAX_LESSON_MINUTES) return 'too-long';
+  return null;
+}
+
 export function slotsOverlap(a: Slot, b: Slot): boolean {
   if (a.day !== b.day) return false;
   const aStart = timeToMinutes(a.start);

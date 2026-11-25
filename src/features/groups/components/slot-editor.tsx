@@ -6,7 +6,8 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { slotsOverlap } from '@/lib/groups/operations';
+import { lessonTimeProblem, slotsOverlap } from '@/lib/groups/operations';
+import { useLessonTimeMessage } from '@/lib/groups/use-lesson-time-message';
 import type { DraftSlot, Weekday } from '../stores/create-wizard-store';
 
 const WEEKDAYS: { value: Weekday; key: string }[] = [
@@ -47,6 +48,7 @@ function conflictSet(slots: DraftSlot[]): Set<string> {
 export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = false }: Props) {
   const t = useTranslations('Groups');
   const conflicts = conflictSet(slots);
+  const timeMessage = useLessonTimeMessage();
 
   return (
     <div className="flex flex-col gap-3">
@@ -58,9 +60,7 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
 
       {slots.map((slot, i) => {
         const hasConflict = conflicts.has(slot._id);
-        const [sh = 0, sm = 0] = slot.start.split(':').map(Number);
-        const [eh = 0, em = 0] = slot.end.split(':').map(Number);
-        const endBeforeStart = slot.start && slot.end && (eh * 60 + em) <= (sh * 60 + sm);
+        const timeError = timeMessage(lessonTimeProblem(slot.start, slot.end));
 
         return (
           <div
@@ -143,15 +143,16 @@ export function SlotEditor({ slots, mode, onAdd, onRemove, onUpdate, readOnly = 
                   value={slot.end}
                   disabled={readOnly}
                   onChange={(e) => onUpdate(slot._id, { end: e.target.value })}
+                  aria-invalid={timeError !== null}
                   className={cn(
                     'h-9 rounded-md border border-input bg-background px-3 text-sm',
-                    endBeforeStart ? 'border-error-400' : '',
+                    timeError ? 'border-error-400' : '',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                     'disabled:opacity-50',
                   )}
                 />
-                {endBeforeStart && (
-                  <p className="text-xs text-error-600">{t('slot.endBeforeStart')}</p>
+                {timeError && (
+                  <p className="text-xs text-error-600">{timeError}</p>
                 )}
               </div>
 

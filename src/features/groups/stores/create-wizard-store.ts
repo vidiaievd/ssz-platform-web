@@ -3,6 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+import { lessonTimeProblem } from '@/lib/groups/operations';
 import { todayISO } from '../lib/today-iso';
 import type { AgeBand } from '../types';
 
@@ -147,11 +148,7 @@ export const useGroupCreateWizardStore = create<WizardState & WizardActions>()(
           case 2: {
             if (s.slots.length === 0) return false;
             return s.slots.every((sl) => {
-              const [sh = 0, sm = 0] = sl.start.split(':').map(Number);
-              const [eh = 0, em = 0] = sl.end.split(':').map(Number);
-              const startMins = sh * 60 + sm;
-              const endMins = eh * 60 + em;
-              const timeOk = endMins > startMins;
+              const timeOk = Boolean(sl.start && sl.end) && lessonTimeProblem(sl.start, sl.end) === null;
               const roomOk = s.mode === 'online' || sl.room.trim().length > 0;
               return timeOk && roomOk;
             });
