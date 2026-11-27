@@ -33,7 +33,13 @@ import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { SchoolTaskLocked } from '@/features/school-lifecycle';
 import { recentSchoolRefusal } from '@/features/school-lifecycle/types';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  AiFirstPanel,
+  AiReviewPanel,
+  aiFirstFromAttempt,
+  aiFirstFromSubmit,
+  type AiFirstTarget,
+} from '@/features/student/ai-review';
 import {
   PrecheckButton,
   PrecheckResultPanel,
@@ -107,6 +113,8 @@ export function WritingTaskSolver({
    * this screen waits for, or nobody — the card under the read-only text says which.
    */
   const [handedIn, setHandedIn] = useState<HandedIn>('review');
+  /** The hand-in a model reads before the teacher (plan 80; OQ-110), shown under «sent». */
+  const [aiFirst, setAiFirst] = useState<AiFirstTarget | null>(null);
   const [attemptNo, setAttemptNo] = useState(1);
   const [saveState, setSaveState] = useState<DraftSaveState>('idle');
   /** The verdict the learner came back to, or the model's that this screen waited for. */
@@ -167,6 +175,7 @@ export function WritingTaskSolver({
               const reader = handedInFromStatus(last.status, last.schoolId);
               setPhase(reader === 'passed' ? 'graded' : 'sent');
               setHandedIn(reader);
+              setAiFirst(aiFirstFromAttempt(last));
               // Back within the seconds a model takes: wait for it here, as after a hand-in.
               if (reader === 'ai') setAwaited(last.id);
               return;
@@ -281,6 +290,7 @@ export function WritingTaskSolver({
           setPhase('sent');
           const reader = handedInFromSubmit(data);
           setHandedIn(reader);
+          setAiFirst(aiFirstFromSubmit(data));
           if (reader === 'ai') setAwaited(data.attemptId);
           setSaveState('idle');
           // Always `null`: a written text is never judged by the machine, and reporting
@@ -342,6 +352,7 @@ export function WritingTaskSolver({
     setValue({ text: '', ticked: [] });
     setPhase('draft');
     setHandedIn('review');
+    setAiFirst(null);
     setAwaited(null);
     setAttemptNo((n) => n + 1);
     setVerdict(null);
@@ -433,6 +444,16 @@ export function WritingTaskSolver({
                   : t('writingTask.deliveredWhen')}
               </p>
             )
+          )}
+          {handedIn === 'review' && aiFirst !== null && (
+            <div className="mt-3">
+              <AiFirstPanel
+                exerciseId={exerciseId}
+                attemptId={aiFirst.attemptId}
+                templateCode="writing_task"
+                initial={aiFirst.initial}
+              />
+            </div>
           )}
         </div>
       ) : (

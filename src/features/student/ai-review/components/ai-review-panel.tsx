@@ -49,6 +49,11 @@ export interface AiReviewPanelProps {
   promptLabel?: (itemId: string) => string;
   /** A `read_aloud` prompt's passage as the screen has it, to draw the check over. */
   passageOf?: (itemId: string) => string | null;
+  /**
+   * A school's provisional verdict (plan 80; OQ-110): the teacher's comes after it, so there
+   * is nothing to dispute yet — the engine takes a dispute on a final model verdict only.
+   */
+  provisional?: boolean;
 }
 
 /**
@@ -68,6 +73,7 @@ export function AiReviewPanel({
   showSummary = true,
   promptLabel,
   passageOf,
+  provisional = false,
 }: AiReviewPanelProps) {
   const t = useTranslations('Review.aiReview');
   const review = useAiReview(exerciseId, attemptId);
@@ -125,12 +131,14 @@ export function AiReviewPanel({
             <Marks t={t} marks={review.data.marks} />
           )}
 
-          <Dispute
-            exerciseId={exerciseId}
-            attemptId={attemptId}
-            disputedAt={review.data.disputedAt}
-            reading={reading}
-          />
+          {!provisional && (
+            <Dispute
+              exerciseId={exerciseId}
+              attemptId={attemptId}
+              disputedAt={review.data.disputedAt}
+              reading={reading}
+            />
+          )}
         </>
       )}
     </section>

@@ -8,7 +8,7 @@ import { Link } from '@/lib/i18n/navigation';
 
 import { useAgeWords } from '@/features/review/components/age-mark';
 import { hoursSince } from '@/features/review/lib/age-scale';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import { AiReviewPanel, ProvisionalVerdictCard } from '@/features/student/ai-review';
 import { cn } from '@/lib/utils';
 
 import { resubmitModeFor, runnerHref } from '../lib/resubmit-route';
@@ -164,6 +164,27 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
               <p className="mt-1.5 text-(--ssz-text-muted)">{t('due.note')}</p>
             </div>
           )}
+
+          {/*
+            A school that has a model read the work first (plan 80; OQ-110): its verdict, marked
+            as not counting yet, while the teacher's is awaited — or that it is still coming.
+          */}
+          {submission.status === 'pending' && !byAi && submission.provisional !== null && (
+            <ProvisionalVerdictCard
+              exerciseId={submission.exerciseId}
+              attemptId={submission.id}
+              templateCode={submission.exerciseType}
+              verdict={submission.provisional}
+            />
+          )}
+          {submission.status === 'pending' &&
+            !byAi &&
+            submission.provisional === null &&
+            submission.aiFirst && (
+              <p className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">
+                {t('pending.aiFirst')}
+              </p>
+            )}
 
           {/*
             A model's verdict is shown whole, under its label, with the learner's way to say

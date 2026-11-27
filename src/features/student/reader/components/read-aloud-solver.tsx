@@ -6,7 +6,13 @@ import { useTranslations } from 'next-intl';
 
 import { useExerciseForRunner } from '@/features/content/api/use-exercise';
 import { uploadRecording, type AssetResponse } from '@/features/media';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  AiFirstPanel,
+  AiReviewPanel,
+  aiFirstFromAttempt,
+  aiFirstFromSubmit,
+  type AiFirstTarget,
+} from '@/features/student/ai-review';
 import {
   AttemptRequestError,
   fetchDraft,
@@ -180,6 +186,8 @@ type Opening =
       recordings: SubmittedRecording[];
       unread: boolean;
       byAi: boolean;
+      /** A school's model listens before the teacher (plan 80; OQ-110). */
+      aiFirst?: AiFirstTarget | null;
     }
   | { stage: 'graded'; recordings: SubmittedRecording[]; verdict: AttemptRecord };
 
@@ -265,6 +273,7 @@ function ReadAloudRun({
               recordings: handedIn,
               unread: false,
               byAi: handedInFromStatus(mine.status, mine.schoolId) === 'ai',
+              aiFirst: aiFirstFromAttempt(mine),
             };
           } else if (Object.keys(draft.takes).length > 0) {
             opening = { stage: 'draft', draft };
@@ -453,6 +462,10 @@ function ReadAloudSession({
       ? opening.byAi
       : opening.stage === 'graded' && opening.verdict.reviewedBy === 'ai',
   );
+  /** The hand-in a model listens to before the teacher (plan 80; OQ-110). */
+  const [aiFirst, setAiFirst] = useState<AiFirstTarget | null>(
+    opening.stage === 'sent' ? (opening.aiFirst ?? null) : null,
+  );
   /** The attempt handed in: the one reopened, or this one once it is sent. */
   const [handedInId, setHandedInId] = useState(
     opening.stage === 'sent' ? opening.attemptId : attemptId,
@@ -605,6 +618,7 @@ function ReadAloudSession({
       setStage('sent');
       setUnread(handedIn === 'unread');
       setByAi(handedIn === 'ai');
+      setAiFirst(data === undefined ? null : aiFirstFromSubmit(data));
       setHandedInId(attemptId);
       // The takes the teacher will not hear go (DECISIONS §1); a failed delete costs nothing
       // but storage (§8 item 5).
@@ -711,6 +725,20 @@ function ReadAloudSession({
       sourceOf={sourceOf}
       submitted={submitted}
       graded={graded}
+      {...(aiFirst !== null && !byAi && !unread
+        ? {
+            aiFirst: (
+              <AiFirstPanel
+                exerciseId={exerciseId}
+                attemptId={aiFirst.attemptId}
+                templateCode={TEMPLATE_CODE}
+                initial={aiFirst.initial}
+                promptLabel={labelOf}
+                passageOf={(itemId) => projection.prompts.find((p) => p.id === itemId)?.text ?? null}
+              />
+            ),
+          }
+        : {})}
       onSubmit={send}
       onRetryUpload={retryUpload}
       {...(precheckOn && !precheck.closed

@@ -578,7 +578,8 @@
     },
     "pending": {
       "body": "Handed in {age} ago, waiting in your teacher's queue.",
-      "ai": "Handed in {age} ago. AI is reviewing your work — the review will appear here, usually in under a minute."
+      "ai": "Handed in {age} ago. AI is reviewing your work — the review will appear here, usually in under a minute.",
+      "aiFirst": "A language model reads it first; its preliminary assessment will appear here before your teacher’s."
     },
     "comment": {
       "label": "Comment · {teacher}",
@@ -669,6 +670,16 @@
     "commentsMissing": "{count, plural, one {# recording has no comment} other {# recordings have no comment}} — the verdict does not go out without one.",
     "commentsRequired": "Every recording needs a comment before the verdict can be sent.",
     "scoreIsPerPrompt": "Each recording is marked on its own: it passes when its points reach the threshold for one recording, and the submission is approved when every one passes. The total is computed from the levels."
+  },
+  "aiFirst": {
+    "reading": "A language model reads your work first, before your teacher. Its preliminary assessment will appear here in a minute; the final mark is your teacher’s.",
+    "slow": "The AI is taking longer than usual. Its preliminary assessment will appear in",
+    "settled": "The check is finished — the result is in",
+    "myWork": "My work",
+    "approved": "Preliminary AI assessment: accepted.",
+    "returned": "Preliminary AI assessment: needs work.",
+    "teacherDecides": "It doesn’t count yet — your teacher gives the final mark.",
+    "countsAt": "It doesn’t count yet — your teacher gives the final mark; if there’s no answer by {when}, this one counts."
   },
   "aiReview": {
     "label": "Checked by AI, not a teacher",

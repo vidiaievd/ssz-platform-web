@@ -36,7 +36,12 @@ import type {
 } from '@/lib/shared-kernel/short-answer';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  AiFirstPanel,
+  AiReviewPanel,
+  aiFirstFromSubmit,
+  type AiFirstTarget,
+} from '@/features/student/ai-review';
 import {
   PrecheckButton,
   PrecheckResultPanel,
@@ -136,6 +141,8 @@ export function ShortAnswerSolver({
   const [review, setReview] = useState<AttemptReview | null>(null);
   /** Who reads the set once it is in — a teacher, a model, nobody (plan 79, 2.1d and 2.3c2). */
   const [handedIn, setHandedIn] = useState<HandedIn>('review');
+  /** The hand-in a model reads before the teacher (plan 80; OQ-110), shown under «sent». */
+  const [aiFirst, setAiFirst] = useState<AiFirstTarget | null>(null);
   /** The handed-in attempt a model is reading, while this screen waits for its verdict. */
   const [awaited, setAwaited] = useState<string | null>(null);
 
@@ -285,6 +292,7 @@ export function ShortAnswerSolver({
         onSuccess: (data) => {
           const reader = handedInFromSubmit(data);
           setHandedIn(reader);
+          setAiFirst(aiFirstFromSubmit(data));
           if (reader === 'ai') setAwaited(openAttemptId);
           onChecked?.(data.requiresReview ? null : submitPassed(data));
         },
@@ -422,6 +430,7 @@ export function ShortAnswerSolver({
     setPhase('writing');
     setReview(null);
     setHandedIn('review');
+    setAiFirst(null);
     setAwaited(null);
     answers.current = [];
     begin();
@@ -460,6 +469,16 @@ export function ShortAnswerSolver({
           showProgressBar={!stacked}
           accent={PRACTICE_ACCENT}
         />
+      )}
+      {review === null && phase === 'done' && handedIn === 'review' && aiFirst !== null && (
+        <div className="mt-3">
+          <AiFirstPanel
+            exerciseId={exerciseId}
+            attemptId={aiFirst.attemptId}
+            templateCode="short_answer"
+            initial={aiFirst.initial}
+          />
+        </div>
       )}
       {precheckOn && question !== undefined && phase === 'writing' && review === null && (
         // Remounted per question, so a panel never outlives the text it was about.

@@ -36,7 +36,13 @@ import {
   type TranslateVerdicts,
 } from '@/features/student/exercises/runner';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  AiFirstPanel,
+  AiReviewPanel,
+  aiFirstFromAttempt,
+  aiFirstFromSubmit,
+  type AiFirstTarget,
+} from '@/features/student/ai-review';
 import {
   PrecheckButton,
   PrecheckResultPanel,
@@ -95,6 +101,8 @@ export function TranslateSolver({
   const [allWritten, setAllWritten] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
   const [sent, setSent] = useState<HandedIn | null>(null);
+  /** The hand-in a model reads before the teacher (plan 80; OQ-110), shown under «sent». */
+  const [aiFirst, setAiFirst] = useState<AiFirstTarget | null>(null);
   /** Per sentence, as the server decided it. Absent when a restored attempt kept none. */
   const [routing, setRouting] = useState<TranslateRouting | null>(null);
   /**
@@ -161,6 +169,7 @@ export function TranslateSolver({
           // and no sign they ever sent them.
           const handedIn = handedInFromStatus(saved.status, saved.schoolId);
           setSent(handedIn);
+          setAiFirst(aiFirstFromAttempt(saved));
           // Back within the seconds a model takes: wait for it here, as after a hand-in.
           if (handedIn === 'ai') setAwaited(saved.id);
           setRouting(readRouting(saved.validationDetails));
@@ -233,6 +242,7 @@ export function TranslateSolver({
           clearAnswerDraft(exerciseId);
           const handedIn = handedInFromSubmit(data);
           setSent(handedIn);
+          setAiFirst(aiFirstFromSubmit(data));
           if (handedIn === 'ai') setAwaited(data.attemptId);
           setRouting(readRouting(data.details));
           // `null` on a routed answer: it has been done, and whether it was right is the
@@ -310,6 +320,7 @@ export function TranslateSolver({
     setFeedback(null);
     setChecksLeft(null);
     setSent(null);
+    setAiFirst(null);
     setRouting(null);
     setReview(null);
     setAwaited(null);
@@ -524,6 +535,17 @@ export function TranslateSolver({
                     ? t('translate.withTeacherSplit', { approved, total: items.length })
                     : t('translate.withTeacherWhen')}
                 </p>
+              )}
+              {sent === 'review' && aiFirst !== null && (
+                <div className="mt-3">
+                  <AiFirstPanel
+                    exerciseId={exerciseId}
+                    attemptId={aiFirst.attemptId}
+                    // The panel names items by template only for reading, essays and questions.
+                    templateCode="translate_to_target"
+                    initial={aiFirst.initial}
+                  />
+                </div>
               )}
               {sent === 'unread' && (
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">

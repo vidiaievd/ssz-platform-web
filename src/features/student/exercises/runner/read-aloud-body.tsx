@@ -106,6 +106,11 @@ export interface ReadAloudBodyProps {
   submitted?: readonly SubmittedRecording[];
   /** The teacher's verdict, drawn under the handed-in takes in `graded`. */
   graded?: ReactNode;
+  /**
+   * `sent` to a school that has a model listen first (plan 80; OQ-110): its provisional
+   * verdict, or that it is coming — drawn under the «with the teacher» card.
+   */
+  aiFirst?: ReactNode;
   onSubmit: () => void;
   onRetryUpload: (itemId: string, n: number) => void;
   /** «Check» before the hand-in and what it answered (plan 84), drawn above the hand-in. */
@@ -164,6 +169,7 @@ export function ReadAloudBody({
   carried = [],
   submitted = [],
   graded,
+  aiFirst,
   onSubmit,
   precheck,
   onRetryUpload,
@@ -371,6 +377,7 @@ export function ReadAloudBody({
               )}
             </div>
           )}
+          {stage === 'sent' && aiFirst}
           {stage === 'graded' && graded}
         </>
       )}

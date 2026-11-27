@@ -32,7 +32,13 @@ import {
 import type { AttemptRecord } from '@/features/student/exercises/types/attempts';
 import { useExerciseAudio } from '@/features/student/exercises/audio';
 import { ErrorState, LearningSkeleton } from '@/features/learning';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import {
+  AiFirstPanel,
+  AiReviewPanel,
+  aiFirstFromAttempt,
+  aiFirstFromSubmit,
+  type AiFirstTarget,
+} from '@/features/student/ai-review';
 import {
   PrecheckButton,
   PrecheckResultPanel,
@@ -131,6 +137,8 @@ export function ErrorCorrectionSolver({
   const [allTouched, setAllTouched] = useState(false);
   /** How the submission ended: approved outright, or handed to a teacher. */
   const [sent, setSent] = useState<HandedIn | null>(null);
+  /** The hand-in a model reads before the teacher (plan 80; OQ-110), shown under «sent». */
+  const [aiFirst, setAiFirst] = useState<AiFirstTarget | null>(null);
   /**
    * The teacher's verdict, once one has read the submission. It is the only feedback this
    * template can give beyond "it matched the key", and it arrives with the attempt rather
@@ -195,6 +203,7 @@ export function ErrorCorrectionSolver({
           // no sign they ever sent them.
           const handedIn = handedInFromStatus(saved.status, saved.schoolId);
           setSent(handedIn);
+          setAiFirst(aiFirstFromAttempt(saved));
           // Back within the seconds a model takes: wait for it here, as after a hand-in.
           if (handedIn === 'ai') setAwaited(saved.id);
           // A string, not merely "not null": an attempt read back from an engine that
@@ -279,6 +288,7 @@ export function ErrorCorrectionSolver({
           if (data.audioTranscript !== undefined) setTranscript(data.audioTranscript);
           const handedIn = handedInFromSubmit(data);
           setSent(handedIn);
+          setAiFirst(aiFirstFromSubmit(data));
           if (handedIn === 'ai') setAwaited(data.attemptId);
           // `null` on a routed answer: it has been done, and whether it was right is
           // the teacher's to say. The reader counts it as attempted either way.
@@ -358,6 +368,7 @@ export function ErrorCorrectionSolver({
     setFeedback(null);
     setChecksLeft(null);
     setSent(null);
+    setAiFirst(null);
     setReview(null);
     setAwaited(null);
     setSubmissions(0);
@@ -551,6 +562,16 @@ export function ErrorCorrectionSolver({
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
                   {t('errorCorrection.withTeacherWhen')}
                 </p>
+              )}
+              {sent === 'review' && aiFirst !== null && (
+                <div className="mt-3">
+                  <AiFirstPanel
+                    exerciseId={exerciseId}
+                    attemptId={aiFirst.attemptId}
+                    templateCode={'error_correction'}
+                    initial={aiFirst.initial}
+                  />
+                </div>
               )}
               {sent === 'unread' && (
                 <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">

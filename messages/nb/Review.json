@@ -578,7 +578,8 @@
     },
     "pending": {
       "body": "Levert for {age} siden, ligger i køen til læreren.",
-      "ai": "Levert for {age} siden. KI går gjennom arbeidet ditt — tilbakemeldingen kommer her, vanligvis på under ett minutt."
+      "ai": "Levert for {age} siden. KI går gjennom arbeidet ditt — tilbakemeldingen kommer her, vanligvis på under ett minutt.",
+      "aiFirst": "En språkmodell leser det først; den foreløpige vurderingen kommer her før lærerens."
     },
     "comment": {
       "label": "Kommentar · {teacher}",
@@ -669,6 +670,16 @@
     "commentsMissing": "{count, plural, one {# opptak mangler kommentar} other {# opptak mangler kommentar}} — uten kommentar går vurderingen ikke ut.",
     "commentsRequired": "Hvert opptak trenger en kommentar før vurderingen kan sendes.",
     "scoreIsPerPrompt": "Hvert opptak vurderes for seg: det er bestått når poengene når grensen for ett opptak, og innleveringen godkjennes når alle er bestått. Summen regnes ut av systemet fra nivåene."
+  },
+  "aiFirst": {
+    "reading": "En språkmodell leser arbeidet ditt først, før læreren. Den foreløpige vurderingen kommer her om et minutt; den endelige karakteren gir læreren.",
+    "slow": "KI-en bruker lengre tid enn vanlig. Den foreløpige vurderingen kommer i",
+    "settled": "Sjekken er ferdig — resultatet finner du i",
+    "myWork": "Mitt arbeid",
+    "approved": "Foreløpig KI-vurdering: godkjent.",
+    "returned": "Foreløpig KI-vurdering: må jobbes mer med.",
+    "teacherDecides": "Den teller ikke ennå — læreren gir den endelige vurderingen.",
+    "countsAt": "Den teller ikke ennå — læreren gir den endelige vurderingen; kommer det ikke svar innen {when}, teller denne."
   },
   "aiReview": {
     "label": "Sjekket av KI, ikke av lærer",

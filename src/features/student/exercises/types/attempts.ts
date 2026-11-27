@@ -181,6 +181,11 @@ export interface SubmitAnswerResponse {
    * nobody keeps. Absent when nothing went to review, and from engines before the step.
    */
   reviewer?: 'teacher' | 'ai' | 'none';
+  /**
+   * With `reviewer: 'teacher'`: the school has a model answer first (plan 80), so its
+   * provisional verdict comes before the teacher's (OQ-110). Absent from older engines.
+   */
+  aiFirst?: boolean;
   feedback: { summary: string; hints?: string[]; correctAnswer?: unknown };
   /** Validator output. For gap-fill, a verdict and an explanation per gap. */
   details?: unknown;
@@ -806,6 +811,22 @@ export interface AttemptRecord {
    */
   rubricMarks?: Record<string, number> | null;
   rubricSnapshot?: RubricSnapshot | null;
+  /** The school has a model read this work before the teacher (plan 80; OQ-110). */
+  aiFirst?: boolean;
+  /** That model's verdict while the teacher's is awaited — it does not count yet. */
+  provisionalVerdict?: ProvisionalVerdict | null;
+}
+
+/**
+ * A model's verdict on a school's work that does not count yet (plan 80 §3): the learner
+ * reads it at once; the teacher's verdict replaces it, or it counts by itself at `countsAt`.
+ */
+export interface ProvisionalVerdict {
+  outcome: 'approved' | 'returned';
+  comment: string | null;
+  at: string;
+  /** When it counts if no teacher answers; null — it waits for the teacher. */
+  countsAt: string | null;
 }
 
 /** `submittedAnswer` when the template is `word_bank_gap_fill`. */
@@ -861,6 +882,8 @@ export interface DraftResponse {
  */
 export interface AttemptStatusResponse {
   status: AttemptStatus;
+  /** A model's provisional verdict is on the work (plan 80; OQ-110) — a yes/no, nothing of it. */
+  provisional?: boolean;
 }
 
 /**

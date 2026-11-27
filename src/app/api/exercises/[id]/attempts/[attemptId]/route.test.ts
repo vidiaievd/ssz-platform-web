@@ -18,7 +18,7 @@ const params = Promise.resolve({ id: 'ex-1', attemptId: 'att-1' });
 beforeEach(() => vi.mocked(serverFetch).mockReset());
 
 describe('GET /api/exercises/[id]/attempts/[attemptId]', () => {
-  it('returns only the status', async () => {
+  it('returns only the status and whether a provisional verdict is in', async () => {
     vi.mocked(serverFetch).mockResolvedValue({
       status: 'ROUTED_FOR_REVIEW',
       submittedAnswer: { text: 'the actual answer' },
@@ -28,12 +28,23 @@ describe('GET /api/exercises/[id]/attempts/[attemptId]', () => {
     const res = await GET(makeRequest(), { params });
 
     expect(res.status).toBe(200);
-    await expect(res.json()).resolves.toEqual({ status: 'ROUTED_FOR_REVIEW' });
+    await expect(res.json()).resolves.toEqual({ status: 'ROUTED_FOR_REVIEW', provisional: false });
     expect(serverFetch).toHaveBeenCalledWith({
       service: 'exercises',
       path: '/exercises/ex-1/attempts/att-1',
       method: 'GET',
     });
+  });
+
+  it('says a model’s provisional verdict is in, without any of it (OQ-110)', async () => {
+    vi.mocked(serverFetch).mockResolvedValue({
+      status: 'ROUTED_FOR_REVIEW',
+      provisionalVerdict: { outcome: 'returned', comment: 'Se på verbet.', at: 'x', countsAt: null },
+    });
+
+    const res = await GET(makeRequest(), { params });
+
+    await expect(res.json()).resolves.toEqual({ status: 'ROUTED_FOR_REVIEW', provisional: true });
   });
 
   it('never forwards the answer or the validator output, whatever the engine sends', async () => {

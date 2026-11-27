@@ -54,6 +54,8 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
     expectedResponseBy: inHours(40),
     decision: null,
     reader: 'teacher',
+    provisional: null,
+    aiFirst: false,
     canResubmit: false,
     ...overrides,
   };
