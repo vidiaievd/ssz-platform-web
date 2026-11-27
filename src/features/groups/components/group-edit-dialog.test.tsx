@@ -175,6 +175,38 @@ describe('GroupEditDialog', () => {
     );
   });
 
+  it('saves an emptied max as "no ceiling" (OQ-111)', async () => {
+    const { updateGroup } = await import('../api/mutations');
+    vi.mocked(updateGroup).mockResolvedValue({ ok: true });
+    renderDialog();
+
+    await userEvent.clear(screen.getByLabelText('Max students'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(updateGroup).toHaveBeenCalledWith('my-school', 'g1', expect.objectContaining({ capacityMax: null })),
+    );
+  });
+
+  it('keeps a group without a ceiling without one, never 999 (OQ-111)', async () => {
+    const { updateGroup } = await import('../api/mutations');
+    vi.mocked(updateGroup).mockResolvedValue({ ok: true });
+    renderDialog(vi.fn(), { ...baseGroup, capacity: { min: 0, max: null } });
+
+    expect(screen.getByLabelText('Max students')).toHaveValue(null);
+    await userEvent.clear(screen.getByLabelText('Name'));
+    await userEvent.type(screen.getByLabelText('Name'), 'Renamed');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(updateGroup).toHaveBeenCalledWith(
+        'my-school',
+        'g1',
+        expect.objectContaining({ name: 'Renamed', capacityMax: null }),
+      ),
+    );
+  });
+
   it('includes the selected courseId in the save payload', async () => {
     const { updateGroup } = await import('../api/mutations');
     vi.mocked(updateGroup).mockResolvedValue({ ok: true });

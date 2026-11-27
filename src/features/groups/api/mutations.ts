@@ -99,7 +99,7 @@ export async function createGroup(
 export async function updateGroup(
   schoolId: string,
   groupId: string,
-  data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; capacityMin: number; capacityMax: number; startDate: string | null; endDate: string | null; ageBand: string | null }>,
+  data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; capacityMin: number; capacityMax: number | null; startDate: string | null; endDate: string | null; ageBand: string | null }>,
 ): Promise<MutationResult> {
   try {
     const resolvedSchoolId = await requireSchoolId(schoolId);

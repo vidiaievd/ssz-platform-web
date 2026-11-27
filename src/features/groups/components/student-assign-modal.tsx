@@ -25,7 +25,7 @@ import type { StudentCandidate } from '../api/queries';
 type Props = {
   groupId: string;
   groupName: string;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
   currentCount: number;
   candidates: StudentCandidate[];
   schoolId: string;
@@ -65,7 +65,7 @@ export function StudentAssignModal({
   }, [candidates, query]);
 
   const projected = currentCount + selectedIds.size;
-  const overCap = projected > capacity.max;
+  const overCap = capacity.max !== null && projected > capacity.max;
   const underMin = projected < capacity.min && selectedIds.size > 0;
 
   function toggleStudent(userId: string) {
@@ -134,7 +134,7 @@ export function StudentAssignModal({
                 {t('addStudents.overCapWarning', {
                   count: selectedIds.size,
                   projected,
-                  max: capacity.max,
+                  max: capacity.max ?? 0,
                 })}
               </div>
             )}

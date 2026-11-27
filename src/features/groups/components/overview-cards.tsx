@@ -178,7 +178,9 @@ export function OverviewCards({
           <div className="flex items-center gap-4">
             <div className="text-[38px] font-bold leading-none tracking-[-0.03em] text-(--ssz-text-primary)">
               {group.studentCount}
-              <span className="text-sm font-medium text-(--ssz-text-muted)"> /{group.capacity.max}</span>
+              {group.capacity.max !== null && (
+                <span className="text-sm font-medium text-(--ssz-text-muted)"> /{group.capacity.max}</span>
+              )}
             </div>
             <div className="flex-1">
               <CapacityMeter
@@ -188,7 +190,9 @@ export function OverviewCards({
                 hideLabel
               />
               <p className="mt-1.5 text-[11.5px] text-(--ssz-text-muted)">
-                {t('overview.minMaxSeats', { min: group.capacity.min, max: group.capacity.max })}
+                {group.capacity.max !== null
+                  ? t('overview.minMaxSeats', { min: group.capacity.min, max: group.capacity.max })
+                  : t('overview.minSeatsNoMax', { min: group.capacity.min })}
               </p>
             </div>
           </div>

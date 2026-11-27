@@ -87,6 +87,12 @@ describe('groupAlerts', () => {
     expect(alerts.some((a) => a.type === 'over')).toBe(true);
   });
 
+  it('emits no over-capacity alert for a group without a ceiling (OQ-111)', () => {
+    const group = makeGroup({ studentCount: 15, capacity: { min: 5, max: null } });
+    const alerts = groupAlerts(group, null, [group]);
+    expect(alerts.some((a) => a.type === 'over')).toBe(false);
+  });
+
   it('emits under-minimum warn when studentCount < min', () => {
     const group = makeGroup({ studentCount: 2, capacity: { min: 5, max: 12 } });
     const alerts = groupAlerts(group, null, [group]);
@@ -281,6 +287,12 @@ describe('projectedCapacity', () => {
   it('over when projected exceeds max', () => {
     expect(projectedCapacity(group, 5).over).toBe(true);
     expect(projectedCapacity(group, 5).withinCapacity).toBe(false);
+  });
+
+  it('never over without a ceiling (OQ-111)', () => {
+    const open: GroupForOps = { ...group, capacity: { min: 5, max: null } };
+    expect(projectedCapacity(open, 500).over).toBe(false);
+    expect(projectedCapacity(open, 500).withinCapacity).toBe(true);
   });
 
   it('under when projected is below min', () => {

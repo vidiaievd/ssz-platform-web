@@ -33,7 +33,7 @@ export type GroupForOps = {
   coPrimaryTeacherId: string | null;
   slots: Slot[];
   studentCount: number;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
 };
 
 export type TeacherForOps = {
@@ -151,7 +151,7 @@ export function groupAlerts(
     }
   }
 
-  if (group.studentCount > group.capacity.max) {
+  if (group.capacity.max !== null && group.studentCount > group.capacity.max) {
     alerts.push({ type: 'over', severity: 'warn', label: `${group.studentCount}/${group.capacity.max} — over capacity` });
   } else if (group.studentCount < group.capacity.min) {
     alerts.push({ type: 'under', severity: 'warn', label: `${group.studentCount}/${group.capacity.min} — under minimum` });
@@ -237,11 +237,13 @@ export function projectedCapacity(
   addCount: number,
 ): { projected: number; over: boolean; under: boolean; withinCapacity: boolean } {
   const projected = group.studentCount + addCount;
+  // A group without a ceiling is never over it.
+  const over = group.capacity.max !== null && projected > group.capacity.max;
   return {
     projected,
-    over: projected > group.capacity.max,
+    over,
     under: projected < group.capacity.min,
-    withinCapacity: projected >= group.capacity.min && projected <= group.capacity.max,
+    withinCapacity: projected >= group.capacity.min && !over,
   };
 }
 

@@ -87,6 +87,7 @@
     "add": "Додати",
     "scheduleSummary": "{hours} год/тиждень · {mode}",
     "minMaxSeats": "мін {min} · макс {max} місць",
+    "minSeatsNoMax": "мін {min} місць · без максимуму",
     "ready": "Готово до запуску",
     "notReady": "Не готово до запуску",
     "statusUnknown": "Статус невідомий — не вдалося перевірити конфлікти"

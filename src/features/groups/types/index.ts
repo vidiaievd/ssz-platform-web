@@ -38,7 +38,8 @@ export interface Group {
    * learner of theirs, and it is never shown as a group (plan 59, §5.1).
    */
   isDefault?: boolean;
-  capacity: { min: number; max: number };
+  /** `max` null = the group has no ceiling (organization's `capacityMax` unset). */
+  capacity: { min: number; max: number | null };
   studentCount: number;
   startDate: ISODate | null; endDate: ISODate | null;
   teachers: GroupTeacher[];
@@ -63,7 +64,7 @@ export interface GroupHealthRowVM {
   primaryTeacher: { name: string; avatarUrl?: string | null } | null;
   coPrimaryTeacher: { name: string } | null;
   scheduleSummary: string;
-  studentCount: number; capacity: { min: number; max: number };
+  studentCount: number; capacity: { min: number; max: number | null };
   alerts: Alert[];
   /** Everyone who teaches the group today, in any role (the dashboard narrows a teacher by it). */
   teacherIds?: string[];

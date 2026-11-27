@@ -10,7 +10,7 @@ import type { StudentCandidate } from './queries';
 type GroupCandidatesResult = {
   groupName: string;
   currentCount: number;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
   candidates: StudentCandidate[];
 };
 

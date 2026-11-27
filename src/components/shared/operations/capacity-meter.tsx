@@ -3,7 +3,8 @@ import { cn } from '@/lib/utils';
 type CapacityMeterProps = {
   count: number;
   min: number;
-  max: number;
+  /** null = the group has no ceiling: the count alone, no bar and never "over". */
+  max: number | null;
   /** Projected total after a pending add operation. */
   projected?: number;
   size?: 'sm' | 'md';
@@ -15,8 +16,8 @@ type CapacityMeterProps = {
 
 type Tone = 'success' | 'warning' | 'error';
 
-function deriveTone(count: number, min: number, max: number): Tone {
-  if (count > max) return 'error';
+function deriveTone(count: number, min: number, max: number | null): Tone {
+  if (max !== null && count > max) return 'error';
   if (count < min) return 'warning';
   return 'success';
 }
@@ -50,8 +51,8 @@ export function CapacityMeter({
 }: CapacityMeterProps) {
   const effectiveCount = projected ?? count;
   const tone = deriveTone(effectiveCount, min, max);
-  const fillPct = max > 0 ? Math.min((count / max) * 100, 100) : 0;
-  const projectedPct = projected !== undefined && max > 0
+  const fillPct = max !== null && max > 0 ? Math.min((count / max) * 100, 100) : 0;
+  const projectedPct = projected !== undefined && max !== null && max > 0
     ? Math.min((projected / max) * 100, 100)
     : null;
 
@@ -75,11 +76,12 @@ export function CapacityMeter({
               <>
                 <span>{count}</span>
                 <span className="opacity-60"> → {projected}</span>
-                <span className="text-(--ssz-text-muted)"> / {max}</span>
+                {max !== null && <span className="text-(--ssz-text-muted)"> / {max}</span>}
               </>
             ) : (
               <>
-                {count} <span className="text-(--ssz-text-muted)">/ {max}</span>
+                {count}
+                {max !== null && <span className="text-(--ssz-text-muted)"> / {max}</span>}
               </>
             )}
           </span>
@@ -96,44 +98,46 @@ export function CapacityMeter({
         </div>
       )}
 
-      {/* Bar */}
-      <div
-        role="progressbar"
-        aria-label={
-          projected !== undefined
-            ? `${count} of ${max} seats filled; ${projected} projected`
-            : `${count} of ${max} seats filled`
-        }
-        aria-valuenow={count}
-        aria-valuemin={0}
-        aria-valuemax={max}
-        className={cn('relative w-full rounded-full bg-border overflow-hidden', barHeight)}
-      >
-        {/* Projected segment (rendered first so it's behind the actual fill) */}
-        {projectedPct !== null && projectedPct > fillPct && (
-          <div
-            aria-hidden="true"
-            className={cn(
-              'absolute h-full rounded-full border border-dashed border-current opacity-60',
-              PROJECTED_COLOR[tone],
-            )}
-            style={{ width: `${projectedPct}%` }}
-          />
-        )}
-        {/* Actual fill */}
+      {/* Bar — only against a ceiling; without one a fill would read as "empty" */}
+      {max !== null && (
         <div
-          className={cn('h-full rounded-full transition-[width]', TRACK_COLOR[tone])}
-          style={{ width: `${fillPct}%` }}
-        />
-        {/* Minimum-seats tick — the threshold the tone below min crosses */}
-        {min > 0 && max > 0 && (
+          role="progressbar"
+          aria-label={
+            projected !== undefined
+              ? `${count} of ${max} seats filled; ${projected} projected`
+              : `${count} of ${max} seats filled`
+          }
+          aria-valuenow={count}
+          aria-valuemin={0}
+          aria-valuemax={max}
+          className={cn('relative w-full rounded-full bg-border overflow-hidden', barHeight)}
+        >
+          {/* Projected segment (rendered first so it's behind the actual fill) */}
+          {projectedPct !== null && projectedPct > fillPct && (
+            <div
+              aria-hidden="true"
+              className={cn(
+                'absolute h-full rounded-full border border-dashed border-current opacity-60',
+                PROJECTED_COLOR[tone],
+              )}
+              style={{ width: `${projectedPct}%` }}
+            />
+          )}
+          {/* Actual fill */}
           <div
-            aria-hidden="true"
-            className="absolute inset-y-0 w-0.5 bg-(--ssz-text-muted) opacity-70"
-            style={{ left: `${Math.min((min / max) * 100, 100)}%` }}
+            className={cn('h-full rounded-full transition-[width]', TRACK_COLOR[tone])}
+            style={{ width: `${fillPct}%` }}
           />
-        )}
-      </div>
+          {/* Minimum-seats tick — the threshold the tone below min crosses */}
+          {min > 0 && max > 0 && (
+            <div
+              aria-hidden="true"
+              className="absolute inset-y-0 w-0.5 bg-(--ssz-text-muted) opacity-70"
+              style={{ left: `${Math.min((min / max) * 100, 100)}%` }}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 }

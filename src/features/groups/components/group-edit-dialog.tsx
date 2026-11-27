@@ -99,7 +99,7 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
   const startDateValue = useWatch({ control, name: 'startDate' });
   const ageBandValue = useWatch({ control, name: 'ageBand' });
 
-  const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
+  const maxBelowEnrolled = capacityMax != null && capacityMax < group.studentCount;
 
   function addSlot() {
     setSlots((s) => [...s, { _id: crypto.randomUUID(), day: 'Mon', start: '09:00', end: '10:00', room: '' }]);
@@ -315,7 +315,10 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
                     id="cap-max"
                     type="number"
                     min={1}
-                    {...register('capacity.max', { valueAsNumber: true })}
+                    {...register('capacity.max', {
+                      // An emptied field is "no ceiling", not NaN.
+                      setValueAs: (v: unknown) => (v === '' || v === null || v === undefined ? null : Number(v)),
+                    })}
                     aria-describedby={errors.capacity?.max ? 'cap-max-error' : 'cap-max-note'}
                   />
                   {errors.capacity?.max ? (

@@ -38,7 +38,7 @@ type OrgGroup = {
   isDefault?: boolean;
   mode?: string;
   capacityMin?: number;
-  capacityMax?: number;
+  capacityMax?: number | null;
   studentCount?: number;
   startDate?: string | null;
   endDate?: string | null;
@@ -113,7 +113,7 @@ function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
     coPrimaryTeacherId: coPrimary?.userId ?? null,
     slots,
     studentCount: g.studentCount ?? 0,
-    capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
+    capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? null },
   };
 }
 
@@ -245,7 +245,7 @@ export async function getGroups(
       coPrimaryTeacher: coPrimaryInfo ? { name: coPrimaryInfo.name } : null,
       scheduleSummary: buildScheduleSummary(slots),
       studentCount: g.studentCount ?? 0,
-      capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
+      capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? null },
       alerts,
       teacherIds: [...new Set(live.map((t) => t.userId))],
       isDefault: g.isDefault ?? false,
@@ -358,7 +358,7 @@ export async function getGroup(
     status: mapGroupStatus(rawGroup.status),
     isDefault: rawGroup.isDefault ?? false,
     mode: mapGroupMode(rawGroup.mode),
-    capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
+    capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? null },
     studentCount: rawGroup.studentCount ?? 0,
     startDate: toDateOnly(rawGroup.startDate),
     endDate: toDateOnly(rawGroup.endDate),
@@ -779,7 +779,7 @@ export async function getStudentCandidates(
 ): Promise<{
   groupName: string;
   currentCount: number;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
   candidates: StudentCandidate[];
 }> {
   const [groupData, allMembers] = await Promise.all([
@@ -794,7 +794,7 @@ export async function getStudentCandidates(
   ]);
 
   if (!groupData || !allMembers) {
-    return { groupName: '', currentCount: 0, capacity: { min: 0, max: 999 }, candidates: [] };
+    return { groupName: '', currentCount: 0, capacity: { min: 0, max: null }, candidates: [] };
   }
 
   const rosterIds = new Set(groupData.roster.map((s) => s.userId));

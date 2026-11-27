@@ -75,7 +75,7 @@ describe('groupsHealthWidget', () => {
   });
 
   it('shows no ceiling for a group without capacity', () => {
-    const w = groupsHealthWidget({ groups: [group({ capacity: { min: 0, max: 999 } })] }, owner);
+    const w = groupsHealthWidget({ groups: [group({ capacity: { min: 0, max: null } })] }, owner);
     expect(w.status === 'ok' && w.data.groups[0]!.max).toBe(0);
   });
 

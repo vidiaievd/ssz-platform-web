@@ -14,8 +14,6 @@ import type { DashboardRole, GroupsHealthData, Kpi, TeacherWorkloadData, WidgetD
  * - Load comes from the teachers screen's composite (`buildCommandCenter`).
  */
 
-/** `getGroups` fills an unset capacity with 999; the card shows no ceiling for it. */
-const NO_CAPACITY = 999;
 
 export function groupsHealthWidget(
   result: { groups: GroupHealthRowVM[]; unavailable?: boolean },
@@ -42,7 +40,8 @@ export function groupsHealthWidget(
         level: g.level,
         primaryTeacherName: g.primaryTeacher?.name || null,
         studentCount: g.studentCount,
-        max: g.capacity.max >= NO_CAPACITY ? 0 : g.capacity.max,
+        // The dashboard card's `max` 0 = no ceiling.
+        max: g.capacity.max ?? 0,
         alerts: g.alerts,
       })),
     },

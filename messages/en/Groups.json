@@ -87,6 +87,7 @@
     "add": "Add",
     "scheduleSummary": "{hours}h / week · {mode}",
     "minMaxSeats": "min {min} · max {max} seats",
+    "minSeatsNoMax": "min {min} seats · no maximum",
     "ready": "Ready to run",
     "notReady": "Not ready to run",
     "statusUnknown": "Status unknown — couldn’t check conflicts"
