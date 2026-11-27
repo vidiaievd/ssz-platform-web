@@ -86,8 +86,8 @@
     "assign": "Assign",
     "add": "Add",
     "scheduleSummary": "{hours}h / week · {mode}",
-    "minMaxSeats": "min {min} · max {max} seats",
-    "minSeatsNoMax": "min {min} seats · no maximum",
+    "minMaxSeats": "min {min} · max {max, plural, one {# seat} other {# seats}}",
+    "minSeatsNoMax": "min {min, plural, one {# seat} other {# seats}} · no maximum",
     "ready": "Ready to run",
     "notReady": "Not ready to run",
     "statusUnknown": "Status unknown — couldn’t check conflicts"

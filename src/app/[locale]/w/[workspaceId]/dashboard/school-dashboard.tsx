@@ -199,10 +199,12 @@ export async function SchoolDashboard({ params }: Props) {
   const hybrid = schoolType === 'hybrid';
   // The work waiting for review: the owner's card and the teacher's read the same queue.
   const seesQueue = role === 'owner' || role === 'teacher';
+  // Students at risk are an admin card, and analytics answers a teacher 403 — not asked for them.
+  const seesAtRisk = role === 'owner' || role === 'admin';
   const [kpis, atRisk, courseHealth, activity, groupsHealthWidget, teacherWorkloadWidget, groupGaps, todaysSessions, groupFacts, waitingWork] =
     await Promise.all([
       fetchDashboardKpis(school.id),
-      fetchAtRisk(school.id, 3),
+      seesAtRisk ? fetchAtRisk(school.id, 3) : Promise.resolve({ status: 'unavailable' } as const),
       fetchCourseHealth(school.id),
       fetchActivity(school.id, 6),
       fetchGroupsHealth(school.id, { role, userId: user?.userId ?? null }),

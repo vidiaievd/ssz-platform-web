@@ -86,8 +86,8 @@
     "assign": "Назначить",
     "add": "Добавить",
     "scheduleSummary": "{hours} ч/нед · {mode}",
-    "minMaxSeats": "мин {min} · макс {max} мест",
-    "minSeatsNoMax": "мин {min} мест · без максимума",
+    "minMaxSeats": "мин {min} · макс {max, plural, one {# место} few {# места} many {# мест} other {# места}}",
+    "minSeatsNoMax": "мин {min, plural, one {# место} few {# места} many {# мест} other {# места}} · без максимума",
     "ready": "Готово к запуску",
     "notReady": "Не готово к запуску",
     "statusUnknown": "Статус неизвестен — не удалось проверить конфликты"

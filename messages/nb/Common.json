@@ -11,6 +11,13 @@
     },
     "groups": "{count, plural, one {# gruppe} other {# grupper}}",
     "hours": "{name}: {hours} av {max} avtalte timer",
-    "hoursOver": "{name}: {hours} av {max} avtalte timer, overbelastet"
+    "hoursOver": "{name}: {hours} av {max} avtalte timer, overbelastet",
+    "hoursOfMax": "{hours, number, ::.0}/{max} t",
+    "hoursUnit": "t",
+    "hoursValue": "{hours, number, ::.0} t",
+    "overBy": "+{hours, number, ::.0} t over grensen",
+    "clashes": "{count, plural, one {# kollisjon} other {# kollisjoner}}",
+    "loadContact": "{contact, number, ::.0} t undervisning av {cap} t",
+    "loadContactPrep": "{contact, number, ::.0} t undervisning + {prep, number, ::.0} t forberedelse av {cap} t"
   }
 }

@@ -7,6 +7,7 @@ import { CapacityMeter } from '@/components/shared/operations';
 import { GroupStatusPill } from './group-status-pill';
 import { GroupRowMenu } from './group-row-menu';
 import { AlertArea, LangTile, TeacherStack } from './group-health-row';
+import { scheduleSummaryOf, WEEKDAY_SHORT_KEYS } from '../lib/schedule-summary';
 import type { GroupHealthRowVM } from '../types';
 
 type Props = {
@@ -66,7 +67,7 @@ export async function GroupCard({ group, href, schoolId, workspaceId }: Props) {
         />
         <div className="flex flex-col items-end gap-0.5">
           <span className="text-xs text-(--ssz-text-secondary) whitespace-nowrap">
-            {group.scheduleSummary}
+            {scheduleSummaryOf(group.slots, (day) => t(WEEKDAY_SHORT_KEYS[day]))}
           </span>
           <span className="inline-flex items-center gap-0.5 text-[10px] text-(--ssz-text-muted)">
             {group.mode === 'online' ? <Monitor className="size-3" aria-hidden="true" /> : null}

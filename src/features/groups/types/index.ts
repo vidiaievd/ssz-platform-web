@@ -63,7 +63,8 @@ export interface GroupHealthRowVM {
   status: GroupStatus; mode: GroupMode;
   primaryTeacher: { name: string; avatarUrl?: string | null } | null;
   coPrimaryTeacher: { name: string } | null;
-  scheduleSummary: string;
+  /** Weekly slots; screens word them with `scheduleSummaryOf` in the reader's language. */
+  slots: Slot[];
   studentCount: number; capacity: { min: number; max: number | null };
   alerts: Alert[];
   /** Everyone who teaches the group today, in any role (the dashboard narrows a teacher by it). */

@@ -11,6 +11,13 @@
     },
     "groups": "{count, plural, one {# группа} few {# группы} many {# групп} other {# группы}}",
     "hours": "{name}: {hours} из {max} часов по договору",
-    "hoursOver": "{name}: {hours} из {max} часов по договору, перегрузка"
+    "hoursOver": "{name}: {hours} из {max} часов по договору, перегрузка",
+    "hoursOfMax": "{hours, number, ::.0}/{max} ч",
+    "hoursUnit": "ч",
+    "hoursValue": "{hours, number, ::.0} ч",
+    "overBy": "+{hours, number, ::.0} ч сверх лимита",
+    "clashes": "{count, plural, one {# накладка} few {# накладки} many {# накладок} other {# накладки}}",
+    "loadContact": "{contact, number, ::.0} ч занятий из {cap} ч",
+    "loadContactPrep": "{contact, number, ::.0} ч занятий + {prep, number, ::.0} ч подготовки из {cap} ч"
   }
 }

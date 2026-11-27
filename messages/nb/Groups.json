@@ -86,8 +86,8 @@
     "assign": "Tildel",
     "add": "Legg til",
     "scheduleSummary": "{hours}t / uke · {mode}",
-    "minMaxSeats": "min {min} · maks {max} plasser",
-    "minSeatsNoMax": "min {min} plasser · ingen øvre grense",
+    "minMaxSeats": "min {min} · maks {max, plural, one {# plass} other {# plasser}}",
+    "minSeatsNoMax": "min {min, plural, one {# plass} other {# plasser}} · ingen øvre grense",
     "ready": "Klar til å kjøre",
     "notReady": "Ikke klar til å kjøre",
     "statusUnknown": "Status ukjent — kunne ikke sjekke konflikter"

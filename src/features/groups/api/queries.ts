@@ -117,20 +117,6 @@ function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
   };
 }
 
-function buildScheduleSummary(slots: Slot[]): string {
-  if (!slots.length) return '—';
-  const sorted = [...slots].sort((a, b) => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.indexOf(a.day) - days.indexOf(b.day);
-  });
-  const days = [...new Set(sorted.map((s) => s.day))].join('/');
-  const first = sorted[0];
-  // The end time matters as much as the start for "can I be somewhere else
-  // after this": a bare start hides whether two groups' slots actually clash.
-  const time = first ? `${first.start}–${first.end}` : '';
-  return `${days} ${time}`.trim();
-}
-
 // Not organization-only despite the call sites historically being org-service —
 // resolveCourseNames() below reuses it against content-service too.
 async function safeFetch<T>(fn: () => Promise<T>): Promise<T | null> {
@@ -243,7 +229,7 @@ export async function getGroups(
         ? { name: primaryInfo.name, avatarUrl: primaryInfo.avatarUrl }
         : null,
       coPrimaryTeacher: coPrimaryInfo ? { name: coPrimaryInfo.name } : null,
-      scheduleSummary: buildScheduleSummary(slots),
+      slots,
       studentCount: g.studentCount ?? 0,
       capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? null },
       alerts,

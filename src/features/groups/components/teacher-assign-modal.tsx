@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/dialog';
 import { assignTeacher } from '../api/mutations';
 import { useCloseGroupModal } from '../lib/use-close-group-modal';
+import { scheduleSummaryOf, WEEKDAY_SHORT_KEYS } from '../lib/schedule-summary';
 import type { TeacherAssignCandidate } from '../api/queries';
 import type { TeacherRole, Slot } from '../types';
 
@@ -27,31 +28,6 @@ function slotWeeklyHours(slots: Slot[]): number {
     const [eh = 0, em = 0] = s.end.split(':').map(Number);
     return acc + (eh * 60 + em - sh * 60 - sm) / 60;
   }, 0);
-}
-
-const DAY_ORDER: Record<Slot['day'], number> = {
-  Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
-};
-
-/** "Mon/Fri 18:00–19:30" — mirrors buildScheduleSummary in api/queries.ts,
- *  which is server-only and can't be imported into this client component. */
-/** Short weekday names, per locale (`Mon` → `пн`). */
-const DAY_LABEL_KEYS = {
-  Mon: 'timetable.weekdayShort.mon',
-  Tue: 'timetable.weekdayShort.tue',
-  Wed: 'timetable.weekdayShort.wed',
-  Thu: 'timetable.weekdayShort.thu',
-  Fri: 'timetable.weekdayShort.fri',
-  Sat: 'timetable.weekdayShort.sat',
-  Sun: 'timetable.weekdayShort.sun',
-} as const satisfies Record<Slot['day'], string>;
-
-function scheduleSummaryOf(slots: Slot[], dayLabel: (day: Slot['day']) => string): string {
-  if (slots.length === 0) return '—';
-  const sorted = [...slots].sort((a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day]);
-  const days = [...new Set(sorted.map((s) => s.day))].map(dayLabel).join('/');
-  const first = sorted[0];
-  return first ? `${days} ${first.start}–${first.end}` : days;
 }
 
 // ── Role picker ───────────────────────────────────────────────────────────────
@@ -413,7 +389,7 @@ export function TeacherAssignModal({
             <DialogDescription className="mt-0.75 text-[13px] text-(--ssz-text-muted)">
               {t('assignTeacher.description', {
                 groupName,
-                schedule: scheduleSummaryOf(groupSlots, (day) => t(DAY_LABEL_KEYS[day])),
+                schedule: scheduleSummaryOf(groupSlots, (day) => t(WEEKDAY_SHORT_KEYS[day])),
               })}
             </DialogDescription>
           </div>

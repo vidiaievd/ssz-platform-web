@@ -30,7 +30,7 @@ export function TeacherWorkloadBar({ teacher }: TeacherWorkloadBarProps) {
         <div className="flex items-center justify-between gap-2 mb-1">
           <span className="text-sm font-medium text-(--ssz-text-primary) truncate">{name}</span>
           <span className="shrink-0 text-xs text-(--ssz-text-muted) font-mono">
-            {hours.toFixed(1)}/{max}h
+            {t('hoursOfMax', { hours, max })}
           </span>
         </div>
 
@@ -41,7 +41,7 @@ export function TeacherWorkloadBar({ teacher }: TeacherWorkloadBarProps) {
 
         <div
           role="progressbar"
-          aria-label={t(overloaded ? 'hoursOver' : 'hours', { name, hours: hours.toFixed(1), max })}
+          aria-label={t(overloaded ? 'hoursOver' : 'hours', { name, hours, max })}
           aria-valuenow={pct}
           aria-valuemin={0}
           aria-valuemax={100}
@@ -57,12 +57,12 @@ export function TeacherWorkloadBar({ teacher }: TeacherWorkloadBarProps) {
       <div className="flex shrink-0 flex-col items-end gap-1">
         {overloaded && (
           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold bg-error-100 text-error-700 dark:bg-error-900/40 dark:text-error-400">
-            +{(hours - max).toFixed(1)}h over
+            {t('overBy', { hours: hours - max })}
           </span>
         )}
         {conflicts > 0 && (
           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold bg-error-100 text-error-700 dark:bg-error-900/40 dark:text-error-400">
-            {conflicts} clash
+            {t('clashes', { count: conflicts })}
           </span>
         )}
       </div>

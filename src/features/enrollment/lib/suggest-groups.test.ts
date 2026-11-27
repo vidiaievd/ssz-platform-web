@@ -133,4 +133,14 @@ describe('suggestGroups', () => {
     expect(full!.hasCapacity).toBe(false);
     expect(open!.hasCapacity).toBe(true);
   });
+
+  it('treats a group without a ceiling as having seats and ranks it above a full one (OQ-111)', () => {
+    const groups = [
+      makeGroup({ id: 'full', level: 'B1', capacity: { min: 2, max: 5 }, studentCount: 5 }),
+      makeGroup({ id: 'unbounded', level: 'B1', capacity: { min: 0, max: null }, studentCount: 40 }),
+    ];
+    const result = suggestGroups(makeMembership(), groups);
+    expect(result.map((r) => r.group.id)).toEqual(['unbounded', 'full']);
+    expect(result[0]?.hasCapacity).toBe(true);
+  });
 });

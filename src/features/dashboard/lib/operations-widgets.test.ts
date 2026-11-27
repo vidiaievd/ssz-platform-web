@@ -15,7 +15,7 @@ const group = (over: Partial<GroupHealthRowVM> = {}): GroupHealthRowVM => ({
   mode: 'online',
   primaryTeacher: { name: 'Kari' },
   coPrimaryTeacher: null,
-  scheduleSummary: '',
+  slots: [],
   studentCount: 8,
   capacity: { min: 0, max: 12 },
   alerts: [],

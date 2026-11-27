@@ -26,6 +26,7 @@ type TeacherLoadTableProps = {
 
 export function TeacherLoadTable({ teachers, onRemove }: TeacherLoadTableProps) {
   const t = useTranslations("Teachers.commandCenter.table");
+  const tOps = useTranslations("Common.operations");
   const tRoster = useTranslations("Teachers.roster.removeGuard");
   const router = useRouter();
   const params = useParams<{ locale: string; workspaceId: string }>();
@@ -86,7 +87,7 @@ export function TeacherLoadTable({ teachers, onRemove }: TeacherLoadTableProps) 
                 <div>
                   <div className="font-medium text-(--ssz-text-primary)">{teacher.name}</div>
                   <div className="text-xs text-(--ssz-text-muted)">
-                    {teacher.contactHours.toFixed(1)}/{teacher.maxWeeklyContactHours}h
+                    {tOps("hoursOfMax", { hours: teacher.contactHours, max: teacher.maxWeeklyContactHours })}
                   </div>
                 </div>
               </div>
