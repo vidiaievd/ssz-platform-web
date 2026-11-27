@@ -15,6 +15,7 @@ export type KpiCardProps = {
   hint?: string;
   spark?: number[];
   sub?: string;
+  unit?: '%';
   locked?: boolean;
   loading?: boolean;
 };
@@ -39,6 +40,7 @@ export function KpiCard({
   hint,
   spark,
   sub,
+  unit,
   locked,
   loading,
 }: KpiCardProps) {
@@ -93,6 +95,7 @@ export function KpiCard({
             )}
           >
             {displayValue}
+            {unit && displayValue !== '—' ? unit : null}
           </span>
 
           {delta && trend && !locked && (

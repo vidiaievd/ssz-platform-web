@@ -65,6 +65,10 @@ export interface GroupHealthRowVM {
   scheduleSummary: string;
   studentCount: number; capacity: { min: number; max: number };
   alerts: Alert[];
+  /** Everyone who teaches the group today, in any role (the dashboard narrows a teacher by it). */
+  teacherIds?: string[];
+  /** A private tutor's hidden group (plan 59, §5.1) — never shown as a group. */
+  isDefault?: boolean;
 }
 
 export interface RosterStudent {

@@ -49,6 +49,8 @@ export interface TeacherLoad {
   groups: number;
   langs?: string[];
   conflicts: number;
+  /** Lessons in the weekly timetable (the teacher's own KPI). */
+  lessons?: number;
 }
 
 export interface TeacherWorkloadData {
@@ -82,6 +84,8 @@ export interface Kpi {
   hintValues?: Record<string, number>;
   spark?: number[];
   sub?: string;
+  /** Written after the value (load is a share of the weekly hours). */
+  unit?: '%';
   locked?: boolean;
 }
 

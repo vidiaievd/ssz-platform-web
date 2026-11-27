@@ -93,9 +93,19 @@ function mapTeacherRole(r?: string): GroupTeacher['role'] {
   return 'primary';
 }
 
+/**
+ * The assignments that make their teacher part of the group today. organization lists
+ * finished ones too (`teachers: true`), so a primary teacher who left still read as the
+ * group's lead and the group never showed «no primary».
+ */
+function liveTeachers(g: OrgGroup): NonNullable<OrgGroup['teachers']> {
+  return (g.teachers ?? []).filter((t) => teachesGroupToday({ to: t.toDate }));
+}
+
 function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
-  const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
-  const coPrimary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'co-primary');
+  const live = liveTeachers(g);
+  const primary = live.find((t) => mapTeacherRole(t.role) === 'primary');
+  const coPrimary = live.find((t) => mapTeacherRole(t.role) === 'co-primary');
   return {
     id: g.id,
     status: mapGroupStatus(g.status),
@@ -158,11 +168,13 @@ async function resolveCourseNames(courseIds: Array<string | null | undefined>): 
 export type GetGroupsResult = {
   groups: GroupHealthRowVM[];
   schedulingError: string | null;
+  /** organization could not be read — not the same as a school without groups. */
+  unavailable?: boolean;
 };
 
 /**
  * Groups list with ops-derived health view models.
- * Used by the groups list RSC page.
+ * Used by the groups list RSC page and the school dashboard's groups widget.
  */
 export async function getGroups(
   schoolId: string,
@@ -178,7 +190,7 @@ export async function getGroups(
     ),
     getSchoolTeachers(schoolId),
   ]);
-  if (!rawGroups) return { groups: [], schedulingError: null };
+  if (!rawGroups) return { groups: [], schedulingError: null, unavailable: true };
 
   // The groups endpoint only returns bare teacher associations (userId + role);
   // join against the school's enriched teacher roster for name/avatar/hours.
@@ -206,8 +218,9 @@ export async function getGroups(
   const groups = rawGroups.map((g) => {
     const slots = slotsMap[g.id] ?? [];
     const forOps = buildGroupForOps(g, slots);
-    const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
-    const coPrimary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'co-primary');
+    const live = liveTeachers(g);
+    const primary = live.find((t) => mapTeacherRole(t.role) === 'primary');
+    const coPrimary = live.find((t) => mapTeacherRole(t.role) === 'co-primary');
     const primaryInfo = primary ? teachersById.get(primary.userId) : undefined;
     const coPrimaryInfo = coPrimary ? teachersById.get(coPrimary.userId) : undefined;
     const maxHours = primaryInfo?.maxWeeklyHours ?? null;
@@ -234,6 +247,8 @@ export async function getGroups(
       studentCount: g.studentCount ?? 0,
       capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
       alerts,
+      teacherIds: [...new Set(live.map((t) => t.userId))],
+      isDefault: g.isDefault ?? false,
     };
   });
 
@@ -297,7 +312,7 @@ export async function getGroup(
   );
 
   const forOps = buildGroupForOps(rawGroup, slots);
-  const primary = rawGroup.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
+  const primary = liveTeachers(rawGroup).find((t) => mapTeacherRole(t.role) === 'primary');
   const maxHours = primary ? (teachersById.get(primary.userId)?.maxWeeklyHours ?? null) : null;
   const rawAlerts = groupAlerts(forOps, maxHours, allForOps);
   const alerts: Alert[] = rawAlerts.map((a) => ({

@@ -27,6 +27,7 @@ import {
 } from '@/lib/dashboard/queries';
 import { wsHref } from '@/features/workspaces/lib/href';
 import { buildTodaysClasses, utcDay } from '@/features/dashboard/lib/todays-classes';
+import { operationsKpis, withOperationsKpis } from '@/features/dashboard/lib/operations-widgets';
 
 import type {
   WidgetData,
@@ -34,19 +35,12 @@ import type {
   ActivityItem,
   CourseHealthRow,
   AtRiskStudent,
-  GroupsHealthData,
-  TeacherWorkloadData,
-  Alert,
-  AlertType,
-  AlertSeverity,
 } from '@/features/dashboard/types';
 import type {
   KpisPayload,
   AtRiskPayload,
   CourseHealthPayload,
   ActivityPayload,
-  GroupsHealthPayload,
-  TeacherLoadPayload,
   GroupGapsPayload,
   GroupGap,
   Unavailable,
@@ -175,52 +169,6 @@ function adaptAtRisk(result: WidgetResult<AtRiskPayload>): WidgetData<{ students
   return { status: 'ok', data: { students, total: payload.total } };
 }
 
-function adaptGroupsHealth(result: WidgetResult<GroupsHealthPayload>): WidgetData<GroupsHealthData> {
-  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
-    return { status: 'unavailable' };
-  }
-  const payload = result as GroupsHealthPayload;
-  if (!payload.groups || payload.groups.length === 0) return { status: 'empty' };
-  return {
-    status: 'ok',
-    data: {
-      activeCount: payload.activeCount,
-      attentionCount: payload.attentionCount,
-      groups: payload.groups.map((g) => ({
-        id: g.id,
-        name: g.name,
-        lang: g.lang,
-        level: g.level,
-        primaryTeacherName: g.primaryTeacherName,
-        studentCount: g.studentCount,
-        max: g.max,
-        alerts: g.alerts.map((a) => ({
-          type: a.type as AlertType,
-          severity: a.severity as AlertSeverity,
-          label: a.label,
-        } satisfies Alert)),
-      })),
-    },
-  };
-}
-
-function adaptTeacherWorkload(result: WidgetResult<TeacherLoadPayload>): WidgetData<TeacherWorkloadData> {
-  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
-    return { status: 'unavailable' };
-  }
-  const payload = result as TeacherLoadPayload;
-  if (!payload.teachers || payload.teachers.length === 0) return { status: 'empty' };
-  return {
-    status: 'ok',
-    data: {
-      overloadedCount: payload.overloadedCount,
-      avgLoadPct: payload.avgLoadPct,
-      conflictCount: payload.conflictCount,
-      teachers: payload.teachers,
-    },
-  };
-}
-
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
 };
@@ -251,13 +199,13 @@ export async function SchoolDashboard({ params }: Props) {
   const hybrid = schoolType === 'hybrid';
   // The work waiting for review: the owner's card and the teacher's read the same queue.
   const seesQueue = role === 'owner' || role === 'teacher';
-  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps, todaysSessions, groupFacts, waitingWork] =
+  const [kpis, atRisk, courseHealth, activity, groupsHealthWidget, teacherWorkloadWidget, groupGaps, todaysSessions, groupFacts, waitingWork] =
     await Promise.all([
       fetchDashboardKpis(school.id),
       fetchAtRisk(school.id, 3),
       fetchCourseHealth(school.id),
       fetchActivity(school.id, 6),
-      fetchGroupsHealth(school.id, role),
+      fetchGroupsHealth(school.id, { role, userId: user?.userId ?? null }),
       fetchTeacherLoad(school.id),
       fetchGroupGaps(school.id),
       hybrid
@@ -270,12 +218,14 @@ export async function SchoolDashboard({ params }: Props) {
     ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
-  const kpisWidget = adaptKpis(kpis);
+  // Groups and load are not analytics' facts: their tiles come from the two cards (OQ-108).
+  const kpisWidget = withOperationsKpis(
+    adaptKpis(kpis),
+    operationsKpis(groupsHealthWidget, teacherWorkloadWidget, { role, userId: user?.userId ?? null }),
+  );
   const activityWidget = adaptActivity(activity);
   const courseHealthWidget = adaptCourseHealth(courseHealth);
   const atRiskWidget = adaptAtRisk(atRisk);
-  const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
-  const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
   const groupGapsWidget = adaptGroupGaps(groupGaps);
   const waitingWorkWidget: WidgetData<WaitingWorkPayload> =
     'status' in waitingWork ? { status: 'unavailable' } : { status: 'ok', data: waitingWork };

@@ -73,7 +73,9 @@
       "summary": "{healthy} i orden · {attention} trenger oppmerksomhet",
       "resolve": "Løs det i Grupper →",
       "students": "{count}/{max} elever",
-      "teacherStudents": "{teacher} · {count}/{max} elever"
+      "teacherStudents": "{teacher} · {count}/{max} elever",
+      "studentsNoCap": "{count, plural, one {# elev} other {# elever}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# elev} other {# elever}}"
     },
     "workload": {
       "title": "Lærernes arbeidsmengde",

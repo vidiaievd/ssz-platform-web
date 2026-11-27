@@ -64,7 +64,7 @@ export type ActivityPayload = {
   nextCursor: string | null;
 };
 
-// ─── Groups health (API response shape) ───────────────────────────────────────
+// ─── Groups (organization reading; «today's classes» uses its facts) ──────────
 
 export type GroupAlert = {
   type: string;
@@ -85,34 +85,6 @@ export type GroupHealthItem = {
 
 /** A school group as «today's classes» reads it: name and head count (organization-service). */
 export type SchoolGroupFacts = Pick<GroupHealthItem, 'id' | 'name' | 'studentCount' | 'max'>;
-
-export type GroupsHealthPayload = {
-  activeCount: number;
-  groups: GroupHealthItem[];
-  attentionCount: number;
-};
-
-// ─── Teacher workload (API response shape) ─────────────────────────────────────
-
-export type TeacherLoadItem = {
-  id: string;
-  name: string;
-  avatarUrl?: string | null;
-  hours: number;
-  max: number;
-  pct: number;
-  overloaded: boolean;
-  groups: number;
-  langs?: string[];
-  conflicts: number;
-};
-
-export type TeacherLoadPayload = {
-  overloadedCount: number;
-  avgLoadPct: number;
-  conflictCount: number;
-  teachers: TeacherLoadItem[];
-};
 
 // ─── BFF composite response ────────────────────────────────────────────────────
 

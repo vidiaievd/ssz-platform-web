@@ -7,14 +7,16 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { env } from '@/lib/env';
 import { queueScopeFor, resolveOversightAccess, resolveReviewScope } from '@/features/review/lib/review-scope';
 import { engineQueueView } from '@/features/review/lib/term-window';
+import { getGroups } from '@/features/groups/api/queries';
+import { buildCommandCenter } from '@/lib/scheduling/command-center';
+import { groupsHealthWidget, teacherWorkloadWidget } from '@/features/dashboard/lib/operations-widgets';
+import type { DashboardRole, GroupsHealthData, TeacherWorkloadData, WidgetData } from '@/features/dashboard/types';
 import type {
   KpisPayload,
   AtRiskPayload,
   CourseHealthPayload,
   ActivityPayload,
-  GroupsHealthPayload,
   GroupGapsPayload,
-  TeacherLoadPayload,
   SchoolGroupFacts,
   SchoolSessionItem,
   Unavailable,
@@ -90,28 +92,28 @@ export async function fetchActivity(
   );
 }
 
+/**
+ * «Groups» card: the groups page's own reading (organization + scheduling), narrowed to the
+ * viewer — a teacher gets the groups they teach today (OQ-108).
+ */
 export async function fetchGroupsHealth(
   schoolId: string,
-  role: string,
-): Promise<WidgetResult<GroupsHealthPayload>> {
-  return safeWidgetFetch(() =>
-    serverFetch<GroupsHealthPayload>({
-      service: 'analytics',
-      path: `/analytics/schools/${schoolId}/dashboard/groups-health`,
-      query: { role },
-    }),
-  );
+  viewer: { role: DashboardRole; userId: string | null },
+): Promise<WidgetData<GroupsHealthData>> {
+  try {
+    return groupsHealthWidget(await getGroups(schoolId), viewer);
+  } catch {
+    return { status: 'unavailable' };
+  }
 }
 
-export async function fetchTeacherLoad(
-  schoolId: string,
-): Promise<WidgetResult<TeacherLoadPayload>> {
-  return safeWidgetFetch(() =>
-    serverFetch<TeacherLoadPayload>({
-      service: 'analytics',
-      path: `/analytics/schools/${schoolId}/dashboard/teacher-load`,
-    }),
-  );
+/** «Teacher workload» card: the teachers screen's composite (organization + scheduling, OQ-108). */
+export async function fetchTeacherLoad(schoolId: string): Promise<WidgetData<TeacherWorkloadData>> {
+  try {
+    return teacherWorkloadWidget(await buildCommandCenter(schoolId));
+  } catch {
+    return { status: 'unavailable' };
+  }
 }
 
 /**
@@ -143,8 +145,7 @@ type OrgGroupSummary = {
 
 /**
  * The school's groups as «today's classes» names them — from organization-service, the owner
- * of groups. (The analytics `dashboard/groups-health` aggregate the dashboard also asks for
- * does not exist yet, so the card cannot lean on it: its rows came out unnamed, "0 students".)
+ * of groups.
  * `max` 0 = no capacity set.
  */
 export async function fetchSchoolGroupFacts(

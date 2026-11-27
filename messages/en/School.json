@@ -73,7 +73,9 @@
       "summary": "{healthy} healthy · {attention} need attention",
       "resolve": "Resolve in Groups →",
       "students": "{count}/{max} students",
-      "teacherStudents": "{teacher} · {count}/{max} students"
+      "teacherStudents": "{teacher} · {count}/{max} students",
+      "studentsNoCap": "{count, plural, one {# student} other {# students}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# student} other {# students}}"
     },
     "workload": {
       "title": "Teacher workload",

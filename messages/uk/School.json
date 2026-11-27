@@ -73,7 +73,9 @@
       "summary": "гаразд {healthy} · потребують уваги {attention}",
       "resolve": "Розібратися в «Групах» →",
       "students": "{count}/{max} учнів",
-      "teacherStudents": "{teacher} · {count}/{max} учнів"
+      "teacherStudents": "{teacher} · {count}/{max} учнів",
+      "studentsNoCap": "{count, plural, one {# учень} few {# учні} many {# учнів} other {# учня}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# учень} few {# учні} many {# учнів} other {# учня}}"
     },
     "workload": {
       "title": "Навантаження викладачів",

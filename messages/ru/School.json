@@ -73,7 +73,9 @@
       "summary": "в порядке {healthy} · требуют внимания {attention}",
       "resolve": "Разобраться в «Группах» →",
       "students": "{count}/{max} учеников",
-      "teacherStudents": "{teacher} · {count}/{max} учеников"
+      "teacherStudents": "{teacher} · {count}/{max} учеников",
+      "studentsNoCap": "{count, plural, one {# ученик} few {# ученика} many {# учеников} other {# ученика}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# ученик} few {# ученика} many {# учеников} other {# ученика}}"
     },
     "workload": {
       "title": "Нагрузка преподавателей",

@@ -47,6 +47,7 @@ export async function buildCommandCenter(schoolId: string): Promise<CommandCente
       groupCount: tt?.groups ?? 0,
       conflictCount: tt?.conflicts ?? 0,
       maxWeeklyContactHours: t.maxWeeklyHours,
+      lessonsPerWeek: tt?.lessons?.length ?? 0,
     };
   });
 
