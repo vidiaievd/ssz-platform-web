@@ -90,7 +90,10 @@ export function AiReviewPanel({
           {t('label')}
         </p>
         <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
-          {reading ? t('caveatReading') : t('caveat')}
+          {/* A provisional verdict has no dispute: the teacher is the one who answers it. */}
+          {provisional
+            ? reading ? t('caveatReadingProvisional') : t('caveatProvisional')
+            : reading ? t('caveatReading') : t('caveat')}
         </p>
       </header>
 

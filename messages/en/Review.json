@@ -685,6 +685,8 @@
     "label": "Checked by AI, not a teacher",
     "caveat": "This review was written by a language model. It can be wrong — if something here is off, tell us.",
     "caveatReading": "A machine listened to the recording and compared it with the text. It can mishear — if something here is off, tell us.",
+    "caveatProvisional": "This review was written by a language model. It can be wrong — which is why your teacher gives the final grade.",
+    "caveatReadingProvisional": "A machine listened to the recording and compared it with the text. It can mishear — which is why your teacher gives the final grade.",
     "failed": "Couldn’t load the review.",
     "retry": "Try again",
     "noRemarks": "No remarks.",

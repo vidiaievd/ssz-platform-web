@@ -109,6 +109,13 @@ describe('AiReviewPanel (plan 79, 2.3c)', () => {
     expect(screen.queryByRole('button', { name: /close|dismiss/i })).not.toBeInTheDocument();
   });
 
+  it('does not ask to be told of a mistake on a provisional verdict, which the teacher answers (OQ-110)', async () => {
+    renderPanel('writing_task', { provisional: true });
+
+    expect(screen.getByText(/your teacher gives the final grade/)).toBeInTheDocument();
+    expect(screen.queryByText(/tell us/i)).not.toBeInTheDocument();
+  });
+
   it('keeps the label when the review cannot be loaded', async () => {
     fetchMock.mockImplementation(() => respond(502, { error: 'nope' }));
     renderPanel();

@@ -685,6 +685,8 @@
     "label": "Sjekket av KI, ikke av lærer",
     "caveat": "Denne tilbakemeldingen er skrevet av en språkmodell. Den kan ta feil — si fra hvis noe her ikke stemmer.",
     "caveatReading": "En maskin har lyttet til opptaket og sammenlignet det med teksten. Den kan høre feil – si fra hvis noe her ikke stemmer.",
+    "caveatProvisional": "Denne gjennomgangen er skrevet av en språkmodell. Den kan ta feil — derfor er det læreren som gir den endelige vurderingen.",
+    "caveatReadingProvisional": "Opptaket er lyttet til og sammenlignet med teksten av en maskin. Den kan høre feil — derfor er det læreren som gir den endelige vurderingen.",
     "failed": "Kunne ikke laste tilbakemeldingen.",
     "retry": "Prøv igjen",
     "noRemarks": "Ingen merknader.",
