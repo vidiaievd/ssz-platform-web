@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import {
-  Bot,
   Check,
   CircleAlert,
   Clock,
@@ -481,7 +480,10 @@ export function ShortAnswerBody({
 
   const verdict: Verdict | 'wait' = result?.verdict ?? 'wait';
   const tone = VERDICT_TONE[verdict];
-  const routingLine = s.aiStage ? t('shortAnswer.routingAi') : t('shortAnswer.routing');
+  // A question's result is the key's check alone. A model reads the work only after the
+  // whole set is handed in, and only where the school chose it (the hand-in says so,
+  // OQ-110) — so the line never claims the model has read this answer.
+  const routingLine = t('shortAnswer.routing');
 
   return (
     <>
@@ -608,25 +610,6 @@ export function ShortAnswerBody({
               at all in that case, rather than rows this component would have to hide. */}
           {result.hits.length > 0 && <Breakdown hits={result.hits} />}
 
-          {/* Plan 51 §3.6: the stage is a switch and a placeholder. Nothing is called,
-              and the card says so rather than implying a check that did not happen. */}
-          {s.aiStage && (
-            <div
-              className="flex gap-2 rounded-lg px-3 py-2.5 text-[12.5px] leading-snug"
-              style={{
-                background: 'var(--ssz-color-info-50)',
-                border: '1px solid var(--ssz-color-info-100)',
-                color: 'var(--ssz-color-info-700)',
-              }}
-            >
-              <Bot size={14} aria-hidden="true" className="mt-0.5 shrink-0" />
-              <span>
-                {s.aiGrammar ? t('shortAnswer.aiNoteGrammar') : t('shortAnswer.aiNote')}{' '}
-                <span className="font-semibold uppercase">{t('shortAnswer.aiSoon')}</span>
-              </span>
-            </div>
-          )}
-
           {result.why.trim() !== '' && (
             <p className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">{result.why}</p>
           )}
@@ -656,11 +639,7 @@ export function ShortAnswerBody({
                 color: 'var(--ssz-text-secondary)',
               }}
             >
-              {s.aiStage ? (
-                <Bot size={14} aria-hidden="true" className="shrink-0" />
-              ) : (
-                <Send size={14} aria-hidden="true" className="shrink-0" />
-              )}
+              <Send size={14} aria-hidden="true" className="shrink-0" />
               {s.teacherReview === 'flagged' && result.verdict === 'pass'
                 ? t('shortAnswer.routingIfUnclear', { line: routingLine })
                 : routingLine}
