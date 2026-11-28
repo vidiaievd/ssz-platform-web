@@ -572,13 +572,14 @@
     },
     "due": {
       "expected": "Svar ventes {when}",
+      "overdue": "Svarfristen gikk ut {when}",
       "unknown": "Ingen svarfrist er satt for dette kurset",
       "note": "Det er tiden skolen vanligvis bruker, ikke et løfte om svar i minuttet.",
       "ai": "KI går gjennom — vanligvis under ett minutt"
     },
     "pending": {
-      "body": "Levert for {age} siden, ligger i køen til læreren.",
-      "ai": "Levert for {age} siden. KI går gjennom arbeidet ditt — tilbakemeldingen kommer her, vanligvis på under ett minutt.",
+      "body": "Levert {when}, ligger i køen til læreren.",
+      "ai": "Levert {when}. KI går gjennom arbeidet ditt — tilbakemeldingen kommer her, vanligvis på under ett minutt.",
       "aiFirst": "En språkmodell leser det først; den foreløpige vurderingen kommer her før lærerens."
     },
     "comment": {

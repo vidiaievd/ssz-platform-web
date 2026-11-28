@@ -208,3 +208,29 @@ describe('MyRow — a model’s verdict (plan 79, 2.3c)', () => {
     expect(screen.getByText(/A language model reads it first/)).toBeInTheDocument();
   });
 });
+
+describe('MyRow — how long a pending work has waited, in the reader’s grammar', () => {
+  const HOUR = 3_600_000;
+  const pending = (overrides: Partial<MySubmission>) =>
+    submission({ status: 'pending', decision: null, canResubmit: false, ...overrides });
+
+  it('says a fresh hand-in was a minute ago, not «just now ago»', () => {
+    renderRow(pending({ submittedAt: new Date().toISOString() }));
+    expect(screen.getByText(/^Handed in 1 minute ago, waiting/)).toBeInTheDocument();
+  });
+
+  it('counts hours with the locale’s own relative time', () => {
+    renderRow(pending({ submittedAt: new Date(Date.now() - 3 * HOUR).toISOString() }));
+    expect(screen.getByText(/^Handed in 3 hours ago, waiting/)).toBeInTheDocument();
+  });
+
+  it('names a passed due date as passed, not as still expected', () => {
+    renderRow(pending({ expectedResponseBy: new Date(Date.now() - 15 * HOUR).toISOString() }));
+    expect(screen.getByText('The answer was due 15 hours ago')).toBeInTheDocument();
+  });
+
+  it('keeps a future due date as expected', () => {
+    renderRow(pending({ expectedResponseBy: new Date(Date.now() + 2 * 24 * HOUR).toISOString() }));
+    expect(screen.getByText('Answer expected in 2 days')).toBeInTheDocument();
+  });
+});

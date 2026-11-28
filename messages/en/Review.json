@@ -572,13 +572,14 @@
     },
     "due": {
       "expected": "Answer expected {when}",
+      "overdue": "The answer was due {when}",
       "unknown": "No response time set for this course",
       "note": "That is the usual time this school takes, not a promise for the minute.",
       "ai": "AI is reviewing — usually under a minute"
     },
     "pending": {
-      "body": "Handed in {age} ago, waiting in your teacher's queue.",
-      "ai": "Handed in {age} ago. AI is reviewing your work — the review will appear here, usually in under a minute.",
+      "body": "Handed in {when}, waiting in your teacher's queue.",
+      "ai": "Handed in {when}. AI is reviewing your work — the review will appear here, usually in under a minute.",
       "aiFirst": "A language model reads it first; its preliminary assessment will appear here before your teacher’s."
     },
     "comment": {
