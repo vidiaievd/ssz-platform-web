@@ -22,7 +22,7 @@ import type {
   SpanType,
   StudentEdits,
 } from './model';
-import { hardSpans, judge, words } from './engine';
+import { authoredItems, hardSpans, judge, words } from './engine';
 
 /** One item as the runner receives it. */
 export interface ProjectedItem {
@@ -72,8 +72,12 @@ export function toStudentProjection(
   task: { mode: Mode; note: string; items: Item[]; hints: Hints; check: Check; flow: Flow },
 ): StudentProjection {
   const { hints, check } = task;
+  // A row the author left empty is a scratch line of the editor, not a sentence: shown to
+  // the student it could never be worked through, and the hand-in waits for every row.
+  // Grading and the self-check already skip it.
+  const authored = authoredItems(task);
 
-  const items = task.items.map((item): ProjectedItem => {
+  const items = authored.map((item): ProjectedItem => {
     const spans = hardSpans(item, check);
     return {
       id: item.id,
@@ -98,7 +102,7 @@ export function toStudentProjection(
       showSpanCount: task.flow.showSpanCount,
     },
     ...(hints.count
-      ? { totalErrors: task.items.reduce((sum, item) => sum + hardSpans(item, check).length, 0) }
+      ? { totalErrors: authored.reduce((sum, item) => sum + hardSpans(item, check).length, 0) }
       : {}),
   };
 }
