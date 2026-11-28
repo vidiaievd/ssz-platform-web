@@ -401,6 +401,8 @@
       "submit": "Add",
       "submitting": "Adding…",
       "failed": "The reviewer could not be added.",
+      "alreadyInGroup": "This teacher already works in this group in another role.",
+      "coPrimaryTaken": "The group already has a co-teacher. Add the helper as a substitute.",
       "assigned": "Added — the group's queue is now theirs as well.",
       "helperTitle": "A helper for {name}",
       "helperFor": "A second teacher in {name}'s groups: the queue is shared, and work stops reaching the term with nobody reading it."
@@ -428,7 +430,8 @@
       "hint": "Receives a summary of what is stuck, not a letter per submission.",
       "school_admins": "School administrators",
       "owner": "Owner",
-      "primary_teacher": "The group's lead teacher"
+      "primary_teacher": "The group's lead teacher",
+      "primaryTeacherHint": "A summary, not a letter per submission. A group with no lead teacher goes to the school administrators."
     },
     "preview": "This is how the age scale reads at {n} h.",
     "save": "Save",
@@ -569,13 +572,15 @@
     },
     "due": {
       "expected": "Answer expected {when}",
+      "overdue": "The answer was due {when}",
       "unknown": "No response time set for this course",
       "note": "That is the usual time this school takes, not a promise for the minute.",
       "ai": "AI is reviewing — usually under a minute"
     },
     "pending": {
-      "body": "Handed in {age} ago, waiting in your teacher's queue.",
-      "ai": "Handed in {age} ago. AI is reviewing your work — the review will appear here, usually in under a minute."
+      "body": "Handed in {when}, waiting in your teacher's queue.",
+      "ai": "Handed in {when}. AI is reviewing your work — the review will appear here, usually in under a minute.",
+      "aiFirst": "A language model reads it first; its preliminary assessment will appear here before your teacher’s."
     },
     "comment": {
       "label": "Comment · {teacher}",
@@ -667,10 +672,22 @@
     "commentsRequired": "Every recording needs a comment before the verdict can be sent.",
     "scoreIsPerPrompt": "Each recording is marked on its own: it passes when its points reach the threshold for one recording, and the submission is approved when every one passes. The total is computed from the levels."
   },
+  "aiFirst": {
+    "reading": "A language model reads your work first, before your teacher. Its preliminary assessment will appear here in a minute; the final mark is your teacher’s.",
+    "slow": "The AI is taking longer than usual. Its preliminary assessment will appear in",
+    "settled": "The check is finished — the result is in",
+    "myWork": "My work",
+    "approved": "Preliminary AI assessment: accepted.",
+    "returned": "Preliminary AI assessment: needs work.",
+    "teacherDecides": "It doesn’t count yet — your teacher gives the final mark.",
+    "countsAt": "It doesn’t count yet — your teacher gives the final mark; if there’s no answer by {when}, this one counts."
+  },
   "aiReview": {
     "label": "Checked by AI, not a teacher",
     "caveat": "This review was written by a language model. It can be wrong — if something here is off, tell us.",
     "caveatReading": "A machine listened to the recording and compared it with the text. It can mishear — if something here is off, tell us.",
+    "caveatProvisional": "This review was written by a language model. It can be wrong — which is why your teacher gives the final grade.",
+    "caveatReadingProvisional": "A machine listened to the recording and compared it with the text. It can mishear — which is why your teacher gives the final grade.",
     "failed": "Couldn’t load the review.",
     "retry": "Try again",
     "noRemarks": "No remarks.",
@@ -732,7 +749,8 @@
         "prosody": "intonation {prosody}",
         "unclear": "Unclear:",
         "note": "A hint only — it does not change the result.",
-        "sounds": "Sounds to work on:"
+        "sounds": "Sounds to work on:",
+        "howTo": "How to say it"
       }
     }
   }

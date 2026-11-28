@@ -15,11 +15,12 @@ import type {
 } from '../types';
 
 /**
- * Cards pulled from the due queue in one go. The queue is capped upstream by
- * `limit`, so this is also the ceiling on `totalDue` — high enough that a real
- * learner never reaches it, low enough to bound the join below.
+ * Cards pulled from the due queue in one go — learning-service's own ceiling on
+ * `limit` (`@Max(100)`); asking for more is a 400, which used to leave both the
+ * Reviews and the Training screens empty. The true backlog comes from
+ * `/srs/stats/me`; due cards beyond this sample are counted, not attributed.
  */
-const DUE_CARD_LIMIT = 500;
+const DUE_CARD_LIMIT = 100;
 
 /** Page size when expanding a vocabulary list into its item ids. */
 const VOCAB_ITEM_LIMIT = 200;
@@ -49,6 +50,8 @@ const RawDueCard = z.object({
 const RawDueEnvelope = z.object({
   cards: z.array(RawDueCard).default([]),
 });
+
+const RawSrsStats = z.object({ dueNowCount: z.number().int().nonnegative() });
 
 const RawLeafItem = z.object({ type: z.string(), id: z.string() });
 const RawLeafItems = z.array(RawLeafItem);
@@ -246,7 +249,7 @@ function buildUpcoming(
 export async function getReviewsSummary(myUserId: string): Promise<ReviewsSummary> {
   const now = new Date();
 
-  const [rawDue, courseList] = await Promise.all([
+  const [rawDue, rawStats, courseList] = await Promise.all([
     safe(
       () =>
         serverFetch({
@@ -256,11 +259,14 @@ export async function getReviewsSummary(myUserId: string): Promise<ReviewsSummar
         }),
       null,
     ),
+    safe(() => serverFetch({ service: 'progress', path: '/srs/stats/me' }), null),
     safe(() => getMyCourses(myUserId), [] as StudentCourse[]),
   ]);
 
   const cards = RawDueEnvelope.safeParse(rawDue).data?.cards ?? [];
   if (!cards.length) return EMPTY;
+  // The sample is at most DUE_CARD_LIMIT cards; the rest of the backlog is known by count only.
+  const totalDue = Math.max(cards.length, RawSrsStats.safeParse(rawStats).data?.dueNowCount ?? 0);
 
   const byKind: Record<ReviewKind, number> = { exercise: 0, vocabulary_word: 0 };
   const kinds = new Set<ReviewKind>();
@@ -282,11 +288,12 @@ export async function getReviewsSummary(myUserId: string): Promise<ReviewsSummar
   }).length;
 
   return {
-    totalDue: cards.length,
+    totalDue,
     overdueCount,
     byKind,
     breakdown,
     upcoming: buildUpcoming(cards, index, courses, now),
-    unattributedDue,
+    // Rows still add up to `totalDue`: what lies beyond the sample has no course to show.
+    unattributedDue: unattributedDue + (totalDue - cards.length),
   };
 }

@@ -1,3 +1,5 @@
+import type { ProvisionalVerdict } from '@/features/student/exercises/types/attempts';
+
 /**
  * "Мои работы" — what a learner handed in and what came back (plan 47, screen E).
  *
@@ -66,6 +68,13 @@ export interface MySubmission {
    * model. Known before the verdict, so a waiting row does not promise a teacher's queue.
    */
   reader: 'teacher' | 'ai';
+  /**
+   * A school that has a model read the work first (plan 80; OQ-110): on a `pending` row, its
+   * verdict while the teacher's is awaited — it does not count yet. Null before it is in.
+   */
+  provisional: ProvisionalVerdict | null;
+  /** The model reads this pending work before the teacher (OQ-110). */
+  aiFirst: boolean;
   /** Whether "hand in again" would resume *this* row rather than a later one (47.1). */
   canResubmit: boolean;
 }

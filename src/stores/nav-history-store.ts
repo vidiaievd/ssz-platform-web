@@ -8,6 +8,14 @@ type NavHistoryState = {
    */
   returnPath: string | null;
   setReturnPath: (path: string | null) => void;
+  /**
+   * Locale-agnostic path of the page before the current one, reached by a client-side
+   * navigation in this document. `null` on a direct load or a reload — then there is no
+   * in-app history entry behind the current page and `router.back()` would leave the app.
+   * Kept in memory only (never persisted).
+   */
+  previousPath: string | null;
+  setPreviousPath: (path: string | null) => void;
 };
 
 /**
@@ -19,10 +27,13 @@ export const useNavHistoryStore = create<NavHistoryState>()(
     (set) => ({
       returnPath: null,
       setReturnPath: (returnPath) => set({ returnPath }),
+      previousPath: null,
+      setPreviousPath: (previousPath) => set({ previousPath }),
     }),
     {
       name: 'ssz-nav-history',
       storage: createJSONStorage(() => sessionStorage),
+      partialize: (state) => ({ returnPath: state.returnPath }),
     },
   ),
 );

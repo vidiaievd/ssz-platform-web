@@ -17,7 +17,8 @@ vi.mock('next/cache', () => ({
 const { serverFetch } = await import('@/lib/api/server-fetcher');
 const mockFetch = vi.mocked(serverFetch);
 
-const { createGroup, updateGroup, addGroupMaterial, removeGroupMaterial } = await import('./mutations');
+const { createGroup, updateGroup, addGroupMaterial, removeGroupMaterial, assignTeacher } = await import('./mutations');
+const { AppError } = await import('@/lib/errors/app-error');
 
 describe('createGroup', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -124,5 +125,58 @@ describe('removeGroupMaterial', () => {
       }),
     );
     expect(result).toEqual({ ok: true });
+  });
+});
+
+describe('assignTeacher', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("names organization's refusal of a second role in the group (OQ-17)", async () => {
+    mockFetch.mockRejectedValue(
+      new AppError('conflict', 'conflict', { error: 'already-in-group', existingRole: 'substitute' }),
+    );
+
+    await expect(
+      assignTeacher('school-1', 'g1', { userId: 't1', role: 'co-primary' }, true),
+    ).resolves.toEqual({ ok: false, blocked: 'already-in-group' });
+  });
+
+  it('sends override in the body, where organization reads it (П7-3)', async () => {
+    mockFetch.mockResolvedValue({ ok: true, warnings: [{ type: 'replaced-primary' }] });
+
+    await assignTeacher('school-1', 'g1', { userId: 't1', role: 'primary' }, true);
+
+    const call = mockFetch.mock.calls[0]![0];
+    expect(call.query).toBeUndefined();
+    expect(call.body).toMatchObject({ userId: 't1', role: 'primary', override: true });
+  });
+
+  it('leaves override out when nothing is replaced', async () => {
+    mockFetch.mockResolvedValue({ ok: true, warnings: [] });
+
+    await assignTeacher('school-1', 'g1', { userId: 't1', role: 'co-primary' });
+
+    expect(mockFetch.mock.calls[0]![0].body).not.toHaveProperty('override');
+  });
+
+  it.each(['primary-already-assigned', 'co_primary-already-assigned'])(
+    'names a taken role (%s) so the modal can offer to replace',
+    async (error) => {
+      mockFetch.mockRejectedValue(new AppError('conflict', 'conflict', { error, existingUserId: 'u0' }));
+
+      await expect(
+        assignTeacher('school-1', 'g1', { userId: 't1', role: 'primary' }),
+      ).resolves.toEqual({ ok: false, blocked: 'role-taken' });
+    },
+  );
+
+  it('keeps any other conflict anonymous', async () => {
+    mockFetch.mockRejectedValue(
+      new AppError('conflict', 'conflict', { error: 'language-mismatch' }),
+    );
+
+    await expect(
+      assignTeacher('school-1', 'g1', { userId: 't1', role: 'co-primary' }, true),
+    ).resolves.toEqual({ ok: false });
   });
 });

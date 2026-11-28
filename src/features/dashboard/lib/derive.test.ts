@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { computeOnboarding, deriveDataState, deriveSchoolType, deriveViewerRole } from './derive';
+import {
+  computeOnboarding,
+  deriveDataState,
+  deriveSchoolType,
+  deriveViewerRole,
+  schoolMembersCount,
+} from './derive';
 
 // ─── deriveSchoolType ─────────────────────────────────────────────────────────
 
@@ -196,5 +202,29 @@ describe('computeOnboarding', () => {
     });
     expect(result.minutesLeft).toBe(0);
     expect(result.completed).toBe(6);
+  });
+});
+
+// ─── schoolMembersCount ───────────────────────────────────────────────────────
+
+describe('schoolMembersCount', () => {
+  it('adds the owner, who is not on the roster', () => {
+    expect(
+      schoolMembersCount({ ownerId: 'o', members: [{ userId: 't1' }, { userId: 's1' }] }),
+    ).toBe(3);
+  });
+
+  it('is 1 for an owner alone — a new school stays "empty"', () => {
+    const count = schoolMembersCount({ ownerId: 'o', members: [] });
+    expect(count).toBe(1);
+    expect(deriveDataState({ membersCount: count, coursesCount: 0, hasActivity: false })).toBe('empty');
+  });
+
+  it('does not count an owner twice when the roster carries them', () => {
+    expect(schoolMembersCount({ ownerId: 'o', members: [{ userId: 'o' }, { userId: 's' }] })).toBe(2);
+  });
+
+  it('counts the roster only without an owner on record', () => {
+    expect(schoolMembersCount({ members: [{ userId: 'a' }] })).toBe(1);
   });
 });

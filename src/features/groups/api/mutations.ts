@@ -48,11 +48,17 @@ async function requireSchoolId(idOrSlug: string): Promise<string> {
 function mapError(e: unknown): MutationResult {
   if (e instanceof AppError && e.code === 'conflict') {
     const details = e.details as
-      | { conflicts?: FailResult['conflicts']; blocked?: FailResult['blocked'] }
+      | { conflicts?: FailResult['conflicts']; blocked?: FailResult['blocked']; error?: string }
       | undefined;
     const result: FailResult = { ok: false };
     if (details?.conflicts) result.conflicts = details.conflicts;
     if (details?.blocked) result.blocked = details.blocked;
+    // organization refuses a second role for someone already in the group (OQ-17).
+    if (details?.error === 'already-in-group') result.blocked = 'already-in-group';
+    // The group already has someone in this exclusive role; only `override` replaces them.
+    if (details?.error === 'primary-already-assigned' || details?.error === 'co_primary-already-assigned') {
+      result.blocked = 'role-taken';
+    }
     return result;
   }
   if (e instanceof AppError && e.code === 'validation') {
@@ -93,7 +99,7 @@ export async function createGroup(
 export async function updateGroup(
   schoolId: string,
   groupId: string,
-  data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; capacityMin: number; capacityMax: number; startDate: string | null; endDate: string | null; ageBand: string | null }>,
+  data: Partial<{ name: string; courseId: string | null; lang: string; level: string; mode: string; capacityMin: number; capacityMax: number | null; startDate: string | null; endDate: string | null; ageBand: string | null }>,
 ): Promise<MutationResult> {
   try {
     const resolvedSchoolId = await requireSchoolId(schoolId);
@@ -190,6 +196,7 @@ export async function assignTeacher(
   schoolId: string,
   groupId: string,
   data: { userId: string; role: 'primary' | 'co-primary' | 'substitute'; from?: string; to?: string; reason?: string },
+  /** Replace the group's current holder of this role (primary / co-primary). */
   override = false,
 ): Promise<MutationResult> {
   try {
@@ -198,13 +205,15 @@ export async function assignTeacher(
       service: 'organization',
       path: `/schools/${resolvedSchoolId}/groups/${groupId}/teachers`,
       method: 'POST',
-      query: override ? { override: true } : undefined,
+      // organization reads `override` from the body only. It means one thing there:
+      // replace the group's current primary / co-primary with this teacher.
       body: {
         userId: data.userId,
         role: data.role === 'co-primary' ? 'co_primary' : data.role,
         fromDate: data.from,
         toDate: data.to,
         reason: data.reason,
+        ...(override ? { override: true } : {}),
       },
     });
     invalidate(groupCacheTags.group(groupId));

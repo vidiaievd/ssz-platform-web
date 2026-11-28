@@ -29,13 +29,14 @@ export function GroupHealthRow({ group, workspaceId }: GroupHealthRowProps) {
           {group.name}
         </Link>
         <p className="text-xs text-(--ssz-text-muted) truncate">
-          {group.primaryTeacherName
-            ? t('teacherStudents', {
-                teacher: group.primaryTeacherName,
-                count: group.studentCount,
-                max: group.max,
-              })
-            : t('students', { count: group.studentCount, max: group.max })}
+          {/* max 0 = the group has no capacity set: a head count without a ceiling. */}
+          {group.max > 0
+            ? group.primaryTeacherName
+              ? t('teacherStudents', { teacher: group.primaryTeacherName, count: group.studentCount, max: group.max })
+              : t('students', { count: group.studentCount, max: group.max })
+            : group.primaryTeacherName
+              ? t('teacherStudentsNoCap', { teacher: group.primaryTeacherName, count: group.studentCount })
+              : t('studentsNoCap', { count: group.studentCount })}
         </p>
       </div>
 

@@ -89,6 +89,19 @@ export function AssignReviewerDialog({
     staleTime: 60_000,
   });
 
+  // Who already teaches each group, so the list for a group leaves them out (OQ-17). A
+  // failed read hides nobody: the server still refuses the second role.
+  const { data: staffByGroup, isPending: staffPending } = useQuery({
+    queryKey: ['review', 'group-staff', schoolId],
+    queryFn: async () => {
+      const response = await fetch(`/api/schools/${encodeURIComponent(schoolId)}/groups`);
+      if (!response.ok) throw new Error('Failed to load groups');
+      return staffOfGroups((await response.json()) as GroupWithTeachers[]);
+    },
+    enabled: target !== null,
+    staleTime: 60_000,
+  });
+
   const open = target !== null;
   const unassigned = target?.kind === 'submission' && target.unassigned;
 
@@ -129,7 +142,7 @@ export function AssignReviewerDialog({
               {t('banner.body')}
             </Note>
 
-            {isPending || choices === undefined ? (
+            {isPending || staffPending || choices === undefined ? (
               <Skeleton className="h-64 w-full rounded-lg" />
             ) : (
               <AssignTeacherForm
@@ -140,6 +153,7 @@ export function AssignReviewerDialog({
                 groups={groupChoices}
                 initialGroupId={target?.kind === 'submission' ? target.groupId : null}
                 teachers={choices}
+                staffByGroup={staffByGroup}
                 labels={{
                   group: t('group'),
                   teacher: t('teacher'),
@@ -155,6 +169,8 @@ export function AssignReviewerDialog({
                   submit: t('submit'),
                   submitting: t('submitting'),
                   failed: t('failed'),
+                  alreadyInGroup: t('alreadyInGroup'),
+                  coPrimaryTaken: t('coPrimaryTaken'),
                 }}
                 onCancel={onClose}
                 onAssigned={() => {
@@ -172,5 +188,31 @@ export function AssignReviewerDialog({
         )}
       </DialogContent>
     </Dialog>
+  );
+}
+
+/** The part of organization's group summary this dialog reads. */
+interface GroupWithTeachers {
+  id: string;
+  teachers?: { userId: string; toDate?: string | null }[];
+}
+
+/**
+ * Group id → who teaches it today, in any role. An assignment that ended before today no
+ * longer counts and one that starts later does — the same rule organization applies when
+ * it refuses a second role (dates are days, compared in UTC as the server does).
+ */
+export function staffOfGroups(
+  groups: GroupWithTeachers[],
+  now: Date = new Date(),
+): Record<string, string[]> {
+  const today = now.toISOString().slice(0, 10);
+  return Object.fromEntries(
+    groups.map((group) => [
+      group.id,
+      (group.teachers ?? [])
+        .filter((t) => t.toDate == null || t.toDate.slice(0, 10) >= today)
+        .map((t) => t.userId),
+    ]),
   );
 }

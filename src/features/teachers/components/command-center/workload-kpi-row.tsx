@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { KpiTile } from "@/components/shared/operations/kpi-tile";
 import type { WorkloadKpis } from "../../types";
@@ -11,6 +11,8 @@ type WorkloadKpiRowProps = {
 
 export function WorkloadKpiRow({ kpis }: WorkloadKpiRowProps) {
   const t = useTranslations("Teachers.commandCenter.kpis");
+  const tOps = useTranslations("Common.operations");
+  const format = useFormatter();
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -26,8 +28,8 @@ export function WorkloadKpiRow({ kpis }: WorkloadKpiRowProps) {
       />
       <KpiTile
         label={t("spareCapacity")}
-        value={kpis.spareCapacityHours.toFixed(1)}
-        unit="h"
+        value={format.number(kpis.spareCapacityHours, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+        unit={tOps("hoursUnit")}
         tone={kpis.spareCapacityHours <= 0 ? "danger" : "default"}
       />
       <KpiTile

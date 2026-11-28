@@ -1,3 +1,5 @@
+import { useTranslations } from 'next-intl';
+
 import { cn } from '@/lib/utils';
 
 type LoadBarProps = {
@@ -9,6 +11,7 @@ type LoadBarProps = {
 };
 
 export function LoadBar({ contact, cap, prep, label, className }: LoadBarProps) {
+  const t = useTranslations('Common.operations');
   const total = prep !== undefined ? contact + prep : contact;
   const contactPct = cap > 0 ? Math.min((contact / cap) * 100, 100) : 0;
   const prepPct = cap > 0 && prep !== undefined ? Math.min((prep / cap) * 100, 100 - contactPct) : 0;
@@ -16,8 +19,8 @@ export function LoadBar({ contact, cap, prep, label, className }: LoadBarProps) 
 
   const ariaLabel = label ??
     (prep !== undefined
-      ? `${contact.toFixed(1)}h contact + ${prep.toFixed(1)}h prep of ${cap}h cap`
-      : `${contact.toFixed(1)}h of ${cap}h cap`);
+      ? t('loadContactPrep', { contact, prep, cap })
+      : t('loadContact', { contact, cap }));
 
   return (
     <div

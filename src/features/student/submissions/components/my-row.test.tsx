@@ -48,6 +48,8 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
       comment: 'Se på perfektum.',
     },
     reader: 'teacher',
+    provisional: null,
+    aiFirst: false,
     canResubmit: true,
     ...overrides,
   };
@@ -174,5 +176,61 @@ describe('MyRow — a model’s verdict (plan 79, 2.3c)', () => {
     expect(screen.getByText('AI is reviewing — usually under a minute')).toBeInTheDocument();
     expect(screen.queryByText(/teacher.s queue/i)).not.toBeInTheDocument();
     expect(screen.queryByText('Checked by AI, not a teacher')).not.toBeInTheDocument();
+  });
+
+  it('shows a model’s provisional verdict on pending school work, with no dispute (OQ-110)', async () => {
+    renderRow(
+      submission({
+        status: 'pending',
+        decision: null,
+        canResubmit: false,
+        aiFirst: true,
+        provisional: {
+          outcome: 'returned',
+          comment: 'Se på verbet.',
+          at: new Date().toISOString(),
+          countsAt: null,
+        },
+      }),
+    );
+
+    expect(screen.getByText('Preliminary AI assessment: needs work.')).toBeInTheDocument();
+    expect(
+      screen.getByText('It doesn’t count yet — your teacher gives the final mark.'),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Se på verbet.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'This review is wrong' })).not.toBeInTheDocument();
+  });
+
+  it('says a model reads pending school work first, before its verdict is in (OQ-110)', () => {
+    renderRow(submission({ status: 'pending', decision: null, canResubmit: false, aiFirst: true }));
+
+    expect(screen.getByText(/A language model reads it first/)).toBeInTheDocument();
+  });
+});
+
+describe('MyRow — how long a pending work has waited, in the reader’s grammar', () => {
+  const HOUR = 3_600_000;
+  const pending = (overrides: Partial<MySubmission>) =>
+    submission({ status: 'pending', decision: null, canResubmit: false, ...overrides });
+
+  it('says a fresh hand-in was a minute ago, not «just now ago»', () => {
+    renderRow(pending({ submittedAt: new Date().toISOString() }));
+    expect(screen.getByText(/^Handed in 1 minute ago, waiting/)).toBeInTheDocument();
+  });
+
+  it('counts hours with the locale’s own relative time', () => {
+    renderRow(pending({ submittedAt: new Date(Date.now() - 3 * HOUR).toISOString() }));
+    expect(screen.getByText(/^Handed in 3 hours ago, waiting/)).toBeInTheDocument();
+  });
+
+  it('names a passed due date as passed, not as still expected', () => {
+    renderRow(pending({ expectedResponseBy: new Date(Date.now() - 15 * HOUR).toISOString() }));
+    expect(screen.getByText('The answer was due 15 hours ago')).toBeInTheDocument();
+  });
+
+  it('keeps a future due date as expected', () => {
+    renderRow(pending({ expectedResponseBy: new Date(Date.now() + 2 * 24 * HOUR).toISOString() }));
+    expect(screen.getByText('Answer expected in 2 days')).toBeInTheDocument();
   });
 });

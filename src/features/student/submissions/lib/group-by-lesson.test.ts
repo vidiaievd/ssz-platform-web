@@ -21,6 +21,8 @@ function submission(overrides: Partial<MySubmission> = {}): MySubmission {
     expectedResponseBy: null,
     decision: null,
     reader: 'teacher',
+    provisional: null,
+    aiFirst: false,
     canResubmit: false,
     ...overrides,
   };

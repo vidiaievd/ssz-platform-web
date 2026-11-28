@@ -31,6 +31,8 @@ const SUBMISSION: MySubmission = {
     comment: 'Se på perfektum.',
   },
   reader: 'teacher',
+  provisional: null,
+  aiFirst: false,
   canResubmit: true,
 };
 

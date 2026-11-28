@@ -10,6 +10,7 @@ import {
   fetchAtRisk,
   fetchCourseHealth,
   fetchActivity,
+  fetchSchoolGroupFacts,
 } from './queries';
 import type { KpisPayload, AtRiskPayload, CourseHealthPayload, ActivityPayload } from './types';
 
@@ -125,5 +126,29 @@ describe('fetchActivity', () => {
     );
     await fetchActivity(SCHOOL_ID, 10);
     expect(capturedLimit).toBe('10');
+  });
+});
+
+describe('fetchSchoolGroupFacts', () => {
+  const url = `http://organization.test/api/v1/schools/${SCHOOL_ID}/groups`;
+
+  it("maps organization's groups to name, head count and capacity", async () => {
+    server.use(
+      http.get(url, () =>
+        HttpResponse.json([
+          { id: 'g1', name: 'Kveld B1', studentCount: 7, capacityMax: 12, lang: 'nb' },
+          { id: 'g2', name: 'Uten tak', studentCount: null, capacityMax: null },
+        ]),
+      ),
+    );
+    expect(await fetchSchoolGroupFacts(SCHOOL_ID)).toEqual([
+      { id: 'g1', name: 'Kveld B1', studentCount: 7, max: 12 },
+      { id: 'g2', name: 'Uten tak', studentCount: 0, max: 0 },
+    ]);
+  });
+
+  it('is unavailable when organization fails', async () => {
+    server.use(http.get(url, () => HttpResponse.json({ message: 'down' }, { status: 503 })));
+    expect(await fetchSchoolGroupFacts(SCHOOL_ID)).toEqual({ status: 'unavailable' });
   });
 });

@@ -2,7 +2,7 @@
 
 import { useId, useState } from 'react';
 import { Sparkles } from 'lucide-react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useFormatter, useLocale, useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -49,6 +49,11 @@ export interface AiReviewPanelProps {
   promptLabel?: (itemId: string) => string;
   /** A `read_aloud` prompt's passage as the screen has it, to draw the check over. */
   passageOf?: (itemId: string) => string | null;
+  /**
+   * A school's provisional verdict (plan 80; OQ-110): the teacher's comes after it, so there
+   * is nothing to dispute yet — the engine takes a dispute on a final model verdict only.
+   */
+  provisional?: boolean;
 }
 
 /**
@@ -68,6 +73,7 @@ export function AiReviewPanel({
   showSummary = true,
   promptLabel,
   passageOf,
+  provisional = false,
 }: AiReviewPanelProps) {
   const t = useTranslations('Review.aiReview');
   const review = useAiReview(exerciseId, attemptId);
@@ -84,7 +90,10 @@ export function AiReviewPanel({
           {t('label')}
         </p>
         <p className="mt-1 text-[12.5px] text-(--ssz-text-secondary)">
-          {reading ? t('caveatReading') : t('caveat')}
+          {/* A provisional verdict has no dispute: the teacher is the one who answers it. */}
+          {provisional
+            ? reading ? t('caveatReadingProvisional') : t('caveatProvisional')
+            : reading ? t('caveatReading') : t('caveat')}
         </p>
       </header>
 
@@ -125,12 +134,14 @@ export function AiReviewPanel({
             <Marks t={t} marks={review.data.marks} />
           )}
 
-          <Dispute
-            exerciseId={exerciseId}
-            attemptId={attemptId}
-            disputedAt={review.data.disputedAt}
-            reading={reading}
-          />
+          {!provisional && (
+            <Dispute
+              exerciseId={exerciseId}
+              attemptId={attemptId}
+              disputedAt={review.data.disputedAt}
+              reading={reading}
+            />
+          )}
         </>
       )}
     </section>
@@ -217,6 +228,7 @@ function Sounds({
   prompt: AiReadingPrompt;
   remarks: AiReviewRemark[];
 }) {
+  const locale = useLocale();
   if (remarks.length === 0) return null;
   return (
     <div className="flex flex-col gap-1.5">
@@ -230,6 +242,19 @@ function Sounds({
             <SoundWord word={remark.fragment} transcription={transcriptionOf(prompt, remark)} />
           )}
           <p className="text-[13px] leading-relaxed text-(--ssz-text-primary)">{remark.comment}</p>
+          {/* The sound's card (OQ-10): how it is made, and a session to train it. A new tab,
+              so the result stays where it was. A plain <a> with the locale put in by hand:
+              every solver imports this panel, and the i18n router breaks their tests. */}
+          {remark.soundAtomId && (
+            <a
+              href={`/${locale}/student/pronunciation/sound/${encodeURIComponent(remark.soundAtomId)}`}
+              target="_blank"
+              rel="noopener"
+              className="self-start text-[12.5px] text-(--ssz-text-accent) underline"
+            >
+              {t('reading.pronunciation.howTo')}
+            </a>
+          )}
         </div>
       ))}
     </div>

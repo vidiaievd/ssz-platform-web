@@ -34,13 +34,14 @@ export const groupCreateSchema = z
     mode: z.enum(['online', 'in-person']),
     capacity: z.object({
       min: z.number().int().min(0),
-      max: z.number().int().min(1),
+      /** null = no ceiling (an emptied field in the edit dialog). */
+      max: z.number().int().min(1).nullable(),
     }),
     startDate: isodateSchema.nullable().optional(),
     endDate: isodateSchema.nullable().optional(),
     ageBand: z.enum(AGE_BANDS).nullable().optional(),
   })
-  .refine((d) => (d.capacity.min ?? 0) <= d.capacity.max, {
+  .refine((d) => d.capacity.max === null || (d.capacity.min ?? 0) <= d.capacity.max, {
     message: 'Minimum must be ≤ maximum',
     path: ['capacity', 'min'],
   });
@@ -77,7 +78,7 @@ export function groupEditSchema(
   messages: { maxBelowEnrolled: string; endBeforeStart: string },
 ) {
   return groupCreateSchema.superRefine((d, ctx) => {
-    if (d.capacity.max < studentCount) {
+    if (d.capacity.max !== null && d.capacity.max < studentCount) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: messages.maxBelowEnrolled,

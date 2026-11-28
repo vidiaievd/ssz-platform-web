@@ -20,6 +20,8 @@ import type {
   CourseOutlineView,
 } from '@/features/groups/types';
 import type { Alert } from '@/features/dashboard/types';
+import { teachesGroupToday } from '@/features/groups/lib/teaches-group-today';
+import { fitsGroupLanguage } from '@/features/groups/lib/language-fit';
 import type { CurriculumTree, ContainerPublishState } from '@/features/content/types';
 import type { AlertType, AlertSeverity } from '@/lib/groups/operations';
 
@@ -36,7 +38,7 @@ type OrgGroup = {
   isDefault?: boolean;
   mode?: string;
   capacityMin?: number;
-  capacityMax?: number;
+  capacityMax?: number | null;
   studentCount?: number;
   startDate?: string | null;
   endDate?: string | null;
@@ -91,9 +93,19 @@ function mapTeacherRole(r?: string): GroupTeacher['role'] {
   return 'primary';
 }
 
+/**
+ * The assignments that make their teacher part of the group today. organization lists
+ * finished ones too (`teachers: true`), so a primary teacher who left still read as the
+ * group's lead and the group never showed «no primary».
+ */
+function liveTeachers(g: OrgGroup): NonNullable<OrgGroup['teachers']> {
+  return (g.teachers ?? []).filter((t) => teachesGroupToday({ to: t.toDate }));
+}
+
 function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
-  const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
-  const coPrimary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'co-primary');
+  const live = liveTeachers(g);
+  const primary = live.find((t) => mapTeacherRole(t.role) === 'primary');
+  const coPrimary = live.find((t) => mapTeacherRole(t.role) === 'co-primary');
   return {
     id: g.id,
     status: mapGroupStatus(g.status),
@@ -101,22 +113,8 @@ function buildGroupForOps(g: OrgGroup, slots: Slot[]): GroupForOps {
     coPrimaryTeacherId: coPrimary?.userId ?? null,
     slots,
     studentCount: g.studentCount ?? 0,
-    capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
+    capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? null },
   };
-}
-
-function buildScheduleSummary(slots: Slot[]): string {
-  if (!slots.length) return '—';
-  const sorted = [...slots].sort((a, b) => {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days.indexOf(a.day) - days.indexOf(b.day);
-  });
-  const days = [...new Set(sorted.map((s) => s.day))].join('/');
-  const first = sorted[0];
-  // The end time matters as much as the start for "can I be somewhere else
-  // after this": a bare start hides whether two groups' slots actually clash.
-  const time = first ? `${first.start}–${first.end}` : '';
-  return `${days} ${time}`.trim();
 }
 
 // Not organization-only despite the call sites historically being org-service —
@@ -156,11 +154,13 @@ async function resolveCourseNames(courseIds: Array<string | null | undefined>): 
 export type GetGroupsResult = {
   groups: GroupHealthRowVM[];
   schedulingError: string | null;
+  /** organization could not be read — not the same as a school without groups. */
+  unavailable?: boolean;
 };
 
 /**
  * Groups list with ops-derived health view models.
- * Used by the groups list RSC page.
+ * Used by the groups list RSC page and the school dashboard's groups widget.
  */
 export async function getGroups(
   schoolId: string,
@@ -176,7 +176,7 @@ export async function getGroups(
     ),
     getSchoolTeachers(schoolId),
   ]);
-  if (!rawGroups) return { groups: [], schedulingError: null };
+  if (!rawGroups) return { groups: [], schedulingError: null, unavailable: true };
 
   // The groups endpoint only returns bare teacher associations (userId + role);
   // join against the school's enriched teacher roster for name/avatar/hours.
@@ -204,8 +204,9 @@ export async function getGroups(
   const groups = rawGroups.map((g) => {
     const slots = slotsMap[g.id] ?? [];
     const forOps = buildGroupForOps(g, slots);
-    const primary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
-    const coPrimary = g.teachers?.find((t) => mapTeacherRole(t.role) === 'co-primary');
+    const live = liveTeachers(g);
+    const primary = live.find((t) => mapTeacherRole(t.role) === 'primary');
+    const coPrimary = live.find((t) => mapTeacherRole(t.role) === 'co-primary');
     const primaryInfo = primary ? teachersById.get(primary.userId) : undefined;
     const coPrimaryInfo = coPrimary ? teachersById.get(coPrimary.userId) : undefined;
     const maxHours = primaryInfo?.maxWeeklyHours ?? null;
@@ -228,10 +229,12 @@ export async function getGroups(
         ? { name: primaryInfo.name, avatarUrl: primaryInfo.avatarUrl }
         : null,
       coPrimaryTeacher: coPrimaryInfo ? { name: coPrimaryInfo.name } : null,
-      scheduleSummary: buildScheduleSummary(slots),
+      slots,
       studentCount: g.studentCount ?? 0,
-      capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? 999 },
+      capacity: { min: g.capacityMin ?? 0, max: g.capacityMax ?? null },
       alerts,
+      teacherIds: [...new Set(live.map((t) => t.userId))],
+      isDefault: g.isDefault ?? false,
     };
   });
 
@@ -295,7 +298,7 @@ export async function getGroup(
   );
 
   const forOps = buildGroupForOps(rawGroup, slots);
-  const primary = rawGroup.teachers?.find((t) => mapTeacherRole(t.role) === 'primary');
+  const primary = liveTeachers(rawGroup).find((t) => mapTeacherRole(t.role) === 'primary');
   const maxHours = primary ? (teachersById.get(primary.userId)?.maxWeeklyHours ?? null) : null;
   const rawAlerts = groupAlerts(forOps, maxHours, allForOps);
   const alerts: Alert[] = rawAlerts.map((a) => ({
@@ -341,7 +344,7 @@ export async function getGroup(
     status: mapGroupStatus(rawGroup.status),
     isDefault: rawGroup.isDefault ?? false,
     mode: mapGroupMode(rawGroup.mode),
-    capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? 999 },
+    capacity: { min: rawGroup.capacityMin ?? 0, max: rawGroup.capacityMax ?? null },
     studentCount: rawGroup.studentCount ?? 0,
     startDate: toDateOnly(rawGroup.startDate),
     endDate: toDateOnly(rawGroup.endDate),
@@ -691,7 +694,11 @@ export async function getTeacherAssignCandidates(
     });
   const availabilityByTeacher = new Map(availability.map((a) => [a.teacherId, a]));
 
-  const existingIds = new Set(groupData.teachers.map((t) => t.userId));
+  // Whoever teaches the group today, in any role; an assignment that already ended
+  // (a finished substitution) no longer keeps its teacher out — the server accepts them.
+  const existingIds = new Set(
+    groupData.teachers.filter((t) => teachesGroupToday(t)).map((t) => t.userId),
+  );
 
   const candidates: TeacherAssignCandidate[] = teachers.map((t) => {
     const tt = timetable.find((x: TimetableTeacher) => x.userId === t.userId);
@@ -704,7 +711,7 @@ export async function getTeacherAssignCandidates(
       currentHours: tt?.hours ?? 0,
       currentGroups: tt?.groups ?? 0,
       currentConflicts: tt?.conflicts ?? 0,
-      langFit: t.langs.some((l) => l.toLowerCase() === groupData.lang.toLowerCase()),
+      langFit: fitsGroupLanguage(t.langs, groupData.lang),
       availabilityStatus: availabilityByTeacher.get(t.userId)?.status ?? 'free',
     };
   });
@@ -713,7 +720,7 @@ export async function getTeacherAssignCandidates(
     groupName: groupData.name,
     groupLang: groupData.lang,
     groupSlots: groupData.slots,
-    // Exclude teachers already assigned to the group
+    // Exclude teachers who already teach the group
     candidates: candidates.filter((c) => !existingIds.has(c.userId)),
   };
 }
@@ -758,7 +765,7 @@ export async function getStudentCandidates(
 ): Promise<{
   groupName: string;
   currentCount: number;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
   candidates: StudentCandidate[];
 }> {
   const [groupData, allMembers] = await Promise.all([
@@ -773,7 +780,7 @@ export async function getStudentCandidates(
   ]);
 
   if (!groupData || !allMembers) {
-    return { groupName: '', currentCount: 0, capacity: { min: 0, max: 999 }, candidates: [] };
+    return { groupName: '', currentCount: 0, capacity: { min: 0, max: null }, candidates: [] };
   }
 
   const rosterIds = new Set(groupData.roster.map((s) => s.userId));

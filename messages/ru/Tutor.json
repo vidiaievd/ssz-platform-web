@@ -62,7 +62,6 @@
       "start": "С",
       "end": "До",
       "from": "Начиная с",
-      "endBeforeStart": "Конец должен быть позже начала.",
       "courseLabel": "Курс",
       "coursePick": "Выбрать курс",
       "courseClear": "Убрать курс",

@@ -6,6 +6,7 @@ import { can } from './can';
 function rights(features: Entitlements['features']): Entitlements {
   return {
     account: { type: 'workspace', externalId: 'w1' },
+    subscription: null,
     features,
     validUntil: '2026-11-21T00:00:00.000Z',
     version: 2,

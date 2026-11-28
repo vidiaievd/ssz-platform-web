@@ -49,6 +49,8 @@ export interface TeacherLoad {
   groups: number;
   langs?: string[];
   conflicts: number;
+  /** Lessons in the weekly timetable (the teacher's own KPI). */
+  lessons?: number;
 }
 
 export interface TeacherWorkloadData {
@@ -82,6 +84,8 @@ export interface Kpi {
   hintValues?: Record<string, number>;
   spark?: number[];
   sub?: string;
+  /** Written after the value (load is a share of the weekly hours). */
+  unit?: '%';
   locked?: boolean;
 }
 
@@ -118,23 +122,18 @@ export interface AtRiskStudent {
   lang: string;
 }
 
-export interface ReviewQueueItem {
-  id: string;
-  kind: 'lesson' | 'rubric';
-  title: string;
-  author: string;
-  age: string;
-}
-
 export interface TodaysClass {
   id: string;
+  /** Wall-clock start, `HH:MM`. */
   time: string;
-  name: string;
+  /** The group's name; null when the dashboard's group list does not hold that group. */
+  name: string | null;
   teacher?: string;
   room: string;
   mode: 'online' | 'in-person';
   students: number;
-  cap: number;
+  /** The group's capacity; null when unknown or not set. */
+  cap: number | null;
   status: 'now' | 'upcoming' | 'low';
 }
 
@@ -176,7 +175,6 @@ export interface DashboardData {
   activity: WidgetData<ActivityItem[]>;
   courseHealth: WidgetData<CourseHealthRow[]>;
   atRisk: WidgetData<{ students: AtRiskStudent[]; total: number }>;
-  reviewQueue: WidgetData<ReviewQueueItem[]>;
   todaysClasses: WidgetData<TodaysClass[]>;
   onboarding: OnboardingState;
 }

@@ -378,7 +378,10 @@ export function AppShell({
             userMenuExtraItems={userMenuExtraItems}
             actions={
               <div className="flex items-center gap-2">
-                {variant === 'school' && <TrialPill />}
+                {/* The payer's notice: the school owner, or the tutor in their own workspace. */}
+                {(variant === 'tutor' || (variant === 'school' && schoolContext?.role === 'owner')) && (
+                  <TrialPill />
+                )}
                 {canSeeSchedulingAlerts && <AlertBadge schoolId={schoolContext?.schoolId} />}
                 <NotificationBell
                   linkContext={notificationsLinkContext}

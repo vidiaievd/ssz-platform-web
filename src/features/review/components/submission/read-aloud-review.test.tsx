@@ -159,6 +159,7 @@ function renderPanel(entitlements: Entitlements | null = null) {
 
 const withKeys = (...keys: string[]): Entitlements => ({
   account: { type: 'workspace', externalId: 'ws-1' },
+  subscription: null,
   features: Object.fromEntries(
     keys.map((key) => [key, { enabled: true, monthlyCredits: '50', limits: {} }]),
   ),

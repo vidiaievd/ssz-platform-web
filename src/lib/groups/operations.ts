@@ -33,7 +33,7 @@ export type GroupForOps = {
   coPrimaryTeacherId: string | null;
   slots: Slot[];
   studentCount: number;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
 };
 
 export type TeacherForOps = {
@@ -64,6 +64,24 @@ export type TeacherLoadResult = {
 export function timeToMinutes(hhmm: string): number {
   const [h, m] = hhmm.split(':').map(Number);
   return (h ?? 0) * 60 + (m ?? 0);
+}
+
+/** The longest lesson the timetable takes — mirrors scheduling-service's `MAX_LESSON_MINUTES`. */
+export const MAX_LESSON_MINUTES = 4 * 60;
+
+export type LessonTimeProblem = 'end-before-start' | 'too-long';
+
+/**
+ * Why a weekly slot or a session cannot have this time, or `null` when it can.
+ * The same rule the server applies (422 `END_TIME_NOT_AFTER_START` / `LESSON_TOO_LONG`).
+ * An unfilled field is no problem yet — the form is still being typed.
+ */
+export function lessonTimeProblem(start: HHMM, end: HHMM): LessonTimeProblem | null {
+  if (!start || !end) return null;
+  const length = timeToMinutes(end) - timeToMinutes(start);
+  if (length <= 0) return 'end-before-start';
+  if (length > MAX_LESSON_MINUTES) return 'too-long';
+  return null;
 }
 
 export function slotsOverlap(a: Slot, b: Slot): boolean {
@@ -133,7 +151,7 @@ export function groupAlerts(
     }
   }
 
-  if (group.studentCount > group.capacity.max) {
+  if (group.capacity.max !== null && group.studentCount > group.capacity.max) {
     alerts.push({ type: 'over', severity: 'warn', label: `${group.studentCount}/${group.capacity.max} — over capacity` });
   } else if (group.studentCount < group.capacity.min) {
     alerts.push({ type: 'under', severity: 'warn', label: `${group.studentCount}/${group.capacity.min} — under minimum` });
@@ -219,11 +237,13 @@ export function projectedCapacity(
   addCount: number,
 ): { projected: number; over: boolean; under: boolean; withinCapacity: boolean } {
   const projected = group.studentCount + addCount;
+  // A group without a ceiling is never over it.
+  const over = group.capacity.max !== null && projected > group.capacity.max;
   return {
     projected,
-    over: projected > group.capacity.max,
+    over,
     under: projected < group.capacity.min,
-    withinCapacity: projected >= group.capacity.min && projected <= group.capacity.max,
+    withinCapacity: projected >= group.capacity.min && !over,
   };
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { LoadBar } from "@/components/shared/operations/load-bar";
 import { KpiTile } from "@/components/shared/operations/kpi-tile";
@@ -20,6 +20,9 @@ export function LoadBreakdownPanel({
   softCost,
 }: LoadBreakdownPanelProps) {
   const t = useTranslations("Teachers.schedule");
+  const tOps = useTranslations("Common.operations");
+  const format = useFormatter();
+  const oneDecimal = (n: number) => format.number(n, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
   return (
     <div
@@ -36,8 +39,8 @@ export function LoadBreakdownPanel({
           prep={teacher.prepHours}
         />
         <div className="flex justify-between text-xs text-(--ssz-text-muted)">
-          <span>{t("contact")}: {teacher.contactHours.toFixed(1)}h</span>
-          <span>{t("prep")}: {teacher.prepHours.toFixed(1)}h</span>
+          <span>{t("contact")}: {tOps("hoursValue", { hours: teacher.contactHours })}</span>
+          <span>{t("prep")}: {tOps("hoursValue", { hours: teacher.prepHours })}</span>
         </div>
       </div>
 
@@ -45,8 +48,8 @@ export function LoadBreakdownPanel({
       <div className="grid grid-cols-2 gap-2">
         <KpiTile
           label={t("effective")}
-          value={teacher.effectiveLoad.toFixed(1)}
-          unit="h"
+          value={oneDecimal(teacher.effectiveLoad)}
+          unit={tOps("hoursUnit")}
         />
         <KpiTile
           label={t("utilization")}
@@ -62,8 +65,8 @@ export function LoadBreakdownPanel({
         />
         <KpiTile
           label={t("dayPeak")}
-          value={dayPeakHours.toFixed(1)}
-          unit="h"
+          value={oneDecimal(dayPeakHours)}
+          unit={tOps("hoursUnit")}
           tone={dayPeakHours >= 6 ? "danger" : "default"}
         />
         <KpiTile

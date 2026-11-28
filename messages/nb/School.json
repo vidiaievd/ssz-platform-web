@@ -27,7 +27,7 @@
       "atRisk": "Elever i faresonen",
       "todaysClasses": "Dagens timer",
       "teacherWorkload": "Lærernes arbeidsmengde",
-      "reviewQueue": "Trenger din gjennomgang"
+      "reviewQueue": "Rettekø"
     },
     "kpis": {
       "label": "Nøkkeltall",
@@ -67,13 +67,16 @@
       "myTitle": "Mine grupper",
       "titleCounts": "Grupper · {active} aktive · {attention} trenger oppmerksomhet",
       "empty": "Ingen grupper ennå",
+      "emptyMine": "Du er ikke satt opp på noen gruppe ennå.",
       "newGroup": "Ny gruppe",
       "all": "Alle grupper →",
-      "allHealthy": "Alle {count} grupper har lærer, timeplan og ledige plasser.",
+      "allHealthy": "{count, plural, =1 {Gruppen har lærer, timeplan og ledige plasser.} other {Alle # grupper har lærer, timeplan og ledige plasser.}}",
       "summary": "{healthy} i orden · {attention} trenger oppmerksomhet",
       "resolve": "Løs det i Grupper →",
       "students": "{count}/{max} elever",
-      "teacherStudents": "{teacher} · {count}/{max} elever"
+      "teacherStudents": "{teacher} · {count}/{max} elever",
+      "studentsNoCap": "{count, plural, one {# elev} other {# elever}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# elev} other {# elever}}"
     },
     "workload": {
       "title": "Lærernes arbeidsmengde",
@@ -108,6 +111,7 @@
         "joined": "ble med som {role}",
         "published": "publiserte",
         "enrolled": "meldte seg på",
+        "enrolledCourse": "meldte seg på et kurs",
         "submitted": "leverte til retting",
         "reviewed": "rettet en besvarelse — {outcome}"
       },
@@ -164,7 +168,8 @@
       "online": "Nett",
       "now": "nå",
       "low": "få",
-      "underEnrolled": "få påmeldte"
+      "underEnrolled": "få påmeldte",
+      "unknownGroup": "Gruppe"
     },
     "quick": {
       "title": "Snarveier",
@@ -185,20 +190,17 @@
         "message-class": "Skriv til gruppen"
       }
     },
-    "review": {
-      "title": "Trenger din gjennomgang",
-      "subtitle": "Eieren må godkjenne før publisering",
-      "emptyTitle": "Alt er gjennomgått!",
-      "emptyBody": "Ingen innhold venter på din gjennomgang.",
-      "by": "{author} · {age}"
-    },
     "teacherQueue": {
       "title": "Rettekø",
       "subtitle": "Besvarelser som venter på deg",
+      "subtitleSchool": "Besvarelser i skolen som venter på retting",
       "emptyTitle": "Ingenting å rette ennå",
       "emptyBody": "Nye besvarelser fra elevene vises her.",
       "writing": "skriftlig besvarelse",
-      "speaking": "muntlig besvarelse"
+      "speaking": "muntlig besvarelse",
+      "open": "Åpne",
+      "more": "Og {count, plural, one {# besvarelse} other {# besvarelser}} til",
+      "someone": "Elev"
     },
     "tips": {
       "ownerFull": "Fest de mest brukte snarveiene i sidepanelet for raskere navigasjon.",

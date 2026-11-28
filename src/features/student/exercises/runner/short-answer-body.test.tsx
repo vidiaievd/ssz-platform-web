@@ -223,7 +223,7 @@ describe('ShortAnswerBody', () => {
     expect(screen.getByText(/Han vil ha mer ansvar\./)).toBeInTheDocument();
   });
 
-  it('marks the AI stage as unbuilt rather than implying a check that did not happen', () => {
+  it('never says a model has read one answer — the model reads the whole set after hand-in (OQ-110)', () => {
     render(
       wrap(
         <Harness
@@ -235,9 +235,9 @@ describe('ShortAnswerBody', () => {
     );
 
     const card = screen.getByRole('status');
-    expect(card).toHaveTextContent('AI comment');
-    expect(card).toHaveTextContent('coming');
-    expect(card).toHaveTextContent('Checked by AI · passed on to the teacher');
+    expect(card).not.toHaveTextContent('AI comment');
+    expect(card).not.toHaveTextContent('Checked by AI');
+    expect(card).toHaveTextContent(/teacher/i);
   });
 
   it('counts the set on the done screen and offers another go', async () => {

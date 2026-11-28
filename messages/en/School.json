@@ -27,7 +27,7 @@
       "atRisk": "At-risk students",
       "todaysClasses": "Today's classes",
       "teacherWorkload": "Teacher workload",
-      "reviewQueue": "Needs your review"
+      "reviewQueue": "Grade queue"
     },
     "kpis": {
       "label": "Key indicators",
@@ -58,7 +58,7 @@
       "conflicts": "{count, plural, one {# scheduling conflict} other {# scheduling conflicts}}",
       "noTeacher": "{count, plural, one {# group} other {# groups}} with no teacher",
       "both": "{first} and {second}",
-      "body": "<b>{problems}</b> block lessons from running safely.",
+      "body": "{n, plural, one {<b>{problems}</b> blocks lessons from running safely.} other {<b>{problems}</b> block lessons from running safely.}}",
       "timetable": "Teacher timetable",
       "reviewGroups": "Review groups"
     },
@@ -67,13 +67,16 @@
       "myTitle": "My groups",
       "titleCounts": "Groups · {active} active · {attention} need attention",
       "empty": "No groups yet",
+      "emptyMine": "You have not been assigned to a group yet.",
       "newGroup": "New group",
       "all": "All groups →",
-      "allHealthy": "All {count} groups are staffed, scheduled and within capacity.",
+      "allHealthy": "{count, plural, =1 {The group is staffed, scheduled and within capacity.} other {All # groups are staffed, scheduled and within capacity.}}",
       "summary": "{healthy} healthy · {attention} need attention",
       "resolve": "Resolve in Groups →",
       "students": "{count}/{max} students",
-      "teacherStudents": "{teacher} · {count}/{max} students"
+      "teacherStudents": "{teacher} · {count}/{max} students",
+      "studentsNoCap": "{count, plural, one {# student} other {# students}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# student} other {# students}}"
     },
     "workload": {
       "title": "Teacher workload",
@@ -108,6 +111,7 @@
         "joined": "joined as {role}",
         "published": "published",
         "enrolled": "enrolled in",
+        "enrolledCourse": "enrolled in a course",
         "submitted": "submitted for review",
         "reviewed": "reviewed submission — {outcome}"
       },
@@ -164,7 +168,8 @@
       "online": "Online",
       "now": "now",
       "low": "low",
-      "underEnrolled": "under-enrolled"
+      "underEnrolled": "under-enrolled",
+      "unknownGroup": "Group"
     },
     "quick": {
       "title": "Quick actions",
@@ -185,20 +190,17 @@
         "message-class": "Message class"
       }
     },
-    "review": {
-      "title": "Needs your review",
-      "subtitle": "Owner approval required to publish",
-      "emptyTitle": "All caught up!",
-      "emptyBody": "No content is waiting for your review.",
-      "by": "by {author} · {age}"
-    },
     "teacherQueue": {
       "title": "Grade queue",
       "subtitle": "Submissions awaiting your review",
+      "subtitleSchool": "Student submissions across the school awaiting review",
       "emptyTitle": "Nothing to grade yet",
       "emptyBody": "New student submissions will appear here.",
       "writing": "writing submission",
-      "speaking": "speaking submission"
+      "speaking": "speaking submission",
+      "open": "Open",
+      "more": "And {count, plural, one {# more submission} other {# more submissions}}",
+      "someone": "Student"
     },
     "tips": {
       "ownerFull": "Pin your most-used shortcuts to the sidebar for faster navigation.",

@@ -63,6 +63,18 @@ describe('OverviewCards', () => {
     expect(screen.getByText('min 6 · max 12 seats')).toBeInTheDocument();
   });
 
+  it('shows no "/max" for a group without a ceiling (OQ-111)', () => {
+    renderCards({ group: { ...baseGroup, studentCount: 8, capacity: { min: 0, max: null } } });
+    expect(screen.getByText('min 0 seats · no maximum')).toBeInTheDocument();
+    expect(screen.queryByText(/999/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\/\s*\d/)).not.toBeInTheDocument();
+  });
+
+  it('names one seat in the singular', () => {
+    renderCards({ group: { ...baseGroup, capacity: { min: 1, max: null } } });
+    expect(screen.getByText('min 1 seat · no maximum')).toBeInTheDocument();
+  });
+
   it('shows "Add" for an admin', () => {
     renderCards({ canManage: true });
     expect(screen.getAllByText('Add').length).toBeGreaterThan(0);

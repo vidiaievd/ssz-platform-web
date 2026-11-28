@@ -16,6 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
 import { addStudents } from '../api/mutations';
+import { useCloseGroupModal } from '../lib/use-close-group-modal';
 import { useStudentCandidates } from '../api/use-student-candidates';
 import { groupKeys } from '../api/keys';
 import { studentKeys } from '@/features/students/api/keys';
@@ -24,7 +25,7 @@ import type { StudentCandidate } from '../api/queries';
 type Props = {
   groupId: string;
   groupName: string;
-  capacity: { min: number; max: number };
+  capacity: { min: number; max: number | null };
   currentCount: number;
   candidates: StudentCandidate[];
   schoolId: string;
@@ -40,6 +41,7 @@ export function StudentAssignModal({
 }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
+  const closeModal = useCloseGroupModal();
   const queryClient = useQueryClient();
   const { data } = useStudentCandidates(schoolId, groupId, {
     initialData: {
@@ -63,7 +65,7 @@ export function StudentAssignModal({
   }, [candidates, query]);
 
   const projected = currentCount + selectedIds.size;
-  const overCap = projected > capacity.max;
+  const overCap = capacity.max !== null && projected > capacity.max;
   const underMin = projected < capacity.min && selectedIds.size > 0;
 
   function toggleStudent(userId: string) {
@@ -76,7 +78,7 @@ export function StudentAssignModal({
   }
 
   function handleClose() {
-    router.back();
+    closeModal();
   }
 
   function handleAdd() {
@@ -99,7 +101,7 @@ export function StudentAssignModal({
         );
         queryClient.invalidateQueries({ queryKey: groupKeys.studentCandidates(schoolId, groupId) });
         queryClient.invalidateQueries({ queryKey: studentKeys.list(schoolId) });
-        router.back();
+        closeModal();
         router.refresh();
       } else {
         toast.error(t('addStudents.error'));
@@ -132,7 +134,7 @@ export function StudentAssignModal({
                 {t('addStudents.overCapWarning', {
                   count: selectedIds.size,
                   projected,
-                  max: capacity.max,
+                  max: capacity.max ?? 0,
                 })}
               </div>
             )}

@@ -56,7 +56,7 @@ export function suggestGroups(membership: Membership, groups: Group[]): GroupSug
     const delta = cefrLevel ? cefrDistance(cefrLevel, group.level) : 0;
     if (delta > 1) continue;
 
-    const hasCapacity = group.studentCount < group.capacity.max;
+    const hasCapacity = group.capacity.max === null || group.studentCount < group.capacity.max;
 
     const slotOverlap = membership.availability
       ? group.slots.filter((s) => slotMatchesAvailability(s, membership.availability)).length

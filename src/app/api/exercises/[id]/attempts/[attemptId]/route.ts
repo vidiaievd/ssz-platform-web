@@ -20,12 +20,17 @@ export async function GET(
   const { id, attemptId } = await params;
 
   try {
-    const data = await serverFetch<{ status: AttemptStatus }>({
+    const data = await serverFetch<{ status: AttemptStatus; provisionalVerdict?: unknown }>({
       service: 'exercises',
       path: `/exercises/${id}/attempts/${attemptId}`,
       method: 'GET',
     });
-    return NextResponse.json({ status: data.status } satisfies AttemptStatusResponse);
+    // Whether a model's provisional verdict is in (OQ-110) — a screen waiting for it asks here;
+    // the verdict itself is read with the attempt.
+    return NextResponse.json({
+      status: data.status,
+      provisional: data.provisionalVerdict != null,
+    } satisfies AttemptStatusResponse);
   } catch (e) {
     if (isAppError(e)) {
       if (e.code === 'unauthenticated') {

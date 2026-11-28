@@ -9,6 +9,7 @@ import { AlertChip, CapacityMeter } from '@/components/shared/operations';
 import { GroupStatusPill } from './group-status-pill';
 import { GroupRowMenu } from './group-row-menu';
 import { langTileColor } from '../lib/lang-tile-color';
+import { scheduleSummaryOf, WEEKDAY_SHORT_KEYS } from '../lib/schedule-summary';
 import type { GroupHealthRowVM } from '../types';
 
 // ── Language tile ─────────────────────────────────────────────────────────────
@@ -182,7 +183,7 @@ export async function GroupHealthRow({ group, href, schoolId, workspaceId }: Pro
       <TableCell>
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-medium text-(--ssz-text-secondary) whitespace-nowrap">
-            {group.scheduleSummary}
+            {scheduleSummaryOf(group.slots, (day) => t(WEEKDAY_SHORT_KEYS[day]))}
           </span>
           <span className="text-[11px] text-(--ssz-text-muted)">
             {group.mode === 'online' ? t('row.online') : t('row.inPerson')}

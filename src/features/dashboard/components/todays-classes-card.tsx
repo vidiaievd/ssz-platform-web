@@ -28,7 +28,7 @@ function statusStyles(status: TodaysClass['status']): {
 export function TodaysClassesCard({ todaysClasses, teacherView }: TodaysClassesCardProps) {
   const t = useTranslations('School.dashboard.classes');
   if (todaysClasses.status === 'unavailable') {
-    // Scheduling service not built yet — don't render at all
+    // Scheduling could not be read: no card rather than a false "no classes today"
     return null;
   }
 
@@ -49,7 +49,7 @@ export function TodaysClassesCard({ todaysClasses, teacherView }: TodaysClassesC
         <ul role="list" aria-label={t('title')} className="divide-y divide-border -mx-4 -mb-4">
           {visible.map((cls) => {
             const styles = statusStyles(cls.status);
-            const underEnrolled = cls.students / cls.cap < 0.6;
+            const underEnrolled = cls.cap !== null && cls.students / cls.cap < 0.6;
             return (
               <li key={cls.id} className="flex items-start gap-3 px-4 py-3 min-h-[44px]">
                 <div className="shrink-0 w-14 text-center">
@@ -61,7 +61,7 @@ export function TodaysClassesCard({ todaysClasses, teacherView }: TodaysClassesC
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-(--ssz-text-primary) truncate">{cls.name}</p>
+                  <p className="text-sm font-medium text-(--ssz-text-primary) truncate">{cls.name ?? t('unknownGroup')}</p>
                   <p className="font-mono text-[11px] text-(--ssz-text-muted) truncate">
                     {cls.mode === 'in-person' ? (
                       <span className="inline-flex items-center gap-1">
@@ -77,7 +77,7 @@ export function TodaysClassesCard({ todaysClasses, teacherView }: TodaysClassesC
                     {' · '}
                     <span className="inline-flex items-center gap-1">
                       <Users className="size-2.5" aria-hidden="true" />
-                      {cls.students}/{cls.cap}
+                      {cls.cap !== null ? `${cls.students}/${cls.cap}` : cls.students}
                       {underEnrolled && (
                         <AlertTriangle className="size-2.5 text-warning-500" aria-label={t('underEnrolled')} />
                       )}

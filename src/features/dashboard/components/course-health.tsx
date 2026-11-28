@@ -51,7 +51,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
               >
                 {/* Desktop: grid layout */}
                 <div className="hidden md:grid md:grid-cols-[36px_1fr_56px_120px_40px] md:items-center md:gap-3">
-                  <span className="inline-flex items-center justify-center rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 h-6 w-9 uppercase">
+                  <span className="inline-flex items-center justify-center rounded text-[11px] font-bold bg-muted text-(--ssz-text-secondary) h-6 w-9 uppercase">
                     {course.lang}
                   </span>
                   <div className="min-w-0">
@@ -67,7 +67,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                       aria-valuemin={0}
                       aria-valuemax={100}
                       aria-label={t('completion', { name: course.name, pct })}
-                      className="h-2 rounded-full bg-neutral-100 overflow-hidden"
+                      className="h-2 rounded-full bg-muted overflow-hidden"
                     >
                       <div
                         className={`h-full rounded-full ${completionColor(course.completion)}`}
@@ -88,7 +88,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                 <div className="md:hidden">
                   <div className="flex items-center justify-between mb-1.5">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center justify-center rounded text-[11px] font-bold bg-neutral-100 text-neutral-700 h-5 w-8 uppercase">
+                      <span className="inline-flex items-center justify-center rounded text-[11px] font-bold bg-muted text-(--ssz-text-secondary) h-5 w-8 uppercase">
                         {course.lang}
                       </span>
                       <p className="text-sm font-medium text-(--ssz-text-primary)">{course.name}</p>
@@ -106,7 +106,7 @@ export function CourseHealth({ courseHealth }: CourseHealthProps) {
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-label={t('completion', { name: course.name, pct })}
-                    className="h-1.5 rounded-full bg-neutral-100 overflow-hidden"
+                    className="h-1.5 rounded-full bg-muted overflow-hidden"
                   >
                     <div
                       className={`h-full rounded-full ${completionColor(course.completion)}`}

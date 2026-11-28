@@ -80,6 +80,7 @@ const BASE: ReviewSubmission = {
 
 const WITH_KEY: Entitlements = {
   account: { type: 'workspace', externalId: 'ws-1' },
+  subscription: null,
   features: { 'ai.review_draft': { enabled: true, monthlyCredits: '50', limits: {} } },
   validUntil: new Date(Date.now() + 86_400_000).toISOString(),
   version: 1,

@@ -27,7 +27,7 @@
       "atRisk": "Учні в зоні ризику",
       "todaysClasses": "Заняття сьогодні",
       "teacherWorkload": "Навантаження викладачів",
-      "reviewQueue": "Потребує вашої перевірки"
+      "reviewQueue": "Черга перевірки"
     },
     "kpis": {
       "label": "Ключові показники",
@@ -58,7 +58,7 @@
       "conflicts": "{count, plural, one {# конфлікт розкладу} few {# конфлікти розкладу} many {# конфліктів розкладу} other {# конфлікту розкладу}}",
       "noTeacher": "{count, plural, one {# група} few {# групи} many {# груп} other {# групи}} без викладача",
       "both": "{first} і {second}",
-      "body": "<b>{problems}</b> заважають безпечно проводити заняття.",
+      "body": "{n, plural, one {<b>{problems}</b> заважає безпечно проводити заняття.} other {<b>{problems}</b> заважають безпечно проводити заняття.}}",
       "timetable": "Розклад викладачів",
       "reviewGroups": "Переглянути групи"
     },
@@ -67,13 +67,16 @@
       "myTitle": "Мої групи",
       "titleCounts": "Групи · активних {active} · потребують уваги {attention}",
       "empty": "Груп ще немає",
+      "emptyMine": "Вам ще не призначили жодної групи.",
       "newGroup": "Нова група",
       "all": "Усі групи →",
-      "allHealthy": "Усі {count} групи мають викладача, розклад і вільні місця.",
+      "allHealthy": "{count, plural, =1 {Група має викладача, розклад і вільні місця.} one {Усі # група мають викладача, розклад і вільні місця.} few {Усі # групи мають викладача, розклад і вільні місця.} many {Усі # груп мають викладача, розклад і вільні місця.} other {Усі # групи мають викладача, розклад і вільні місця.}}",
       "summary": "гаразд {healthy} · потребують уваги {attention}",
       "resolve": "Розібратися в «Групах» →",
       "students": "{count}/{max} учнів",
-      "teacherStudents": "{teacher} · {count}/{max} учнів"
+      "teacherStudents": "{teacher} · {count}/{max} учнів",
+      "studentsNoCap": "{count, plural, one {# учень} few {# учні} many {# учнів} other {# учня}}",
+      "teacherStudentsNoCap": "{teacher} · {count, plural, one {# учень} few {# учні} many {# учнів} other {# учня}}"
     },
     "workload": {
       "title": "Навантаження викладачів",
@@ -108,6 +111,7 @@
         "joined": "приєднався як {role}",
         "published": "опублікував",
         "enrolled": "записався на",
+        "enrolledCourse": "записався на курс",
         "submitted": "здав на перевірку",
         "reviewed": "перевірив роботу — {outcome}"
       },
@@ -164,7 +168,8 @@
       "online": "Онлайн",
       "now": "зараз",
       "low": "мало",
-      "underEnrolled": "мало учнів"
+      "underEnrolled": "мало учнів",
+      "unknownGroup": "Група"
     },
     "quick": {
       "title": "Швидкі дії",
@@ -185,20 +190,17 @@
         "message-class": "Написати групі"
       }
     },
-    "review": {
-      "title": "Потребує вашої перевірки",
-      "subtitle": "Для публікації потрібне схвалення власника",
-      "emptyTitle": "Усе перевірено!",
-      "emptyBody": "Жоден матеріал не чекає на вашу перевірку.",
-      "by": "{author} · {age}"
-    },
     "teacherQueue": {
       "title": "Черга перевірки",
       "subtitle": "Роботи, що чекають на вашу перевірку",
+      "subtitleSchool": "Роботи учнів школи, що чекають на перевірку",
       "emptyTitle": "Поки нічого перевіряти",
       "emptyBody": "Тут зʼявлятимуться нові роботи учнів.",
       "writing": "письмова робота",
-      "speaking": "усна робота"
+      "speaking": "усна робота",
+      "open": "Відкрити",
+      "more": "І ще {count, plural, one {# робота} few {# роботи} many {# робіт} other {# роботи}}",
+      "someone": "Учень"
     },
     "tips": {
       "ownerFull": "Закріпіть найпотрібніші ярлики в боковій панелі, щоб швидше переходити.",

@@ -62,7 +62,6 @@
       "start": "From",
       "end": "To",
       "from": "Starting",
-      "endBeforeStart": "The end has to come after the start.",
       "courseLabel": "Course",
       "coursePick": "Choose a course",
       "courseClear": "Remove course",

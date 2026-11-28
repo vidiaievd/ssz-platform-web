@@ -216,6 +216,39 @@ describe('GET /api/student/submissions', () => {
     expect(body.items[1].expectedResponseBy).toBeNull();
   });
 
+  it('carries a model’s provisional verdict and «AI first» on pending school work (OQ-110)', async () => {
+    upstream({
+      items: [
+        {
+          ...PENDING,
+          aiFirst: true,
+          provisional: {
+            outcome: 'returned',
+            comment: 'Se på verbet.',
+            at: '2026-08-19T09:01:00.000Z',
+            countsAt: '2026-08-22T09:00:00.000Z',
+            extra: 'not for the learner',
+          },
+        },
+        { ...PENDING, attemptId: 'att-8', aiFirst: true, provisional: null },
+        { ...RETURNED, aiFirst: true },
+      ],
+    });
+
+    const body = await (await GET(request())).json();
+
+    expect(body.items[0]).toMatchObject({ reader: 'teacher', aiFirst: true });
+    expect(body.items[0].provisional).toEqual({
+      outcome: 'returned',
+      comment: 'Se på verbet.',
+      at: '2026-08-19T09:01:00.000Z',
+      countsAt: '2026-08-22T09:00:00.000Z',
+    });
+    expect(body.items[1]).toMatchObject({ aiFirst: true, provisional: null });
+    // A decided row has no «coming» to tell.
+    expect(body.items[2]).toMatchObject({ aiFirst: false, provisional: null });
+  });
+
   it('reads a verdict from an engine before plan 79 as a teacher’s', async () => {
     upstream({ items: [RETURNED] });
 

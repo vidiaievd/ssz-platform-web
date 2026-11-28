@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { lessonTimeProblem } from '@/lib/groups/operations';
+import { useLessonTimeMessage } from '@/lib/groups/use-lesson-time-message';
 import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
 
@@ -47,7 +49,9 @@ export function AddLessonDialog({ workspaceId, targets, defaultDate }: Props) {
   const [end, setEnd] = useState('19:00');
   const [isPending, startTransition] = useTransition();
 
-  const endsBeforeStart = end <= start;
+  const timeMessage = useLessonTimeMessage();
+  const timeError = timeMessage(lessonTimeProblem(start, end));
+  const endsBeforeStart = !start || !end || timeError !== null;
 
   function submit() {
     if (!groupId || endsBeforeStart) return;
@@ -131,6 +135,7 @@ export function AddLessonDialog({ workspaceId, targets, defaultDate }: Props) {
               />
             </div>
           </div>
+          {timeError && <p className="text-xs text-destructive">{timeError}</p>}
         </div>
 
         <DialogFooter>

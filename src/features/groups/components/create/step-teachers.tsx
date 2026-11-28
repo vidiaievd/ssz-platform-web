@@ -9,6 +9,7 @@ import { Avatar } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { StatusPill } from '@/components/ui/status-pill';
 import { useTeachersAvailability } from '../../api/use-teachers-availability';
+import { fitsGroupLanguage } from '../../lib/language-fit';
 import { useGroupCreateWizardStore } from '../../stores/create-wizard-store';
 import type { WizardTeacherRole } from '../../stores/create-wizard-store';
 import type { TimetableTeacher } from '../../types';
@@ -89,7 +90,7 @@ export function StepTeachers({ teachers, timetable }: Props) {
     const flags = new Map<string, { langFit: boolean; availabilityStatus: 'free' | 'conflict' | 'absent'; currentHours: number; maxHours: number }>();
     for (const cand of teachers) {
       const tt = timetable.find((x) => x.userId === cand.userId);
-      const langFit = cand.langs.some((l) => l.toLowerCase() === lang.toLowerCase());
+      const langFit = fitsGroupLanguage(cand.langs, lang);
       const currentHours = tt?.hours ?? 0;
       const availabilityStatus = availabilityByTeacher.get(cand.userId)?.status ?? 'free';
       flags.set(cand.userId, { langFit, availabilityStatus, currentHours, maxHours: cand.maxWeeklyHours });

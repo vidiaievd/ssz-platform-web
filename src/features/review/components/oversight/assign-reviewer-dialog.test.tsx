@@ -9,7 +9,7 @@ import { enMessages } from '@/lib/i18n/messages';
 vi.mock('@/features/groups/api/mutations', () => ({ assignTeacher: vi.fn() }));
 
 import { assignTeacher } from '@/features/groups/api/mutations';
-import { AssignReviewerDialog, type AssignTarget } from './assign-reviewer-dialog';
+import { AssignReviewerDialog, staffOfGroups, type AssignTarget } from './assign-reviewer-dialog';
 
 const SCHOOL_ID = 'school-1';
 
@@ -46,20 +46,29 @@ function renderDialog(target: AssignTarget) {
   return { onClose };
 }
 
+const TEACHERS = [
+  { teacherId: 'teacher-1', name: 'Marius Holt' },
+  { teacherId: 'teacher-2', name: 'Per Nygård' },
+];
+
+/** organization's group summaries — only the staff matters to the dialog. */
+let groupStaff: { id: string; teachers: { userId: string; role: string; toDate: string | null }[] }[];
+
 beforeEach(() => {
   vi.clearAllMocks();
+  groupStaff = [];
   vi.stubGlobal(
     'fetch',
-    vi.fn().mockResolvedValue({
+    vi.fn(async (url: string) => ({
       ok: true,
-      json: async () => [
-        { teacherId: 'teacher-1', name: 'Marius Holt' },
-        { teacherId: 'teacher-2', name: 'Per Nygård' },
-      ],
-    }),
+      json: async () => (url.endsWith('/groups') ? groupStaff : TEACHERS),
+    })),
   );
   vi.mocked(assignTeacher).mockResolvedValue({ ok: true });
 });
+
+const optionNames = () =>
+  Array.from((screen.getByLabelText('Teacher') as HTMLSelectElement).options).map((o) => o.text);
 
 describe('AssignReviewerDialog', () => {
   it('says that this writes a place in the group, not a role of its own', async () => {
@@ -85,7 +94,7 @@ describe('AssignReviewerDialog', () => {
         SCHOOL_ID,
         'group-2',
         expect.objectContaining({ userId: 'teacher-1', role: 'co-primary' }),
-        true,
+        false,
       );
     });
     expect(onClose).toHaveBeenCalled();
@@ -112,7 +121,7 @@ describe('AssignReviewerDialog', () => {
           to: '2026-08-29',
           reason: 'Sick leave',
         }),
-        true,
+        false,
       );
     });
   });
@@ -139,9 +148,68 @@ describe('AssignReviewerDialog', () => {
         SCHOOL_ID,
         'group-3',
         expect.objectContaining({ userId: 'teacher-1', role: 'co-primary' }),
-        true,
+        false,
       );
     });
+  });
+
+  it('leaves out who already teaches the chosen group, in any role (OQ-17)', async () => {
+    groupStaff = [
+      { id: 'group-2', teachers: [{ userId: 'teacher-1', role: 'substitute', toDate: null }] },
+      { id: 'group-1', teachers: [{ userId: 'teacher-2', role: 'primary', toDate: null }] },
+    ];
+    renderDialog(submission());
+
+    await screen.findByLabelText('Teacher');
+    expect(optionNames()).toEqual(['Choose a teacher…', 'Per Nygård']);
+
+    await userEvent.selectOptions(screen.getByLabelText('Group'), 'group-1');
+    expect(optionNames()).toEqual(['Choose a teacher…', 'Marius Holt']);
+  });
+
+  it('drops a choice that the newly chosen group already has', async () => {
+    groupStaff = [{ id: 'group-1', teachers: [{ userId: 'teacher-2', role: 'primary', toDate: null }] }];
+    renderDialog(submission());
+
+    await userEvent.selectOptions(await screen.findByLabelText('Teacher'), 'teacher-2');
+    await userEvent.selectOptions(screen.getByLabelText('Group'), 'group-1');
+
+    expect(screen.getByLabelText('Teacher')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+  });
+
+  it('offers again someone whose substitution in the group is over', async () => {
+    groupStaff = [{ id: 'group-2', teachers: [{ userId: 'teacher-1', role: 'substitute', toDate: '2020-01-31T00:00:00.000Z' }] }];
+    renderDialog(submission());
+
+    await screen.findByLabelText('Teacher');
+    expect(optionNames()).toContain('Marius Holt');
+  });
+
+  it('names the refusal when the server finds the teacher already in the group', async () => {
+    vi.mocked(assignTeacher).mockResolvedValue({ ok: false, blocked: 'already-in-group' });
+    const { onClose } = renderDialog(submission());
+
+    await userEvent.selectOptions(await screen.findByLabelText('Teacher'), 'teacher-1');
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    expect(
+      await screen.findByText('This teacher already works in this group in another role.'),
+    ).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it('never replaces a co-teacher: a taken role is named, not overridden (П7-3)', async () => {
+    vi.mocked(assignTeacher).mockResolvedValue({ ok: false, blocked: 'role-taken' });
+    const { onClose } = renderDialog(submission());
+
+    await userEvent.selectOptions(await screen.findByLabelText('Teacher'), 'teacher-1');
+    await userEvent.click(screen.getByRole('button', { name: 'Add' }));
+
+    expect(
+      await screen.findByText('The group already has a co-teacher. Add the helper as a substitute.'),
+    ).toBeInTheDocument();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it('refuses to pretend it can help a learner who is in no group', async () => {
@@ -150,5 +218,28 @@ describe('AssignReviewerDialog', () => {
     expect(await screen.findByText('This learner is in no group')).toBeInTheDocument();
     // No form at all: an assignment here would be saved and change nothing.
     expect(screen.queryByLabelText('Teacher')).not.toBeInTheDocument();
+  });
+});
+
+describe('staffOfGroups', () => {
+  const now = new Date('2026-11-23T10:00:00Z');
+
+  it('keeps open, running and future assignments and drops ended ones', () => {
+    expect(
+      staffOfGroups(
+        [
+          {
+            id: 'g',
+            teachers: [
+              { userId: 'open', toDate: null },
+              { userId: 'ends-today', toDate: '2026-11-23T00:00:00.000Z' },
+              { userId: 'ended', toDate: '2026-11-22T00:00:00.000Z' },
+            ],
+          },
+          { id: 'empty' },
+        ],
+        now,
+      ),
+    ).toEqual({ g: ['open', 'ends-today'], empty: [] });
   });
 });

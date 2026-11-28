@@ -12,6 +12,7 @@ vi.mock('next/navigation', () => ({
 
 vi.mock('../api/mutations', () => ({
   updateGroup: vi.fn(),
+  updateSlots: vi.fn(),
   addGroupMaterial: vi.fn(),
   removeGroupMaterial: vi.fn(),
 }));
@@ -174,6 +175,38 @@ describe('GroupEditDialog', () => {
     );
   });
 
+  it('saves an emptied max as "no ceiling" (OQ-111)', async () => {
+    const { updateGroup } = await import('../api/mutations');
+    vi.mocked(updateGroup).mockResolvedValue({ ok: true });
+    renderDialog();
+
+    await userEvent.clear(screen.getByLabelText('Max students'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(updateGroup).toHaveBeenCalledWith('my-school', 'g1', expect.objectContaining({ capacityMax: null })),
+    );
+  });
+
+  it('keeps a group without a ceiling without one, never 999 (OQ-111)', async () => {
+    const { updateGroup } = await import('../api/mutations');
+    vi.mocked(updateGroup).mockResolvedValue({ ok: true });
+    renderDialog(vi.fn(), { ...baseGroup, capacity: { min: 0, max: null } });
+
+    expect(screen.getByLabelText('Max students')).toHaveValue(null);
+    await userEvent.clear(screen.getByLabelText('Name'));
+    await userEvent.type(screen.getByLabelText('Name'), 'Renamed');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() =>
+      expect(updateGroup).toHaveBeenCalledWith(
+        'my-school',
+        'g1',
+        expect.objectContaining({ name: 'Renamed', capacityMax: null }),
+      ),
+    );
+  });
+
   it('includes the selected courseId in the save payload', async () => {
     const { updateGroup } = await import('../api/mutations');
     vi.mocked(updateGroup).mockResolvedValue({ ok: true });
@@ -192,5 +225,55 @@ describe('GroupEditDialog', () => {
         expect.objectContaining({ courseId: '11111111-1111-4111-8111-111111111111' }),
       ),
     );
+  });
+
+  describe('slots', () => {
+    // NO-A2-2026 had "00:00–13:45" twice a week: the dialog let it through and so did the server.
+    const groupWithSlot: Group = {
+      ...baseGroup,
+      slots: [{ id: 's1', day: 'Mon', start: '18:00', end: '19:30', room: '' }],
+    };
+
+    it('holds the save back when a changed slot is longer than four hours', async () => {
+      const { updateGroup, updateSlots } = await import('../api/mutations');
+      renderDialog(vi.fn(), groupWithSlot);
+
+      fireEvent.change(screen.getByLabelText('Start'), { target: { value: '00:00' } });
+      fireEvent.change(screen.getByLabelText('End'), { target: { value: '13:45' } });
+
+      expect(screen.getByText('A lesson lasts at most 4 hours.')).toBeInTheDocument();
+      const save = screen.getByRole('button', { name: 'Save changes' });
+      expect(save).toBeDisabled();
+      fireEvent.click(save);
+      expect(updateGroup).not.toHaveBeenCalled();
+      expect(updateSlots).not.toHaveBeenCalled();
+    });
+
+    it('holds the save back when a changed slot ends before it starts', async () => {
+      renderDialog(vi.fn(), groupWithSlot);
+
+      fireEvent.change(screen.getByLabelText('End'), { target: { value: '17:00' } });
+
+      expect(screen.getByText('The end must be after the start.')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Save changes' })).toBeDisabled();
+    });
+
+    it('still lets a group with an old bad slot be renamed — the untouched slots are not sent', async () => {
+      const { updateGroup, updateSlots } = await import('../api/mutations');
+      vi.mocked(updateGroup).mockResolvedValue({ ok: true });
+      renderDialog(vi.fn(), {
+        ...baseGroup,
+        slots: [{ id: 's1', day: 'Mon', start: '00:00', end: '13:45', room: '' }],
+      });
+
+      expect(screen.getByText('A lesson lasts at most 4 hours.')).toBeInTheDocument();
+      const name = screen.getByLabelText('Name');
+      await userEvent.clear(name);
+      await userEvent.type(name, 'Norwegian A2 — renamed');
+      fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+      await waitFor(() => expect(updateGroup).toHaveBeenCalled());
+      expect(updateSlots).not.toHaveBeenCalled();
+    });
   });
 });

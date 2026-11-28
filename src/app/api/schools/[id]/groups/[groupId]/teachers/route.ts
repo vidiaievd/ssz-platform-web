@@ -24,8 +24,8 @@ export async function POST(req: NextRequest, { params }: Params) {
       service: 'organization',
       path: `/schools/${schoolId}/groups/${groupId}/teachers`,
       method: 'POST',
-      query: override ? { override: true } : undefined,
-      body,
+      // organization reads `override` from the body only; the query flag is kept for callers.
+      body: override ? { ...(body as Record<string, unknown>), override: true } : body,
     });
     return NextResponse.json(data, { status: 201 });
   } catch (e) {

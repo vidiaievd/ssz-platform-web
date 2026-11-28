@@ -28,12 +28,15 @@ export function GroupsWidget({ groupsHealth, role, workspaceId }: GroupsWidgetPr
   if (groupsHealth.status === 'empty') {
     return (
       <WidgetCard title={isTeacher ? t('myTitle') : t('title')}>
+        {/* A teacher does not create groups — the school assigns them. */}
         <WidgetEmptyState
-          title={t('empty')}
+          title={isTeacher ? t('emptyMine') : t('empty')}
           cta={
-            <Button size="sm" asChild>
-              <Link href={`${groupsHref}/new`}>{t('newGroup')}</Link>
-            </Button>
+            isTeacher ? undefined : (
+              <Button size="sm" asChild>
+                <Link href={`${groupsHref}/new`}>{t('newGroup')}</Link>
+              </Button>
+            )
           }
         />
       </WidgetCard>

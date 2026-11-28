@@ -143,7 +143,16 @@ export function SlaSettings({ school, canEdit }: SlaSettingsProps) {
             />
           </Field>
 
-          <Field label={t('escalateTo.label')} hint={t('escalateTo.hint')}>
+          <Field
+            label={t('escalateTo.label')}
+            // A group without a lead teacher is not silent: organization hands it to the
+            // school's administrators (OQ-13), and the school should know before choosing.
+            hint={
+              form.escalateTo === 'primary_teacher'
+                ? t('escalateTo.primaryTeacherHint')
+                : t('escalateTo.hint')
+            }
+          >
             <select
               aria-label={t('escalateTo.label')}
               value={form.escalateTo}

@@ -13,5 +13,5 @@ export default withSentryConfig(withNextIntl(nextConfig), {
   // Disable the Sentry telemetry call on every build.
   telemetry: false,
   // Tree-shake Sentry debug code in production bundles.
-  disableLogger: true,
+  webpack: { treeshake: { removeDebugLogging: true } },
 });

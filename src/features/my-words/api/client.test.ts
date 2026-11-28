@@ -74,9 +74,9 @@ describe('introduceWord', () => {
     expect(calls).toContain('POST /api/srs/cards/card-1/unsuspend');
   });
 
-  it('takes the day’s limit as no error', async () => {
+  it('reports a throttled introduce as an error — the budget never refuses one', async () => {
     mockFetch({ '/api/srs/cards/introduce': { status: 429 } });
 
-    await expect(introduceWord('item-1')).resolves.toBeUndefined();
+    await expect(introduceWord('item-1')).rejects.toMatchObject({ status: 429 });
   });
 });

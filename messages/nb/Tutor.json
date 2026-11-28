@@ -62,7 +62,6 @@
       "start": "Fra",
       "end": "Til",
       "from": "Starter",
-      "endBeforeStart": "Slutt må komme etter start.",
       "courseLabel": "Kurs",
       "coursePick": "Velg kurs",
       "courseClear": "Fjern kurs",

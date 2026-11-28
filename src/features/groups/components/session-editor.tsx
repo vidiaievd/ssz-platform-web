@@ -3,6 +3,8 @@
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
+import { lessonTimeProblem } from '@/lib/groups/operations';
+import { useLessonTimeMessage } from '@/lib/groups/use-lesson-time-message';
 import { toast } from 'sonner';
 
 import {
@@ -158,7 +160,9 @@ export function SessionEditor({
   const canReschedule = session ? rights.canReschedule : true;
   const types = creatableTypes(viewer);
   const isExam = draft.type === 'exam';
-  const invalidTime = draft.end <= draft.start;
+  const timeMessage = useLessonTimeMessage();
+  const timeError = timeMessage(lessonTimeProblem(draft.start, draft.end));
+  const invalidTime = !draft.start || !draft.end || timeError !== null;
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setDraft((d) => ({ ...d, [key]: value }));
 
@@ -320,7 +324,7 @@ export function SessionEditor({
               </Field>
               <Field
                 label={t('schedule.end')}
-                error={invalidTime ? t('schedule.endBeforeStart') : undefined}
+                error={timeError ?? undefined}
               >
                 <Input
                 type="time"

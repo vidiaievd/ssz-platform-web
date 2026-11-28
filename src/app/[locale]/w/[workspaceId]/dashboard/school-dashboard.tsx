@@ -3,7 +3,13 @@ import { Suspense } from 'react';
 import { getTranslations } from 'next-intl/server';
 
 import { getSchoolByRef } from '@/features/school/api/get-school-by-ref';
-import { deriveViewerRole, deriveSchoolType, deriveDataState, computeOnboarding } from '@/features/dashboard/lib/derive';
+import {
+  deriveViewerRole,
+  deriveSchoolType,
+  deriveDataState,
+  computeOnboarding,
+  schoolMembersCount,
+} from '@/features/dashboard/lib/derive';
 import { canSeeWidget } from '@/features/dashboard/lib/roles';
 import { getCurrentUser } from '@/features/auth/api/get-current-user';
 import {
@@ -12,9 +18,16 @@ import {
   fetchCourseHealth,
   fetchActivity,
   fetchGroupsHealth,
+  fetchSchoolGroupFacts,
   fetchTeacherLoad,
   fetchGroupGaps,
+  fetchSchoolSessionsOn,
+  fetchWaitingWork,
+  type WaitingWorkPayload,
 } from '@/lib/dashboard/queries';
+import { wsHref } from '@/features/workspaces/lib/href';
+import { buildTodaysClasses, utcDay } from '@/features/dashboard/lib/todays-classes';
+import { operationsKpis, withOperationsKpis } from '@/features/dashboard/lib/operations-widgets';
 
 import type {
   WidgetData,
@@ -22,19 +35,12 @@ import type {
   ActivityItem,
   CourseHealthRow,
   AtRiskStudent,
-  GroupsHealthData,
-  TeacherWorkloadData,
-  Alert,
-  AlertType,
-  AlertSeverity,
 } from '@/features/dashboard/types';
 import type {
   KpisPayload,
   AtRiskPayload,
   CourseHealthPayload,
   ActivityPayload,
-  GroupsHealthPayload,
-  TeacherLoadPayload,
   GroupGapsPayload,
   GroupGap,
   Unavailable,
@@ -48,7 +54,6 @@ import { isWorkspaceWritable } from '@/features/school-lifecycle/api/get-workspa
 import { TipCard } from '@/features/dashboard/components/tip-card';
 import { CourseHealth } from '@/features/dashboard/components/course-health';
 import { AtRiskList } from '@/features/dashboard/components/at-risk-list';
-import { ReviewQueueCard } from '@/features/dashboard/components/review-queue-card';
 import { TodaysClassesCard } from '@/features/dashboard/components/todays-classes-card';
 import { TeacherQueueCard } from '@/features/dashboard/components/teacher-queue-card';
 import { WidgetCard } from '@/features/dashboard/components/widget-card';
@@ -164,52 +169,6 @@ function adaptAtRisk(result: WidgetResult<AtRiskPayload>): WidgetData<{ students
   return { status: 'ok', data: { students, total: payload.total } };
 }
 
-function adaptGroupsHealth(result: WidgetResult<GroupsHealthPayload>): WidgetData<GroupsHealthData> {
-  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
-    return { status: 'unavailable' };
-  }
-  const payload = result as GroupsHealthPayload;
-  if (!payload.groups || payload.groups.length === 0) return { status: 'empty' };
-  return {
-    status: 'ok',
-    data: {
-      activeCount: payload.activeCount,
-      attentionCount: payload.attentionCount,
-      groups: payload.groups.map((g) => ({
-        id: g.id,
-        name: g.name,
-        lang: g.lang,
-        level: g.level,
-        primaryTeacherName: g.primaryTeacherName,
-        studentCount: g.studentCount,
-        max: g.max,
-        alerts: g.alerts.map((a) => ({
-          type: a.type as AlertType,
-          severity: a.severity as AlertSeverity,
-          label: a.label,
-        } satisfies Alert)),
-      })),
-    },
-  };
-}
-
-function adaptTeacherWorkload(result: WidgetResult<TeacherLoadPayload>): WidgetData<TeacherWorkloadData> {
-  if ('status' in (result as object) && (result as Unavailable).status === 'unavailable') {
-    return { status: 'unavailable' };
-  }
-  const payload = result as TeacherLoadPayload;
-  if (!payload.teachers || payload.teachers.length === 0) return { status: 'empty' };
-  return {
-    status: 'ok',
-    data: {
-      overloadedCount: payload.overloadedCount,
-      avgLoadPct: payload.avgLoadPct,
-      conflictCount: payload.conflictCount,
-      teachers: payload.teachers,
-    },
-  };
-}
-
 type Props = {
   params: Promise<{ workspaceId: string; locale: string }>;
 };
@@ -236,30 +195,52 @@ export async function SchoolDashboard({ params }: Props) {
   const schoolType = deriveSchoolType(school);
 
   // ── 2. Parallel widget data fetch ──────────────────────────────────────────
-  const [kpis, atRisk, courseHealth, activity, groupsHealth, teacherWorkload, groupGaps] =
+  // «Today's classes» is drawn for hybrid schools only — an online one is not asked.
+  const hybrid = schoolType === 'hybrid';
+  // The work waiting for review: the owner's card and the teacher's read the same queue.
+  const seesQueue = role === 'owner' || role === 'teacher';
+  // Students at risk are an admin card, and analytics answers a teacher 403 — not asked for them.
+  const seesAtRisk = role === 'owner' || role === 'admin';
+  const [kpis, atRisk, courseHealth, activity, groupsHealthWidget, teacherWorkloadWidget, groupGaps, todaysSessions, groupFacts, waitingWork] =
     await Promise.all([
       fetchDashboardKpis(school.id),
-      fetchAtRisk(school.id, 3),
+      seesAtRisk ? fetchAtRisk(school.id, 3) : Promise.resolve({ status: 'unavailable' } as const),
       fetchCourseHealth(school.id),
       fetchActivity(school.id, 6),
-      fetchGroupsHealth(school.id, role),
+      fetchGroupsHealth(school.id, { role, userId: user?.userId ?? null }),
       fetchTeacherLoad(school.id),
       fetchGroupGaps(school.id),
+      hybrid
+        ? fetchSchoolSessionsOn(school.id, utcDay(new Date()))
+        : Promise.resolve({ status: 'unavailable' } as const),
+      hybrid ? fetchSchoolGroupFacts(school.id) : Promise.resolve({ status: 'unavailable' } as const),
+      seesQueue
+        ? fetchWaitingWork(school.id, role === 'owner' ? 'school' : 'mine')
+        : Promise.resolve({ status: 'unavailable' } as const),
     ]);
 
   // ── 3. Adapt to WidgetData<T> + derive data state ─────────────────────────
-  const kpisWidget = adaptKpis(kpis);
+  // Groups and load are not analytics' facts: their tiles come from the two cards (OQ-108).
+  const kpisWidget = withOperationsKpis(
+    adaptKpis(kpis),
+    operationsKpis(groupsHealthWidget, teacherWorkloadWidget, { role, userId: user?.userId ?? null }),
+  );
   const activityWidget = adaptActivity(activity);
   const courseHealthWidget = adaptCourseHealth(courseHealth);
   const atRiskWidget = adaptAtRisk(atRisk);
-  const groupsHealthWidget = adaptGroupsHealth(groupsHealth);
-  const teacherWorkloadWidget = adaptTeacherWorkload(teacherWorkload);
   const groupGapsWidget = adaptGroupGaps(groupGaps);
+  const waitingWorkWidget: WidgetData<WaitingWorkPayload> =
+    'status' in waitingWork ? { status: 'unavailable' } : { status: 'ok', data: waitingWork };
+  // Names and head counts from organization: a row of an unreadable group still shows, unnamed.
+  const todaysClassesWidget = buildTodaysClasses(todaysSessions, Array.isArray(groupFacts) ? groupFacts : []);
 
   const hasActivity = activityWidget.status === 'ok' && activityWidget.data.length > 0;
   const coursesCount = courseHealthWidget.status === 'ok' ? courseHealthWidget.data.length : 0;
   const groupsCount = groupsHealthWidget.status === 'ok' ? groupsHealthWidget.data.activeCount : 0;
-  const membersCount = 1; // conservative — full count not fetched here
+  // The owner is not on the roster (schools.ownerId), so they count on top of it. A fixed 1 here
+  // kept every school out of the "full" state: course health, the review queue and the
+  // operations banner never showed.
+  const membersCount = schoolMembersCount(school);
 
   const dataState = deriveDataState({ membersCount, coursesCount, hasActivity });
 
@@ -386,7 +367,7 @@ export async function SchoolDashboard({ params }: Props) {
           {canSeeWidget('todaysClasses', ctx) && (
             <Suspense fallback={<WidgetCard title={tLoading('todaysClasses')} loading />}>
               <TodaysClassesCard
-                todaysClasses={{ status: 'unavailable' }}
+                todaysClasses={todaysClassesWidget}
                 teacherView={role === 'teacher'}
               />
             </Suspense>
@@ -409,16 +390,16 @@ export async function SchoolDashboard({ params }: Props) {
           {/* Quick actions */}
           <QuickActions role={role} workspaceId={schoolSlugDisplay} readOnly={!writable} />
 
-          {/* Review queue — owner, full state */}
+          {/* Work waiting for review — the owner's whole school (to oversight), full state */}
           {canSeeWidget('reviewQueue', ctx) && (
             <Suspense fallback={<WidgetCard title={tLoading('reviewQueue')} loading />}>
-              <ReviewQueueCard reviewQueue={{ status: 'unavailable' }} />
+              <TeacherQueueCard work={waitingWorkWidget} href={wsHref(schoolSlugDisplay, 'review/oversight')} whose="school" />
             </Suspense>
           )}
 
-          {/* Teacher grading queue */}
+          {/* Work waiting for review — the teacher's own groups (to their inbox) */}
           {canSeeWidget('teacherQueue', ctx) && (
-            <TeacherQueueCard items={[]} loading={false} />
+            <TeacherQueueCard work={waitingWorkWidget} href={wsHref(schoolSlugDisplay, 'review')} />
           )}
 
           {/* Contextual tip */}

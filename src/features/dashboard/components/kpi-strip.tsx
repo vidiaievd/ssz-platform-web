@@ -64,6 +64,7 @@ export function KpiStrip({ kpis, role }: KpiStripProps) {
                 hint={hintOf(kpi)}
                 spark={kpi?.spark}
                 sub={kpi?.sub}
+                unit={kpi?.unit}
                 locked={locked}
               />
             </div>

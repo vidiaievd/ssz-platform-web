@@ -5,6 +5,7 @@ import { serverFetch } from '@/lib/api/server-fetcher';
 import { fetchProfileSummaries } from '@/lib/api/profile-directory';
 import { env } from '@/lib/env';
 import { buildSlaMap } from '@/features/review/lib/sla-map';
+import type { ProvisionalVerdict } from '@/features/student/exercises/types/attempts';
 import type {
   MySubmission,
   MySubmissionsFilter,
@@ -33,6 +34,10 @@ interface EngineSubmission {
     at: string;
     comment: string | null;
   } | null;
+  /** Plan 80: a model's verdict on pending school work; absent from older engines. */
+  provisional?: ProvisionalVerdict | null;
+  /** OQ-110: the model reads this work first; absent from older engines. */
+  aiFirst?: boolean;
   canResubmit: boolean;
 }
 
@@ -137,6 +142,17 @@ export async function GET(request: NextRequest) {
     // Only a learner with no school is read by a model, and only one with a verdict on
     // record can say who read it; a waiting row without a school is waiting for the model.
     reader: item.decision?.by ?? (item.schoolId === null ? 'ai' : 'teacher'),
+    // Copied field by field: the engine's verdict carries nothing else for the learner.
+    provisional:
+      item.status === 'pending' && item.provisional
+        ? {
+            outcome: item.provisional.outcome,
+            comment: item.provisional.comment,
+            at: item.provisional.at,
+            countsAt: item.provisional.countsAt,
+          }
+        : null,
+    aiFirst: item.status === 'pending' && item.aiFirst === true,
     canResubmit: item.canResubmit,
   }));
 

@@ -3,6 +3,8 @@
 import { describe, it, expect } from 'vitest';
 
 import {
+  lessonTimeProblem,
+  MAX_LESSON_MINUTES,
   slotsOverlap,
   groupAlerts,
   teacherConflicts,
@@ -83,6 +85,12 @@ describe('groupAlerts', () => {
     const group = makeGroup({ studentCount: 15, capacity: { min: 5, max: 12 } });
     const alerts = groupAlerts(group, null, [group]);
     expect(alerts.some((a) => a.type === 'over')).toBe(true);
+  });
+
+  it('emits no over-capacity alert for a group without a ceiling (OQ-111)', () => {
+    const group = makeGroup({ studentCount: 15, capacity: { min: 5, max: null } });
+    const alerts = groupAlerts(group, null, [group]);
+    expect(alerts.some((a) => a.type === 'over')).toBe(false);
   });
 
   it('emits under-minimum warn when studentCount < min', () => {
@@ -279,6 +287,12 @@ describe('projectedCapacity', () => {
   it('over when projected exceeds max', () => {
     expect(projectedCapacity(group, 5).over).toBe(true);
     expect(projectedCapacity(group, 5).withinCapacity).toBe(false);
+  });
+
+  it('never over without a ceiling (OQ-111)', () => {
+    const open: GroupForOps = { ...group, capacity: { min: 5, max: null } };
+    expect(projectedCapacity(open, 500).over).toBe(false);
+    expect(projectedCapacity(open, 500).withinCapacity).toBe(true);
   });
 
   it('under when projected is below min', () => {
@@ -595,5 +609,28 @@ describe('forecast', () => {
     const term1Students = 80; // no growth
     const expectedGroups = Math.ceil(term1Students / 10);
     expect(result.projection[0]!.contactHours).toBe(expectedGroups * 2);
+  });
+});
+
+describe('lessonTimeProblem', () => {
+  it('takes an ordinary lesson and one of exactly the longest length', () => {
+    expect(MAX_LESSON_MINUTES).toBe(240);
+    expect(lessonTimeProblem('18:00', '19:30')).toBeNull();
+    expect(lessonTimeProblem('09:00', '13:00')).toBeNull();
+  });
+
+  it('refuses a lesson that ends when it starts or before', () => {
+    expect(lessonTimeProblem('10:00', '10:00')).toBe('end-before-start');
+    expect(lessonTimeProblem('19:00', '18:00')).toBe('end-before-start');
+  });
+
+  it('refuses a lesson longer than four hours — the NO-A2-2026 slot "00:00–13:45"', () => {
+    expect(lessonTimeProblem('09:00', '13:01')).toBe('too-long');
+    expect(lessonTimeProblem('00:00', '13:45')).toBe('too-long');
+  });
+
+  it('says nothing while a field is still empty', () => {
+    expect(lessonTimeProblem('', '10:00')).toBeNull();
+    expect(lessonTimeProblem('09:00', '')).toBeNull();
   });
 });

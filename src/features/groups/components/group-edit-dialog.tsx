@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { lessonTimeProblem } from '@/lib/groups/operations';
 import { GroupEditCourseField } from './group-edit-course-field';
 import { GroupEditMaterialsField } from './group-edit-materials-field';
 import { SlotEditor } from './slot-editor';
@@ -58,6 +59,10 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
   const [courseName, setCourseName] = useState(group.courseName ?? null);
   const [slots, setSlots] = useState<DraftSlot[]>(() => group.slots.map(toDraftSlot));
   const [slotsDirty, setSlotsDirty] = useState(false);
+  // A changed set goes to the server whole, so one bad slot holds the save back.
+  // An untouched set is not sent and does not block renaming a group whose old slot is off.
+  const slotsInvalid =
+    slotsDirty && slots.some((sl) => !sl.start || !sl.end || lessonTimeProblem(sl.start, sl.end) !== null);
   const { data: offeredAgeBands } = useSchoolAgeBands(workspaceId);
 
   const {
@@ -94,7 +99,7 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
   const startDateValue = useWatch({ control, name: 'startDate' });
   const ageBandValue = useWatch({ control, name: 'ageBand' });
 
-  const maxBelowEnrolled = capacityMax !== undefined && capacityMax < group.studentCount;
+  const maxBelowEnrolled = capacityMax != null && capacityMax < group.studentCount;
 
   function addSlot() {
     setSlots((s) => [...s, { _id: crypto.randomUUID(), day: 'Mon', start: '09:00', end: '10:00', room: '' }]);
@@ -112,6 +117,7 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
   }
 
   function onSubmit(data: GroupCreateInput) {
+    if (slotsInvalid) return;
     startTransition(async () => {
       const [result, slotsResult] = await Promise.all([
         updateGroup(schoolId, group.id, {
@@ -309,7 +315,10 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
                     id="cap-max"
                     type="number"
                     min={1}
-                    {...register('capacity.max', { valueAsNumber: true })}
+                    {...register('capacity.max', {
+                      // An emptied field is "no ceiling", not NaN.
+                      setValueAs: (v: unknown) => (v === '' || v === null || v === undefined ? null : Number(v)),
+                    })}
                     aria-describedby={errors.capacity?.max ? 'cap-max-error' : 'cap-max-note'}
                   />
                   {errors.capacity?.max ? (
@@ -390,7 +399,7 @@ export function GroupEditDialog({ group, schoolId, workspaceId, open, onOpenChan
               <Button variant="outline" onClick={requestClose} disabled={isPending}>
                 {t('edit.cancel')}
               </Button>
-              <Button onClick={handleSubmit(onSubmit)} disabled={isPending || maxBelowEnrolled}>
+              <Button onClick={handleSubmit(onSubmit)} disabled={isPending || maxBelowEnrolled || slotsInvalid}>
                 {isPending ? t('edit.saving') : t('edit.save')}
               </Button>
             </div>

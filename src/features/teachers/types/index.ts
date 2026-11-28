@@ -186,6 +186,8 @@ export interface TeacherLoadRow {
   groupCount: number;
   conflictCount: number;
   maxWeeklyContactHours: number;
+  /** Lessons in the teacher's weekly timetable. */
+  lessonsPerWeek?: number;
 }
 
 export interface Vacancy {

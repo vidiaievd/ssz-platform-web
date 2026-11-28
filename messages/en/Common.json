@@ -11,6 +11,13 @@
     },
     "groups": "{count, plural, one {# group} other {# groups}}",
     "hours": "{name}: {hours} of {max} contracted hours",
-    "hoursOver": "{name}: {hours} of {max} contracted hours, overloaded"
+    "hoursOver": "{name}: {hours} of {max} contracted hours, overloaded",
+    "hoursOfMax": "{hours, number, ::.0}/{max}h",
+    "hoursUnit": "h",
+    "hoursValue": "{hours, number, ::.0}h",
+    "overBy": "+{hours, number, ::.0}h over",
+    "clashes": "{count, plural, one {# clash} other {# clashes}}",
+    "loadContact": "{contact, number, ::.0}h contact of {cap}h cap",
+    "loadContactPrep": "{contact, number, ::.0}h contact + {prep, number, ::.0}h prep of {cap}h cap"
   }
 }

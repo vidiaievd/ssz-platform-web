@@ -1,14 +1,12 @@
 'use client';
 
 import { useId } from 'react';
-import { useFormatter, useTranslations } from 'next-intl';
+import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { Check, ChevronRight, Clock, Undo2 } from 'lucide-react';
 
 import { Link } from '@/lib/i18n/navigation';
 
-import { useAgeWords } from '@/features/review/components/age-mark';
-import { hoursSince } from '@/features/review/lib/age-scale';
-import { AiReviewPanel } from '@/features/student/ai-review';
+import { AiReviewPanel, ProvisionalVerdictCard } from '@/features/student/ai-review';
 import { cn } from '@/lib/utils';
 
 import { resubmitModeFor, runnerHref } from '../lib/resubmit-route';
@@ -30,6 +28,8 @@ const STATUS_TONE: Record<MySubmissionStatus, string> = {
 };
 
 const STATUS_ICON = { pending: Clock, returned: Undo2, approved: Check } as const;
+
+const MINUTE_MS = 60_000;
 
 export interface MyRowProps {
   submission: MySubmission;
@@ -58,7 +58,6 @@ export interface MyRowProps {
 export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProps) {
   const t = useTranslations('Review.student');
   const format = useFormatter();
-  const { words } = useAgeWords();
 
   const tone = STATUS_TONE[submission.status];
   const Icon = STATUS_ICON[submission.status];
@@ -71,6 +70,14 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
   const decidedAt = submission.decision
     ? format.relativeTime(new Date(submission.decision.at))
     : null;
+  // «Здано 2 години тому», never «щойно тому» / «1 година тому»: the whole phrase comes from
+  // the locale's own relative time, which knows its cases. Floored at a minute so a fresh
+  // hand-in does not read «handed in now».
+  const now = useNow({ updateInterval: MINUTE_MS }).getTime();
+  const handedIn = format.relativeTime(
+    new Date(Math.min(new Date(submission.submittedAt).getTime(), now - MINUTE_MS)),
+  );
+  const dueAt = submission.expectedResponseBy === null ? null : new Date(submission.expectedResponseBy);
 
   return (
     <div
@@ -123,10 +130,10 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
             {submission.status === 'pending'
               ? byAi
                 ? t('due.ai')
-                : submission.expectedResponseBy === null
+                : dueAt === null
                   ? t('due.unknown')
-                  : t('due.expected', {
-                      when: format.relativeTime(new Date(submission.expectedResponseBy)),
+                  : t(dueAt.getTime() < now ? 'due.overdue' : 'due.expected', {
+                      when: format.relativeTime(dueAt),
                     })
               : byAi
                 ? t('row.ai', { when: decidedAt ?? '' })
@@ -150,12 +157,12 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
         <div id={bodyId} className="flex flex-col gap-3 pb-4 pl-[63px] pr-4">
           {submission.status === 'pending' && byAi && (
             <p className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">
-              {t('pending.ai', { age: words(hoursSince(submission.submittedAt)) })}
+              {t('pending.ai', { when: handedIn })}
             </p>
           )}
           {submission.status === 'pending' && !byAi && (
             <div className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">
-              <p>{t('pending.body', { age: words(hoursSince(submission.submittedAt)) })}</p>
+              <p>{t('pending.body', { when: handedIn })}</p>
               {/*
                 Invariant 2: waiting without a date reads as lost. And where a date exists,
                 it is said to be the usual time rather than a countdown — a school that
@@ -164,6 +171,27 @@ export function MyRow({ submission, open, onToggle, showPath = true }: MyRowProp
               <p className="mt-1.5 text-(--ssz-text-muted)">{t('due.note')}</p>
             </div>
           )}
+
+          {/*
+            A school that has a model read the work first (plan 80; OQ-110): its verdict, marked
+            as not counting yet, while the teacher's is awaited — or that it is still coming.
+          */}
+          {submission.status === 'pending' && !byAi && submission.provisional !== null && (
+            <ProvisionalVerdictCard
+              exerciseId={submission.exerciseId}
+              attemptId={submission.id}
+              templateCode={submission.exerciseType}
+              verdict={submission.provisional}
+            />
+          )}
+          {submission.status === 'pending' &&
+            !byAi &&
+            submission.provisional === null &&
+            submission.aiFirst && (
+              <p className="text-[13px] leading-relaxed text-(--ssz-text-secondary)">
+                {t('pending.aiFirst')}
+              </p>
+            )}
 
           {/*
             A model's verdict is shown whole, under its label, with the learner's way to say

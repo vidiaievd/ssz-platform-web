@@ -20,6 +20,9 @@ export function OperationsBanner({ conflictCount, noTeacherCount, workspaceId }:
   if (conflictCount > 0) parts.push(t('conflicts', { count: conflictCount }));
   if (noTeacherCount > 0) parts.push(t('noTeacher', { count: noTeacherCount }));
   const problems = parts.length === 2 ? t('both', { first: parts[0]!, second: parts[1]! }) : parts[0]!;
+  // The verb agrees with the subject: one kind of problem takes its own number («1 група … заважає»,
+  // «5 груп … заважають»), two kinds joined by «і» always take the plural.
+  const n = parts.length === 2 ? 2 : conflictCount || noTeacherCount;
 
   const groupsHref = wsHref(workspaceId, 'groups');
 
@@ -34,7 +37,7 @@ export function OperationsBanner({ conflictCount, noTeacherCount, workspaceId }:
           aria-hidden="true"
         />
         <p className="text-sm text-error-800 dark:text-error-300">
-          {t.rich('body', { problems, b: (chunks) => <strong>{chunks}</strong> })}
+          {t.rich('body', { n, problems, b: (chunks) => <strong>{chunks}</strong> })}
         </p>
       </div>
 

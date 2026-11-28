@@ -38,7 +38,8 @@ export interface Group {
    * learner of theirs, and it is never shown as a group (plan 59, §5.1).
    */
   isDefault?: boolean;
-  capacity: { min: number; max: number };
+  /** `max` null = the group has no ceiling (organization's `capacityMax` unset). */
+  capacity: { min: number; max: number | null };
   studentCount: number;
   startDate: ISODate | null; endDate: ISODate | null;
   teachers: GroupTeacher[];
@@ -62,9 +63,14 @@ export interface GroupHealthRowVM {
   status: GroupStatus; mode: GroupMode;
   primaryTeacher: { name: string; avatarUrl?: string | null } | null;
   coPrimaryTeacher: { name: string } | null;
-  scheduleSummary: string;
-  studentCount: number; capacity: { min: number; max: number };
+  /** Weekly slots; screens word them with `scheduleSummaryOf` in the reader's language. */
+  slots: Slot[];
+  studentCount: number; capacity: { min: number; max: number | null };
   alerts: Alert[];
+  /** Everyone who teaches the group today, in any role (the dashboard narrows a teacher by it). */
+  teacherIds?: string[];
+  /** A private tutor's hidden group (plan 59, §5.1) — never shown as a group. */
+  isDefault?: boolean;
 }
 
 export interface RosterStudent {
@@ -166,7 +172,7 @@ export interface TeacherAvailability {
 
 export type MutationResult =
   | { ok: true; warnings?: OpsWarning[] }
-  | { ok: false; conflicts?: OpsWarning[]; warnings?: OpsWarning[]; blocked?: 'language' | 'no-primary'; reason?: 'seats_exhausted' };
+  | { ok: false; conflicts?: OpsWarning[]; warnings?: OpsWarning[]; blocked?: 'language' | 'no-primary' | 'already-in-group' | 'role-taken'; reason?: 'seats_exhausted' };
 /** One teachable item of a course unit, named by the identity a session stores. */
 export interface OutlineItem {
   /** Stable id of the item itself — what `Session.contentLessonId` points at. */

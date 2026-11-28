@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useFormatter, useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import { Search, Check, AlertCircle, AlertTriangle, X } from 'lucide-react';
 
@@ -15,6 +15,8 @@ import {
   Dialog, DialogContent, DialogTitle, DialogDescription, DialogClose,
 } from '@/components/ui/dialog';
 import { assignTeacher } from '../api/mutations';
+import { useCloseGroupModal } from '../lib/use-close-group-modal';
+import { scheduleSummaryOf, WEEKDAY_SHORT_KEYS } from '../lib/schedule-summary';
 import type { TeacherAssignCandidate } from '../api/queries';
 import type { TeacherRole, Slot } from '../types';
 
@@ -26,20 +28,6 @@ function slotWeeklyHours(slots: Slot[]): number {
     const [eh = 0, em = 0] = s.end.split(':').map(Number);
     return acc + (eh * 60 + em - sh * 60 - sm) / 60;
   }, 0);
-}
-
-const DAY_ORDER: Record<Slot['day'], number> = {
-  Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6,
-};
-
-/** "Mon/Fri 18:00–19:30" — mirrors buildScheduleSummary in api/queries.ts,
- *  which is server-only and can't be imported into this client component. */
-function scheduleSummaryOf(slots: Slot[]): string {
-  if (slots.length === 0) return '—';
-  const sorted = [...slots].sort((a, b) => DAY_ORDER[a.day] - DAY_ORDER[b.day]);
-  const days = [...new Set(sorted.map((s) => s.day))].join('/');
-  const first = sorted[0];
-  return first ? `${days} ${first.start}–${first.end}` : days;
 }
 
 // ── Role picker ───────────────────────────────────────────────────────────────
@@ -109,6 +97,11 @@ function TeacherOption({
   onSelect: () => void;
 }) {
   const t = useTranslations('Groups');
+  const format = useFormatter();
+  const hours = format.number(candidate.currentHours, {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
   const projectedHours = candidate.currentHours + groupWeeklyHours;
   const wouldOverload = projectedHours > candidate.maxWeeklyHours;
   const dimmed = !candidate.langFit;
@@ -152,14 +145,21 @@ function TeacherOption({
           )}
         </div>
         <div className="mt-0.5 text-[11px] text-(--ssz-text-muted)">
-          {candidate.currentHours.toFixed(1)}/{candidate.maxWeeklyHours}h
-          {' · '}{candidate.currentGroups} {candidate.currentGroups === 1 ? 'group' : 'groups'}
+          {t('assignTeacher.candidateLoad', {
+            hours,
+            max: candidate.maxWeeklyHours,
+            groups: candidate.currentGroups,
+          })}
         </div>
       </div>
 
       <div
         role="progressbar"
-        aria-label={`${candidate.name}: ${candidate.currentHours.toFixed(1)} of ${candidate.maxWeeklyHours}h`}
+        aria-label={t('assignTeacher.candidateLoadAria', {
+          name: candidate.name,
+          hours,
+          max: candidate.maxWeeklyHours,
+        })}
         aria-valuenow={Math.round(fillPct)}
         aria-valuemin={0}
         aria-valuemax={100}
@@ -248,6 +248,7 @@ export function TeacherAssignModal({
 }: Props) {
   const t = useTranslations('Groups');
   const router = useRouter();
+  const closeModal = useCloseGroupModal();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
@@ -259,6 +260,9 @@ export function TeacherAssignModal({
   const [subTo, setSubTo] = useState('');
   const [subReason, setSubReason] = useState('');
   const [serverError, setServerError] = useState<string | null>(null);
+  // The server refused because the role is taken; set for that exact (teacher, role)
+  // pair, so the next click replaces the current holder. Another choice drops it.
+  const [replaceFor, setReplaceFor] = useState<string | null>(null);
 
   const groupWeeklyHours = useMemo(() => slotWeeklyHours(groupSlots), [groupSlots]);
 
@@ -304,17 +308,21 @@ export function TeacherAssignModal({
   }, [selected, groupLang, groupWeeklyHours, wouldOverload, t]);
 
   const needsOverride = validationState.status === 'error' || validationState.status === 'warn';
+  const choiceKey = selectedId ? `${selectedId}:${role}` : null;
+  const replacing = choiceKey !== null && replaceFor === choiceKey;
   const canAssign =
     selectedId !== null &&
     (role !== 'substitute' || subReason.trim().length > 0);
 
   function handleClose() {
-    router.back();
+    closeModal();
   }
 
   function handleAssign() {
     if (!selectedId) return;
-    const override = needsOverride;
+    // The server's `override` only replaces the current primary / co-primary; the
+    // warnings above are the client's own and need nothing from the server.
+    const override = replacing;
     setServerError(null);
     startTransition(async () => {
       const result = await assignTeacher(
@@ -335,7 +343,7 @@ export function TeacherAssignModal({
           ? `Assigned ${selected?.name} as ${role} — ${warnings.length} warning${warnings.length > 1 ? 's' : ''}`
           : `Assigned ${selected?.name} as ${role}`;
         toast.success(label);
-        router.back();
+        closeModal();
         router.refresh();
       } else {
         if (result.conflicts && result.conflicts.length > 0) {
@@ -344,11 +352,20 @@ export function TeacherAssignModal({
               reasons: result.conflicts.map((c) => c.type).join(', '),
             }),
           );
+        } else if (result.blocked === 'role-taken') {
+          setReplaceFor(choiceKey);
+          setServerError(
+            t(role === 'co-primary' ? 'assignTeacher.errorCoPrimaryTaken' : 'assignTeacher.errorPrimaryTaken', {
+              name: selected?.name ?? '',
+            }),
+          );
         } else if (result.blocked) {
           setServerError(
             result.blocked === 'no-primary'
               ? t('assignTeacher.errorNoPrimary')
-              : t('assignTeacher.errorBlocked'),
+              : result.blocked === 'already-in-group'
+                ? t('assignTeacher.errorAlreadyInGroup')
+                : t('assignTeacher.errorBlocked'),
           );
         } else {
           setServerError(t('assignTeacher.errorGeneric'));
@@ -372,7 +389,7 @@ export function TeacherAssignModal({
             <DialogDescription className="mt-0.75 text-[13px] text-(--ssz-text-muted)">
               {t('assignTeacher.description', {
                 groupName,
-                schedule: scheduleSummaryOf(groupSlots),
+                schedule: scheduleSummaryOf(groupSlots, (day) => t(WEEKDAY_SHORT_KEYS[day])),
               })}
             </DialogDescription>
           </div>
@@ -493,15 +510,17 @@ export function TeacherAssignModal({
             {t('assignTeacher.cancel')}
           </Button>
           <Button
-            variant={needsOverride ? 'secondary' : 'primary'}
+            variant={needsOverride || replacing ? 'secondary' : 'primary'}
             onClick={handleAssign}
             disabled={!canAssign || isPending}
           >
             {isPending
               ? t('assignTeacher.assigning')
-              : needsOverride
-                ? t('assignTeacher.assignAnyway')
-                : t('assignTeacher.assign')}
+              : replacing
+                ? t('assignTeacher.replace')
+                : needsOverride
+                  ? t('assignTeacher.assignAnyway')
+                  : t('assignTeacher.assign')}
           </Button>
         </div>
       </DialogContent>

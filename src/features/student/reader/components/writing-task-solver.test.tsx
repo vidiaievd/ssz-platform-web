@@ -363,6 +363,52 @@ describe('WritingTaskSolver', () => {
     expect(screen.queryByText('eldre utkast')).not.toBeInTheDocument();
   });
 
+  // OQ-110: a school that has a model read the work first.
+  it('tells a school learner a model reads it first, then shows its provisional verdict', async () => {
+    const { fetchMock } = mockApi({
+      submit: { ...ROUTED, reviewer: 'teacher', aiFirst: true },
+      attemptStatus: { status: 'ROUTED_FOR_REVIEW', provisional: true },
+      lastAfterSubmit: attemptRecord({
+        id: 'att-1',
+        schoolId: 'school-1',
+        aiFirst: true,
+        provisionalVerdict: {
+          outcome: 'returned',
+          comment: 'Se på verbet.',
+          at: '2026-11-27T10:01:00.000Z',
+          countsAt: null,
+        },
+      }),
+      aiReview: { outcome: 'returned', items: [], summary: 'Se på verbet.', marks: null, reviewedAt: null, disputedAt: null },
+    });
+    renderSolver(fetchMock);
+    await screen.findByRole('textbox', { name: 'Your text' });
+
+    write('ett to tre fire fem');
+    await userEvent.click(screen.getByRole('button', { name: 'Hand in for review' }));
+
+    expect(await screen.findByText('Handed in.')).toBeInTheDocument();
+    expect(screen.getByText(/A language model reads your work first/)).toBeInTheDocument();
+    expect(
+      await screen.findByText('Preliminary AI assessment: needs work.', {}, { timeout: 4000 }),
+    ).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'This review is wrong' })).not.toBeInTheDocument();
+  });
+
+  it('reopens waiting school work with the provisional verdict it already has', async () => {
+    const { fetchMock } = mockApi({
+      last: attemptRecord({
+        schoolId: 'school-1',
+        aiFirst: true,
+        provisionalVerdict: { outcome: 'approved', comment: null, at: '2026-11-27T10:01:00.000Z', countsAt: null },
+      }),
+      aiReview: { outcome: 'approved', items: [], summary: null, marks: null, reviewedAt: null, disputedAt: null },
+    });
+    renderSolver(fetchMock);
+
+    expect(await screen.findByText('Preliminary AI assessment: accepted.')).toBeInTheDocument();
+  });
+
   // Plan 79, step 2.1c: self-study with no AI review closes the attempt as NO_REVIEWER.
   it('says nobody will read the text when the engine has no reviewer for it', async () => {
     const { fetchMock } = mockApi({ submit: { ...ROUTED, reviewer: 'none' } });
